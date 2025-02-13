@@ -7,9 +7,9 @@
     <script defer src="script.js"></script>
     <title>Vaxyp</title>
   </head>
-  <input>
+ 
   <select name="" id="anakritikos">
-    <option default value="Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος">ΕΜΜΑΝΟΥΗΛΙΔΗΣ</option>
+    <option selected value="Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος">ΕΜΜΑΝΟΥΗΛΙΔΗΣ</option>
     <option value="Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης">ΚΟΛΤΣΙΔΑΣ</option>
     <option value="Ανθ/μος ΚΟΥΛΕΛΗΣ Χρήστος">ΚΟΥΛΕΛΗΣ</option>
     <option value="Αρχ/κας ΓΚΑΓΚΑΤΣΑΣ Γεώργιος">ΓΚΑΓΚΑΤΣΑΣ</option>    
@@ -17,41 +17,37 @@
     <option value="Ανθ/μος ΓΙΑΝΝΑΚΙΔΗΣ Βασίλειος">ΓΙΑΝΝΑΚΙΔΗΣ</option>
   </select>
   <select name="" id="anakritikos-b">
-    <option value="Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος">ΕΜΜΑΝΟΥΗΛΙΔΗΣ</option>
-    <option default value="Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης">ΚΟΛΤΣΙΔΑΣ</option>
-    <option value="Ανθ/μος ΚΟΥΛΕΛΗΣ Χρήστος">ΚΟΥΛΕΛΗΣ</option>
-    <option value="Αρχ/κας ΓΚΑΓΚΑΤΣΑΣ Γεώργιος">ΓΚΑΓΚΑΤΣΑΣ</option>    
-    <option value="Υπ/κας ΠΑΡΑΣΚΕΥΑΣ Νερατζής">ΠΑΡΑΣΚΕΥΑΣ</option>
-    <option value="Ανθ/μος ΓΙΑΝΝΑΚΙΔΗΣ Βασίλειος">ΓΙΑΝΝΑΚΙΔΗΣ</option>
+    <option value="Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου">ΕΜΜΑΝΟΥΗΛΙΔΗΣ</option>
+    <option selected value="Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη">ΚΟΛΤΣΙΔΑΣ</option>
+    <option value="Ανθ/μου ΚΟΥΛΕΛΗ Χρήστου">ΚΟΥΛΕΛΗΣ</option>
+    <option value="Αρχ/κα ΓΚΑΓΚΑΤΣΑ Γεώργιου">ΓΚΑΓΚΑΤΣΑΣ</option>    
+    <option value="Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή">ΠΑΡΑΣΚΕΥΑΣ</option>
+    <option value="Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου">ΓΙΑΝΝΑΚΙΔΗΣ</option>
   </select>
     <p>
-      Στην Κομοτηνή σήμερα την <span class="day">07</span> του μήνα
-      <span class="month">Αυγούστου</span> του έτους
-      <span class="year">2019</span> ημέρα
-      <span class="day-name">Τετάρτη</span> και ώρα
-      <span class="time">22:00</span> ο
-      <span class="anakritikos">Υ/Α΄ ΜΑΡΓΙΑΝΟΣ Γεώργιος</span> του Τ.Δ.Ε.Ε
+      Στην Κομοτηνή σήμερα την <b><span class="day">07</span></b> του μήνα
+      <b><span class="month">Φεβρουαρίου</span></b> του έτους
+      <b><span class="year">2025</span></b> ημέρα
+      <b><span class="day-name">Τετάρτη</span></b> και ώρα
+      <b><span class="time">22:00</span></b> ο
+      <span class="anakritikos">Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης</span> του Τ.Δ.Ε.Ε
       Κομοτηνής, παρισταμένου και του
       <span class="anakritikos-b"> Ανθ/μου ΖΑΧΑΡΙΑ Ελένη </span> της ίδιας
       Υπηρεσίας που προσλήφθηκε ως β΄ ανακριτικός υπάλληλος, της ίδιας
-      Υπηρεσίας, εμφανίστηκε ο κατωτέρω μάρτυρας, ο οποίος αφού ρωτήθηκε για την
-      ταυτότητά του, απάντησε ότι ονομάζεται<span class="martyras">
-        ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος του Στεφάνου και της Ροδόπης γεννήθηκε την
-        06-07-1984 στην Κομοτηνή και κατοικεί Κομοτηνή – Ροδόπης, επαγγέλματος
-        Αστυνομικός υπηρετών Τ.Α Κομοτηνής, με Α.Φ.Μ 111222333 / Δ.Ο.Υ
-        Κομοτηνής, email example@mail.com, τηλέφωνο 6985556666, εγγράμματος,
-        κάτοχος του υπ’ αριθ.275624 Δελτίου Ταυτότητας, που εκδόθηκε 04-10-2010
-        από ΕΛ.ΑΣ.,
-      </span>
+      Υπηρεσίας
     </p>
+    
     <hr>
-    <textarea id="taytotita" placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"></textarea>
-    <input readonly class="clipboard-id"></input>
-    <button class="copy-id">copy to clipboard</button>
+    <textarea id="taytotita" placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"></textarea> 
+    <button id="personFormat">Μετατροπή</button>
+    
+    <textarea readonly class="clipboard-id"></textarea>
+    <button class="copy-id">Αντιγραφή</button>
     <hr>
     <textarea id="oxima" placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"></textarea>
-    <input readonly class="clipboard-oxima"></input>
-    <button class="copy-oxima">copy to clipboard</button>
+    <button id="carFormat">Μετατροπή</button>
+    <textarea readonly class="clipboard-oxima"></textarea>
+    <button class="copy-oxima">Αντιγραφή</button>
 
   </body>
 </html>
