@@ -13,6 +13,8 @@ const months = [
   "Νοεμβρίου",
   "Δεκεμβρίου",
 ];
+let id = "";
+let vehicle = "";
 let stringYear = today.getFullYear();
 let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
 let stringDay = String(today.getDate()).padStart(2, "0");
@@ -28,7 +30,9 @@ let days = [
   "Σάββατο",
 ];
 let dayName = days[specificDate.getDay()];
-let formattedHour = `${today.getHours()}:${today.getMinutes()}`;
+let formattedHour = String(today.getHours()).padStart(2, "0");
+let formattedMinutes = String(today.getMinutes()).padStart(2, "0");
+let formattedTime = `${formattedHour}:${formattedMinutes}`;
 let year = today.getFullYear();
 let month = months[today.getMonth()];
 let day = today.getDate();
@@ -47,7 +51,7 @@ dayElement.innerHTML = day;
 monthElement.innerHTML = month;
 yearElement.innerHTML = year;
 dayNameElement.innerHTML = dayName;
-timeElement.innerHTML = formattedHour;
+timeElement.innerHTML = formattedTime;
 
 function updateAnakritikosElement() {
   anakritikosElement.innerHTML = anakritikosSelect.value;
@@ -64,6 +68,39 @@ updateBAnakritikosElement();
 
 bAnakritikosSelect.addEventListener("change", updateBAnakritikosElement);
 
+// initial copy mech
+function copyInitial() {
+  const initial = document.getElementById("initial");
+
+  const textToCopy = initial.textContent;
+
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        console.log("Text copied to clipboard successfully!");
+      })
+      .catch((err) => {
+        console.error("Could not copy text to clipboard: ", err);
+      });
+  } else {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      console.log("Text copied to clipboard using fallback method!");
+    } catch (err) {
+      console.error("Could not copy text using fallback method: ", err);
+    }
+    document.body.removeChild(textArea);
+  }
+}
+const copyInitialBtn = document.getElementById("copy-initial");
+copyInitialBtn.addEventListener("click", copyInitial());
+
 // formatters
 function convertCarInfo(input) {
   // Initialize values
@@ -75,6 +112,7 @@ function convertCarInfo(input) {
   let ownerLastName = "------";
   let ownerFirstName = "------";
   let ownerFatherName = "------";
+  let type = "--";
 
   // Parse input string
   const lines = input.split("\n");
@@ -105,13 +143,14 @@ function convertCarInfo(input) {
       case "Πατρώνυμο":
         ownerFatherName = parts[1].trim();
         break;
+      case "Είδος":
+        type = Array.from(parts[1].trim())[0];
+        break;
     }
   });
 
   // Construct output string
-  return `${licensePlate} Ι.Χ.Ε. μάρκας ${brand} χρώματος ${color}, με
- αριθμό πλαισίου ${frameNumber} και αριθμό κινητήρα ${engineNumber}
- ιδιοκτησίας ${ownerLastName} ${ownerFirstName} του ${ownerFatherName}`;
+  return `${licensePlate} Ι.Χ.${type}. μάρκας ${brand} χρώματος ${color}, με αριθμό πλαισίου ${frameNumber} και αριθμό κινητήρα ${engineNumber} ιδιοκτησίας ${ownerLastName} ${ownerFirstName} του ${ownerFatherName}`;
 }
 
 function convertId(input) {
@@ -131,6 +170,7 @@ function convertId(input) {
   let phone = "------";
   let afm = "------";
   let profession = "------";
+  let adt = "------";
 
   // Parse input string
   const lines = input.split("\n");
@@ -139,6 +179,9 @@ function convertId(input) {
     switch (parts[0].trim()) {
       case "Επώνυμο":
         lastName = parts[1].trim();
+        break;
+      case "Α.Δ.Τ":
+        adt = parts[1].trim();
         break;
       case "Όνομα":
         firstName = parts[1].trim();
@@ -179,21 +222,89 @@ function convertId(input) {
     }
   });
 
-  // Construct output string
-  return `${lastName} ${firstName} του ${fatherName} της ${motherName},
- γεν ${birthDate} στο ${birthPlace} ${country}, κάτοικος Κομοτηνής, οδός
- ${address} αρ. ${number}, κάτοχος του υπ’αριθ Α00544988 Δ.Α.Τ εκδοθέν
- ${issueDate} από ${issueAuthority}, με Α.Φ.Μ ${afm} / Δ.Ο.Υ. Κομοτηνής,
- τηλ ${phone}, email example@mail.com, επάγγελμα ${profession}, ημ. λήξης
- ${expirationDate}`;
+  return `${lastName} ${firstName} του ${fatherName} της ${motherName}, γεν ${birthDate} στο ${birthPlace} ${country}, κάτοικος Κομοτηνής, οδός ${address} αρ. ${number}, κάτοχος του υπ’αριθ ${adt} Δ.Α.Τ εκδοθέν ${issueDate} από ${issueAuthority}, με Α.Φ.Μ ${afm} / Δ.Ο.Υ. Κομοτηνής, τηλ ${phone}, email (στερείται), επάγγελμα ${profession}, ημ. λήξης ${expirationDate}`;
 }
 
+// person parser fields
 const taytotita = document.getElementById("taytotita");
 const personFormatBtn = document.getElementById("personFormat");
 const clipboardId = document.querySelector(".clipboard-id");
 const copyIdBtn = document.querySelector(".copy-id");
+taytotita.addEventListener("input", () => {
+  id = taytotita.value;
+});
 
 personFormatBtn.addEventListener("click", () => {
-  let formattedID = convertId(taytotita.textContent);
-  clipboardId.textContent = formattedID;
+  console.log(convertId(id));
+  clipboardId.value = convertId(id);
+});
+
+copyIdBtn.addEventListener("click", () => {
+  const textToCopy = clipboardId.value;
+
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        console.log("Text copied to clipboard successfully!");
+      })
+      .catch((err) => {
+        console.error("Could not copy text to clipboard: ", err);
+      });
+  } else {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      console.log("Text copied to clipboard using fallback method!");
+    } catch (err) {
+      console.error("Could not copy text using fallback method: ", err);
+    }
+    document.body.removeChild(textArea);
+  }
+});
+
+//vehicle parser fields
+
+const oxima = document.getElementById("oxima");
+const carFormatBtn = document.getElementById("carFormat");
+const clipboardOxima = document.querySelector(".clipboard-oxima");
+const copyOximaBtn = document.querySelector(".copy-oxima");
+
+oxima.addEventListener("input", () => {
+  vehicle = oxima.value;
+});
+carFormatBtn.addEventListener("click", () => {
+  clipboardOxima.value = convertCarInfo(vehicle);
+});
+
+copyOximaBtn.addEventListener("click", () => {
+  const textToCopy = clipboardOxima.value;
+
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        console.log("Text copied to clipboard successfully!");
+      })
+      .catch((err) => {
+        console.error("Could not copy text to clipboard: ", err);
+      });
+  } else {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      console.log("Text copied to clipboard using fallback method!");
+    } catch (err) {
+      console.error("Could not copy text using fallback method: ", err);
+    }
+    document.body.removeChild(textArea);
+  }
 });
