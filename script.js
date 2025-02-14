@@ -96,165 +96,131 @@ copyInitialBtn.addEventListener("click", () => {
 
 // formatters
 function formatVehicleInfo(input) {
-  // Parse input text into an object
-  const lines = input.split("\n");
+  // Parse input text into an array of key-value pairs
+  const lines = input
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line);
+
   const data = {};
 
-  lines.forEach((line) => {
-    const parts = line.trim().split("\n");
-    parts.forEach((part) => {
-      const [key, value] = part.split(/\s{2,}/);
-      if (key && value) {
-        data[key.trim()] = value.trim();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Check if the current line is a key (doesn't have a value after it)
+    if (!line.includes(":") && !line.includes("-") && lines[i + 1]) {
+      const nextLine = lines[i + 1];
+      // If the next line isn't a section header and doesn't contain special characters
+      if (
+        !nextLine.includes(":") &&
+        !nextLine.includes("-") &&
+        !nextLine.includes("Στοιχεία")
+      ) {
+        data[line] = nextLine;
       }
-    });
-  });
-
-  // Extract needed values
-  const licensePlate = data["Αρ.Κυκλοφ"] || "";
-  const color = data["Χρώμα"]?.toLowerCase() || "";
-  const make = data["Μάρκα"] || "";
-  const chassisNumber = data["Πλαίσιο"] || "";
-  const engineNumber = data["Αρ. Κινητήρα"] || "";
-  const usage = data["Χρήση"] || "";
-  const type = data["Είδος"] || "";
-  const ownerSurname = data["Επώνυμο"] || "";
-  const ownerFirstName = data["Όνομα"] || "";
-  const ownerFatherName = data["Πατρώνυμο"] || "";
-
-  // Format the usage and type
-  let formattedUsage = usage;
-  if (type === "ΔΙΚΥΚΛΟ") {
-    formattedUsage = "δίκυκλο";
-  } else if (usage === "Ι.Χ" || usage === "Δ.Χ") {
-    const typeFirstLetter = type.charAt(0);
-    formattedUsage = `${usage}.${typeFirstLetter}`;
+    }
   }
 
-  // Format the owner's father name to end with genitive case
-  const fatherNameGenitive = ownerFatherName.replace("Η", "λ");
+  // Extract needed values with proper error handling
+  const getValue = (key) => data[key] || "";
+
+  // Extract all required fields
+  const fields = {
+    licensePlate: getValue("Αρ.Κυκλοφ"),
+    color: getValue("Χρώμα")?.toLowerCase() || "",
+    make: getValue("Μάρκα") || "",
+    model: getValue("Μοντέλο") || "",
+    chassisNumber: getValue("Πλαίσιο") || "",
+    engineNumber: getValue("Αρ. Κινητήρα") || "",
+    usage: getValue("Χρήση") || "",
+    type: getValue("Είδος") || "",
+    ownerSurname: getValue("Επώνυμο") || "",
+    ownerFirstName: getValue("Όνομα") || "",
+    ownerFatherName: getValue("Πατρώνυμο") || "",
+  };
+
+  // Format the usage and type
+  const formattedUsage =
+    fields.type === "ΔΙΚΥΚΛΟ"
+      ? "δίκυκλο"
+      : fields.usage.match(/Ι.Χ|Δ.Χ/)
+      ? `${fields.usage}.${Array.from(fields.type)[0]}`
+      : fields.usage;
 
   // Format the output string
-  const formattedString = `${licensePlate} ${formattedUsage} χρώματος ${color}, μάρκας ${make}, με αριθμό πλαισίου ${chassisNumber} και αριθμό κινητήρα ${engineNumber} ιδιοκτησίας του ${ownerSurname} ${capitalize(
-    ownerFirstName
-  )} του ${capitalize(fatherNameGenitive)}`;
-
-  return formattedString;
+  return `${fields.licensePlate} ${formattedUsage} χρώματος ${
+    fields.color
+  }, μάρκας ${fields.make} ${fields.model}, με αριθμό πλαισίου ${
+    fields.chassisNumber
+  } και αριθμό κινητήρα ${fields.engineNumber} ιδιοκτησίας του ${
+    fields.ownerSurname
+  } ${capitalize(fields.ownerFirstName)} του ${capitalize(
+    fields.ownerFatherName
+  )}`;
 }
+function formatIdInfo(input) {
+  // Parse input text into an array of key-value pairs
+  const lines = input
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line);
 
-// function convertId(input) {
-//   // Initialize values
-//   let lastName = "------";
-//   let firstName = "------";
-//   let fatherName = "------";
-//   let motherName = "------";
-//   let birthDate = "------";
-//   let birthPlace = "------";
-//   let country = "------";
-//   let address = "------";
-//   let number = "------";
-//   let issueDate = "------";
-//   let expirationDate = "------";
-//   let issueAuthority = "------";
-//   let phone = "------";
-//   let afm = "------";
-//   let profession = "------";
-//   let adt = "------";
-
-//   // Parse input string
-//   const lines = input.split("\n");
-//   lines.forEach((line) => {
-//     const parts = line.split("\t");
-//     switch (parts[0].trim()) {
-//       case "Επώνυμο":
-//         lastName = parts[1].trim();
-//         break;
-//       case "Α.Δ.Τ":
-//         adt = parts[1].trim();
-//         break;
-//       case "Όνομα":
-//         firstName = parts[1].trim();
-//         break;
-//       case "Όνομα Πατρός":
-//         fatherName = parts[1].trim();
-//         break;
-//       case "Όνομα Μητρός":
-//         motherName = parts[1].trim();
-//         break;
-//       case "Ημ/νία Γέννησης":
-//         birthDate = parts[1].trim();
-//         break;
-//       case "Τόπος Γέννησης":
-//         birthPlace = parts[1].trim();
-//         break;
-//       case "Χώρα Γέννησης":
-//         country = parts[1].trim();
-//         break;
-//       case "Οδός":
-//         address = parts[1].trim();
-//         break;
-//       case "Αριθμός":
-//         number = parts[1].trim();
-//         break;
-//       case "Ημ/νια Έκδοσης":
-//         issueDate = parts[1].trim();
-//         break;
-//       case "Ημερομηνία Λήξης":
-//         expirationDate = parts[1].trim();
-//         break;
-//       case "Αρχή Έκδοσης":
-//         issueAuthority = parts[1].trim();
-//         break;
-//       case "Τηλέφωνο":
-//         phone = parts[1].trim();
-//         break;
-//     }
-//   });
-
-//   return `${lastName} ${firstName} του ${fatherName} της ${motherName}, γεν ${birthDate} στο ${birthPlace} ${country}, κάτοικος Κομοτηνής, οδός ${address} αρ. ${number}, κάτοχος του υπ’αριθ ${adt} Δ.Α.Τ εκδοθέν ${issueDate} από ${issueAuthority}, με Α.Φ.Μ ${afm} / Δ.Ο.Υ. Κομοτηνής, τηλ ${phone}, email (στερείται), επάγγελμα ${profession}, ημ. λήξης ${expirationDate}`;
-// }
-function formatGreekIdInfo(input) {
-  // Parse input text into an object
-  const lines = input.split("\n");
+  // Create a more reliable parsing mechanism
   const data = {};
+  let currentKey = null;
 
-  lines.forEach((line) => {
-    const parts = line.trim().split("\n");
-    parts.forEach((part) => {
-      const [key, value] = part.split(/\s{2,}/);
-      if (key && value) {
-        data[key.trim()] = value.trim();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Check if the current line is a key (doesn't have a value after it)
+    if (!line.includes(":") && !line.includes("-") && lines[i + 1]) {
+      const nextLine = lines[i + 1];
+      // Skip Latin translations and other secondary information
+      if (
+        !nextLine.includes(":") &&
+        !nextLine.includes("-") &&
+        !nextLine.includes("(Λατιν.)") &&
+        !line.includes("(Λατιν.)")
+      ) {
+        data[line] = nextLine;
       }
-    });
-  });
+    }
+  }
 
-  // Extract needed values
-  const surname = data["Επώνυμο"] || "";
-  const firstName = data["Όνομα"] || "";
-  const fatherName = data["Όνομα Πατρός"] || "";
-  const motherName = data["Όνομα Μητρός"] || "";
-  const birthDate = data["Ημ/νία Γέννησης"]
-    ? data["Ημ/νία Γέννησης"].replace("/", "-")
-    : "";
-  const birthPlace = data["Τόπος Γέννησης"]
-    ? data["Τόπος Γέννησης"].split(" ")[0]
-    : "";
-  const area = data["Περιοχή"] || "";
-  const region = data["Νομός"] || "";
-  const idNumber = data["Α.Δ.Τ"] || "";
-  const issueDate = data["Ημ/νια Έκδοσης"]
-    ? data["Ημ/νια Έκδοσης"].replace("/", "-")
-    : "";
-  const issuingAuthority = data["Αρχή Έκδοσης"]
-    ? data["Αρχή Έκδοσης"].split(" - ")[1]
-    : "";
+  // Extract needed values with proper error handling
+  const getValue = (key) => data[key] || "";
 
-  // Format the output string
-  const formattedString = `${surname} ${capitalize(firstName)} του ${capitalize(
-    fatherName
-  )} και της ${capitalize(
-    motherName
-  )}, γεν. ${birthDate} στην ${birthPlace}, κάτοικος ${area} ${region}, επάγγελμα -------, κάτοχος του υπ'αριθ ${idNumber} Δ.Α.Τ. εκδοθέντος ${issueDate} από ${issuingAuthority}, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με email (στερούμενος)`;
+  const formatDate = (dateStr) => {
+    return dateStr ? dateStr.split("/").join("-") : "";
+  };
+
+  // Extract all required fields
+  const fields = {
+    surname: getValue("Επώνυμο"),
+    firstName: getValue("Όνομα"),
+    fatherName: getValue("Όνομα Πατρός"),
+    motherName: getValue("Όνομα Μητρός"),
+    birthDate: formatDate(getValue("Ημ/νία Γέννησης")),
+    birthPlace: getValue("Τόπος Γέννησης").split(" ")[0],
+    area: getValue("Περιοχή"),
+    region: getValue("Νομός"),
+    idNumber: getValue("Α.Δ.Τ"),
+    issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
+    issuingAuthority: (getValue("Αρχή Έκδοσης").split(" - ")[1] || "").trim(),
+  };
+
+  // Format the output string with proper spacing and line breaks
+  const formattedString = `${fields.surname} ${capitalize(
+    fields.firstName
+  )} του ${capitalize(fields.fatherName)} και της ${capitalize(
+    fields.motherName
+  )}, γεν. ${fields.birthDate} στην ${fields.birthPlace}, κάτοικος ${
+    fields.area
+  } ${fields.region}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+    fields.idNumber
+  } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
+    fields.issuingAuthority
+  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με email (στερούμενος)`;
 
   return formattedString;
 }
@@ -278,7 +244,7 @@ taytotita.addEventListener("input", () => {
 });
 
 personFormatBtn.addEventListener("click", () => {
-  clipboardId.value = formatGreekIdInfo(id);
+  clipboardId.value = formatIdInfo(id);
 });
 
 copyIdBtn.addEventListener("click", () => {
