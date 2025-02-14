@@ -1,0 +1,55 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+}
+body {
+  height: 100vh;
+  padding: 2em;
+}
+.top {
+  height: 20%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2em;
+  justify-content: space-between;
+}
+#initial,
+.output {
+  font-family: "Calibri", sans-serif;
+}
+#copy-initial {
+  align-self: center;
+}
+.anakritikoi {
+  display: flex;
+  width: 100%;
+  gap: 10%;
+  justify-content: center;
+}
+.anakritikoi div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  height: 40%;
+  padding-top: 1.5em;
+}
+.input,
+.output {
+  min-width: 30%;
+  min-height: 90%;
+}
+
+.format {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
