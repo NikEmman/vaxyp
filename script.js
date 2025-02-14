@@ -69,37 +69,30 @@ updateBAnakritikosElement();
 bAnakritikosSelect.addEventListener("change", updateBAnakritikosElement);
 
 // initial copy mech
-function copyInitial() {
-  const initial = document.getElementById("initial");
 
-  const textToCopy = initial.textContent;
-
-  if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        console.log("Text copied to clipboard successfully!");
-      })
-      .catch((err) => {
-        console.error("Could not copy text to clipboard: ", err);
-      });
-  } else {
-    // Fallback for older browsers
-    const textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand("copy");
-      console.log("Text copied to clipboard using fallback method!");
-    } catch (err) {
-      console.error("Could not copy text using fallback method: ", err);
-    }
-    document.body.removeChild(textArea);
-  }
-}
 const copyInitialBtn = document.getElementById("copy-initial");
-copyInitialBtn.addEventListener("click", copyInitial());
+copyInitialBtn.addEventListener("click", () => {
+  const tempElement = document.createElement("div");
+  tempElement.innerHTML = initial.innerHTML;
+  document.body.appendChild(tempElement);
+
+  const range = document.createRange();
+  range.selectNodeContents(tempElement);
+
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  try {
+    document.execCommand("copy");
+    console.log("Content copied to clipboard successfully!");
+  } catch (err) {
+    console.error("Could not copy content: ", err);
+  }
+
+  selection.removeAllRanges();
+  document.body.removeChild(tempElement);
+});
 
 // formatters
 function convertCarInfo(input) {
