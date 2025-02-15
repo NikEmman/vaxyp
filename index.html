@@ -13,14 +13,14 @@
         <div>
           <label for="anakritikos">Ά ανακριτικός</label>
           <select name="" id="anakritikos">
-            <option selected value="Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος">
+            <option selected value="Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου">
               ΕΜΜΑΝΟΥΗΛΙΔΗΣ
             </option>
-            <option value="Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης">ΚΟΛΤΣΙΔΑΣ</option>
-            <option value="Ανθ/μος ΚΟΥΛΕΛΗΣ Χρήστος">ΚΟΥΛΕΛΗΣ</option>
-            <option value="Αρχ/κας ΓΚΑΓΚΑΤΣΑΣ Γεώργιος">ΓΚΑΓΚΑΤΣΑΣ</option>
-            <option value="Υπ/κας ΠΑΡΑΣΚΕΥΑΣ Νερατζής">ΠΑΡΑΣΚΕΥΑΣ</option>
-            <option value="Ανθ/μος ΓΙΑΝΝΑΚΙΔΗΣ Βασίλειος">ΓΙΑΝΝΑΚΙΔΗΣ</option>
+            <option value="Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη">ΚΟΛΤΣΙΔΑΣ</option>
+            <option value="Ανθ/μου ΚΟΥΛΕΛΗ Χρήστου">ΚΟΥΛΕΛΗΣ</option>
+            <option value="Αρχ/κα ΓΚΑΓΚΑΤΣΑ Γεώργιου">ΓΚΑΓΚΑΤΣΑΣ</option>
+            <option value="Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή">ΠΑΡΑΣΚΕΥΑΣ</option>
+            <option value="Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου">ΓΙΑΝΝΑΚΙΔΗΣ</option>
           </select>
         </div>
         <div>
@@ -40,11 +40,10 @@
         <b><span class="month">Φεβρουαρίου</span></b> του έτους
         <b><span class="year">2025</span></b> ημέρα
         <b><span class="day-name">Τετάρτη</span></b> και ώρα
-        <b><span class="time">22:00</span></b> ο
+        <b><span class="time">22:00</span></b> ενώπιον εμού, του
         <span class="anakritikos">Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης</span> του Τ.Δ.Ε.Ε
         Κομοτηνής, παρισταμένου και του
-        <span class="anakritikos-b"> Ανθ/μου ΖΑΧΑΡΙΑ Ελένη </span> της ίδιας
-        Υπηρεσίας που προσλήφθηκε ως β΄ ανακριτικός υπάλληλος
+        <span class="anakritikos-b"> Ανθ/μου ΖΑΧΑΡΙΑ Ελένη </span>
       </p>
       <button id="copy-initial">Αντιγραφή</button>
     </div>
@@ -57,8 +56,10 @@
         placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
       ></textarea>
       <div class="format">
+        <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
         <p>→</p>
         <button id="personFormat">Μετατροπή</button>
+        <button id="person-clear">Εκκαθάριση</button>
       </div>
       <textarea readonly class="clipboard-id output"></textarea>
       <button class="copy-id">Αντιγραφή</button>
@@ -72,11 +73,47 @@
         placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
       ></textarea>
       <div class="format">
+        <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
         <p>→</p>
         <button id="carFormat">Μετατροπή</button>
+        <button id="vehicle-clear">Εκκαθάριση</button>
       </div>
       <textarea readonly class="clipboard-oxima output"></textarea>
       <button class="copy-oxima">Αντιγραφή</button>
     </div>
+    <dialog id="person-dialog">
+      <div class="container">
+        <p id="person-close">&times;</p>
+        <img src="tautotita.jpg" alt="photo from id app" />
+        <ol>
+          <li>
+            Ανιγράψτε από την εφαρμογή Ταυτότητες το κείμενο, όπως δείχει η φωτό
+          </li>
+          <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
+          <li>Πατήστε το κουμπί "Μετατροπή"</li>
+          <li>
+            Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
+            υπολογιστή
+          </li>
+        </ol>
+      </div>
+    </dialog>
+    <dialog id="vehicle-dialog">
+      <div class="container">
+        <p id="vehicle-close">&times;</p>
+        <img src="oxima.jpg" alt="photo from id app" />
+        <ol>
+          <li>
+            Ανιγράψτε από την εφαρμογή Οχήματα το κείμενο, όπως δείχει η φωτό
+          </li>
+          <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
+          <li>Πατήστε το κουμπί "Μετατροπή"</li>
+          <li>
+            Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
+            υπολογιστή
+          </li>
+        </ol>
+      </div>
+    </dialog>
   </body>
 </html>
