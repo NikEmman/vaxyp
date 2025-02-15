@@ -324,3 +324,16 @@ vehicleHelp.addEventListener("click", () => {
 vehicleClose.addEventListener("click", () => {
   vehicleDialog.close();
 });
+
+// field clear buttons
+const personClear = document.getElementById("person-clear");
+personClear.addEventListener("click", () => {
+  taytotita.value = "";
+  clipboardId.value = "";
+});
+
+const vehicleClear = document.getElementById("vehicle-clear");
+vehicleClear.addEventListener("click", () => {
+  oxima.value = "";
+  clipboardOxima.value = "";
+});
