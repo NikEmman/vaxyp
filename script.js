@@ -214,9 +214,11 @@ function formatIdInfo(input) {
     fields.firstName
   )} του ${capitalize(fields.fatherName)} και της ${capitalize(
     fields.motherName
-  )}, γεν. ${fields.birthDate} στην ${fields.birthPlace}, κάτοικος ${
-    fields.area
-  } ${fields.region}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+  )}, γεν. ${fields.birthDate} στην ${capitalize(
+    fields.birthPlace
+  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(
+    fields.region
+  )}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
     fields.idNumber
   } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
