@@ -51,21 +51,36 @@ function formatGreekIdInfo(input) {
     idNumber: getValue("Α.Δ.Τ"),
     issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
     issuingAuthority: (getValue("Αρχή Έκδοσης").split(" - ")[1] || "").trim(),
+    phoneNumber: getValue("Τηλέφωνο") || "-------",
+    street: getValue("Οδός") || "-----",
+    streetNumber: getValue("Αριθμός") || "-----",
   };
+  if (fields.streetNumber == "Ταχ.Κώδικας") {
+    fields.streetNumber = "---";
+  }
+  if (fields.street == "Αριθμός") {
+    fields.street = "----------";
+  }
+  if (fields.phoneNumber == "Άλλα στοιχεία επικοινωνίας") {
+    fields.phoneNumber = "----------";
+  }
 
   // Format the output string with proper spacing and line breaks
   const formattedString = `${fields.surname} ${capitalize(
     fields.firstName
-  )} του ${capitalize(fields.fatherName)} \
-  και της ${capitalize(fields.motherName)}, γεν. ${fields.birthDate} στην ${
+  )} του ${capitalize(fields.fatherName)} και της ${capitalize(
+    fields.motherName
+  )}, γεν. ${fields.birthDate} στην ${capitalize(
     fields.birthPlace
-  }, κάτοικος ${fields.area} \
-  ${fields.region}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(fields.region)}, οδός ${
+    fields.street
+  } αρ. ${fields.streetNumber}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
     fields.idNumber
-  } Δ.Α.Τ. εκδοθέντος \
-  ${fields.issueDate} από ${
+  } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
-  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με email (στερούμενος)`;
+  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με τηλέφωνο ${
+    fields.phoneNumber
+  }, με email (στερείται)`;
 
   return formattedString;
 }
@@ -129,7 +144,7 @@ const testInput = `Α.Δ.Τ
   6943708013
   Άλλα στοιχεία επικοινωνίας`;
 
-// console.log(formatGreekIdInfo(testInput));
+console.log(formatGreekIdInfo(testInput));
 function formatVehicleInfo(input) {
   // Parse input text into an array of key-value pairs
   const lines = input
@@ -273,5 +288,5 @@ DY 100A
 ΡΟΔΟΠΗΣ
 Ταχ. Κωδικός
 69100`;
-console.log(formatVehicleInfo(testveh));
-console.log(formatVehicleInfo(testMot));
+// console.log(formatVehicleInfo(testveh));
+// console.log(formatVehicleInfo(testMot));

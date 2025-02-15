@@ -207,7 +207,19 @@ function formatIdInfo(input) {
     idNumber: getValue("Α.Δ.Τ"),
     issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
     issuingAuthority: (getValue("Αρχή Έκδοσης").split(" - ")[1] || "").trim(),
+    phoneNumber: getValue("Τηλέφωνο") || "-------",
+    street: getValue("Οδός") || "-----",
+    streetNumber: getValue("Αριθμός") || "-----",
   };
+  if (fields.streetNumber == "Ταχ.Κώδικας") {
+    fields.streetNumber = "---";
+  }
+  if (fields.street == "Αριθμός") {
+    fields.street = "----------";
+  }
+  if (fields.phoneNumber == "Άλλα στοιχεία επικοινωνίας") {
+    fields.phoneNumber = "----------";
+  }
 
   // Format the output string with proper spacing and line breaks
   const formattedString = `${fields.surname} ${capitalize(
@@ -216,13 +228,15 @@ function formatIdInfo(input) {
     fields.motherName
   )}, γεν. ${fields.birthDate} στην ${capitalize(
     fields.birthPlace
-  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(
-    fields.region
-  )}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(fields.region)}, οδός ${
+    fields.street
+  } αρ. ${fields.streetNumber}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
     fields.idNumber
   } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
-  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με email (στερούμενος)`;
+  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με τηλέφωνο ${
+    fields.phoneNumber
+  }, με email (στερείται)`;
 
   return formattedString;
 }
