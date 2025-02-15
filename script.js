@@ -318,3 +318,39 @@ copyOximaBtn.addEventListener("click", () => {
     document.body.removeChild(textArea);
   }
 });
+
+// dialog functionality
+const personDialog = document.getElementById("person-dialog");
+const personHelp = document.getElementById("person-help");
+const personClose = document.getElementById("person-close");
+
+personHelp.addEventListener("click", () => {
+  personDialog.showModal();
+});
+personClose.addEventListener("click", () => {
+  personDialog.close();
+});
+
+const vehicleDialog = document.getElementById("vehicle-dialog");
+const vehicleHelp = document.getElementById("vehicle-help");
+const vehicleClose = document.getElementById("vehicle-close");
+
+vehicleHelp.addEventListener("click", () => {
+  vehicleDialog.showModal();
+});
+vehicleClose.addEventListener("click", () => {
+  vehicleDialog.close();
+});
+
+// field clear buttons
+const personClear = document.getElementById("person-clear");
+personClear.addEventListener("click", () => {
+  taytotita.value = "";
+  clipboardId.value = "";
+});
+
+const vehicleClear = document.getElementById("vehicle-clear");
+vehicleClear.addEventListener("click", () => {
+  oxima.value = "";
+  clipboardOxima.value = "";
+});
