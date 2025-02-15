@@ -57,6 +57,75 @@ body {
   font-size: xx-large;
   font-weight: 900;
 }
+.helpBtn {
+  background-color: rgb(22, 117, 180);
+  color: white;
+  border-radius: 5px;
+  width: 1em;
+  height: 1.5em;
+  text-align: center;
+  cursor: pointer;
+}
+.helpBtn:active {
+  scale: 0.8;
+}
+.helpBtn:hover {
+  filter: grayscale(40%);
+}
 button {
   padding: 5px;
+  cursor: pointer;
+}
+/* dialog styles  */
+dialog {
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  padding: 2em;
+
+  border-radius: 5px;
+  box-shadow: 0 0 1em rgb(0 0 0 / 0.3);
+}
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+dialog:focus {
+  border: none;
+  outline: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  position: relative;
+}
+.container img {
+  width: 80%;
+}
+.container p {
+  border: 1px solid black;
+  align-self: flex-end;
+  width: 1.5em;
+  height: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  position: sticky;
+  top: 10px;
+  cursor: pointer;
+}
+.container p:hover {
+  background-color: red;
+  color: white;
+}
+.container p:active {
+  scale: 0.8;
+}
+ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }

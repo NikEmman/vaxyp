@@ -57,6 +57,7 @@
         placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
       ></textarea>
       <div class="format">
+        <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
         <p>→</p>
         <button id="personFormat">Μετατροπή</button>
       </div>
@@ -72,11 +73,46 @@
         placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
       ></textarea>
       <div class="format">
+        <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
         <p>→</p>
         <button id="carFormat">Μετατροπή</button>
       </div>
       <textarea readonly class="clipboard-oxima output"></textarea>
       <button class="copy-oxima">Αντιγραφή</button>
     </div>
+    <dialog id="person-dialog">
+      <div class="container">
+        <p id="person-close">&times;</p>
+        <img src="tautotita.jpg" alt="photo from id app" />
+        <ol>
+          <li>
+            Ανιγράψτε από την εφαρμογή Ταυτότητες το κείμενο, όπως δείχει η φωτό
+          </li>
+          <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
+          <li>Πατήστε το κουμπί "Μετατροπή"</li>
+          <li>
+            Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
+            υπολογιστή
+          </li>
+        </ol>
+      </div>
+    </dialog>
+    <dialog id="vehicle-dialog">
+      <div class="container">
+        <p id="vehicle-close">&times;</p>
+        <img src="oxima.jpg" alt="photo from id app" />
+        <ol>
+          <li>
+            Ανιγράψτε από την εφαρμογή Οχήματα το κείμενο, όπως δείχει η φωτό
+          </li>
+          <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
+          <li>Πατήστε το κουμπί "Μετατροπή"</li>
+          <li>
+            Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
+            υπολογιστή
+          </li>
+        </ol>
+      </div>
+    </dialog>
   </body>
 </html>
