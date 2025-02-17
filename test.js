@@ -2,8 +2,8 @@ function capitalize(str) {
   return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 }
 
-function formatGreekIdInfo(input) {
-  // Parse input text into an array of key-value pairs
+function formatIdInfo(input) {
+  // Parse input text into an array of lines
   const lines = input
     .split("\n")
     .map((line) => line.trim())
@@ -11,31 +11,32 @@ function formatGreekIdInfo(input) {
 
   // Create a more reliable parsing mechanism
   const data = {};
-  let currentKey = null;
-
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const currentLine = lines[i];
+    const nextLine = lines[i + 1];
 
-    // Check if the current line is a key (doesn't have a value after it)
-    if (!line.includes(":") && !line.includes("-") && lines[i + 1]) {
-      const nextLine = lines[i + 1];
-      // Skip Latin translations and other secondary information
-      if (
-        !nextLine.includes(":") &&
-        !nextLine.includes("-") &&
-        !nextLine.includes("(Λατιν.)") &&
-        !line.includes("(Λατιν.)")
-      ) {
-        data[line] = nextLine;
-      }
+    // Skip lines containing Latin translations
+    if (currentLine.includes("(Λατιν.)")) continue;
+
+    // Store the current line as a key if it has a corresponding value in the next line
+    if (nextLine && !currentLine.includes("(Λατιν.)")) {
+      data[currentLine] = nextLine;
     }
   }
 
-  // Extract needed values with proper error handling
+  // Helper functions
   const getValue = (key) => data[key] || "";
-
-  const formatDate = (dateStr) => {
-    return dateStr ? dateStr.split("/").join("-") : "";
+  const formatDate = (dateStr) => (dateStr ? dateStr.split("/").join("-") : "");
+  const formatIssuingAuthority = (string) => {
+    const authorityText = string.split("-")[1].trim();
+    const [prefix, location] = authorityText.split(" ");
+    return `${prefix} ${capitalize(location)}`;
+  };
+  const capitalize = (str) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
 
   // Extract all required fields
@@ -50,41 +51,44 @@ function formatGreekIdInfo(input) {
     region: getValue("Νομός"),
     idNumber: getValue("Α.Δ.Τ"),
     issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
-    issuingAuthority: (getValue("Αρχή Έκδοσης").split(" - ")[1] || "").trim(),
-    phoneNumber: getValue("Τηλέφωνο") || "-------",
-    street: getValue("Οδός") || "-----",
-    streetNumber: getValue("Αριθμός") || "-----",
+    issuingAuthority: formatIssuingAuthority(getValue("Αρχή Έκδοσης")),
+    phoneNumber: getValue("Τηλέφωνο"),
+    street: getValue("Οδός"),
+    streetNumber: getValue("Αριθμός"),
   };
-  if (fields.streetNumber == "Ταχ.Κώδικας") {
+
+  // Handle special cases
+  if (fields.streetNumber === "Ταχ.Κώδικας") {
     fields.streetNumber = "---";
   }
-  if (fields.street == "Αριθμός") {
+  if (fields.street === "Αριθμός") {
     fields.street = "----------";
   }
-  if (fields.phoneNumber == "Άλλα στοιχεία επικοινωνίας") {
-    fields.phoneNumber = "----------";
+  if (fields.phoneNumber === "Άλλα στοιχεία επικοινωνίας") {
+    fields.phoneNumber = "(στερείται)";
   }
 
-  // Format the output string with proper spacing and line breaks
+  // Format the output string
   const formattedString = `${fields.surname} ${capitalize(
     fields.firstName
   )} του ${capitalize(fields.fatherName)} και της ${capitalize(
     fields.motherName
   )}, γεν. ${fields.birthDate} στην ${capitalize(
     fields.birthPlace
-  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(fields.region)}, οδός ${
-    fields.street
-  } αρ. ${fields.streetNumber}, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(
+    fields.region
+  )}, οδός ${capitalize(fields.street)} αρ. ${
+    fields.streetNumber
+  }, επάγγελμα -------, κάτοχος του υπ'αριθ ${
     fields.idNumber
   } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
-  }, με Α.Φ.Μ -------/ Δ.Ο.Υ. Κομοτηνής, με τηλέφωνο ${
+  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. Κομοτηνής, με τηλέφωνο ${
     fields.phoneNumber
   }, με email (στερείται)`;
 
   return formattedString;
 }
-
 // Test the function
 const testInput = `Α.Δ.Τ
   Α00544988
@@ -144,7 +148,7 @@ const testInput = `Α.Δ.Τ
   6943708013
   Άλλα στοιχεία επικοινωνίας`;
 
-console.log(formatGreekIdInfo(testInput));
+console.log(formatIdInfo(testInput));
 function formatVehicleInfo(input) {
   // Parse input text into an array of key-value pairs
   const lines = input
