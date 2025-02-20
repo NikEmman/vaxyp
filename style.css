@@ -103,7 +103,8 @@ dialog:focus {
   position: relative;
 }
 .container img {
-  width: 80%;
+  width: 70%;
+  height: auto;
 }
 .container p {
   border: 1px solid black;
