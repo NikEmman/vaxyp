@@ -1,6 +1,8 @@
 import externalData from "./data.js";
+import { formatTime, capitalize, formatDate } from "./helpers.js";
+import { printMartyra, printSyllipsi } from "./ektheseis.js";
 
-let today = new Date();
+const today = new Date();
 const months = [
   "Ιανουαρίου",
   "Φεβρουαρίου",
@@ -32,9 +34,7 @@ let days = [
   "Σάββατο",
 ];
 let dayName = days[specificDate.getDay()];
-let formattedHour = String(today.getHours()).padStart(2, "0");
-let formattedMinutes = String(today.getMinutes()).padStart(2, "0");
-let formattedTime = `${formattedHour}:${formattedMinutes}`;
+let formattedTime = formatTime(today, 0);
 let year = today.getFullYear();
 let month = months[today.getMonth()];
 let day = today.getDate();
@@ -73,6 +73,8 @@ externalData.anakritikoi.forEach((anakritikos, index) => {
 const ypiresia = document.getElementById("ypiresia");
 ypiresia.textContent = externalData.ypiresia;
 
+const location = document.querySelector(".location");
+location.textContent = externalData.merosSyntaksisEkthesis;
 function updateAnakritikosElement() {
   anakritikosElement.innerHTML = anakritikosSelect.value;
 }
@@ -208,12 +210,6 @@ function formatIdInfo(input) {
     const [prefix, location] = authorityText.split(" ");
     return `${prefix} ${capitalize(location)}`;
   };
-  const capitalize = (str) => {
-    return str
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  };
 
   // Extract all required fields
   const fields = {
@@ -264,15 +260,6 @@ function formatIdInfo(input) {
   }, με email (στερείται)`;
   console.log(externalData);
   return formattedString;
-}
-
-// Helper function to capitalize first letter of each word
-function capitalize(str) {
-  return str
-    .toLowerCase()
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 }
 
 // person parser fields
@@ -404,3 +391,26 @@ vehicleClear.addEventListener("click", () => {
   oxima.value = "";
   clipboardOxima.value = "";
 });
+
+// ekthesi martyra
+const initial = document.getElementById("initial");
+
+console.log(
+  printMartyra(
+    initial.textContent,
+    clipboardId.value,
+    externalData,
+    today,
+    formatTime
+  )
+);
+console.log(
+  printSyllipsi(
+    initial.textContent,
+    clipboardId.value,
+    externalData,
+    today,
+    formatTime,
+    formatDate
+  )
+);

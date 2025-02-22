@@ -9,5 +9,7 @@ const data = {
   ],
   ypiresia: "Τ.Δ.Ε.Ε. Κομοτηνής",
   doy: "Κομοτηνής",
+  merosSyntaksisEkthesis: "Κομοτηνή",
+  xronosPeratosis: 10,
 };
 export default data;
