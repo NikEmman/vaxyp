@@ -67,6 +67,11 @@ body {
   text-align: center;
   cursor: pointer;
 }
+.large {
+  width: fit-content;
+  padding: 0.5em;
+  height: 2em;
+}
 .helpBtn:active {
   scale: 0.8;
 }
@@ -130,4 +135,22 @@ ol {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+}
+@media screen and (max-width: 580px) {
+  .top {
+    height: fit-content;
+    gap: 1em;
+  }
+  .data {
+    flex-direction: column;
+    height: fit-content;
+  }
+  .input,
+  .output {
+    width: 50%;
+    height: 20vh;
+  }
+  .arrow {
+    transform: rotate(90deg);
+  }
 }
