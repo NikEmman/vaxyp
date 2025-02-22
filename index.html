@@ -4,35 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <script defer src="script.js"></script>
+    <script defer type="module" src="script.js"></script>
     <title>Vaxyp</title>
   </head>
   <body>
+    <header>
+      <p class="helpBtn large" id="genikes-help">Οδηγίες αλλαγής Ανακριτικών</p>
+    </header>
     <div class="top">
       <div class="anakritikoi">
         <div>
           <label for="anakritikos">Ά ανακριτικός</label>
-          <select name="" id="anakritikos">
-            <option selected value="Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου">
-              ΕΜΜΑΝΟΥΗΛΙΔΗΣ
-            </option>
-            <option value="Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη">ΚΟΛΤΣΙΔΑΣ</option>
-            <option value="Ανθ/μου ΚΟΥΛΕΛΗ Χρήστου">ΚΟΥΛΕΛΗΣ</option>
-            <option value="Αρχ/κα ΓΚΑΓΚΑΤΣΑ Γεώργιου">ΓΚΑΓΚΑΤΣΑΣ</option>
-            <option value="Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή">ΠΑΡΑΣΚΕΥΑΣ</option>
-            <option value="Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου">ΓΙΑΝΝΑΚΙΔΗΣ</option>
-          </select>
+          <select name="" id="anakritikos"></select>
         </div>
         <div>
           <label for="anakritikos-b">´Β ανακριτικός</label>
-          <select name="" id="anakritikos-b">
-            <option value="Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου">ΕΜΜΑΝΟΥΗΛΙΔΗΣ</option>
-            <option selected value="Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη">ΚΟΛΤΣΙΔΑΣ</option>
-            <option value="Ανθ/μου ΚΟΥΛΕΛΗ Χρήστου">ΚΟΥΛΕΛΗΣ</option>
-            <option value="Αρχ/κα ΓΚΑΓΚΑΤΣΑ Γεώργιου">ΓΚΑΓΚΑΤΣΑΣ</option>
-            <option value="Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή">ΠΑΡΑΣΚΕΥΑΣ</option>
-            <option value="Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου">ΓΙΑΝΝΑΚΙΔΗΣ</option>
-          </select>
+          <select name="" id="anakritikos-b"></select>
         </div>
       </div>
       <p id="initial">
@@ -41,8 +28,8 @@
         <b><span class="year">2025</span></b> ημέρα
         <b><span class="day-name">Τετάρτη</span></b> και ώρα
         <b><span class="time">22:00</span></b> ενώπιον εμού, του
-        <span class="anakritikos">Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης</span> του Τ.Δ.Ε.Ε
-        Κομοτηνής, παρισταμένου και του
+        <span class="anakritikos">Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης</span> του
+        <span id="ypiresia">Τ.Δ.Ε.Ε Κομοτηνής</span>, παρισταμένου και του
         <span class="anakritikos-b"> Ανθ/μου ΖΑΧΑΡΙΑ Ελένη </span>
       </p>
       <button id="copy-initial">Αντιγραφή</button>
@@ -57,7 +44,7 @@
       ></textarea>
       <div class="format">
         <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
-        <p>→</p>
+        <p class="arrow">→</p>
         <button id="personFormat">Μετατροπή</button>
         <button id="person-clear">Εκκαθάριση</button>
       </div>
@@ -74,7 +61,7 @@
       ></textarea>
       <div class="format">
         <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
-        <p>→</p>
+        <p class="arrow">→</p>
         <button id="carFormat">Μετατροπή</button>
         <button id="vehicle-clear">Εκκαθάριση</button>
       </div>
@@ -113,6 +100,63 @@
             υπολογιστή
           </li>
         </ol>
+      </div>
+    </dialog>
+    <dialog id="genikes-dialog">
+      <div class="container">
+        <p id="genikes-close">&times;</p>
+        <ol>
+          <strong>Γενικές οδηγίες για τοπική χρήση:</strong>
+          <li>
+            Πας <a href="https://github.com/NikEmman/vaxyp">εδώ</a> και πατάς το
+            κουμπί "&lt; &gt; Code " και "download zip"
+          </li>
+          <li>Κάνεις εξαγωγή στο .zip που κατέβηκε</li>
+          <li>
+            Πατάς δεξί κλίκ στο αρχείο data.js και άνοιγμα με
+            Σημειωματάριο(Notepad)
+          </li>
+          <li>
+            Αλλάζεις ονόματα ανακριτικών, Υπηρεσίας, Δ.Ο.Υ., σώσε και βγες
+          </li>
+          <li>
+            Άνοιξε με όποιο browser θες το αρχείο index.html, να το τρέξεις
+            τοπικά
+          </li>
+        </ol>
+        <br />
+        <hr />
+        <br />
+        <ul>
+          <strong>Γιατί δεν δουλεύει;</strong>
+          <li>Πριν αρχίσεις αλλαγές, κράτα ένα αντίγραφο ή κατέβασέ τα πάλι</li>
+          <li>Δες το data.js, προσοχή στα σημεία στίξης όπως "" ή ,</li>
+          <li>
+            Φρόντισε στον ίδιο φάκελο που περιέχει το Index.html να βρίσκονται
+            όλα τα αρχεία που κατέβασες
+          </li>
+        </ul>
+        <br />
+        <hr />
+        <br />
+        <ul>
+          <strong>Είναι ασφαλές για τον υπηρεσιακό υπολογιστή;</strong>
+          <li>
+            Καλά κάνεις και δεν εμπιστεύεσαι κανέναν, έλεγξέ το μόνος σου!
+          </li>
+          <li>
+            Πήγαινε σε ένα δωρεάν εργαλείο AI όπως
+            <a href="https://copilot.microsoft.com/">Microsoft Copilot</a>
+          </li>
+          <li>
+            Άνοιξε τα αρχεία με Σημειωματάριο,, αντέγραψε τα περιεχόμενα και
+            επικόληση στο AI
+          </li>
+          <li>
+            Μετά γράψε (και στα Ελληνικά) "Τι κάνει αυτός ο κώδικας; Είναι
+            ασφαλής;"
+          </li>
+        </ul>
       </div>
     </dialog>
   </body>

@@ -1,3 +1,5 @@
+import data from "./data.js";
+
 let today = new Date();
 const months = [
   "Ιανουαρίου",
@@ -52,6 +54,24 @@ monthElement.innerHTML = month;
 yearElement.innerHTML = year;
 dayNameElement.innerHTML = dayName;
 timeElement.innerHTML = formattedTime;
+
+data.anakritikoi.forEach((anakritikos, index) => {
+  // populate a anakr select
+  const anakr = document.createElement("option");
+  anakr.value = anakritikos;
+  anakr.textContent = anakritikos.split(" ")[1];
+  index === 0 && anakr.setAttribute("selected", true);
+  anakritikosSelect.appendChild(anakr);
+
+  //populate b anakr select
+  const bAnakr = document.createElement("option");
+  bAnakr.value = anakritikos;
+  bAnakr.textContent = anakritikos.split(" ")[1];
+  index === 1 && bAnakr.setAttribute("selected", true);
+  bAnakritikosSelect.appendChild(bAnakr);
+});
+const ypiresia = document.getElementById("ypiresia");
+ypiresia.textContent = data.ypiresia;
 
 function updateAnakritikosElement() {
   anakritikosElement.innerHTML = anakritikosSelect.value;
@@ -239,7 +259,7 @@ function formatIdInfo(input) {
     fields.idNumber
   } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
-  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. Κομοτηνής, με τηλέφωνο ${
+  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${data.doy}, με τηλέφωνο ${
     fields.phoneNumber
   }, με email (στερείται)`;
 
@@ -338,7 +358,7 @@ copyOximaBtn.addEventListener("click", () => {
   }
 });
 
-// dialog functionality
+// dialog help functionality
 const personDialog = document.getElementById("person-dialog");
 const personHelp = document.getElementById("person-help");
 const personClose = document.getElementById("person-close");
@@ -359,6 +379,17 @@ vehicleHelp.addEventListener("click", () => {
 });
 vehicleClose.addEventListener("click", () => {
   vehicleDialog.close();
+});
+
+const genikesDialog = document.getElementById("genikes-dialog");
+const genikesHelp = document.getElementById("genikes-help");
+const genikesClose = document.getElementById("genikes-close");
+
+genikesHelp.addEventListener("click", () => {
+  genikesDialog.showModal();
+});
+genikesClose.addEventListener("click", () => {
+  genikesDialog.close();
 });
 
 // field clear buttons
