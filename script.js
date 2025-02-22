@@ -1,4 +1,4 @@
-import data from "./data.js";
+import externalData from "./data.js";
 
 let today = new Date();
 const months = [
@@ -55,7 +55,7 @@ yearElement.innerHTML = year;
 dayNameElement.innerHTML = dayName;
 timeElement.innerHTML = formattedTime;
 
-data.anakritikoi.forEach((anakritikos, index) => {
+externalData.anakritikoi.forEach((anakritikos, index) => {
   // populate a anakr select
   const anakr = document.createElement("option");
   anakr.value = anakritikos;
@@ -71,7 +71,7 @@ data.anakritikoi.forEach((anakritikos, index) => {
   bAnakritikosSelect.appendChild(bAnakr);
 });
 const ypiresia = document.getElementById("ypiresia");
-ypiresia.textContent = data.ypiresia;
+ypiresia.textContent = externalData.ypiresia;
 
 function updateAnakritikosElement() {
   anakritikosElement.innerHTML = anakritikosSelect.value;
@@ -259,10 +259,10 @@ function formatIdInfo(input) {
     fields.idNumber
   } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
     fields.issuingAuthority
-  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${data.doy}, με τηλέφωνο ${
+  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${externalData.doy}, με τηλέφωνο ${
     fields.phoneNumber
   }, με email (στερείται)`;
-
+  console.log(externalData);
   return formattedString;
 }
 
