@@ -171,4 +171,37 @@ function formatIdInfo(input, externalData) {
   return formattedString;
 }
 
-export { formatTime, formatDate, formatVehicleInfo, formatIdInfo };
+//copy to clipboard
+function copyToClipboard(textToCopy) {
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        console.log("Text copied to clipboard successfully!");
+      })
+      .catch((err) => {
+        console.error("Could not copy text to clipboard: ", err);
+      });
+  } else {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      console.log("Text copied to clipboard using fallback method!");
+    } catch (err) {
+      console.error("Could not copy text using fallback method: ", err);
+    }
+    document.body.removeChild(textArea);
+  }
+}
+
+export {
+  formatTime,
+  formatDate,
+  formatVehicleInfo,
+  formatIdInfo,
+  copyToClipboard,
+};
