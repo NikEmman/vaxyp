@@ -53,21 +53,21 @@ let year = today.getFullYear();
 let month = months[today.getMonth()];
 let day = today.getDate();
 
-const dayElement = document.querySelector(".day");
-const monthElement = document.querySelector(".month");
-const yearElement = document.querySelector(".year");
-const dayNameElement = document.querySelector(".day-name");
-const timeElement = document.querySelector(".time");
-const anakritikosElement = document.querySelector(".anakritikos");
-const bAnakritikosElement = document.querySelector(".anakritikos-b");
+// const dayElement = document.querySelector(".day");
+// const monthElement = document.querySelector(".month");
+// const yearElement = document.querySelector(".year");
+// const dayNameElement = document.querySelector(".day-name");
+// const timeElement = document.querySelector(".time");
+// const anakritikosElement = document.querySelector(".anakritikos");
+// const bAnakritikosElement = document.querySelector(".anakritikos-b");
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
 
-dayElement.innerHTML = day;
-monthElement.innerHTML = month;
-yearElement.innerHTML = year;
-dayNameElement.innerHTML = dayName;
-timeElement.innerHTML = formattedTime;
+// dayElement.innerHTML = day;
+// monthElement.innerHTML = month;
+// yearElement.innerHTML = year;
+// dayNameElement.innerHTML = dayName;
+// timeElement.innerHTML = formattedTime;
 
 externalData.anakritikoi.forEach((anakritikos, index) => {
   // Populate a anakr select
@@ -88,22 +88,23 @@ externalData.anakritikoi.forEach((anakritikos, index) => {
   }
   bAnakritikosSelect.appendChild(bAnakr);
 });
-const ypiresia = document.getElementById("ypiresia");
-ypiresia.textContent = externalData.ypiresia;
+const initialText = document.getElementById("initial");
 
-const location = document.querySelector(".location");
-location.textContent = externalData.merosSyntaksisEkthesis;
-function updateAnakritikosElement() {
-  anakritikosElement.innerHTML = anakritikosSelect.value;
+function constructInitialText() {
+  return `Στην ${externalData.merosSyntaksisEkthesis} σήμερα την ${day}η του μήνα ${month} του έτους ${year} ημέρα ${dayName} και ώρα ${formattedTime} ενώπιον εμού, του ${anakritikosSelect.value} του ${externalData.ypiresia}, παρισταμένου και του ${bAnakritikosSelect.value}`;
 }
 
-anakritikosSelect.addEventListener("change", updateAnakritikosElement);
-function updateBAnakritikosElement() {
-  bAnakritikosElement.innerHTML = bAnakritikosSelect.value;
-}
+// Initial setup
+initialText.textContent = constructInitialText();
 
-bAnakritikosSelect.addEventListener("change", updateBAnakritikosElement);
+// Update text when anakritikos selections change
+anakritikosSelect.addEventListener("change", () => {
+  initialText.textContent = constructInitialText();
+});
 
+bAnakritikosSelect.addEventListener("change", () => {
+  initialText.textContent = constructInitialText();
+});
 // initial copy mech
 
 const copyInitialBtn = document.getElementById("copy-initial");
@@ -120,10 +121,6 @@ taytotita.addEventListener("input", () => {
   id = taytotita.value;
   clipboardId.value = formatIdInfo(id, externalData);
 });
-
-// personFormatBtn.addEventListener("click", () => {
-//   clipboardId.value = formatIdInfo(id, externalData);
-// });
 
 copyIdBtn.addEventListener("click", () => {
   copyToClipboard(clipboardId.value);
@@ -283,7 +280,7 @@ katasxesi.addEventListener("click", () => {
 // gnostopoiisi button
 const gnostopoiisi = document.getElementById("gnostopoiisi");
 gnostopoiisi.addEventListener("click", () => {
-  const text = printGnostopoisi(
+  const text = printGnostopoiisi(
     initial.textContent,
     clipboardId.value,
     externalData,
