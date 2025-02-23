@@ -4,6 +4,7 @@ import {
   formatDate,
   formatVehicleInfo,
   formatIdInfo,
+  copyToClipboard,
 } from "./helpers.js";
 import {
   printMartyra,
@@ -69,18 +70,22 @@ dayNameElement.innerHTML = dayName;
 timeElement.innerHTML = formattedTime;
 
 externalData.anakritikoi.forEach((anakritikos, index) => {
-  // populate a anakr select
+  // Populate a anakr select
   const anakr = document.createElement("option");
   anakr.value = anakritikos;
   anakr.textContent = anakritikos.split(" ")[1];
-  index === 0 && anakr.setAttribute("selected", true);
+  if (index === 0) {
+    anakr.setAttribute("selected", ""); // or anakr.selected = true
+  }
   anakritikosSelect.appendChild(anakr);
 
-  //populate b anakr select
+  // Populate b anakr select
   const bAnakr = document.createElement("option");
   bAnakr.value = anakritikos;
   bAnakr.textContent = anakritikos.split(" ")[1];
-  index === 1 && bAnakr.setAttribute("selected", true);
+  if (index === 1) {
+    bAnakr.setAttribute("selected", ""); // or bAnakr.selected = true
+  }
   bAnakritikosSelect.appendChild(bAnakr);
 });
 const ypiresia = document.getElementById("ypiresia");
@@ -92,14 +97,10 @@ function updateAnakritikosElement() {
   anakritikosElement.innerHTML = anakritikosSelect.value;
 }
 
-updateAnakritikosElement();
-
 anakritikosSelect.addEventListener("change", updateAnakritikosElement);
 function updateBAnakritikosElement() {
   bAnakritikosElement.innerHTML = bAnakritikosSelect.value;
 }
-
-updateBAnakritikosElement();
 
 bAnakritikosSelect.addEventListener("change", updateBAnakritikosElement);
 
@@ -107,109 +108,40 @@ bAnakritikosSelect.addEventListener("change", updateBAnakritikosElement);
 
 const copyInitialBtn = document.getElementById("copy-initial");
 copyInitialBtn.addEventListener("click", () => {
-  const tempElement = document.createElement("div");
-  tempElement.innerHTML = initial.innerHTML;
-  document.body.appendChild(tempElement);
-
-  const range = document.createRange();
-  range.selectNodeContents(tempElement);
-
-  const selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
-
-  try {
-    document.execCommand("copy");
-    console.log("Content copied to clipboard successfully!");
-  } catch (err) {
-    console.error("Could not copy content: ", err);
-  }
-
-  selection.removeAllRanges();
-  document.body.removeChild(tempElement);
+  const text = initial.textContent.replace(/(\r\n|\n|\r|\s{2,})/gm, " ");
+  copyToClipboard(text);
 });
 
 // person parser fields
 const taytotita = document.getElementById("taytotita");
-const personFormatBtn = document.getElementById("personFormat");
 const clipboardId = document.querySelector(".clipboard-id");
 const copyIdBtn = document.querySelector(".copy-id");
 taytotita.addEventListener("input", () => {
   id = taytotita.value;
-});
-
-personFormatBtn.addEventListener("click", () => {
   clipboardId.value = formatIdInfo(id, externalData);
 });
 
-copyIdBtn.addEventListener("click", () => {
-  const textToCopy = clipboardId.value;
+// personFormatBtn.addEventListener("click", () => {
+//   clipboardId.value = formatIdInfo(id, externalData);
+// });
 
-  if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        console.log("Text copied to clipboard successfully!");
-      })
-      .catch((err) => {
-        console.error("Could not copy text to clipboard: ", err);
-      });
-  } else {
-    // Fallback for older browsers
-    const textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand("copy");
-      console.log("Text copied to clipboard using fallback method!");
-    } catch (err) {
-      console.error("Could not copy text using fallback method: ", err);
-    }
-    document.body.removeChild(textArea);
-  }
+copyIdBtn.addEventListener("click", () => {
+  copyToClipboard(clipboardId.value);
 });
 
 //vehicle parser fields
 
 const oxima = document.getElementById("oxima");
-const carFormatBtn = document.getElementById("carFormat");
 const clipboardOxima = document.querySelector(".clipboard-oxima");
 const copyOximaBtn = document.querySelector(".copy-oxima");
 
 oxima.addEventListener("input", () => {
   vehicle = oxima.value;
-});
-carFormatBtn.addEventListener("click", () => {
   clipboardOxima.value = formatVehicleInfo(vehicle);
 });
 
 copyOximaBtn.addEventListener("click", () => {
-  const textToCopy = clipboardOxima.value;
-
-  if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        console.log("Text copied to clipboard successfully!");
-      })
-      .catch((err) => {
-        console.error("Could not copy text to clipboard: ", err);
-      });
-  } else {
-    // Fallback for older browsers
-    const textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand("copy");
-      console.log("Text copied to clipboard using fallback method!");
-    } catch (err) {
-      console.error("Could not copy text using fallback method: ", err);
-    }
-    document.body.removeChild(textArea);
-  }
+  copyToClipboard(clipboardOxima.value);
 });
 
 // dialog help functionality
@@ -234,7 +166,7 @@ vehicleHelp.addEventListener("click", () => {
 vehicleClose.addEventListener("click", () => {
   vehicleDialog.close();
 });
-
+// general info button
 const genikesDialog = document.getElementById("genikes-dialog");
 const genikesHelp = document.getElementById("genikes-help");
 const genikesClose = document.getElementById("genikes-close");
@@ -244,6 +176,17 @@ genikesHelp.addEventListener("click", () => {
 });
 genikesClose.addEventListener("click", () => {
   genikesDialog.close();
+});
+//patch note button
+const patchDialog = document.getElementById("patch-dialog");
+const patchHelp = document.getElementById("patch-help");
+const patchClose = document.getElementById("patch-close");
+
+patchHelp.addEventListener("click", () => {
+  patchDialog.showModal();
+});
+patchClose.addEventListener("click", () => {
+  patchDialog.close();
 });
 
 // field clear buttons
@@ -259,72 +202,93 @@ vehicleClear.addEventListener("click", () => {
   clipboardOxima.value = "";
 });
 
-// ekthesi martyra
+// ektheseis
 const initial = document.getElementById("initial");
-
-console.log(
-  printMartyra(
+// martyras button
+const martyra = document.getElementById("martyra");
+martyra.addEventListener("click", () => {
+  const text = printMartyra(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime
-  )
-);
-console.log(
-  printSyllipsi(
+  );
+  copyToClipboard(text);
+});
+
+//syllipsi button
+const syllipsi = document.getElementById("syllipsi");
+syllipsi.addEventListener("click", () => {
+  const text = printSyllipsi(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime,
     formatDate
-  )
-);
-
-console.log(
-  printAnomoti(
+  );
+  copyToClipboard(text);
+});
+// anomoti button
+const anomoti = document.getElementById("anomoti");
+anomoti.addEventListener("click", () => {
+  const text = printAnomoti(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime
-  )
-);
-console.log(
-  printKatigoroumenou(
+  );
+  copyToClipboard(text);
+});
+// katigoroumenou button
+const katigoroumenou = document.getElementById("katigoroumenou");
+katigoroumenou.addEventListener("click", () => {
+  const text = printKatigoroumenou(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime
-  )
-);
-console.log(
-  printApodosi(
+  );
+  copyToClipboard(text);
+});
+const apodosi = document.getElementById("apodosi");
+apodosi.addEventListener("click", () => {
+  const text = printApodosi(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime,
     formatDate
-  )
-);
-console.log(
-  printKatasxesi(
+  );
+  copyToClipboard(text);
+});
+// katasxesi button
+const katasxesi = document.getElementById("katasxesi");
+katasxesi.addEventListener("click", () => {
+  const text = printKatasxesi(
+    initial.textContent,
+    clipboardId.value,
+    externalData,
+    today,
+    formatTime,
+    formatDate
+  );
+  copyToClipboard(text);
+});
+
+// gnostopoiisi button
+const gnostopoiisi = document.getElementById("gnostopoiisi");
+gnostopoiisi.addEventListener("click", () => {
+  const text = printGnostopoisi(
     initial.textContent,
     clipboardId.value,
     externalData,
     today,
     formatTime
-  )
-);
-console.log(
-  printGnostopoiisi(
-    initial.textContent,
-    clipboardId.value,
-    externalData,
-    today,
-    formatTime
-  )
-);
+  );
+  copyToClipboard(text);
+});
