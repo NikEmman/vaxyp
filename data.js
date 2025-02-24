@@ -11,5 +11,7 @@ const data = {
   doy: "Κομοτηνής",
   merosSyntaksisEkthesis: "Κομοτηνή",
   xronosPeratosis: 10,
+  eisaggeleiaProtodikon: "Ροδόπης",
+  dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
 };
 export default data;

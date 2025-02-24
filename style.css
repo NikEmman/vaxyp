@@ -7,6 +7,10 @@ body {
   height: 100vh;
   padding: 2em;
 }
+header {
+  display: flex;
+  justify-content: space-between;
+}
 .top {
   height: 20%;
   display: flex;
@@ -45,7 +49,10 @@ body {
 .input,
 .output {
   min-width: 30%;
-  min-height: 90%;
+  height: 25vh;
+}
+details {
+  padding-bottom: 2em;
 }
 
 .format {
@@ -135,6 +142,11 @@ ol {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+}
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1em;
 }
 @media screen and (max-width: 580px) {
   .top {

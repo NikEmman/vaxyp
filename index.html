@@ -10,64 +10,73 @@
   <body>
     <header>
       <p class="helpBtn large" id="genikes-help">Οδηγίες αλλαγής Ανακριτικών</p>
+      <p class="helpBtn large" id="patch-help">Τι νέο υπάρχει;</p>
     </header>
     <div class="top">
       <div class="anakritikoi">
         <div>
-          <label for="anakritikos">Ά ανακριτικός</label>
+          <label for="anakritikos">Ά Aνακριτικός</label>
           <select name="" id="anakritikos"></select>
         </div>
         <div>
-          <label for="anakritikos-b">´Β ανακριτικός</label>
+          <label for="anakritikos-b">´Β Aνακριτικός</label>
           <select name="" id="anakritikos-b"></select>
         </div>
       </div>
-      <p id="initial">
-        Στην <span class="location">Κομοτηνή</span> σήμερα την
-        <b><span class="day">07</span>η</b> του μήνα
-        <b><span class="month">Φεβρουαρίου</span></b> του έτους
-        <b><span class="year">2025</span></b> ημέρα
-        <b><span class="day-name">Τετάρτη</span></b> και ώρα
-        <b><span class="time">22:00</span></b> ενώπιον εμού, του
-        <span class="anakritikos">Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης</span> του
-        <span id="ypiresia">Τ.Δ.Ε.Ε Κομοτηνής</span>, παρισταμένου και του
-        <span class="anakritikos-b"> Ανθ/μου ΖΑΧΑΡΙΑ Ελένη </span>
-      </p>
+      <p id="initial"></p>
       <button id="copy-initial">Αντιγραφή</button>
     </div>
     <hr />
-    <h2>Μετατροπέας ατόμων</h2>
-    <div class="person data">
-      <textarea
-        id="taytotita"
-        class="input"
-        placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
-      ></textarea>
-      <div class="format">
-        <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
-        <p class="arrow">→</p>
-        <button id="personFormat">Μετατροπή</button>
-        <button id="person-clear">Εκκαθάριση</button>
+    <summary>
+      <h2>Μετατροπέας ατόμων</h2>
+    </summary>
+    <details>
+      <div class="person data">
+        <textarea
+          id="taytotita"
+          class="input"
+          placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
+        ></textarea>
+        <div class="format">
+          <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
+          <p class="arrow">→</p>
+          <button id="person-clear">Εκκαθάριση</button>
+        </div>
+        <textarea readonly class="clipboard-id output"></textarea>
+        <button class="copy-id">Αντιγραφή</button>
       </div>
-      <textarea readonly class="clipboard-id output"></textarea>
-      <button class="copy-id">Αντιγραφή</button>
-    </div>
+    </details>
     <hr />
-    <h2>Μετατροπέας οχημάτων</h2>
-    <div class="data">
-      <textarea
-        id="oxima"
-        class="input"
-        placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
-      ></textarea>
-      <div class="format">
-        <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
-        <p class="arrow">→</p>
-        <button id="carFormat">Μετατροπή</button>
-        <button id="vehicle-clear">Εκκαθάριση</button>
+    <summary>
+      <h2>Μετατροπέας οχημάτων</h2>
+    </summary>
+    <details>
+      <div class="data">
+        <textarea
+          id="oxima"
+          class="input"
+          placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
+        ></textarea>
+        <div class="format">
+          <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
+          <p class="arrow">→</p>
+          <button id="vehicle-clear">Εκκαθάριση</button>
+        </div>
+        <textarea readonly class="clipboard-oxima output"></textarea>
+        <button class="copy-oxima">Αντιγραφή</button>
       </div>
-      <textarea readonly class="clipboard-oxima output"></textarea>
-      <button class="copy-oxima">Αντιγραφή</button>
+    </details>
+    <hr />
+    <h2>Εκθέσεις</h2>
+    <br />
+    <div class="buttons">
+      <p class="helpBtn large" id="martyra">Ένορκη Μάρτυρα</p>
+      <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
+      <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
+      <p class="helpBtn large" id="anomoti">Ανωμοτί</p>
+      <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
+      <p class="helpBtn large" id="katasxesi">Παράδ & Κατάσχ</p>
+      <p class="helpBtn large" id="apodosi">Απόδοσης</p>
     </div>
     <dialog id="person-dialog">
       <div class="container">
@@ -78,7 +87,7 @@
             Ανιγράψτε από την εφαρμογή Ταυτότητες το κείμενο, όπως δείχει η φωτό
           </li>
           <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
-          <li>Πατήστε το κουμπί "Μετατροπή"</li>
+
           <li>
             Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
             υπολογιστή
@@ -95,7 +104,6 @@
             Ανιγράψτε από την εφαρμογή Οχήματα το κείμενο, όπως δείχει η φωτό
           </li>
           <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
-          <li>Πατήστε το κουμπί "Μετατροπή"</li>
           <li>
             Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
             υπολογιστή
@@ -131,7 +139,10 @@
         <ul>
           <strong>Γιατί δεν δουλεύει;</strong>
           <li>Πριν αρχίσεις αλλαγές, κράτα ένα αντίγραφο ή κατέβασέ τα πάλι</li>
-          <li>Δες το data.js, προσοχή στα σημεία στίξης όπως "" ή ,</li>
+          <li>
+            Δες το data.js, προσοχή στα σημεία στίξης όπως "" ή κόμματα, δες αν
+            υπάρχουν όλα τα πεδία
+          </li>
           <li>
             Φρόντισε στον ίδιο φάκελο που περιέχει το Index.html να βρίσκονται
             όλα τα αρχεία που κατέβασες
@@ -160,9 +171,41 @@
         </ul>
       </div>
     </dialog>
-    <dialog id="ekthesi-dialog">
+    <dialog id="patch-dialog">
       <div class="container">
-        <div id="content">
+        <p id="patch-close">&times;</p>
+        <ul>
+          <u>Αλλαγές 25-2-2025</u>
+          <li>Τα κουμπιά των εκθέσεων πλέον κατεβάζουν πλήρες έγγραφο word</li>
+          <li>Βελτίωση κειμένου στα στοιχεία ατόμου</li>
+        </ul>
+        <hr>
+
+        <ul>
+          <u>Αλλαγές 23-2-2025</u>
+          <li>Η μετατροπή ατόμων/οχημάτων γίνεται αυτόματα</li>
+          <li>Προσθήκη βασικών εκθέσεων</li>
+        </ul>
+        <ul>
+          <u>Οδηγίες χρήσης εκθέσεων:</u>
+        </ul>
+        <li>
+          Στο data.js πρόσθεσε τα έξτρα στοιχεία όπως μέρος σύνταξης έκθεσης,
+          χρόνος περάτωσης έκθεσης, τοπική εισαγγελία, διεύθυνση υπηρεσίας
+        </li>
+        <li>
+          Αφού ορίσεις ανακριτικούς και βάλεις την ταυτότητα του
+          μάρτυρα/εξεταζόμενου/συλληφθέντα, πάτα την έκθεση που θες
+        </li>
+        <li>
+          Το κείμενο της έκθεσης είναι συμπληρωμένο και αντιγραμμένο στο
+          πρόχειρο, κάνε επικόλληση στο αντίστοιχο word
+        </li>
+      </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="gnostopoiisi-download">
           <p class="western" align="center" style="line-height: 150%">
             <br />
           </p>
@@ -179,14 +222,183 @@
             <font size="3" style="font-size: 12pt"
               ><font face="Calibri, serif"
                 ><font size="4" style="font-size: 14pt"
-                  ><u
+                  ><u id="gnostopoiisi-title"
                     >ΕΚΘΕΣΗ ΓΝΩΣΤΟΠΟΙΗΣΗΣ ΔΙΚΑΙΩΜΑΤΩΝ ΚΑΤΗΓΟΡΟΥΜΕΝΟΥ (Κ.Π.Δ.)</u
                   ></font
                 ></font
               ></font
             >
           </p>
+          <p id="gnostopoiisi-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="33%" style="text-align: center">
+                Λαβών Γνώση Κατηγορούμενος
+              </td>
+              <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
         </div>
+      </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="anomoti-download">
+          <p class="western" align="center" style="line-height: 150%">
+            <br />
+          </p>
+          <p
+            class="western"
+            align="center"
+            style="
+              font-weight: normal;
+              text-align: center;
+              line-height: 150%;
+              margin-bottom: 0.14in;
+            "
+          >
+            <font size="3" style="font-size: 12pt"
+              ><font face="Calibri, serif"
+                ><font size="4" style="font-size: 14pt"
+                  ><u id="anomoti-title">ΕΚΘΕΣΗ ΕΞΕΤΑΣΗΣ ΧΩΡΙΣ ΟΡΚΟ</u></font
+                ></font
+              ></font
+            >
+          </p>
+          <p id="anomoti-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="33%" style="text-align: center">Εξετασθείς</td>
+              <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="apodosi-download">
+          <p class="western" align="center" style="line-height: 150%">
+            <br />
+          </p>
+          <p
+            class="western"
+            align="center"
+            style="
+              font-weight: normal;
+              text-align: center;
+              line-height: 150%;
+              margin-bottom: 0.14in;
+            "
+          >
+            <font size="3" style="font-size: 12pt"
+              ><font face="Calibri, serif"
+                ><font size="4" style="font-size: 14pt"
+                  ><u id="apodosi-title"
+                    >ΕΚΘΕΣΗ ΑΠΟΔΟΣΗΣ ΚΑΤΑΣΧΕΘΕΝΤΩΝ (Κ.Π.Δ.)</u
+                  ></font
+                ></font
+              ></font
+            >
+          </p>
+          <p id="apodosi-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="33%" style="text-align: center">Παραλαβών</td>
+              <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="katigoroumenou-download">
+          <p class="western" align="center" style="line-height: 150%">
+            <br />
+          </p>
+          <p
+            class="western"
+            align="center"
+            style="
+              font-weight: normal;
+              text-align: center;
+              line-height: 150%;
+              margin-bottom: 0.14in;
+            "
+          >
+            <font size="3" style="font-size: 12pt"
+              ><font face="Calibri, serif"
+                ><font size="4" style="font-size: 14pt"
+                  ><u id="katigoroumenou-title"
+                    >ΕΚΘΕΣΗ ΕΞΕΤΑΣΗΣ ΚΑΤΗΓΟΡΟΥΜΕΝΟΥ ( Κ.Π.Δ. )</u
+                  ></font
+                ></font
+              ></font
+            >
+          </p>
+          <p id="katigoroumenou-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="33%" style="text-align: center">
+                Εξετασθείς Κατηγορούμενος
+              </td>
+              <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </dialog>
+    <dialog>
+      <div id="martyra-download">
+        <p class="western" align="center" style="line-height: 150%">
+          <br />
+        </p>
+        <p
+          class="western"
+          align="center"
+          style="
+            font-weight: normal;
+            text-align: center;
+            line-height: 150%;
+            margin-bottom: 0.14in;
+          "
+        >
+          <font size="3" style="font-size: 12pt"
+            ><font face="Calibri, serif"
+              ><font size="4" style="font-size: 14pt"
+                ><u id="martyra-title"
+                  >ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ (Κ.Π.Δ.)</u
+                ></font
+              ></font
+            ></font
+          >
+        </p>
+        <p id="martyra-content"></p>
         <table width="100%">
           <tr>
             <td width="33%" style="text-align: center">-Ο-</td>
@@ -194,16 +406,98 @@
             <td width="33%" style="text-align: center">-Ο-</td>
           </tr>
           <tr>
-            <td width="33%" style="text-align: center">
-              Λαβών Γνώση Κατηγορούμενος
-            </td>
+            <td width="33%" style="text-align: center">Εξετασθείς</td>
             <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
             <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
           </tr>
         </table>
-
-        <button id="word">Download as Word</button>
+      </div>
+    </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="katasxesi-download">
+          <p class="western" align="center" style="line-height: 150%">
+            <br />
+          </p>
+          <p
+            class="western"
+            align="center"
+            style="
+              font-weight: normal;
+              text-align: center;
+              line-height: 150%;
+              margin-bottom: 0.14in;
+            "
+          >
+            <font size="3" style="font-size: 12pt"
+              ><font face="Calibri, serif"
+                ><font size="4" style="font-size: 14pt"
+                  ><u id="katasxesi-title"
+                    >ΕΚΘΕΣΗ ΠΑΡΑΔΟΣΗΣ - ΠΑΡΑΛΑΒΗΣ ΚΑΙ ΚΑΤΑΣΧΕΣΗΣ</u
+                  ></font
+                ></font
+              ></font
+            >
+          </p>
+          <p id="katasxesi-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+              <td width="33%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="33%" style="text-align: center">Παραδούς</td>
+              <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </dialog>
+    <dialog>
+      <div class="container">
+        <div id="syllipsi-download">
+          <p class="western" align="center" style="line-height: 150%">
+            <br />
+          </p>
+          <p
+            class="western"
+            align="center"
+            style="
+              font-weight: normal;
+              text-align: center;
+              line-height: 150%;
+              margin-bottom: 0.14in;
+            "
+          >
+            <font size="3" style="font-size: 12pt"
+              ><font face="Calibri, serif"
+                ><font size="4" style="font-size: 14pt"
+                  ><u id="syllipsi-title">ΕΚΘΕΣΗ ΣΥΛΛΗΨΗΣ</u></font
+                ></font
+              ></font
+            >
+          </p>
+          <p id="syllipsi-content"></p>
+          <table width="100%">
+            <tr>
+              <td width="25%" style="text-align: center">-Ο-</td>
+              <td width="25%" style="text-align: center">-Ο-</td>
+              <td width="25%" style="text-align: center">-Ο-</td>
+              <td width="25%" style="text-align: center">-Ο-</td>
+            </tr>
+            <tr>
+              <td width="25%" style="text-align: center">Συλληφθής</td>
+              <td width="25%" style="text-align: center">Συλλαβών</td>
+              <td width="25%" style="text-align: center">Β'Ανακριτικός</td>
+              <td width="25%" style="text-align: center">Ά Ανακριτικός</td>
+            </tr>
+          </table>
+        </div>
       </div>
     </dialog>
   </body>
+
 </html>
