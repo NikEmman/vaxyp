@@ -1,7 +1,0 @@
-.ypografes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(33vw, 1fr));
-}
-.ypografes p {
-  text-align: center;
-}
