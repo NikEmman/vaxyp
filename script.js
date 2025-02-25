@@ -221,7 +221,7 @@ function printYpiresiako(
   protokolo,
   apolesthen
 ) {
-  return `<div class="container" style="width: 210mm; height: 297mm; margin: 20px auto; display: flex; flex-direction: column;">
+  return `<div class="container" style="width: 210mm; height: 297mm; display: flex; flex-direction: column;">
 		<div style="display: flex; flex-direction: column; align-items: center; align-self:flex-start">
 		  <p style="margin:0;">
 			<b>ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ</b></fon>
@@ -272,6 +272,7 @@ function printYpiresiako(
 		<p align="center" style="line-height: 150%; margin-bottom: 0cm"><br /></p>
 		<p align="justify" style="line-height: 115%; margin-bottom: 0cm">
 		  Αναφέρεται ότι την ${day} ${month} ${year} και ώρα ${time} προσήλθε στην Υπηρεσία μας ο ${person} και με υπεύθυνη δήλωση του Ν1599/1986 δήλωσε ότι απώλεσε σε άγνωστο τόπο και χρόνο ${apolesthen}</p>
+      <p> -Το παρόν χορηγήται για κάθε νόμιμη χρήση. </p>
 		<div align="right">
 		  <table width="345" cellpadding="7" cellspacing="0">
 			<col width="331" />
@@ -332,17 +333,18 @@ function printYpefthini(
     width: 210mm;
     height: 297mm;
     margin: 20px auto;
-    line-height: 1.5;
+    line-height: 1;
   "
 >
   <div style="text-align: center; margin-bottom: 20px">
     <h3 style="margin-bottom: 10px">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</h3>
     <h3 style="margin-top: 5px"><sup>(άρθρο 8 Ν.1599/1986)</sup></h3>
   </div>
-  <div style="font-size: 0.8em; text-align: end">${axyp}</div>
-  <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
-  <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
-
+  <div style="width: 210mm; line-height:normal; display:flex; flex-direction:column; align-items:flex-end">
+   <div style="font-size: 0.8em; text-align: end ">${axyp}</div>
+   <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
+   <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
+  </div>
   <p style="margin-bottom: 20px; font-style: italic">
     Η ακρίβεια των στοιχείων που υποβάλλονται με αυτή τη δήλωση μπορεί να
     ελεγχθεί με βάση το αρχείο άλλων υπηρεσιών (άρθρο 8 παρ. 4 Ν. 1599/1986)
@@ -430,8 +432,9 @@ function printYpefthini(
   <div style="border: 1px solid #000; padding: 15px; margin-bottom: 30px">
     <p style="font-weight: bold">
       Με ατομική μου ευθύνη και γνωρίζοντας τις κυρώσεις, που προβλέπονται από
-      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:\n
-    Σε άγνωστο τόπο και χρόνο απώλεσα ${apolesthen}</p>
+      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:</p>
+    <p>Σε άγνωστο τόπο και χρόνο απώλεσα ${apolesthen}</p>
+    
   </div>
 
   <div style="text-align: right; margin-top: 30px; margin-right: 50px">
@@ -462,7 +465,7 @@ const months = [
   "Νοεμβρίου",
   "Δεκεμβρίου",
 ];
-let id = "";
+let formattedId = "";
 let vehicle = "";
 let stringYear = today.getFullYear();
 let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
@@ -550,12 +553,14 @@ const taytotita = document.getElementById("taytotita");
 const clipboardId = document.querySelector(".clipboard-id");
 const copyIdBtn = document.querySelector(".copy-id");
 taytotita.addEventListener("input", () => {
-  id = taytotita.value;
-  clipboardId.value = formatIdInfo(id, data);
+  // id = taytotita.value;
+  clipboardId.value = formatIdInfo(taytotita.value, data);
 });
-
+clipboardId.addEventListener("input", () => {
+  formattedId = clipboardId.value;
+});
 copyIdBtn.addEventListener("click", () => {
-  copyToClipboard(clipboardId.value);
+  copyToClipboard(formattedId);
 });
 
 //vehicle parser fields
@@ -623,6 +628,7 @@ const personClear = document.getElementById("person-clear");
 personClear.addEventListener("click", () => {
   taytotita.value = "";
   clipboardId.value = "";
+  formattedId = "";
 });
 
 const vehicleClear = document.getElementById("vehicle-clear");
@@ -637,13 +643,7 @@ const initial = document.getElementById("initial");
 const martyra = document.getElementById("martyra");
 martyra.addEventListener("click", () => {
   downloadAsWord(
-    printMartyra(
-      initial.textContent,
-      clipboardId.value,
-      data,
-      today,
-      formatTime
-    ),
+    printMartyra(initial.textContent, formattedId, data, today, formatTime),
     "martyra"
   );
 });
@@ -653,7 +653,7 @@ martyraXoris.addEventListener("click", () => {
   downloadAsWord(
     printMartyraXoris(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime
@@ -667,7 +667,7 @@ syllipsi.addEventListener("click", () => {
   downloadAsWord(
     printSyllipsi(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime,
@@ -680,13 +680,7 @@ syllipsi.addEventListener("click", () => {
 const anomoti = document.getElementById("anomoti");
 anomoti.addEventListener("click", () => {
   downloadAsWord(
-    printAnomoti(
-      initial.textContent,
-      clipboardId.value,
-      data,
-      today,
-      formatTime
-    ),
+    printAnomoti(initial.textContent, formattedId, data, today, formatTime),
     "anomoti"
   );
 });
@@ -696,7 +690,7 @@ katigoroumenou.addEventListener("click", () => {
   downloadAsWord(
     printKatigoroumenou(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime
@@ -712,7 +706,7 @@ apodosi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime,
@@ -727,7 +721,7 @@ katasxesi.addEventListener("click", () => {
   downloadAsWord(
     printKatasxesi(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime,
@@ -743,7 +737,7 @@ gnostopoiisi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
       initial.textContent,
-      clipboardId.value,
+      formattedId,
       data,
       today,
       formatTime
@@ -757,7 +751,7 @@ ypiresiako.addEventListener("click", () => {
   downloadAsWord(
     printYpiresiako(
       anakritikosSelect.value,
-      clipboardId.value,
+      formattedId,
       data,
       day,
       month,
@@ -976,7 +970,6 @@ function formatIdInfo(input, data) {
   }
   // extract the data for ypefthini dilosi usage
   ypefthiniData = fields;
-  console.log(ypefthiniData);
 
   // Format the output string
   const formattedString = `${fields.surname} ${capitalize(

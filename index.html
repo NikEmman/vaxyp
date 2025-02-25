@@ -31,7 +31,7 @@
     <summary>
       <h2>Μετατροπέας ατόμων</h2>
     </summary>
-    <details>
+    <details open >
       <div class="person data">
         <textarea
           id="taytotita"
@@ -43,7 +43,7 @@
           <p class="arrow">→</p>
           <button id="person-clear">Εκκαθάριση</button>
         </div>
-        <textarea readonly class="clipboard-id output"></textarea>
+        <textarea class="clipboard-id output"></textarea>
         <button class="copy-id">Αντιγραφή</button>
       </div>
     </details>
@@ -81,15 +81,19 @@
       <p class="helpBtn large" id="apodosi">Απόδοσης</p>
     </div>
     <hr>
-    <summary>Δήλωση απώλειας</summary>
-    <details>
-      <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
-      <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
-      <label for="protokolo">3005/4/</label>
-      <input type="text" id="protokolo">
-      <textarea class="input" id="apolesthen" placeholder="Απωλεσθέντα"></textarea>
-      <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
-      <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+    <summary><h2>Δήλωση απώλειας</h2></summary>
+    <details  >
+      <div class="data">
+        <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
+        <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
+        <div class="protokolo-container">
+          <label for="protokolo">3005/4/</label>
+          <input type="text" id="protokolo">
+        </div>
+        <textarea class="input" id="apolesthen" placeholder="Απωλεσθέντα"></textarea>
+        <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
+        <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+      </div>
 
 
     </details>
@@ -102,11 +106,10 @@
             Ανιγράψτε από την εφαρμογή Ταυτότητες το κείμενο, όπως δείχει η φωτό
           </li>
           <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
-
           <li>
-            Πατήστε το κουμπί "Αντιγραφή" για αντιγραφή στο πρόχειρο του
-            υπολογιστή
+            Η μετατροπή γίνεται αυτόματα, τα στοιχεία περνάνε σε όλα τα έγγραφα πιο κάτω.
           </li>
+          <li>Πάτα στο κουμπί αντιγραφή και τα στοιχεία βρίσκονται στο "πρόχειρο" του υπολογιστή, κάνε απλά επικόλληση στο word που θες.</li>
         </ol>
       </div>
     </dialog>
@@ -189,6 +192,10 @@
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
+        <ul><u>Αλλαγές 25-2-2025</u>
+        <li>Προσθήκη Έκθεσης Μάρτυρα Χωρίς Όρκο</li>
+        <li> Προσθήκη πεδίων για δηλώσεις απώλειας. Βάζεις άτομο στον μετατροπέα ατόμων, πρωτ/λο και απολεσθέντα στα πεδία δήλωσης απώλειας, κατεβάζεις αντοίστιχα έγγραφα</li>
+        <li> Οι ώρες περάτωσης πλέον δεν πάνε π.χ. 14.62 αλλα πάνε, σωστά, 15.02</li></ul>
         <ul>
           <u>Αλλαγές 24-2-2025</u>
           <li>Τα κουμπιά των εκθέσεων πλέον κατεβάζουν πλήρες έγγραφο word</li>
