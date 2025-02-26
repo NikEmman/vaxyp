@@ -625,7 +625,7 @@ function printYpoptoy(person) {
                 Δ.Ο.Υ.:
               </td>
               <td style="padding: 5px 0; width: 35%; font-weight: bold">
-              ${datas.doy}
+              ${data.doy}
               </td>
             </tr>
           </table>
@@ -661,7 +661,7 @@ function printYpoptoy(person) {
     <div
       style="float: right; width: 235px; text-align: center; margin-top: 30px"
     >
-      <p style="margin: 5px 0">${datas.merosSyntaksisEkthesis},</p>
+      <p style="margin: 5px 0">${data.merosSyntaksisEkthesis},</p>
       <p style="margin: 5px 0">${formatDate(today)}</p>
       <p style="margin: 5px 0">- Ο -</p>
       <p style="margin: 5px 0">ΑΝΑΚΡΙΤΙΚΟΣ ΥΠΑΛΛΗΛΟΣ</p>
@@ -1002,6 +1002,14 @@ ypefthini.addEventListener("click", () => {
     "ypefthini"
   );
 });
+
+// deltio drasti button
+const ypoptoy = document.getElementById("ypoptoy");
+ypoptoy.addEventListener("click", () => {
+  downloadAsWord(printYpoptoy(ypefthiniData), "ypoptoy");
+});
+
+// word downloader
 function downloadAsWord(func, id) {
   const content = document.getElementById(`${id}-content`);
   content.innerHTML = func;
