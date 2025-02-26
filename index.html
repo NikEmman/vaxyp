@@ -32,7 +32,9 @@
       <h2>Μετατροπέας ατόμων</h2>
     </summary>
     <details open >
+      <h3>Παθών</h3>
       <div class="person data">
+
         <textarea
           id="taytotita"
           class="input"
@@ -45,6 +47,23 @@
         </div>
         <textarea class="clipboard-id output"></textarea>
         <button class="copy-id">Αντιγραφή</button>
+      </div>
+      <br>
+      <hr>
+      <h3>Δράστης</h3>
+      <div class="person data">
+        <textarea
+          id="taytotita-ypoptos"
+          class="input"
+          placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
+        ></textarea>
+        <div class="format">
+          
+          <p class="arrow">→</p>
+          <button id="person-ypoptos-clear">Εκκαθάριση</button>
+        </div>
+        <textarea class="clipboard-id-ypoptos output"></textarea>
+        <button class="copy-id-ypoptos">Αντιγραφή</button>
       </div>
     </details>
     <hr />
@@ -194,10 +213,16 @@
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
-        <ul><u>Αλλαγές 25-2-2025</u>
-        <li>Προσθήκη Έκθεσης Μάρτυρα Χωρίς Όρκο</li>
-        <li> Προσθήκη πεδίων για δηλώσεις απώλειας. Βάζεις άτομο στον μετατροπέα ατόμων, πρωτ/λο και απολεσθέντα στα πεδία δήλωσης απώλειας, κατεβάζεις αντοίστιχα έγγραφα</li>
-        <li> Οι ώρες περάτωσης πλέον δεν πάνε π.χ. 14.62 αλλα πάνε, σωστά, 15.02</li></ul>
+        <ul><u>Αλλαγές 26-2-2025</u>
+          <li>Προσθήκη πεδίων για δράστη, και η Σύλληψη ή Απολογία ή Ανομωτί κτλ τραβάνε αυτά τα στοιχεία</li>
+          <li>Προσθήκη Δελτίου Υπόπτου</li>
+          
+        </ul>
+        <ul>
+          <ul><u>Αλλαγές 25-2-2025</u>
+          <li>Προσθήκη Έκθεσης Μάρτυρα Χωρίς Όρκο</li>
+          <li> Προσθήκη πεδίων για δηλώσεις απώλειας. Βάζεις άτομο στον μετατροπέα ατόμων, πρωτ/λο και απολεσθέντα στα πεδία δήλωσης απώλειας, κατεβάζεις αντοίστιχα έγγραφα</li>
+          <li> Οι ώρες περάτωσης πλέον δεν πάνε π.χ. 14.62 αλλα πάνε, σωστά, 15.02</li></ul>
         <ul>
           <u>Αλλαγές 24-2-2025</u>
           <li>Τα κουμπιά των εκθέσεων πλέον κατεβάζουν πλήρες έγγραφο word</li>

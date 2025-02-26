@@ -688,6 +688,7 @@ const months = [
   "Δεκεμβρίου",
 ];
 let formattedId = "";
+let formattedIdYpoptos = "";
 let vehicle = "";
 let stringYear = today.getFullYear();
 let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
@@ -709,6 +710,7 @@ let year = today.getFullYear();
 let month = months[today.getMonth()];
 let day = today.getDate();
 let ypefthiniData = {};
+let ypoptosData = {};
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
@@ -784,6 +786,31 @@ clipboardId.addEventListener("input", () => {
 });
 copyIdBtn.addEventListener("click", () => {
   copyToClipboard(formattedId);
+});
+
+// Suspect parser fields
+const taytotitaYpoptos = document.getElementById("taytotita-ypoptos");
+const clipboardIdYpoptos = document.querySelector(".clipboard-id-ypoptos");
+const copyIdYpoptosBtn = document.querySelector(".copy-id-ypoptos");
+
+taytotitaYpoptos.addEventListener("input", () => {
+  clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data);
+  formattedIdYpoptos = clipboardIdYpoptos.value;
+});
+
+clipboardIdYpoptos.addEventListener("input", () => {
+  formattedIdYpoptos = clipboardIdYpoptos.value;
+});
+
+copyIdYpoptosBtn.addEventListener("click", () => {
+  copyToClipboard(formattedIdYpoptos);
+});
+
+const clearYpoptosBtn = document.getElementById("person-ypoptos-clear");
+clearYpoptosBtn.addEventListener("click", () => {
+  taytotitaYpoptos.value = "";
+  clipboardIdYpoptos.value = "";
+  formattedIdYpoptos = "";
 });
 
 //vehicle parser fields
@@ -890,7 +917,7 @@ syllipsi.addEventListener("click", () => {
   downloadAsWord(
     printSyllipsi(
       initial.textContent,
-      formattedId,
+      formattedIdYpoptos,
       data,
       today,
       formatTime,
@@ -903,7 +930,13 @@ syllipsi.addEventListener("click", () => {
 const anomoti = document.getElementById("anomoti");
 anomoti.addEventListener("click", () => {
   downloadAsWord(
-    printAnomoti(initial.textContent, formattedId, data, today, formatTime),
+    printAnomoti(
+      initial.textContent,
+      formattedIdYpoptos,
+      data,
+      today,
+      formatTime
+    ),
     "anomoti"
   );
 });
@@ -913,14 +946,13 @@ katigoroumenou.addEventListener("click", () => {
   downloadAsWord(
     printKatigoroumenou(
       initial.textContent,
-      formattedId,
+      formattedIdYpoptos,
       data,
       today,
       formatTime
     ),
     "katigoroumenou"
   );
-  copyToClipboard(text);
 });
 
 //apodosi button
@@ -960,7 +992,7 @@ gnostopoiisi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
       initial.textContent,
-      formattedId,
+      formattedIdYpoptos,
       data,
       today,
       formatTime
@@ -1006,7 +1038,7 @@ ypefthini.addEventListener("click", () => {
 // deltio drasti button
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
-  downloadAsWord(printYpoptoy(ypefthiniData), "ypoptoy");
+  downloadAsWord(printYpoptoy(ypoptosData), "ypoptoy");
 });
 
 // word downloader
@@ -1201,6 +1233,7 @@ function formatIdInfo(input, data) {
   }
   // extract the data for ypefthini dilosi usage
   ypefthiniData = fields;
+  ypoptosData = fields;
 
   // Format the output string
   const formattedString = `${fields.surname} ${capitalize(
