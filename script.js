@@ -555,6 +555,7 @@ const copyIdBtn = document.querySelector(".copy-id");
 taytotita.addEventListener("input", () => {
   // id = taytotita.value;
   clipboardId.value = formatIdInfo(taytotita.value, data);
+  formattedId = clipboardId.value;
 });
 clipboardId.addEventListener("input", () => {
   formattedId = clipboardId.value;
