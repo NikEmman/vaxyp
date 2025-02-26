@@ -6,6 +6,7 @@ const data = {
     "Αρχ/κα ΓΚΑΓΚΑΤΣΑ Γεώργιου",
     "Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή",
     "Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου",
+    "Ανθ/μου ΤΟΠΑΛΙΔΗ Νικόλαου",
   ],
   ypiresia: "Τ.Δ.Ε.Ε. Κομοτηνής",
   doy: "Κομοτηνής",
@@ -448,6 +449,227 @@ function printYpefthini(
 `;
 }
 
+function printYpoptoy(person) {
+  return `<div
+    style="
+      font-family: 'Bookman Old Style', serif;
+      width: 210mm;
+      margin: 0 auto;
+    "
+  >
+    <!-- Header Table -->
+    <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px">
+      <tr>
+        <td
+          style="
+            border: 1px solid #000000;
+            padding: 8px;
+            font-size: 10pt;
+            text-align: center;
+            width: 25%;
+          "
+        >
+          Χορηγείται από το Τυπογραφείο
+        </td>
+        <td
+          style="
+            border: 1px solid #000000;
+            padding: 8px;
+            font-size: 10pt;
+            text-align: center;
+            width: 50%;
+          "
+        >
+          Συντάσσεται από τον αρμόδιο Ανακριτικό Υπάλληλο
+        </td>
+        <td
+          style="
+            border: 1px solid #000000;
+            padding: 8px;
+            font-size: 10pt;
+            text-align: center;
+            width: 25%;
+          "
+        >
+          ΥΠΟΔΕΙΓΜΑ.: Δ-9γ
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan="3"
+          style="border: 1px solid #000000; padding: 8px; font-size: 10pt"
+        >
+          Υπόδειγμα: «Δελτίο στοιχείων ταυτότητος κατηγορουμένου».
+        </td>
+      </tr>
+    </table>
+
+    <!-- Title -->
+    <div
+      style="
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        text-decoration: underline;
+        margin-top: 20px;
+        margin-bottom: 5px;
+      "
+    >
+      ΔΕΛΤΙΟ ΣΤΟΙΧΕΙΩΝ ΤΑΥΤΟΤΗΤΑΣ ΥΠΟΠΤΟΥ
+    </div>
+    <div
+      style="
+        text-align: center;
+        font-family: Arial, sans-serif;
+        margin-bottom: 20px;
+      "
+    >
+      (Επισυνάπτεται στη δικογραφία)
+    </div>
+
+    <!-- Information Table -->
+    <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse">
+      <tr>
+        <td style="padding: 5px 0; width: 35%; font-weight: normal">
+          ΕΠΩΝΥΜΟ.:
+        </td>
+        <td style="padding: 5px 0; font-weight: bold">${person.surname}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΟΝΟΜΑ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.firstName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΟΝΟΜΑ ΠΑΤΕΡΑ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.fatherName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΟΝΟΜΑ ΜΗΤΕΡΑΣ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.motherName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">
+          ΠΑΤΡΙΚΟ ΕΠΩΝΥΜΟ (για έγγαμες):
+        </td>
+        <td style="padding: 5px 0"></td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΟΝΟΜ/ΜΟ ΣΥΖΥΓΟΥ.:</td>
+        <td style="padding: 5px 0"></td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΗΜΕΡ. ΓΕΝΝΗΣΗΣ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.birthDate}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΤΟΠΟΣ ΓΕΝΝΗΣΗΣ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.birthPlace}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΤΟΠΟΣ ΚΑΤΟΙΚΙΑΣ.:</td>
+        <td style="padding: 5px 0; font-weight: bold">${person.area}</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">Οδός:</td>
+        <td style="padding: 5px 0">${person.street} ${person.streetNumber}</td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table style="width: 100%; border-collapse: collapse">
+            <tr>
+              <td style="padding: 5px 0; width: 70%; font-weight: normal">
+                Ταχ. Κωδ.
+              </td>
+              <td style="padding: 5px 0; width: 30%"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">
+          ΑΡΙΘ. ΤΑΥΤΟΤΗΤΑΣ ή ΔΙΑΒΑΤΗΡΙΟΥ:
+        </td>
+        <td style="padding: 5px 0; font-weight: bold">${person.idNumber}</td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table style="width: 100%; border-collapse: collapse">
+            <tr>
+              <td style="padding: 5px 0; width: 25%; font-weight: normal">
+                Ημερ. Έκδοσης
+              </td>
+              <td style="padding: 5px 0; width: 25%; font-weight: bold">
+              ${person.issueDate}
+              </td>
+              <td style="padding: 5px 0; width: 25%; font-weight: normal">
+                Αρχή Έκδοσης
+              </td>
+              <td style="padding: 5px 0; width: 25%; font-weight: bold">
+              ${person.issuingAuthority}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table style="width: 100%; border-collapse: collapse">
+            <tr>
+              <td style="padding: 5px 0; width: 15%; font-weight: normal">
+                Α.Φ.Μ:
+              </td>
+              <td style="padding: 5px 0; width: 35%; font-weight: bold">
+                -----
+              </td>
+              <td style="padding: 5px 0; width: 15%; font-weight: normal">
+                Δ.Ο.Υ.:
+              </td>
+              <td style="padding: 5px 0; width: 35%; font-weight: bold">
+              ${datas.doy}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table style="width: 100%; border-collapse: collapse">
+            <tr>
+              <td style="padding: 5px 0; width: 15%; font-weight: normal">
+                ΤΗΛ:
+              </td>
+              <td style="padding: 5px 0; width: 35%; font-weight: bold">
+                ${person.phoneNumber}
+              </td>
+              <td style="padding: 5px 0; width: 15%; font-weight: normal">
+                ΗΛ. ΤΑΧ:
+              </td>
+              <td style="padding: 5px 0; width: 35%; font-weight: bold">
+                ΑΝΕΥ
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; font-weight: normal">ΕΠΑΓ/ΜΑ:</td>
+        <td style="padding: 5px 0; font-weight: bold">------</td>
+      </tr>
+    </table>
+
+    <!-- Signature Section -->
+    <div
+      style="float: right; width: 235px; text-align: center; margin-top: 30px"
+    >
+      <p style="margin: 5px 0">${datas.merosSyntaksisEkthesis},</p>
+      <p style="margin: 5px 0">${formatDate(today)}</p>
+      <p style="margin: 5px 0">- Ο -</p>
+      <p style="margin: 5px 0">ΑΝΑΚΡΙΤΙΚΟΣ ΥΠΑΛΛΗΛΟΣ</p>
+      <p style="margin: 40px 0 5px 0"><b>${anakritikosSelect.value}</b></p>
+      
+    </div>
+  </div>`;
+}
 //Μην πειράξετε από εδώ και κάτω
 
 const today = new Date();
