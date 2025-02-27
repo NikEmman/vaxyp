@@ -21,7 +21,8 @@ const data = {
 // ΕΚΘΕΣΗ ΜΑΡΤΥΡΑ ΧΩΡΙΣ
 
 function printMartyraXoris(initial, person, datas, date, timeFormatter) {
-  return `<p> ${initial.replace(
+  timePassed += datas.xronosPeratosis;
+  return `<p> ${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ίδιας Υπηρεσίας, προσληφθέντος ως Β’ Ανακριτικού Υπαλλήλου, κλήθηκε και εμφανίσθηκε ενώπιόν μας, ο κατωτέρω σημειούμενος μάρτυρας, ο οποίος αφού ρωτήθηκε για την ταυτότητά του κ.λ.π., απάντησε ότι ονομάζεται ${person}, Έλληνας και Χριστιανός. Στην συνέχεια εξετάζεται χωρίς όρκο, γιατί είναι θύμα του Νόμου 3500/06 ή γιατί είναι νεότερος των 18 ετών σύμφωνα με το άρθρο 221 του Π.Κ.Δ., ως ακολούθως:</p>
@@ -29,10 +30,11 @@ function printMartyraXoris(initial, person, datas, date, timeFormatter) {
 <p><u>ΑΠΟΚΡΙΣΗ :</u> ******* . Άλλο
 τίποτα δεν έχω να προσθέσω και υπογράφω.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα της ιδίας.<p>
 
 <p>Για πίστωση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε, υπογράφεται ως ακολούθως :</p>`;
@@ -40,17 +42,18 @@ function printMartyraXoris(initial, person, datas, date, timeFormatter) {
 
 // ΕΚΘΕΣΗ ΕΝΟΡΚΗ ΜΑΡΤΥΡΑ
 function printMartyra(initial, person, datas, date, timeFormatter) {
-  return `<p> ${initial.replace(
+  return `<p> ${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ίδιας Υπηρεσίας, προσληφθέντος ως Β’ Ανακριτικού Υπαλλήλου, εμφανίσθηκε ο κατωτέρω σημειούμενος μάρτυρας, ο οποίος αφού ρωτήθηκε για την ταυτότητά του κ.λ.π. απάντησε ότι ονομάζεται ${person}. Έπειτα ο εξεταζόμενος, ορκίσθηκε σύμφωνα με το άρθρο 219 παρ. 1 του Κ.Π. Δικονομίας, και στην συνέχεια εξετάζεται ως ακολούθως:<br><u>ΕΡΩΤΗΣΗ:</u> Τι προσήλθατε να καταθέσετε στο ${
     datas.ypiresia
   };<br><u>ΑΠΟΚΡΙΣΗ:</u> **************************. Επιθυμώ την ποινική δίωξη του - ων άγνωστου - ων δράστη - ων. Τίποτα δεν έχω να προσθέσω και υπογράφω.<br> Στον εξεταζόμενο γνωστοποιήσαμε ότι μπορεί να λαμβάνει εγκαίρως γνώση των εγγράφων της δίκης, τα οποία του επιδίδονται και με ηλεκτρονικά μέσα, σύμφωνα με τις παρ. 1 και 4 του άρθρου 155 Κ.Π.Δ.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )} ώρα της σήμερον και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )} ώρα της ιδίας.</p>
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώστηκε και βεβαιώθηκε υπογράφεται ως ακολούθως:</p>
 `;
@@ -65,7 +68,9 @@ function printSyllipsi(
   timeFormatter,
   dateFormatter
 ) {
-  return `<p> ${initial.replace(
+  timePassed += datas.xronosPeratosis;
+
+  return `<p> ${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ίδιας Υπηρεσίας που προσλήφθηκε ως β΄ ανακριτικός υπάλληλος, οδηγήθηκε στο κατάστημα του ${
@@ -78,10 +83,11 @@ function printSyllipsi(
     datas.eisaggeleiaProtodikon
   } παραπομπή και παράδοση αυτού με την παρούσα έκθεση.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα.</p>
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε υπογράφεται ως ακολούθως:</p>
 `;
@@ -89,7 +95,8 @@ function printSyllipsi(
 
 // ΕΚΘΕΣΗ ΑΝΟΜΩΤΙ
 function printAnomoti(initial, person, datas, date, timeFormatter) {
-  return `<p>${initial.replace(
+  timePassed += datas.xronosPeratosis;
+  return `<p>${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ιδίας Υπηρεσίας προσληφθέντος ως Β΄ Ανακριτικού Υπαλλήλου, εμφανίστηκε ο κατωτέρω σημειούμενος εγκαλούμενος, ο οποίος, αφού ρωτήθηκε για την ταυτότητα του κ.λ.π., απάντησε ότι ονομάζεται ${person}.<br> Εξετάζεται χωρίς όρκο, σύμφωνα με τo άρθρο 244 παρ. 1 Κ.Π.Δ., γιατί ενεργείται προκαταρκτική εξέταση κατόπιν της υπ’ αριθ. ***** από **-**-**** Παραγγελία της Εισαγγελίας Πρωτοδικών ${
@@ -103,10 +110,11 @@ function printAnomoti(initial, person, datas, date, timeFormatter) {
 <p><u>ΕΡΩΤΗΣΗ:</u> Σας αποδίδονται ήδη οι πράξεις που σας γνωστοποιήθηκαν ανωτέρω. Ποιες είναι οι εξηγήσεις σας?</p>
 <p><u>ΑΠΟΚΡΙΣΗ:</u> ************* . Τίποτε άλλο δεν έχω να προσθέσω και υπογράφω.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα της σήμερον και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα της ιδίας.</p>
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε υπογράφεται ακολούθως:</p>
 `;
@@ -114,7 +122,9 @@ function printAnomoti(initial, person, datas, date, timeFormatter) {
 
 // ΕΚΘΕΣΗ ΕΞΕΤΑΣΗΣ ΚΑΤΗΓΟΡΟΥΜΕΝΟΥ
 function printKatigoroumenou(initial, person, datas, date, timeFormatter) {
-  return `<p>${initial.replace(
+  timePassed += datas.xronosPeratosis;
+
+  return `<p>${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ιδίας Υπηρεσίας, προσληφθέντος ως Β΄ Ανακριτικός Υπάλληλος, εξετάζεται ο κατωτέρω σημειούμενος κατηγορούμενος, ως ακολούθως:<br><u>ΕΡΩΤΗΣΗ:</u> Πως ονομάζεσαι κ.λ.π. ;<br><u>ΑΠΟΚΡΙΣΗ:</u> ${person}, ---άνευ--- τέκνων.<br>Ακολούθως γνωρίσαμε με σαφήνεια στον εξεταζόμενο ολόκληρο το περιεχόμενο της κατηγορίας και ότι κατηγορείται για παράβαση του **** , και συγκεκριμένα: ***** .<br>Στην συνέχεια, αφού ανακοινώσαμε στον εξεταζόμενο το περιεχόμενο των εγγράφων της ανάκρισης, εξηγήσαμε σ’ αυτόν σύμφωνα με το άρθρο 105 του Κ.Π.Δ., με σαφήνεια όλα τα δικαιώματά του που προβλέπονται από τα άρθρα 91, 95, 96, 97, 98, 100, 101, 103 και 104, 273 και 274 του Κωδ. Ποιν. Δικονομίας και ειδικότερα: το δικαίωμα παράστασης με συνήγορο, το δικαίωμα και τις προϋποθέσεις παροχής δωρεάν νομικών συμβουλών, το δικαίωμα ενημέρωσης σχετικά με την κατηγορία, το δικαίωμα διερμηνείας και μετάφρασης, το δικαίωμα σιωπής και μη αυτοενοχοποίησης, το δικαίωμα πρόσβασης στο υλικό της δικογραφίας, το δικαίωμα ενημέρωσης των προξενικών αρχών και επιπλέον προσώπων της επιλογής του, το δικαίωμα σε επείγουσα ιατρική περίθαλψη, τον ανώτατο αριθμό ωρών ή ημερών κατά τις οποίες ο κατηγορούμενος δύναται να στερηθεί της ελευθερίας του προτού προσαχθεί ενώπιον δικαστικής αρχής, το δικαίωμα άρνησης εν όλω ή εν μέρει της απολογίας, το δικαίωμα προθεσμίας τουλάχιστον σαράντα οκτώ ωρών για να απολογηθεί, η οποία μπορεί να παραταθεί από εκείνον που διενεργεί την προανάκριση, το δικαίωμα πρότασης μαρτύρων προς εξέταση και πληροφορίες σχετικά με τις δυνατότητες προσβολής του νόμιμου χαρακτήρα της σύλληψης ή της κράτησης.</p>
@@ -143,10 +153,11 @@ function printKatigoroumenou(initial, person, datas, date, timeFormatter) {
 <p><u>ΑΠΟΚΡΙΣΗ:</u> ******** . Τίποτε άλλο δεν έχω να προσθέσω και υπογράφω.</p>
 <p>Στον κατηγορούμενο γνωστοποιήσαμε ότι, σύμφωνα με το άρθρο 273 § 1 του Κ.Π.Δ., υποχρεούται να δηλώσει κάθε μεταβολή της κατοικίας ή της διαμονής του, μαζί με ακριβή διεύθυνση, εγγράφως στον Εισαγγελέα του δικαστηρίου στο οποίο εκκρεμεί κατά τον χρόνο δήλωσης η δικογραφία.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα. Για πίστωση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε, υπογράφεται ως ακολούθως:</p>
 `;
 }
@@ -161,17 +172,20 @@ function printApodosi(
   timeFormatter,
   dateFormatter
 ) {
-  return `<p>${initial.replace(
+  timePassed += datas.xronosPeratosis;
+
+  return `<p>${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ιδίας Υπηρεσίας, προσληφθέντα ως Β’ Ανακριτικό Υπάλληλο, εκθέτουμε τα ακόλουθα:<br>Επειδή από την προανάκριση που ενεργούμε για παράβαση του ****** , πειστήκαμε ότι ***** που αναφέρονται στην από ${dateFormatter(
     date
   )} Έκθεση Παράδοσης Παραλαβής και Κατάσχεσης ανήκουν στην κατοχή και κυριότητα του ${person}, τον οποίο προσκαλέσαμε και του τα αποδώσαμε.<br>Σ’ αυτόν υπομνήσαμε να διαφυλάξει τα ανωτέρω και να παραδώσει αυτά, σε κάθε αίτηση της δικαστικής αρχής.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα της σήμερον και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα της ιδίας.</p>
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε, υπογράφεται ως ακολούθως:</p>
 `;
@@ -180,17 +194,20 @@ function printApodosi(
 // ΕΚΘΕΣΗ ΠΑΡΑΔΟΣΗΣ ΚΑΤΑΣΧΕΣΗΣ
 
 function printKatasxesi(initial, person, datas, date, timeFormatter) {
-  return `<p>${initial.replace(
+  timePassed += datas.xronosPeratosis;
+
+  return `<p>${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ιδίας Υπηρεσίας, που προσλήφθηκε ως Β΄ Ανακριτικός Υπάλληλος, ενεργώντας προανάκριση για παράβαση του ****** σε βάρος του ${person}, εμφανίστηκε ενώπιον μας ο Αρχ/κας **** του ${
     datas.ypiresia
   } και μας παρέδωσε ******.<br>Κατόπιν τούτου προβήκαμε στην κατάσχεση αυτών για να χρησιμοποιηθούν ως πειστήρια.</p>
 <p>Γίνεται μνεία ότι η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα της σήμερον και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα της ιδίας.</p>
 <p>Προς πίστωση συντάχθηκε η παρούσα η οποία αναγνώσθηκε, βεβαιώθηκε και υπογράφεται ως ακολούθως:</p>
 `;
@@ -198,15 +215,18 @@ function printKatasxesi(initial, person, datas, date, timeFormatter) {
 
 // ΕΚΘΕΣΗ ΓΝΩΣΤΟΠΟΙΗΣΗΣ ΔΙΚΑΙΩΜΑΤΩΝ
 function printGnostopoiisi(initial, person, datas, date, timeFormatter) {
-  return `<p>${initial.replace(
+  timePassed += datas.xronosPeratosis;
+
+  return `<p>${initial().replace(
     /(\r\n|\n|\r|\s{2,})/gm,
     " "
   )}της ίδιας Υπηρεσίας, προσληφθέντος ως Β΄ Ανακριτικός Υπάλληλος, εκθέτουμε τα ακόλουθα:<br>Δυνάμει του άρθρου 95 του Κ.Π.Δ, γνωστοποιήσαμε στον παρακάτω κατηγορούμενο ${person}, τα ακόλουθα δικαιώματα της: α) το δικαίωμα παράστασης με συνήγορο, β) το δικαίωμα και τις προϋποθέσεις παροχής δωρεάν νομικών συμβούλων, γ) το δικαίωμα ενημέρωσης σχετικά με την κατηγορία, δ) το δικαίωμα διερμηνείας και μετάφρασης και ε) το δικαίωμα σιωπής και μη αυτοενοχοποίησης.</p>
 <p>Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
-    date
+    date,
+    timePassed
   )}΄ ώρα της σήμερον και περατώθηκε την ${timeFormatter(
     date,
-    datas.xronosPeratosis
+    datas.xronosPeratosis + timePassed
   )}΄ ώρα της ιδίας.</p>
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε, υπογράφεται ως ακολούθως:</p>
 `;
@@ -705,12 +725,12 @@ let days = [
   "Σάββατο",
 ];
 let dayName = days[specificDate.getDay()];
-let formattedTime = formatTime(today, 0);
 let year = today.getFullYear();
 let month = months[today.getMonth()];
 let day = today.getDate();
 let ypefthiniData = {};
 let ypoptosData = {};
+let timePassed = 0;
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
@@ -737,7 +757,14 @@ data.anakritikoi.forEach((anakritikos, index) => {
 const initialText = document.getElementById("initial");
 
 function constructInitialText() {
-  return `Στην ${data.merosSyntaksisEkthesis} σήμερα την ${day}η του μήνα ${month} του έτους ${year} ημέρα ${dayName} και ώρα ${formattedTime} ενώπιον εμού, του ${anakritikosSelect.value} του ${data.ypiresia}, παρισταμένου και του ${bAnakritikosSelect.value} `;
+  return `Στην ${
+    data.merosSyntaksisEkthesis
+  } σήμερα την ${day}η του μήνα ${month} του έτους ${year} ημέρα ${dayName} και ώρα ${formatTime(
+    today,
+    timePassed
+  )} ενώπιον εμού, του ${anakritikosSelect.value} του ${
+    data.ypiresia
+  }, παρισταμένου και του ${bAnakritikosSelect.value} `;
 }
 
 //dilosi apoleias
@@ -768,7 +795,7 @@ bAnakritikosSelect.addEventListener("change", () => {
 
 const copyInitialBtn = document.getElementById("copy-initial");
 copyInitialBtn.addEventListener("click", () => {
-  const text = initial.textContent.replace(/(\r\n|\n|\r|\s{2,})/gm, " ");
+  const text = constructInitialText().replace(/(\r\n|\n|\r|\s{2,})/gm, " ");
   copyToClipboard(text);
 });
 
@@ -893,7 +920,7 @@ const initial = document.getElementById("initial");
 const martyra = document.getElementById("martyra");
 martyra.addEventListener("click", () => {
   downloadAsWord(
-    printMartyra(initial.textContent, formattedId, data, today, formatTime),
+    printMartyra(constructInitialText, formattedId, data, today, formatTime),
     "martyra"
   );
 });
@@ -902,7 +929,7 @@ const martyraXoris = document.getElementById("martyraXoris");
 martyraXoris.addEventListener("click", () => {
   downloadAsWord(
     printMartyraXoris(
-      initial.textContent,
+      constructInitialText,
       formattedId,
       data,
       today,
@@ -916,7 +943,7 @@ const syllipsi = document.getElementById("syllipsi");
 syllipsi.addEventListener("click", () => {
   downloadAsWord(
     printSyllipsi(
-      initial.textContent,
+      constructInitialText,
       formattedIdYpoptos,
       data,
       today,
@@ -931,7 +958,7 @@ const anomoti = document.getElementById("anomoti");
 anomoti.addEventListener("click", () => {
   downloadAsWord(
     printAnomoti(
-      initial.textContent,
+      constructInitialText,
       formattedIdYpoptos,
       data,
       today,
@@ -945,7 +972,7 @@ const katigoroumenou = document.getElementById("katigoroumenou");
 katigoroumenou.addEventListener("click", () => {
   downloadAsWord(
     printKatigoroumenou(
-      initial.textContent,
+      constructInitialText,
       formattedIdYpoptos,
       data,
       today,
@@ -960,7 +987,7 @@ const apodosi = document.getElementById("apodosi");
 apodosi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
-      initial.textContent,
+      constructInitialText,
       formattedId,
       data,
       today,
@@ -975,7 +1002,7 @@ const katasxesi = document.getElementById("katasxesi");
 katasxesi.addEventListener("click", () => {
   downloadAsWord(
     printKatasxesi(
-      initial.textContent,
+      constructInitialText,
       formattedId,
       data,
       today,
@@ -991,7 +1018,7 @@ const gnostopoiisi = document.getElementById("gnostopoiisi");
 gnostopoiisi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
-      initial.textContent,
+      constructInitialText,
       formattedIdYpoptos,
       data,
       today,
@@ -1011,7 +1038,7 @@ ypiresiako.addEventListener("click", () => {
       day,
       month,
       year,
-      formattedTime,
+      formatTime(today, 0),
       protokoloNumber,
       apolesthenItem
     ),
