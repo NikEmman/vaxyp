@@ -89,18 +89,27 @@
     <hr />
     <h2>Εκθέσεις</h2>
     <br />
+    <p>Με χρήση του πεδίου Παθών</p>
+    <br>
     <div class="buttons">
       <p class="helpBtn large" id="martyra">Ένορκη Μάρτυρα</p>
       <p class="helpBtn large" id="martyraXoris">Μάρτυρα Χωρίς Όρκο</p>
-      <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
-      <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
-      <p class="helpBtn large" id="anomoti">Ανωμοτί</p>
-      <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
+      <p class="helpBtn large" id="egxeirisis">Έκθεση Εγχείρησης</p>
       <p class="helpBtn large" id="katasxesi">Παράδ & Κατάσχ</p>
       <p class="helpBtn large" id="apodosi">Απόδοσης</p>
-      <p class="helpBtn large" id="ypoptoy">Δελτίο Υπόπτου</p>
-
     </div>
+    <hr>
+    <br>
+    <p>Με χρήση του πεδίου Δράστης</p>   
+    <br> 
+    <div class="buttons">
+      <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
+      <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
+      <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
+      <p class="helpBtn large" id="ypoptoy">Δελτίο Υπόπτου</p>
+      <p class="helpBtn large" id="anomoti">Ανωμοτί</p>
+    </div>
+
     <hr>
     <summary><h2>Δήλωση απώλειας</h2></summary>
     <details  >
@@ -213,6 +222,12 @@
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
+        <ul><u>Αλλαγές 28-2-2025</u>
+          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
+          <li> Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές περνάνε και στις εκθέσεις </li>
+          
+        </ul>
+
         <ul><u>Αλλαγές 27-2-2025</u>
           <li>Κάθε έκθεση μετά την Ένορκη Μαρτυρική, προσθέτει τον χρόνο περάτωσης* στους νέους χρόνους έναρξης/ λήξης</li>
           <ul>* Ο χρόνος περάτωσης αρχικά είναι 10 λεπτά, τον αλλάζετε από το πεδίο xronosPeratosis, μετά τον ορισμό δικών σας Ανακριτικών </ul>
@@ -619,6 +634,29 @@
       </div>
     </div>
     </dialog>
+    <dialog>
+      <div id ="egxeirisis-title">Έκθεση Εγχείρησης</div>
+      <div id="egxeirisis-download">
+        
+        <p id="egxeirisis-content"></p>
+        <table width="100%">
+          <tr>
+            <td width="33%" style="text-align: center">-Ο-</td>
+            <td width="33%" style="text-align: center">-Ο-</td>
+            <td width="33%" style="text-align: center">-Ο-</td>
+          </tr>
+          <tr>
+            <td width="33%" style="text-align: center">Εγχειρίσας</td>
+            <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+            <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+    </dialog>
+
+  
 
 
   </body>
