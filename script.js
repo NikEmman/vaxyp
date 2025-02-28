@@ -1266,63 +1266,85 @@ function formatIdInfo(input, data, suspect = false) {
     return `${prefix} ${capitalize(location)}`;
   };
 
-  // Extract all required fields
-  const fields = {
-    surname: getValue("Επώνυμο"),
-    firstName: getValue("Όνομα"),
-    fatherName: getValue("Όνομα Πατρός"),
-    motherName: getValue("Όνομα Μητρός"),
-    motherSurname: getValue("Επώνυμο Μητρός"),
-    birthDate: formatDate(getValue("Ημ/νία Γέννησης")),
-    birthPlace: getValue("Τόπος Γέννησης").split(" ")[0],
-    area: getValue("Περιοχή"),
-    region: getValue("Νομός"),
-    idNumber: getValue("Α.Δ.Τ"),
-    issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
-    issuingAuthority: formatIssuingAuthority(getValue("Αρχή Έκδοσης")),
-    phoneNumber: getValue("Τηλέφωνο"),
-    street: getValue("Οδός"),
-    streetNumber: getValue("Αριθμός"),
-  };
+  if (datas.hasOwnProperty("Α.Δ.Τ")) {
+    // Extract all required fields
+    const fields = {
+      surname: getValue("Επώνυμο"),
+      firstName: getValue("Όνομα"),
+      fatherName: getValue("Όνομα Πατρός"),
+      motherName: getValue("Όνομα Μητρός"),
+      motherSurname: getValue("Επώνυμο Μητρός"),
+      birthDate: formatDate(getValue("Ημ/νία Γέννησης")),
+      birthPlace: getValue("Τόπος Γέννησης").split(" ")[0],
+      area: getValue("Περιοχή"),
+      region: getValue("Νομός"),
+      idNumber: getValue("Α.Δ.Τ"),
+      issueDate: formatDate(getValue("Ημ/νια Έκδοσης")),
+      issuingAuthority: formatIssuingAuthority(getValue("Αρχή Έκδοσης")),
+      phoneNumber: getValue("Τηλέφωνο"),
+      street: getValue("Οδός"),
+      streetNumber: getValue("Αριθμός"),
+    };
 
-  // Handle special cases
-  if (fields.streetNumber === "Ταχ.Κώδικας") {
-    fields.streetNumber = "--- ";
-  }
-  if (fields.street === "Αριθμός") {
-    fields.street = "---------- ";
-  }
-  if (fields.phoneNumber === "Άλλα στοιχεία επικοινωνίας") {
-    fields.phoneNumber = "(στερείται) ";
-  }
-  if (fields.area === "Οδός") {
-    fields.area = "--- ";
-  }
-  if (fields.region === "Περιοχή") {
-    fields.region = "--- ";
-  }
-  // extract the data for ypefthini dilosi usage
-  suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
+    // Handle special cases
+    if (fields.streetNumber === "Ταχ.Κώδικας") {
+      fields.streetNumber = "--- ";
+    }
+    if (fields.street === "Αριθμός") {
+      fields.street = "---------- ";
+    }
+    if (fields.phoneNumber === "Άλλα στοιχεία επικοινωνίας") {
+      fields.phoneNumber = "(στερείται) ";
+    }
+    if (fields.area === "Οδός") {
+      fields.area = "--- ";
+    }
+    if (fields.region === "Περιοχή") {
+      fields.region = "--- ";
+    }
+    // extract the data for ypefthini dilosi usage
+    suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
 
-  // Format the output string
-  const formattedString = `${fields.surname} ${capitalize(
-    fields.firstName
-  )} του ${capitalize(fields.fatherName)} και της ${capitalize(
-    fields.motherName
-  )}, γεν. ${fields.birthDate} στην ${capitalize(
-    fields.birthPlace
-  )}, κάτοικος ${capitalize(fields.area)} ${capitalize(
-    fields.region
-  )}, οδός ${capitalize(fields.street)} αρ. ${
-    fields.streetNumber
-  }, επάγγελμα -------, κάτοχος του υπ'αριθ ${
-    fields.idNumber
-  } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
-    fields.issuingAuthority
-  }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${data.doy}, χρήστη της υπ'αριθ. ${
-    fields.phoneNumber
-  } τηλεφωνικής σύνδεσης, με διεύθυνση ηλεκτρονικού ταχυδρομείου (στερείται)`;
-  return formattedString;
+    // Format the output string
+    const formattedString = `${fields.surname} ${capitalize(
+      fields.firstName
+    )} του ${capitalize(fields.fatherName)} και της ${capitalize(
+      fields.motherName
+    )}, γεν. ${fields.birthDate} στην ${capitalize(
+      fields.birthPlace
+    )}, κάτοικος ${capitalize(fields.area)} ${capitalize(
+      fields.region
+    )}, οδός ${capitalize(fields.street)} αρ. ${
+      fields.streetNumber
+    }, επάγγελμα -------, κάτοχος του υπ'αριθ ${
+      fields.idNumber
+    } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
+      fields.issuingAuthority
+    }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${data.doy}, χρήστη της υπ'αριθ. ${
+      fields.phoneNumber
+    } τηλεφωνικής σύνδεσης, με διεύθυνση ηλεκτρονικού ταχυδρομείου (στερείται)`;
+    return formattedString;
+  } else {
+    // Extract all required fields
+    const fields = {
+      surname: getValue("Επώνυμο"),
+      firstName: getValue("Όνομα"),
+      fatherName: getValue("Πατρώνυμο"),
+      motherName: getValue("Μητρώνυμο"),
+      motherSurname: getValue("Γένος (Μητέρας)"),
+      birthDate: formatDate(getValue("Ημερομηνία Γέννησης")),
+      sex: getValue("Φύλο"),
+      birthPlace: getValue("Χώρα Γέννησης"),
+      nationality: getValue("Υπηκοότητα(ες)"),
+    };
+
+    //   // extract the data for ypefthini dilosi usage
+    suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
+
+    // Format the output string
+    const formattedString = `(Επ)${fields.surname} (Ον.)${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
+    return formattedString;
+  }
 }
 
 //copy to clipboard
