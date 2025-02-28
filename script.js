@@ -231,6 +231,39 @@ function printGnostopoiisi(initial, person, datas, date, timeFormatter) {
 <p>Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και βεβαιώθηκε, υπογράφεται ως ακολούθως:</p>
 `;
 }
+function printEgxeirisis(initial, person) {
+  return `<div
+  style="
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    color: #000;
+    direction: ltr;
+    background: transparent;
+    line-height: 1.5;
+    width: 21cm;
+    height: 29.7cm;
+  "
+>
+  <p style="text-align: center; margin: 0; font-size: 16pt">
+    <u><b>ΕΚΘΕΣΗ ΕΓΧΕΙΡΙΣΗΣ</b></u>
+  </p>
+
+  <p>
+    ${initial().replace(/(\r\n|\n|\r|\s{2,})/gm, " ")} της ίδιας
+    Υπηρεσίας, προσληφθέντος ως Β΄ Ανακριτικού Υπαλλήλου, εμφανίστηκε ο ${person}, ο οποίος μας εγχείρισε:
+  </p>
+
+  <p>
+    ************** και βεβαίωσε και προφορικά το περιεχόμενό τους ως αληθές.
+  </p>
+
+  <p>
+    Για πιστοποίηση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώστηκε και
+    βεβαιώθηκε, υπογράφεται ως ακολούθως:
+  </p>
+</div>
+`;
+}
 function printYpiresiako(
   axyp,
   person,
@@ -821,7 +854,7 @@ const clipboardIdYpoptos = document.querySelector(".clipboard-id-ypoptos");
 const copyIdYpoptosBtn = document.querySelector(".copy-id-ypoptos");
 
 taytotitaYpoptos.addEventListener("input", () => {
-  clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data);
+  clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data, true);
   formattedIdYpoptos = clipboardIdYpoptos.value;
 });
 
@@ -986,7 +1019,7 @@ katigoroumenou.addEventListener("click", () => {
 const apodosi = document.getElementById("apodosi");
 apodosi.addEventListener("click", () => {
   downloadAsWord(
-    printGnostopoiisi(
+    printApodosi(
       constructInitialText,
       formattedId,
       data,
@@ -1027,6 +1060,16 @@ gnostopoiisi.addEventListener("click", () => {
     "gnostopoiisi"
   );
 });
+
+// egxeirisis button  printEgxeirisis(initial, person)
+const egxeirisis = document.getElementById("egxeirisis");
+egxeirisis.addEventListener("click", () => {
+  downloadAsWord(
+    printEgxeirisis(constructInitialText, formattedId),
+    "egxeirisis"
+  );
+});
+
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
 ypiresiako.addEventListener("click", () => {
@@ -1192,7 +1235,7 @@ function formatVehicleInfo(input) {
     fields.ownerFatherName
   )}`;
 }
-function formatIdInfo(input, data) {
+function formatIdInfo(input, data, suspect = false) {
   // Parse input text into an array of lines
   const lines = input
     .split("\n")
@@ -1259,8 +1302,7 @@ function formatIdInfo(input, data) {
     fields.region = "--- ";
   }
   // extract the data for ypefthini dilosi usage
-  ypefthiniData = fields;
-  ypoptosData = fields;
+  suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
 
   // Format the output string
   const formattedString = `${fields.surname} ${capitalize(
