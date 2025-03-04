@@ -9,6 +9,7 @@ This is a tool to help myself and other on day-to-day paper-work of interrogator
 - After that, there are 2 text areas, one for victim, one for alleged perpetrator. The user copies the text of the ID document of the person of interest from the Police's internal ID application, and a parsed version is provided to the right, with option for edit and copy to clip board
 - The above parsed persons will then be passed below to the documents, depending on role, some use the victim, some the perpetrator, some both.
 - Clicking the buttons in the "Εκθέσεις" section will download the relevant document in Word format, with the above provided data, to be further processed.
+- Below the person parser, there is the vehicle parser. Copy the vehicle's data from the official Vehicle application and paste it to have it formatted, ready for use in a document.
 
 ## Localization
 
