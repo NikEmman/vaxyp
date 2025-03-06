@@ -326,7 +326,7 @@ function printYpiresiako(
 		<p align="center" style="line-height: 150%; margin-bottom: 0cm"><br /></p>
 		<p align="justify" style="line-height: 115%; margin-bottom: 0cm">
 		  Αναφέρεται ότι την ${day} ${month} ${year} και ώρα ${time} προσήλθε στην Υπηρεσία μας ο ${person} και με υπεύθυνη δήλωση του Ν1599/1986 δήλωσε ότι απώλεσε σε άγνωστο τόπο και χρόνο ${apolesthen}</p>
-      <p> -Το παρόν χορηγήται για κάθε νόμιμη χρήση. </p>
+      <p> -Το παρόν χορηγείται για κάθε νόμιμη χρήση. </p>
 		<div align="right">
 		  <table width="345" cellpadding="7" cellspacing="0">
 			<col width="331" />
@@ -390,113 +390,120 @@ function printYpefthini(
     line-height: 1;
   "
 >
-  <div style="text-align: center; margin-bottom: 20px">
-    <h3 style="margin-bottom: 10px">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</h3>
+  <div style="text-align: center; margin-bottom: 15px">
+    <h3 style="margin-bottom: 5px">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</h3>
     <h3 style="margin-top: 5px"><sup>(άρθρο 8 Ν.1599/1986)</sup></h3>
   </div>
-  <div style="width: 210mm; line-height:normal; display:flex; flex-direction:column; align-items:flex-end">
-   <div style="font-size: 0.8em; text-align: end ">${axyp}</div>
-   <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
-   <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
+  <div
+    style="
+      width: 210mm;
+      line-height: normal;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    "
+  >
+    <div style="font-size: 0.8em; text-align: end">${axyp}</div>
+    <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
+    <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
   </div>
-  <p style="margin-bottom: 20px; font-style: italic">
+  <p style="margin-bottom: 10px; font-style: italic">
     Η ακρίβεια των στοιχείων που υποβάλλονται με αυτή τη δήλωση μπορεί να
     ελεγχθεί με βάση το αρχείο άλλων υπηρεσιών (άρθρο 8 παρ. 4 Ν. 1599/1986)
   </p>
 
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
+  <table style="width: 100%; border-collapse: collapse">
     <tr>
-      <td style="width: 20%; padding: 5px; border: 1px solid #000">ΠΡΟΣ:</td>
-      <td style="width: 80%; padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="width: 20%; padding: 2px; border: 1px solid #000">ΠΡΟΣ:</td>
+      <td style="width: 80%; padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${datas.ypiresia}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Ο – Η Όνομα:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000">Ο – Η Όνομα:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.firstName}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000; width: 15%">ΕΠΩΝΥΜΟ:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000; width: 15%">ΕΠΩΝΥΜΟ:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.surname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Όνομα και Επώνυμο Πατέρα:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.fatherName} ${person.surname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Όνομα και Επώνυμο Μητέρας:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.motherName} ${person.motherSurname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Ημερομηνία γέννησης:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000">Ημερομηνία γέννησης:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.birthDate}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Τόπος Γέννησης:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000">Τόπος Γέννησης:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.birthPlace}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Αριθμός Δελτίου Ταυτότητας:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.idNumber}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000">Τηλ:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000">Τηλ:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.phoneNumber}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Τόπος Κατοικίας:</td>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">Τόπος Κατοικίας:</td>
+      <td style="padding: 2px; border: 1px solid #000">
         <strong>${person.area}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">Οδός:</td>
-      <td style="padding: 5px; border: 1px solid #000">${person.street}</td>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">Αριθ:</td>
-      <td style="padding: 5px; border: 1px solid #000">${
-        person.streetNumber
-      }</td>
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">Οδός:</td>
+      <td style="padding: 2px; border: 1px solid #000">${person.street}</td>
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">Αριθ:</td>
+      <td style="padding: 2px; border: 1px solid #000">
+        ${person.streetNumber}
+      </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">ΤΚ:</td>
-      <td style="padding: 5px; border: 1px solid #000"></td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">ΤΚ:</td>
+      <td style="padding: 2px; border: 1px solid #000"></td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         Δ/νση Ηλεκτρ. Ταχυδρομείου (Email):
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2"></td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2"></td>
     </tr>
   </table>
 
-  <div style="border: 1px solid #000; padding: 15px; margin-bottom: 30px">
+  <div style="border: 1px solid #000; padding: 12px; margin-bottom: 20px">
     <p style="font-weight: bold">
       Με ατομική μου ευθύνη και γνωρίζοντας τις κυρώσεις, που προβλέπονται από
-      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:</p>
+      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:
+    </p>
     <p>Σε άγνωστο τόπο και χρόνο απώλεσα ${apolesthen}</p>
-    
   </div>
 
-  <div style="text-align: right; margin-top: 30px; margin-right: 50px">
-    <p><strong>${datas.merosSyntaksisEkthesis}, ${dateFormatter(
-    date
-  )}</strong></p>
-    <p style="margin-top: 30px">Ο-Η Δηλών-ούσα</p>
-    <p style="margin-top: 40px">.</p>
+  <div style="text-align: right; margin-top: 20px; margin-right: 50px">
+    <p>
+      <strong>${datas.merosSyntaksisEkthesis}, ${dateFormatter(date)}</strong>
+    </p>
+    <p style="margin-top: 20px">Ο-Η Δηλών-ούσα</p>
   </div>
 </div>
 `;
