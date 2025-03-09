@@ -326,7 +326,7 @@ function printYpiresiako(
 		<p align="center" style="line-height: 150%; margin-bottom: 0cm"><br /></p>
 		<p align="justify" style="line-height: 115%; margin-bottom: 0cm">
 		  Αναφέρεται ότι την ${day} ${month} ${year} και ώρα ${time} προσήλθε στην Υπηρεσία μας ο ${person} και με υπεύθυνη δήλωση του Ν1599/1986 δήλωσε ότι απώλεσε σε άγνωστο τόπο και χρόνο ${apolesthen}</p>
-      <p> -Το παρόν χορηγήται για κάθε νόμιμη χρήση. </p>
+      <p> -Το παρόν χορηγείται για κάθε νόμιμη χρήση. </p>
 		<div align="right">
 		  <table width="345" cellpadding="7" cellspacing="0">
 			<col width="331" />
@@ -390,113 +390,120 @@ function printYpefthini(
     line-height: 1;
   "
 >
-  <div style="text-align: center; margin-bottom: 20px">
-    <h3 style="margin-bottom: 10px">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</h3>
+  <div style="text-align: center; margin-bottom: 15px">
+    <h3 style="margin-bottom: 5px">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</h3>
     <h3 style="margin-top: 5px"><sup>(άρθρο 8 Ν.1599/1986)</sup></h3>
   </div>
-  <div style="width: 210mm; line-height:normal; display:flex; flex-direction:column; align-items:flex-end">
-   <div style="font-size: 0.8em; text-align: end ">${axyp}</div>
-   <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
-   <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
+  <div
+    style="
+      width: 210mm;
+      line-height: normal;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    "
+  >
+    <div style="font-size: 0.8em; text-align: end">${axyp}</div>
+    <div style="font-size: 0.8em; text-align: end">Χορηγήθηκε Υ.Σ.</div>
+    <div style="font-size: 0.8em; text-align: end">3005/4/${protokolo}</div>
   </div>
-  <p style="margin-bottom: 20px; font-style: italic">
+  <p style="margin-bottom: 10px; font-style: italic">
     Η ακρίβεια των στοιχείων που υποβάλλονται με αυτή τη δήλωση μπορεί να
     ελεγχθεί με βάση το αρχείο άλλων υπηρεσιών (άρθρο 8 παρ. 4 Ν. 1599/1986)
   </p>
 
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px">
+  <table style="width: 100%; border-collapse: collapse">
     <tr>
-      <td style="width: 20%; padding: 5px; border: 1px solid #000">ΠΡΟΣ:</td>
-      <td style="width: 80%; padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="width: 20%; padding: 2px; border: 1px solid #000">ΠΡΟΣ:</td>
+      <td style="width: 80%; padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${datas.ypiresia}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Ο – Η Όνομα:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000">Ο – Η Όνομα:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.firstName}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000; width: 15%">ΕΠΩΝΥΜΟ:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000; width: 15%">ΕΠΩΝΥΜΟ:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.surname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Όνομα και Επώνυμο Πατέρα:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.fatherName} ${person.surname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Όνομα και Επώνυμο Μητέρας:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.motherName} ${person.motherSurname}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Ημερομηνία γέννησης:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000">Ημερομηνία γέννησης:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.birthDate}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Τόπος Γέννησης:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="5">
+      <td style="padding: 2px; border: 1px solid #000">Τόπος Γέννησης:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="5">
         <strong>${person.birthPlace}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">
         Αριθμός Δελτίου Ταυτότητας:
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.idNumber}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000">Τηλ:</td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000">Τηλ:</td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         <strong>${person.phoneNumber}</strong>
       </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000">Τόπος Κατοικίας:</td>
-      <td style="padding: 5px; border: 1px solid #000">
+      <td style="padding: 2px; border: 1px solid #000">Τόπος Κατοικίας:</td>
+      <td style="padding: 2px; border: 1px solid #000">
         <strong>${person.area}</strong>
       </td>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">Οδός:</td>
-      <td style="padding: 5px; border: 1px solid #000">${person.street}</td>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">Αριθ:</td>
-      <td style="padding: 5px; border: 1px solid #000">${
-        person.streetNumber
-      }</td>
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">Οδός:</td>
+      <td style="padding: 2px; border: 1px solid #000">${person.street}</td>
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">Αριθ:</td>
+      <td style="padding: 2px; border: 1px solid #000">
+        ${person.streetNumber}
+      </td>
     </tr>
     <tr>
-      <td style="padding: 5px; border: 1px solid #000; width: 10%">ΤΚ:</td>
-      <td style="padding: 5px; border: 1px solid #000"></td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2">
+      <td style="padding: 2px; border: 1px solid #000; width: 10%">ΤΚ:</td>
+      <td style="padding: 2px; border: 1px solid #000"></td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2">
         Δ/νση Ηλεκτρ. Ταχυδρομείου (Email):
       </td>
-      <td style="padding: 5px; border: 1px solid #000" colspan="2"></td>
+      <td style="padding: 2px; border: 1px solid #000" colspan="2"></td>
     </tr>
   </table>
 
-  <div style="border: 1px solid #000; padding: 15px; margin-bottom: 30px">
+  <div style="border: 1px solid #000; padding: 12px; margin-bottom: 20px">
     <p style="font-weight: bold">
       Με ατομική μου ευθύνη και γνωρίζοντας τις κυρώσεις, που προβλέπονται από
-      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:</p>
+      τις διατάξεις της παρ. 6 του άρθρου 22 του Ν. 1599/1986, δηλώνω ότι:
+    </p>
     <p>Σε άγνωστο τόπο και χρόνο απώλεσα ${apolesthen}</p>
-    
   </div>
 
-  <div style="text-align: right; margin-top: 30px; margin-right: 50px">
-    <p><strong>${datas.merosSyntaksisEkthesis}, ${dateFormatter(
-    date
-  )}</strong></p>
-    <p style="margin-top: 30px">Ο-Η Δηλών-ούσα</p>
-    <p style="margin-top: 40px">.</p>
+  <div style="text-align: right; margin-top: 20px; margin-right: 50px">
+    <p>
+      <strong>${datas.merosSyntaksisEkthesis}, ${dateFormatter(date)}</strong>
+    </p>
+    <p style="margin-top: 20px">Ο-Η Δηλών-ούσα</p>
   </div>
 </div>
 `;
@@ -722,6 +729,649 @@ function printYpoptoy(person) {
       
     </div>
   </div>`;
+}
+function printMartyraEndooik(
+  initial,
+  datas,
+  victim,
+  suspect,
+  date,
+  dateFormatter,
+  timeFormatter
+) {
+  return `<div
+  lang="el-GR"
+  link="#0000ff"
+  vlink="#800000"
+  dir="ltr"
+  style="
+    background: transparent;
+    font-family: 'Arial', sans-serif;
+    font-size: 11pt;
+    line-height: 0.26in;
+    text-align: justify;
+    orphans: 2;
+    widows: 2;
+    margin-bottom: 0in;
+  "
+>
+  <p style="line-height: 100%; text-align: left"><br /></p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: center;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <u><b>ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ</b></u>
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: center;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <u><b>(Κ.Π.Δ.)</b></u>
+  </p>
+  <p style="line-height: 100%; text-align: left"><br /></p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: left;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+  ${initial().replace(/(\r\n|\n|\r|\s{2,})/gm, " ")} της ιδίας
+    Υπηρεσίας, προσληφθέντος ως Β’ Ανακριτικού Υπαλλήλου, εμφανίσθηκε ενώπιων
+    μας, η κατωτέρω σημειούμενη μάρτυρας, η οποία αφού ρωτήθηκε για την
+    ταυτότητά της κλπ, απάντησε ότι ονομάζεται: <b>ΑΣΤΥΝΟΜΙΚΟΣ</b>.
+  </p>
+  
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      text-indent: 0.49in;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    Έπειτα ο μάρτυρας, αφού έδωσε τον ακόλουθο όρκο: «Δηλώνω, επικαλούμενος την
+    τιμή και τη συνείδησή μου, ότι θα πω όλη την αλήθεια και μόνο την αλήθεια,
+    χωρίς να προσθέσω ούτε να αποκρύψω τίποτε», σύμφωνα με τα άρθρα 219 και 220
+    Κ.Π.Δ. στη συνέχεια εξετάζεται ως ακολούθως:
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <b>ΕΡΩΤΗΣΗ:</b> Τι προσήλθες να καταθέσεις στην Υπηρεσία μας.
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <b>ΑΠΟΚΡΙΣΗ:</b> Είμαι Αστυνομικός και υπηρετώ στην ΥΠΗΡΕΣΙΑ ΠΟΥ ΥΠΗΡΕΤΕΙ. Σήμερα ${dateFormatter(
+      date
+    )} ήμουν διατεθειμένος σε διατεταγμένη Υπηρεσία
+    εποχούμενης περιπολίας κατά το ωράριο ΩΡΑΡΙΟ ΤΟΥ στην ***8* με κωδικό κλήσης **. Περί την ώρα της λάβαμε σήμα από το Κέντρο Άμεσης Δράσης για ενδοοικογενειακό επεισόδιο επί της οδού στην Αθήνα.
+    Μεταβήκαμε στο ανωτέρω σημείο περί την ώρα της ιδίας όπου μας ανέμενε η Α) ${victim} η οποία μας ανέφερε ότι προ της αφίξεως μας, ο Β) ${suspect} ***. Κατόπιν αυτού, μεταφέραμε τους ανωτέρω στο Α.Τ. …… και
+    εν συνεχεία μεταφέραμε την ανωτέρω (Α) στην Υπηρεσία σας για τα περαιτέρω.
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <b>ΕΡΩΤΗΣΗ:</b> Έχετε κάτι άλλο να προσθέσετε;
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    <b>ΑΠΟΚΡΙΣΗ:</b> Τίποτα άλλο δεν έχω να προσθέσω και υπογράφω.
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      text-indent: 0.49in;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
+      date,
+      timePassed
+    )}' ώρα της ${dateFormatter(today)} και
+    περατώθηκε την ${timeFormatter(
+      date,
+      datas.xronosPeratosis + timePassed
+    )}' ώρα της ιδίας.
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: justify;
+      text-indent: 0.49in;
+      font-size: 13pt;
+      font-family: 'Bookman Old Style', serif;
+    "
+  >
+    Για πιστοποίηση συντάχθηκε η παρούσα έκθεση η οποία αφού αναγνώστηκε και
+    βεβαιώθηκε υπογράφεται ως ακολούθως:
+  </p>
+  <p
+    style="
+      line-height: 100%;
+      text-align: center;
+      margin-left: -0.39in;
+      margin-right: -0.56in;
+    "
+  >
+    <br />
+  </p>
+  
+</div>
+`;
+}
+
+// χωρίς όρκο θύμα
+function printThymaEndooik(
+  initial,
+  datas,
+  victim,
+  suspect,
+  date,
+  dateFormatter,
+  timeFormatter
+) {
+  timePassed += datas.xronosPeratosis;
+  return `<div
+  style="
+    size: 21cm 29.7cm;
+    
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    line-height: 1.5;
+  "
+>
+  <p style="text-align: center; line-height: 100%">
+    <span style="font-size: 13pt; text-decoration: underline; font-weight: bold"
+      >ΕΚΘΕΣΗ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ ΧΩΡΙΣ ΟΡΚΟ (Κ.Π.Δ.)</span
+    >
+  </p>
+
+  <p style="text-align: left; text-indent: 0.2in; line-height: 100%">
+    ${initial().replace(/(\r\n|\n|\r|\s{2,})/gm, " ")}
+      της ιδίας Υπηρεσίας, προσληφθέντος ως Β' Ανακριτικού Υπαλλήλου,
+      εμφανίσθηκε ενώπιων μας, η κατωτέρω σημειούμενη μάρτυρας, η οποία αφού
+      ρωτήθηκε για την ταυτότητά της κλπ, απάντησε ότι ονομάζεται:
+    ${victim}
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt"
+      >Στην συνέχεια εξετάζεται χωρίς όρκο, κατά τα οριζόμενα του άρθρου 19 του
+      Ν. 3500/2006:</span
+    >
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    <span style="font-size: 11pt">: Ρωτήθηκε σχετικά.</span>
+  </p>
+
+  <p style="text-align: left; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: Είμαστε ***** με τον A) </span>
+    <span style="font-size: 11pt; font-weight: bold">${
+      suspect.split(" ")[0] + " " + suspect.split(" ")[1]
+    }</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ:</span>
+    <span style="font-size: 11pt">
+      Έχουν συμβεί παρόμοια περιστατικά στο παρελθόν;
+    </span>
+  </p>
+
+  <p style="text-align: justify; line-height: 0.26in">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ: </span>
+    <span style="font-size: 11pt">*******</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    <span style="font-size: 11pt"
+      >: Επιθυμείτε να εξεταστείτε από Ιατροδικαστή;</span
+    >
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: Ναι το επιθυμώ.</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ:</span>
+    <span style="font-size: 11pt">
+      Επιθυμείτε να μεταφερθείτε σε κάποια δομή;</span
+    >
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ:</span>
+    <span style="font-size: 11pt"> ********</span>
+  </p>
+
+  <p style="text-align: left; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    <span style="font-size: 11pt"
+      >: Επιθυμείτε να μεταφερθείτε στην Ιατροδικαστική Υπηρεσία;</span
+    >
+  </p>
+
+  <p style="text-align: left; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: όχι</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    : Έχει ο (A) στην κατοχή του κάποιο όπλο;
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: Όχι.</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    : Είναι ο (Α) εξαρτημένος από το αλκοόλ ή από τις Ναρκωτικές ουσίες;
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    : Ναι κάνει μαριχουάνα και πίνει αλκοόλ.
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    : Φοβάστε για την ζωή σας;
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    : Ναι φοβάμαι για την ζωή μου πολύ.
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+
+    : Γνωρίζεται τυχόν ύπαρξη ψυχικής ασθένειας ή διαταραχής του (Α);
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: Δε γνωρίζω.</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    : Επιθυμείτε την ποινική δίωξη του (Α) για τις ως άνω πράξεις;
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: Ναι επιθυμώ</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ</span>
+    <span style="font-size: 11pt">: Επιθυμείτε </span>
+    <span style="font-size: 11pt">panic button;</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ</span>
+    <span style="font-size: 11pt">: **** </span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΕΡΩΤΗΣΗ:</span>
+    <span style="font-size: 11pt"> Έχετε κάτι άλλο να προσθέσετε;</span>
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt; font-weight: bold">ΑΠΟΚΡΙΣΗ:</span>
+    <span style="font-size: 11pt">
+      Τίποτα άλλο δεν έχω να προσθέσω και γράμματα γνωρίζω.</span
+    >
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt"
+      >Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
+        date,
+        timePassed
+      )}' ώρα της ${dateFormatter(date)} και
+      περατώθηκε την ${timeFormatter(
+        date,
+        datas.xronosPeratosis + timePassed
+      )}' ώρα της ιδίας.</span
+    >
+  </p>
+
+  <p style="text-align: justify; line-height: 100%">
+    <span style="font-size: 11pt"
+      >Για πίστωση συντάχθηκε η παρούσα έκθεση, η οποία αφού αναγνώσθηκε και
+      βεβαιώθηκε, υπογράφεται ως ακολούθως</span
+    >
+  </p>
+</div>
+`;
+}
+
+// katigoroumenos endooik
+function printDrastisEndooik(
+  initial,
+  datas,
+  victim,
+  suspect,
+  date,
+  dateFormatter,
+  timeFormatter
+) {
+  timePassed += datas.xronosPeratosis;
+  return `<div
+  style="
+    font-size: 11pt;
+    line-height: 1.2;
+    
+    text-align: justify;
+  "
+>
+  <p style="text-align: center; margin-bottom: 1em">
+    <span style="font-size: 16pt; font-weight: bold; text-decoration: underline"
+      >ΕΚΘΕΣΗ ΕΞΕΤΑΣΗΣ ΚΑΤΗΓΟΡΟΥΜΕΝΟΥ (Κ.Π.Δ.)</span
+    >
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    ${initial().replace(/(\r\n|\n|\r|\s{2,})/gm, " ")} της ιδίας Υπηρεσίας,
+    προσληφθέντος ως Β' Ανακριτικός Υπάλληλος, εξετάζεται η κατωτέρω σημειούμενη
+    κατηγορούμενη ως ακολούθως,
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΕΡΩΤΗΣΗ:</span>
+    Πώς ονομάζεσαι κ.λ.π. (πλήρη στοιχεία ταυτότητας);
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΑΠΟΚΡΙΣΗ:</span>
+    Ονομάζομαι ${suspect}.
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Ενημερώθηκε ότι μπορεί να λαμβάνει εγκαίρως γνώση των εγγράφων της δίκης, τα
+    οποία του επιδίδονται και με ηλεκτρονικά μέσα σύμφωνα με τις παρ. 1 και 4
+    του άρθρου 155 Κ.Π.Δ..
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Ενταύθα, ανακοινώσαμε στην κατηγορούμενη, σύμφωνα με το άρθρο 100 του Κώδικα
+    Ποινικής Δικονομίας, το περιεχόμενο του κατηγορητηρίου,
+    <u>ήτοι</u> παράβαση άρθρου * του Ν. 3500/06 διότι την ώρα της επί της οδού
+    Ζωναρά 19 στην Αθήνα, εξύβρισες τον (σχεση με θυμα) <strong>Α)</strong>
+    ${
+      victim.split(" ")[0] +
+      " " +
+      victim.split(" ")[1] +
+      " " +
+      victim.split(" ")[2] +
+      " " +
+      victim.split(" ")[3]
+    }
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Στη συνέχεια, αφού ανακοινώσαμε στον κατηγορούμενο το περιεχόμενο των
+    εγγράφων της ανάκρισης, εξηγήσαμε σ' αυτόν, σύμφωνα με το άρθρο 105 του
+    Κώδικα Ποινικής Δικονομίας, με σαφήνεια όλα τα δικαιώματά του, που
+    αναφέρονται στα άρθρα 95, 96, 97, 98, 100, 101, 104, 273 και 274 του Κώδικα
+    Ποινικής Δικονομίας και ειδικότερα: το δικαίωμα παράστασης με συνήγορο, το
+    δικαίωμα και τις προϋποθέσεις παροχής δωρεάν νομικών συμβουλών, το δικαίωμα
+    ενημέρωσης σχετικά με την κατηγορία, το δικαίωμα διερμηνείας και μετάφρασης,
+    το δικαίωμα σιωπής και μη αυτοενοχοποίησης, το δικαίωμα πρόσβασης στο υλικό
+    της δικογραφίας, το δικαίωμα ενημέρωσης των προξενικών αρχών και επιπλέον
+    προσώπων της επιλογής του, το δικαίωμα σε επείγουσα ιατρική περίθαλψη, τον
+    ανώτατο αριθμό ωρών ή ημερών κατά τις οποίες ο κατηγορούμενος δύναται να
+    στερηθεί της ελευθερίας του προτού προσαχθεί ενώπιον δικαστικής αρχής, το
+    δικαίωμα άρνησης εν όλω ή εν μέρει της παροχής εξηγήσεων, το δικαίωμα
+    πρότασης μαρτύρων προς εξέταση και πληροφορίες σχετικά με τις δυνατότητες
+    προσβολής του νόμιμου χαρακτήρα της σύλληψης ή της κράτησης.
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΕΡΩΤΗΣΗ:</span>
+    Επιθυμείται να κάνετε χρήση των δικαιωμάτων που σας γνωστοποιήθηκαν;
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΑΠΟΚΡΙΣΗ:</span>
+    Παραιτούμαι όλων των ανωτέρων δικαιωμάτων και ζητώ να απολογηθώ αμέσως.
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Για πιστοποίηση συντάχθηκε η παρούσα έκθεση η οποία αφού αναγνώσθηκε και
+    βεβαιώθηκε υπογράφεται ως ακολούθως:
+  </p>
+
+  <table width="100%">
+    <tr>
+      <td width="33%" style="text-align: center">-Ο-</td>
+      <td width="33%" style="text-align: center">-Ο-</td>
+      <td width="33%" style="text-align: center">-Ο-</td>
+    </tr>
+    <tr>
+      <td width="33%" style="text-align: center">Εξετασθείς</td>
+      <td width="33%" style="text-align: center">Β'Ανακριτικός</td>
+      <td width="33%" style="text-align: center">Ά Ανακριτικός</td>
+    </tr>
+  </table>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-top: 1in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Έπειτα, του απαγγείλαμε της ως άνω κατηγορία και προβήκαμε στην εξέταση του
+    κατηγορουμένου ως ακολούθως:
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΕΡΩΤΗΣΗ:</span>
+    Έχετε κατηγορηθεί άλλη φορά και αν ναι, για ποια αιτία;
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΑΠΟΚΡΙΣΗ:</span>
+    Όχι, δεν έχω κατηγορηθεί.
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΕΡΩΤΗΣΗ:</span>
+    Κατηγορείσαι ήδη για τις πράξεις που σου γνωστοποιήθηκαν ανωτέρω. Τι
+    απολογείσαι;
+  </p>
+
+  <p
+    style="
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    <span style="font-weight: bold; text-decoration: underline">ΑΠΟΚΡΙΣΗ:</span>
+    Δεν αποδέχομαι τις σε βάρος μου κατηγορίες. Ότι επιπλέον έχω να πω θα το πω
+    στο δικαστήριο. Τίποτα άλλο δεν έχω να προσθέσω και υπογράφω.
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+      font-weight: normal;
+      text-decoration: none;
+    "
+  >
+    Στον κατηγορούμενο γνωστοποιήσαμε ότι σύμφωνα με το αρ. 273 παρ. 1 του
+    Κώδικα Ποινικής Δικονομίας υποχρεούται να δηλώσει κάθε μεταβολή της
+    κατοικίας η διαμονής του μαζί με την ακριβή διεύθυνση, ή της διεύθυνσης
+    ηλεκτρονικού ταχυδρομείου ή αριθμού κινητής τηλεφωνίας, σύμφωνα με την παρ.
+    2 του άρθρου 156 Κ.Π.Δ., καθώς και τις συνέπειες σε περίπτωση παράλειψης,
+    εγγράφως στον Εισαγγελέα του δικαστηρίου, στο οποίο εκκρεμεί κατά το χρόνο
+    της δήλωσής της η δικογραφία.
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+      font-weight: normal;
+      text-decoration: none;
+    "
+  >
+    Η παρούσα έκθεση άρχισε να συντάσσεται την ${timeFormatter(
+      date,
+      timePassed
+    )}' ώρα της ${dateFormatter(date)} και
+    περατώθηκε την ${timeFormatter(
+      date,
+      datas.xronosPeratosis + timePassed
+    )}' ώρα της ιδίας.
+  </p>
+
+  <p
+    style="
+      text-indent: 0.49in;
+      margin-bottom: 1em;
+
+      font-size: 12pt;
+    "
+  >
+    Για πιστοποίηση συντάχθηκε η παρούσα έκθεση η οποία αφού αναγνώσθηκε και
+    βεβαιώθηκε υπογράφεται ως ακολούθως:
+  </p>
+</div>
+`;
 }
 //Μην πειράξετε από εδώ και κάτω
 
@@ -1109,6 +1759,58 @@ ypefthini.addEventListener("click", () => {
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
   downloadAsWord(printYpoptoy(ypoptosData), "ypoptoy");
+});
+
+/// ENDOOIKOGENIAKI
+
+//martyra astyn button
+const martyraEndooik = document.getElementById("martyra-endooik");
+martyraEndooik.addEventListener("click", () => {
+  downloadAsWord(
+    printMartyraEndooik(
+      constructInitialText,
+      data,
+      formattedId,
+      formattedIdYpoptos,
+      today,
+      formatDate,
+      formatTime
+    ),
+    "martyra-endooik"
+  );
+});
+// thyma endooik button
+const thymaEndooik = document.getElementById("thyma-endooik");
+thymaEndooik.addEventListener("click", () => {
+  downloadAsWord(
+    printThymaEndooik(
+      constructInitialText,
+      data,
+      formattedId,
+      formattedIdYpoptos,
+      today,
+      formatDate,
+      formatTime
+    ),
+    "thyma-endooik"
+  );
+});
+
+// drastis endooik button
+const drastisEndooik = document.getElementById("drastis-endooik");
+drastisEndooik.addEventListener("click", () => {
+  downloadAsWord(
+    printDrastisEndooik(
+      constructInitialText,
+      data,
+      formattedId,
+      formattedIdYpoptos,
+      today,
+      formatDate,
+      formatTime
+    ),
+    "drastis-endooik"
+  );
 });
 
 // word downloader
