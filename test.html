@@ -90,15 +90,6 @@
         reader.readAsArrayBuffer(file);
       }
 
-      // function base64ToArrayBuffer(base64) {
-      //   const binaryString = atob(base64);
-      //   const bytes = new Uint8Array(binaryString.length);
-      //   for (let i = 0; i < binaryString.length; i++) {
-      //     bytes[i] = binaryString.charCodeAt(i);
-      //   }
-      //   return bytes.buffer;
-      // }
-
       async function generateWord() {
         const base64String =
           document.getElementById("base64Output").textContent;
@@ -139,34 +130,6 @@
           alert("Error generating Word document: " + error.message);
         }
       }
-
-      // Copy button functionality
-      document
-        .getElementById("copy-button")
-        .addEventListener("click", function () {
-          const text = document.getElementById("base64Output").textContent;
-
-          if (!text) {
-            alert("No base64 content to copy.");
-            return;
-          }
-
-          navigator.clipboard
-            .writeText(text)
-            .then(function () {
-              console.log("Text copied to clipboard successfully!");
-              const successElement = document.getElementById("copy-success");
-              successElement.style.display = "inline";
-              setTimeout(() => {
-                successElement.style.display = "none";
-              }, 2000);
-            })
-            .catch(function (err) {
-              console.error("Could not copy text: ", err);
-              alert("Failed to copy text: " + err.message);
-            });
-        });
-
       async function processDocument(arrayBuffer, replacements) {
         try {
           console.log("Processing document...");
@@ -215,6 +178,39 @@
           throw error;
         }
       }
+
+      function copyToClipboard(textToCopy) {
+        if (navigator.clipboard) {
+          navigator.clipboard
+            .writeText(textToCopy)
+            .then(() => {
+              console.log("Text copied to clipboard successfully!");
+            })
+            .catch((err) => {
+              console.error("Could not copy text to clipboard: ", err);
+            });
+        } else {
+          // Fallback for older browsers
+          const textArea = document.createElement("textarea");
+          textArea.value = textToCopy;
+          document.body.appendChild(textArea);
+          textArea.select();
+          try {
+            document.execCommand("copy");
+            console.log("Text copied to clipboard using fallback method!");
+          } catch (err) {
+            console.error("Could not copy text using fallback method: ", err);
+          }
+          document.body.removeChild(textArea);
+        }
+      }
+      // Copy button functionality
+      const stringBase64 = document
+        .getElementById("copy-button")
+        .addEventListener("click", function () {
+          const text = document.getElementById("base64Output").textContent;
+          copyToClipboard(text);
+        });
 
       // Example replacements
       const replacements = {
