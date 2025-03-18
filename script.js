@@ -268,9 +268,7 @@ function printYpiresiako(
   axyp,
   person,
   datas,
-  day,
-  month,
-  year,
+  fullDate,
   time,
   protokolo,
   apolesthen
@@ -325,7 +323,7 @@ function printYpiresiako(
 		</p>
 		<p align="center" style="line-height: 150%; margin-bottom: 0cm"><br /></p>
 		<p align="justify" style="line-height: 115%; margin-bottom: 0cm">
-		  Αναφέρεται ότι την ${day} ${month} ${year} και ώρα ${time} προσήλθε στην Υπηρεσία μας ο ${person} και με υπεύθυνη δήλωση του Ν1599/1986 δήλωσε ότι απώλεσε σε άγνωστο τόπο και χρόνο ${apolesthen}</p>
+		  Αναφέρεται ότι την ${fullDate} και ώρα ${time} προσήλθε στην Υπηρεσία μας ο ${person} και με υπεύθυνη δήλωση του Ν1599/1986 δήλωσε ότι απώλεσε σε άγνωστο τόπο και χρόνο ${apolesthen}</p>
       <p> -Το παρόν χορηγείται για κάθε νόμιμη χρήση. </p>
 		<div align="right">
 		  <table width="345" cellpadding="7" cellspacing="0">
@@ -342,7 +340,7 @@ function printYpiresiako(
 				</p>
 				<p align="center" style="margin-bottom: 0cm">
 				  <font size="3" style="font-size: 13pt"
-					>${datas.merosSyntaksisEkthesis}, ${day} ${month} ${year}</font
+					>${datas.merosSyntaksisEkthesis}, ${fullDate}</font
 				  >
 				</p>
 				<p align="center" style="margin-bottom: 0cm"><br /></p>
@@ -1390,15 +1388,15 @@ const months = [
   "Νοεμβρίου",
   "Δεκεμβρίου",
 ];
-let formattedId = "";
-let formattedIdYpoptos = "";
-let vehicle = "";
+// let formattedId = "";
+// let formattedIdYpoptos = "";
+// let vehicle = "";
 let stringYear = today.getFullYear();
 let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
 let stringDay = String(today.getDate()).padStart(2, "0");
 let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
 let specificDate = new Date(formattedDate);
-let days = [
+const days = [
   "Κυριακή",
   "Δευτέρα",
   "Τρίτη",
@@ -1414,6 +1412,20 @@ let day = today.getDate();
 let ypefthiniData = {};
 let ypoptosData = {};
 let timePassed = 0;
+
+let state = {
+  formattedId: "",
+  formattedIdYpoptos: "",
+  vehicle: "",
+  formattedDate: `${stringYear}-${stringMonth}-${stringDay}`,
+  dayName: days[specificDate.getDay()],
+  year: today.getFullYear(),
+  month: months[today.getMonth()],
+  day: today.getDate(),
+  ypefthiniData: {},
+  ypoptosData: {},
+  timePassed: 0,
+};
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
@@ -1489,13 +1501,13 @@ const copyIdBtn = document.querySelector(".copy-id");
 taytotita.addEventListener("input", () => {
   // id = taytotita.value;
   clipboardId.value = formatIdInfo(taytotita.value, data);
-  formattedId = clipboardId.value;
+  state.formattedId = clipboardId.value;
 });
 clipboardId.addEventListener("input", () => {
-  formattedId = clipboardId.value;
+  state.formattedId = clipboardId.value;
 });
 copyIdBtn.addEventListener("click", () => {
-  copyToClipboard(formattedId);
+  copyToClipboard(state.formattedId);
 });
 
 // Suspect parser fields
@@ -1505,22 +1517,22 @@ const copyIdYpoptosBtn = document.querySelector(".copy-id-ypoptos");
 
 taytotitaYpoptos.addEventListener("input", () => {
   clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data, true);
-  formattedIdYpoptos = clipboardIdYpoptos.value;
+  state.formattedIdYpoptos = clipboardIdYpoptos.value;
 });
 
 clipboardIdYpoptos.addEventListener("input", () => {
-  formattedIdYpoptos = clipboardIdYpoptos.value;
+  state.formattedIdYpoptos = clipboardIdYpoptos.value;
 });
 
 copyIdYpoptosBtn.addEventListener("click", () => {
-  copyToClipboard(formattedIdYpoptos);
+  copyToClipboard(state.formattedIdYpoptos);
 });
 
 const clearYpoptosBtn = document.getElementById("person-ypoptos-clear");
 clearYpoptosBtn.addEventListener("click", () => {
   taytotitaYpoptos.value = "";
   clipboardIdYpoptos.value = "";
-  formattedIdYpoptos = "";
+  state.formattedIdYpoptos = "";
 });
 
 //vehicle parser fields
@@ -1530,8 +1542,8 @@ const clipboardOxima = document.querySelector(".clipboard-oxima");
 const copyOximaBtn = document.querySelector(".copy-oxima");
 
 oxima.addEventListener("input", () => {
-  vehicle = oxima.value;
-  clipboardOxima.value = formatVehicleInfo(vehicle);
+  state.vehicle = oxima.value;
+  clipboardOxima.value = formatVehicleInfo(state.vehicle);
 });
 
 copyOximaBtn.addEventListener("click", () => {
@@ -1588,13 +1600,14 @@ const personClear = document.getElementById("person-clear");
 personClear.addEventListener("click", () => {
   taytotita.value = "";
   clipboardId.value = "";
-  formattedId = "";
+  state.formattedId = "";
 });
 
 const vehicleClear = document.getElementById("vehicle-clear");
 vehicleClear.addEventListener("click", () => {
   oxima.value = "";
   clipboardOxima.value = "";
+  state.vehicle = "";
 });
 
 // ektheseis
@@ -1603,7 +1616,13 @@ const initial = document.getElementById("initial");
 const martyra = document.getElementById("martyra");
 martyra.addEventListener("click", () => {
   downloadAsWord(
-    printMartyra(constructInitialText, formattedId, data, today, formatTime),
+    printMartyra(
+      constructInitialText,
+      state.formattedId,
+      data,
+      today,
+      formatTime
+    ),
     "martyra"
   );
 });
@@ -1613,7 +1632,7 @@ martyraXoris.addEventListener("click", () => {
   downloadAsWord(
     printMartyraXoris(
       constructInitialText,
-      formattedId,
+      state.formattedId,
       data,
       today,
       formatTime
@@ -1627,7 +1646,7 @@ syllipsi.addEventListener("click", () => {
   downloadAsWord(
     printSyllipsi(
       constructInitialText,
-      formattedIdYpoptos,
+      state.formattedIdYpoptos,
       data,
       today,
       formatTime,
@@ -1642,7 +1661,7 @@ anomoti.addEventListener("click", () => {
   downloadAsWord(
     printAnomoti(
       constructInitialText,
-      formattedIdYpoptos,
+      state.formattedIdYpoptos,
       data,
       today,
       formatTime
@@ -1656,7 +1675,7 @@ katigoroumenou.addEventListener("click", () => {
   downloadAsWord(
     printKatigoroumenou(
       constructInitialText,
-      formattedIdYpoptos,
+      state.formattedIdYpoptos,
       data,
       today,
       formatTime
@@ -1671,7 +1690,7 @@ apodosi.addEventListener("click", () => {
   downloadAsWord(
     printApodosi(
       constructInitialText,
-      formattedId,
+      state.formattedId,
       data,
       today,
       formatTime,
@@ -1686,7 +1705,7 @@ katasxesi.addEventListener("click", () => {
   downloadAsWord(
     printKatasxesi(
       constructInitialText,
-      formattedId,
+      state.formattedId,
       data,
       today,
       formatTime,
@@ -1702,7 +1721,7 @@ gnostopoiisi.addEventListener("click", () => {
   downloadAsWord(
     printGnostopoiisi(
       constructInitialText,
-      formattedIdYpoptos,
+      state.formattedIdYpoptos,
       data,
       today,
       formatTime
@@ -1715,7 +1734,7 @@ gnostopoiisi.addEventListener("click", () => {
 const egxeirisis = document.getElementById("egxeirisis");
 egxeirisis.addEventListener("click", () => {
   downloadAsWord(
-    printEgxeirisis(constructInitialText, formattedId),
+    printEgxeirisis(constructInitialText, state.formattedId),
     "egxeirisis"
   );
 });
@@ -1726,7 +1745,7 @@ ypiresiako.addEventListener("click", () => {
   downloadAsWord(
     printYpiresiako(
       anakritikosSelect.value,
-      formattedId,
+      state.formattedId,
       data,
       day,
       month,
@@ -1770,8 +1789,8 @@ martyraEndooik.addEventListener("click", () => {
     printMartyraEndooik(
       constructInitialText,
       data,
-      formattedId,
-      formattedIdYpoptos,
+      state.formattedId,
+      state.formattedIdYpoptos,
       today,
       formatDate,
       formatTime
@@ -1786,8 +1805,8 @@ thymaEndooik.addEventListener("click", () => {
     printThymaEndooik(
       constructInitialText,
       data,
-      formattedId,
-      formattedIdYpoptos,
+      state.formattedId,
+      state.formattedIdYpoptos,
       today,
       formatDate,
       formatTime
@@ -1803,8 +1822,8 @@ drastisEndooik.addEventListener("click", () => {
     printDrastisEndooik(
       constructInitialText,
       data,
-      formattedId,
-      formattedIdYpoptos,
+      state.formattedId,
+      state.formattedIdYpoptos,
       today,
       formatDate,
       formatTime
