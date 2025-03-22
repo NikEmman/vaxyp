@@ -16,6 +16,7 @@ const data = {
   dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
   tilefono: "25314 40177",
   email: "ta.komotinis@astynomia.gr",
+  da: "",
 };
 
 //Μην πειράξετε από εδώ και κάτω
