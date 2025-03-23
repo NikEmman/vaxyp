@@ -51,6 +51,9 @@ header {
   min-width: 30%;
   height: 25vh;
 }
+summary {
+  cursor: pointer;
+}
 details {
   padding-bottom: 2em;
 }
