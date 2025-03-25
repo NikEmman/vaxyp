@@ -16,7 +16,6 @@ const data = {
   dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
   tilefono: "25314 40177",
   email: "ta.komotinis@astynomia.gr",
-  da: "",
 };
 
 //Μην πειράξετε από εδώ και κάτω
@@ -113,6 +112,39 @@ function constructInitialText() {
     anakritikosSelect.value
   } του ${data.ypiresia}, παρισταμένου και του ${bAnakritikosSelect.value} `;
 }
+
+//  file uploader validation
+document
+  .querySelector('input[type="file"]')
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file && file.type !== "application/json") {
+      alert("Only JSON files are allowed!");
+      event.target.value = "";
+    }
+  });
+// upload file button maybe not needed
+document
+  .querySelector('input[type="file"]')
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          console.log("Extracted JSON data:", jsonData); // You can access the JSON object here
+        } catch (error) {
+          console.error("Invalid JSON file:", error);
+          alert("The file is not valid JSON.");
+        }
+      };
+
+      reader.readAsText(file);
+    }
+  });
 
 //dilosi apoleias
 
