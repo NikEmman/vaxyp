@@ -173,3 +173,38 @@ ol {
     transform: rotate(90deg);
   }
 }
+
+/* page userDate */
+#dataForm {
+  display: flex;
+  gap: 2em;
+}
+.containerAnakritikoi {
+  display: flex;
+  gap: 2em;
+  padding-bottom: 1em;
+}
+#dataForm input {
+  width: 20em;
+}
+
+#anakritikoiContainer,
+#anakritikoiEnikosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.anakritikoiBtns {
+  display: flex;
+  justify-content: space-between;
+}
+#addAnakritikoi {
+  color: green;
+}
+#removeAnakritikoi {
+  color: darkred;
+}
+input:invalid {
+  background-color: rgb(224, 186, 199);
+  border: 2px solid red;
+}
