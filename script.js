@@ -1,4 +1,4 @@
-const data = {
+const defaultData = {
   anakritikoi: [
     "Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου",
     "Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη",
@@ -38,11 +38,11 @@ const months = [
 let victim = "";
 let suspect = "";
 let vehicle = "";
-let stringYear = today.getFullYear();
-let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
-let stringDay = String(today.getDate()).padStart(2, "0");
-let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
-let specificDate = new Date(formattedDate);
+// let stringYear = today.getFullYear();
+// let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
+// let stringDay = String(today.getDate()).padStart(2, "0");
+// let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
+// let specificDate = new Date(formattedDate);
 const days = [
   "Κυριακή",
   "Δευτέρα",
@@ -52,55 +52,90 @@ const days = [
   "Παρασκευή",
   "Σάββατο",
 ];
-let dayName = days[specificDate.getDay()];
-let year = today.getFullYear();
-let month = months[today.getMonth()];
-let day = today.getDate();
+// let dayName = days[specificDate.getDay()];
+// let year = today.getFullYear();
+// let month = months[today.getMonth()];
+// let day = today.getDate();
 let ypefthiniData = {};
 let ypoptosData = {};
 let timePassed = 0;
-
-let state = {
-  victim: "",
-  suspect: "",
-  vehicle: "",
-  formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
-  dayName: days[specificDate.getDay()],
-  year: today.getFullYear(),
-  month: months[today.getMonth()],
-  day: today.getDate(),
-  ypefthiniData: {},
-  ypoptosData: {},
-  timePassed: 0,
-  apolesthen: "",
-  protokolo: 0,
+// let state = {
+//   victim: "",
+//   suspect: "",
+//   vehicle: "",
+//   formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
+//   dayName: days[specificDate.getDay()],
+//   year: today.getFullYear(),
+//   month: months[today.getMonth()],
+//   day: today.getDate(),
+//   ypefthiniData: {},
+//   ypoptosData: {},
+//   timePassed: 0,
+//   apolesthen: "",
+//   protokolo: 0,
+// };
+const getData = () => {
+  const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
+  return localStorageData ? localStorageData : defaultData;
 };
+const getState = (localData, todayDate) => {
+  let stringYear = todayDate.getFullYear();
+  let stringMonth = String(todayDate.getMonth() + 1).padStart(2, "0");
+  let stringDay = String(todayDate.getDate()).padStart(2, "0");
+  let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
+  let specificDate = new Date(formattedDate);
+
+  let dataObject = {
+    victim: "",
+    suspect: "",
+    vehicle: "",
+    formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
+    dayName: days[specificDate.getDay()],
+    year: todayDate.getFullYear(),
+    month: months[todayDate.getMonth()],
+    day: todayDate.getDate(),
+    ypefthiniData: {},
+    ypoptosData: {},
+    timePassed: 0,
+    apolesthen: "",
+    protokolo: 0,
+  };
+  Object.assign(dataObject, { ...localData });
+  return dataObject;
+};
+let data = getData();
+let state = getState(data, today);
 
 //combine data and state so the new Ektheseis replacement argument works
-Object.assign(state, { ...data });
+// Object.assign(state, { ...data });
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
 
-data.anakritikoi.forEach((anakritikos, index) => {
-  // Populate a anakr select
-  const anakr = document.createElement("option");
-  anakr.value = anakritikos;
-  anakr.textContent = anakritikos.split(" ")[1];
-  if (index === 0) {
-    anakr.setAttribute("selected", "");
-  }
-  anakritikosSelect.appendChild(anakr);
+const paintSelectMenus = () => {
+  anakritikosSelect.innerHTML = "";
+  bAnakritikosSelect.innerHTML = "";
+  state.anakritikoi.forEach((anakritikos, index) => {
+    // Populate a anakr select
+    const anakr = document.createElement("option");
+    anakr.value = anakritikos;
+    anakr.textContent = anakritikos.split(" ")[1];
+    if (index === 0) {
+      anakr.setAttribute("selected", "");
+    }
+    anakritikosSelect.appendChild(anakr);
 
-  // Populate b anakr select
-  const bAnakr = document.createElement("option");
-  bAnakr.value = anakritikos;
-  bAnakr.textContent = anakritikos.split(" ")[1];
-  if (index === 1) {
-    bAnakr.setAttribute("selected", "");
-  }
-  bAnakritikosSelect.appendChild(bAnakr);
-});
+    // Populate b anakr select
+    const bAnakr = document.createElement("option");
+    bAnakr.value = anakritikos;
+    bAnakr.textContent = anakritikos.split(" ")[1];
+    if (index === 1) {
+      bAnakr.setAttribute("selected", "");
+    }
+    bAnakritikosSelect.appendChild(bAnakr);
+  });
+};
+paintSelectMenus();
 const initialText = document.getElementById("initial");
 
 function constructInitialText() {
@@ -123,7 +158,7 @@ document
       event.target.value = "";
     }
   });
-// upload file button maybe not needed
+
 document
   .querySelector('input[type="file"]')
   .addEventListener("change", function (event) {
@@ -134,8 +169,12 @@ document
 
       reader.onload = function (e) {
         try {
-          const jsonData = JSON.parse(e.target.result);
-          console.log("Extracted JSON data:", jsonData); // You can access the JSON object here
+          localStorage.clear();
+          localStorage.setItem("dataObject", e.target.result);
+          data = getData();
+          state = getState(data, today);
+          initial.textContent = constructInitialText();
+          paintSelectMenus();
         } catch (error) {
           console.error("Invalid JSON file:", error);
           alert("The file is not valid JSON.");
