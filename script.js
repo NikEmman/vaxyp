@@ -1,4 +1,4 @@
-const data = {
+const defaultData = {
   anakritikoi: [
     "Αρχ/κα ΕΜΜΑΝΟΥΗΛΙΔΗ Νικόλαου",
     "Ανθ/μου ΚΟΛΤΣΙΔΑ Βαγγέλη",
@@ -7,6 +7,17 @@ const data = {
     "Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή",
     "Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου",
     "Ανθ/μου ΤΟΠΑΛΙΔΗ Νικόλαου",
+    "Αρχ/κα ΧΑΛΥΒΟΠΟΥΛΟΥ Βασίλειου",
+  ],
+  anakritikoiEnikos: [
+    "Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος",
+    "Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης",
+    "Ανθ/μος ΚΟΥΛΕΛΗΣ Χρήστος",
+    "Αρχ/κας ΓΚΑΓΚΑΤΣΑΣ Γεώργιος",
+    "Υπ/κας ΠΑΡΑΣΚΕΥΑΣ Νερατζής",
+    "Ανθ/μος ΓΙΑΝΝΑΚΙΔΗΣ Βασίλειος",
+    "Ανθ/μος ΤΟΠΑΛΙΔΗΣ Νικόλαος",
+    "Αρχ/κας ΧΑΛΥΒΟΠΟΥΛΟΣ Βασίλειος",
   ],
   ypiresia: "Τ.Δ.Ε.Ε. Κομοτηνής",
   doy: "Κομοτηνής",
@@ -16,7 +27,6 @@ const data = {
   dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
   tilefono: "25314 40177",
   email: "ta.komotinis@astynomia.gr",
-  da: "",
 };
 
 //Μην πειράξετε από εδώ και κάτω
@@ -39,11 +49,11 @@ const months = [
 let victim = "";
 let suspect = "";
 let vehicle = "";
-let stringYear = today.getFullYear();
-let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
-let stringDay = String(today.getDate()).padStart(2, "0");
-let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
-let specificDate = new Date(formattedDate);
+// let stringYear = today.getFullYear();
+// let stringMonth = String(today.getMonth() + 1).padStart(2, "0");
+// let stringDay = String(today.getDate()).padStart(2, "0");
+// let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
+// let specificDate = new Date(formattedDate);
 const days = [
   "Κυριακή",
   "Δευτέρα",
@@ -53,55 +63,90 @@ const days = [
   "Παρασκευή",
   "Σάββατο",
 ];
-let dayName = days[specificDate.getDay()];
-let year = today.getFullYear();
-let month = months[today.getMonth()];
-let day = today.getDate();
-let ypefthiniData = {};
-let ypoptosData = {};
-let timePassed = 0;
-
-let state = {
-  victim: "",
-  suspect: "",
-  vehicle: "",
-  formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
-  dayName: days[specificDate.getDay()],
-  year: today.getFullYear(),
-  month: months[today.getMonth()],
-  day: today.getDate(),
-  ypefthiniData: {},
-  ypoptosData: {},
-  timePassed: 0,
-  apolesthen: "",
-  protokolo: 0,
+// let dayName = days[specificDate.getDay()];
+// let year = today.getFullYear();
+// let month = months[today.getMonth()];
+// let day = today.getDate();
+// let ypefthiniData = {};
+// let ypoptosData = {};
+// let timePassed = 0;
+// let state = {
+//   victim: "",
+//   suspect: "",
+//   vehicle: "",
+//   formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
+//   dayName: days[specificDate.getDay()],
+//   year: today.getFullYear(),
+//   month: months[today.getMonth()],
+//   day: today.getDate(),
+//   ypefthiniData: {},
+//   ypoptosData: {},
+//   timePassed: 0,
+//   apolesthen: "",
+//   protokolo: 0,
+// };
+const getData = () => {
+  const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
+  return localStorageData ? localStorageData : defaultData;
 };
+const getState = (localData, todayDate) => {
+  let stringYear = todayDate.getFullYear();
+  let stringMonth = String(todayDate.getMonth() + 1).padStart(2, "0");
+  let stringDay = String(todayDate.getDate()).padStart(2, "0");
+  let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
+  let specificDate = new Date(formattedDate);
+
+  let dataObject = {
+    victim: "",
+    suspect: "",
+    vehicle: "",
+    formattedDate: `${stringDay}-${stringMonth}-${stringYear}`,
+    dayName: days[specificDate.getDay()],
+    year: todayDate.getFullYear(),
+    month: months[todayDate.getMonth()],
+    day: todayDate.getDate(),
+    ypefthiniData: {},
+    ypoptosData: {},
+    timePassed: 0,
+    apolesthen: "",
+    protokolo: 0,
+  };
+  Object.assign(dataObject, { ...localData });
+  return dataObject;
+};
+let data = getData();
+let state = getState(data, today);
 
 //combine data and state so the new Ektheseis replacement argument works
-Object.assign(state, { ...data });
+// Object.assign(state, { ...data });
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
 
-data.anakritikoi.forEach((anakritikos, index) => {
-  // Populate a anakr select
-  const anakr = document.createElement("option");
-  anakr.value = anakritikos;
-  anakr.textContent = anakritikos.split(" ")[1];
-  if (index === 0) {
-    anakr.setAttribute("selected", "");
-  }
-  anakritikosSelect.appendChild(anakr);
+const paintSelectMenus = () => {
+  anakritikosSelect.innerHTML = "";
+  bAnakritikosSelect.innerHTML = "";
+  state.anakritikoi.forEach((anakritikos, index) => {
+    // Populate a anakr select
+    const anakr = document.createElement("option");
+    anakr.value = anakritikos;
+    anakr.textContent = anakritikos.split(" ")[1];
+    if (index === 0) {
+      anakr.setAttribute("selected", "");
+    }
+    anakritikosSelect.appendChild(anakr);
 
-  // Populate b anakr select
-  const bAnakr = document.createElement("option");
-  bAnakr.value = anakritikos;
-  bAnakr.textContent = anakritikos.split(" ")[1];
-  if (index === 1) {
-    bAnakr.setAttribute("selected", "");
-  }
-  bAnakritikosSelect.appendChild(bAnakr);
-});
+    // Populate b anakr select
+    const bAnakr = document.createElement("option");
+    bAnakr.value = anakritikos;
+    bAnakr.textContent = anakritikos.split(" ")[1];
+    if (index === 1) {
+      bAnakr.setAttribute("selected", "");
+    }
+    bAnakritikosSelect.appendChild(bAnakr);
+  });
+};
+paintSelectMenus();
 const initialText = document.getElementById("initial");
 
 function constructInitialText() {
@@ -113,6 +158,45 @@ function constructInitialText() {
     anakritikosSelect.value
   } του ${data.ypiresia}, παρισταμένου και του ${bAnakritikosSelect.value} `;
 }
+
+//  file uploader validation
+document
+  .querySelector('input[type="file"]')
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file && file.type !== "application/json") {
+      alert("Only JSON files are allowed!");
+      event.target.value = "";
+    }
+  });
+
+//file uploader function
+document
+  .querySelector('input[type="file"]')
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          localStorage.clear();
+          localStorage.setItem("dataObject", e.target.result);
+
+          data = getData();
+          state = getState(data, today);
+          paintSelectMenus();
+          initial.textContent = constructInitialText();
+        } catch (error) {
+          console.error("Invalid JSON file:", error);
+          alert("The file is not valid JSON.");
+        }
+      };
+
+      reader.readAsText(file);
+    }
+  });
 
 //dilosi apoleias
 
@@ -132,7 +216,7 @@ initialText.textContent = constructInitialText();
 // Update text when anakritikos selections change
 anakritikosSelect.addEventListener("change", () => {
   initialText.textContent = constructInitialText();
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
 });
 
 bAnakritikosSelect.addEventListener("change", () => {
@@ -379,7 +463,7 @@ const ypiresiako = document.getElementById("ypiresiako");
 ypiresiako.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -390,14 +474,14 @@ ypiresiako.addEventListener("click", () => {
 const ypefthini = document.getElementById("ypefthini");
 ypefthini.addEventListener("click", () => {
   Object.assign(state, { ...state.ypefthiniData });
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   generateWord(ektheseis.ypefthini, state);
 });
 
 // deltio drasti button
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   Object.assign(state, { ...state.ypoptosData });
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -441,7 +525,7 @@ iatrodikastiki.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -483,6 +567,10 @@ function capitalize(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+// helper function to convert anakritikos to enikos
+function convertToEnikos(value) {
+  return state.anakritikoiEnikos[state.anakritikoi.indexOf(value)];
 }
 // date formatter
 function formatDate(date) {
@@ -663,7 +751,7 @@ function formatIdInfo(input, data, suspect = false) {
     };
 
     //   // extract the data for ypefthini dilosi usage
-    suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
+    suspect ? (state.ypoptosData = fields) : (state.ypefthiniData = fields);
 
     // Format the output string
     const formattedString = `(Επ)${fields.surname} (Ον.)${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
