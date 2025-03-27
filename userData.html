@@ -168,6 +168,7 @@
             email: formData.get("email"),
           };
           // Save to local storage
+          localStorage.clear();
           localStorage.setItem("dataObject", JSON.stringify(data));
 
           // Create a downloadable JSON file
