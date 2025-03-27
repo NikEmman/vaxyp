@@ -7,6 +7,17 @@ const defaultData = {
     "Υπ/κα ΠΑΡΑΣΚΕΥΑ Νερατζή",
     "Ανθ/μου ΓΙΑΝΝΑΚΙΔΗ Βασίλειου",
     "Ανθ/μου ΤΟΠΑΛΙΔΗ Νικόλαου",
+    "Αρχ/κα ΧΑΛΥΒΟΠΟΥΛΟΥ Βασίλειου",
+  ],
+  anakritikoiEnikos: [
+    "Αρχ/κας ΕΜΜΑΝΟΥΗΛΙΔΗΣ Νικόλαος",
+    "Ανθ/μος ΚΟΛΤΣΙΔΑΣ Βαγγέλης",
+    "Ανθ/μος ΚΟΥΛΕΛΗΣ Χρήστος",
+    "Αρχ/κας ΓΚΑΓΚΑΤΣΑΣ Γεώργιος",
+    "Υπ/κας ΠΑΡΑΣΚΕΥΑΣ Νερατζής",
+    "Ανθ/μος ΓΙΑΝΝΑΚΙΔΗΣ Βασίλειος",
+    "Ανθ/μος ΤΟΠΑΛΙΔΗΣ Νικόλαος",
+    "Αρχ/κας ΧΑΛΥΒΟΠΟΥΛΟΣ Βασίλειος",
   ],
   ypiresia: "Τ.Δ.Ε.Ε. Κομοτηνής",
   doy: "Κομοτηνής",
@@ -56,9 +67,9 @@ const days = [
 // let year = today.getFullYear();
 // let month = months[today.getMonth()];
 // let day = today.getDate();
-let ypefthiniData = {};
-let ypoptosData = {};
-let timePassed = 0;
+// let ypefthiniData = {};
+// let ypoptosData = {};
+// let timePassed = 0;
 // let state = {
 //   victim: "",
 //   suspect: "",
@@ -203,7 +214,7 @@ initialText.textContent = constructInitialText();
 // Update text when anakritikos selections change
 anakritikosSelect.addEventListener("change", () => {
   initialText.textContent = constructInitialText();
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
 });
 
 bAnakritikosSelect.addEventListener("change", () => {
@@ -450,7 +461,7 @@ const ypiresiako = document.getElementById("ypiresiako");
 ypiresiako.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -461,14 +472,14 @@ ypiresiako.addEventListener("click", () => {
 const ypefthini = document.getElementById("ypefthini");
 ypefthini.addEventListener("click", () => {
   Object.assign(state, { ...state.ypefthiniData });
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   generateWord(ektheseis.ypefthini, state);
 });
 
 // deltio drasti button
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   Object.assign(state, { ...state.ypoptosData });
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -512,7 +523,7 @@ iatrodikastiki.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.anakritikos = anakritikosSelect.value;
+  state.anakritikos = convertToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
@@ -554,6 +565,10 @@ function capitalize(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+// helper function to convert anakritikos to enikos
+function convertToEnikos(value) {
+  return state.anakritikoiEnikos[state.anakritikoi.indexOf(value)];
 }
 // date formatter
 function formatDate(date) {
@@ -734,7 +749,7 @@ function formatIdInfo(input, data, suspect = false) {
     };
 
     //   // extract the data for ypefthini dilosi usage
-    suspect ? (ypoptosData = fields) : (ypefthiniData = fields);
+    suspect ? (state.ypoptosData = fields) : (state.ypefthiniData = fields);
 
     // Format the output string
     const formattedString = `(Επ)${fields.surname} (Ον.)${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
