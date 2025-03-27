@@ -170,6 +170,7 @@ document
     }
   });
 
+//file uploader function
 document
   .querySelector('input[type="file"]')
   .addEventListener("change", function (event) {
@@ -182,10 +183,11 @@ document
         try {
           localStorage.clear();
           localStorage.setItem("dataObject", e.target.result);
+
           data = getData();
           state = getState(data, today);
-          initial.textContent = constructInitialText();
           paintSelectMenus();
+          initial.textContent = constructInitialText();
         } catch (error) {
           console.error("Invalid JSON file:", error);
           alert("The file is not valid JSON.");

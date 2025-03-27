@@ -11,6 +11,15 @@ header {
   display: flex;
   justify-content: space-between;
 }
+.fileUploader {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+}
 .top {
   height: 20%;
   display: flex;

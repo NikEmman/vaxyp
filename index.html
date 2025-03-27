@@ -14,8 +14,10 @@
       <p class="helpBtn large" id="genikes-help">Οδηγίες αλλαγής Ανακριτικών</p>
       <p class="helpBtn large" id="patch-help">Τι νέο υπάρχει;</p>
     </header>
-    <a href="userData.html">Βάλτε τα δεδομένα της Υπηρεσίας σας</a>
-    <label for="localData">Ανεβάστε το τοπικό αρχείο data.json</label><input id="localData" type="file" accept=".json">
+    <div class="fileUploader">
+      <input id="localData" type="file" accept=".json">
+      <label for="localData"> Ανεβάστε το τοπικό αρχείο data.json ή δημιουργήστε νέο στη <a href="userData.html">Φόρμα</a> </label>
+    </div>
     <div class="top">
       <div class="anakritikoi">
         <div>
@@ -206,7 +208,7 @@
           <li>Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα σωστά στοιχεία / δημιουργήστε νέο data.json</li>
         </ul>
         <ul><strong>Άλλαξαν κάποια στοιχεία, ή άλλαξαν οι Αξ.Υπ, τι κάνω;</strong>
-          <li>Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα σωστά στοιχεία / δημιουργήστε νέο data.json</li>
+          <li>Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα σωστά στοιχεία / δημιουργήστε νέο data.json. Εάν υπάρχουν παλαιότερα στοιχεία, είτε στο browser είτε στο data.json που ανεβάσατε, η φορμα θα προ-συμπληρωθεί με αυτά</li>
         </ul>
         
       </div>
@@ -214,6 +216,12 @@
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
+        <ul><u>Αλλαγές 27-3-2025</u>
+          <li>Πλέον για να βάλετε τα δικά σας δεδομένα δεν απαιτείται να κατεβάσετε τίποτα</li>
+          <li>Βάζετε τα δεδομένα σας στη νέα φόρμα. Βρείτε την στις νέες οδηγίες αλλαγής ανακριτικών</li>
+          <li>Τα δεδομένα σας θα αποθηκευτούν στο browser και σε ένα αρχείο που θα κατεβάσετε συμπληρώνοντας τη φόρμα</li>         
+          
+        </ul>
         <ul><u>Αλλαγές 22-3-2025</u>
           <li>Προσθήκη Ιατροδικαστικής και Panic Button στην Ενδοοικογενειακή</li>          
           
