@@ -46,7 +46,7 @@
 
       <div>
         <h3>Base64 Output:</h3>
-        <pre id="base64Output"></pre>
+        <input id="base64Output"></input>
         <button id="copy-button">Αντιγραφή</button>
         <span id="copy-success" class="success">Copied!</span>
       </div>
@@ -55,6 +55,15 @@
         <button onclick="generateWord()">Generate Word Document</button>
       </div>
     </div>
+    <div>
+      <h3>Base64 Input:</h3>
+      <textarea id="base64Input"></textarea>
+    </div>
+
+    <div>
+      <button onclick="getTemplate()">Generate Word Template</button>
+    </div>
+  </div>
 
     <script>
       // Store the original file ArrayBuffer
@@ -108,7 +117,7 @@
           // Use the original file ArrayBuffer instead of converting back from base64
           const modifiedDocx = await processDocument(
             originalFileArrayBuffer,
-            replacements
+            {}
           );
 
           // Create a blob and download it
@@ -211,13 +220,50 @@
           const text = document.getElementById("base64Output").textContent;
           copyToClipboard(text);
         });
+        async function getTemplate() {
+        const base64String =
+          document.getElementById("base64Input").value;
 
-      // Example replacements
-      const replacements = {
-        initial: "Σημερα στην Ανατολη 12 του μηνα ενωπιων εμας ολων",
-        name: "John Doe",
-        // Add more placeholder replacements as needed
-      };
+        if (!base64String) {
+          alert("Please convert a file to base64 first.");
+          return;
+        }
+
+        if (!originalFileArrayBuffer) {
+          alert("Please select and convert a file first.");
+          return;
+        }
+
+        try {
+          // Use the original file ArrayBuffer instead of converting back from base64
+          const modifiedDocx = await processDocument(
+            originalFileArrayBuffer,
+            replacements
+          );
+
+          // Create a blob and download it
+          const blob = new Blob([modifiedDocx], {
+            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          });
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "generated_document.docx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          console.log("Document generated successfully");
+        } catch (error) {
+          console.error("Error generating Word document:", error);
+          alert("Error generating Word document: " + error.message);
+        }
+      }
+
+        
+
+      
     </script>
   </body>
 </html>

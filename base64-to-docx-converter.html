@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 to DOCX Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>Base64 to DOCX Converter</h1>
+    <div class="container">
+        <p>Paste your base64 encoded DOCX string below:</p>
+        <textarea id="base64Input" placeholder="Paste your base64 string here..."></textarea>
+        <button id="convertButton">Convert and Download</button>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function() {
+            // Get the base64 string from textarea
+            const base64String = document.getElementById('base64Input').value.trim();
+            const messageDiv = document.getElementById('message');
+            
+            // Clear previous messages
+            messageDiv.innerHTML = '';
+            messageDiv.className = 'message';
+            messageDiv.style.display = 'none';
+            
+            // Check if input is empty
+            if (!base64String) {
+                showMessage('Please enter a base64 string.', 'error');
+                return;
+            }
+            
+            try {
+                // Try to decode the base64 string
+                const byteCharacters = atob(base64String);
+                const byteNumbers = new Array(byteCharacters.length);
+                
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                
+                // Create download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = 'document.docx';
+                
+                // Append link, click it, and remove it
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                showMessage('DOCX file generated and download started!', 'success');
+            } catch (error) {
+                showMessage('Error: Invalid base64 string. Please check your input.', 'error');
+                console.error('Error converting base64 to DOCX:', error);
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
