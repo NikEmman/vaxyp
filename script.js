@@ -27,6 +27,8 @@ const defaultData = {
   dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
   tilefono: "25314 40177",
   email: "ta.komotinis@astynomia.gr",
+  dAstynomias: "ΡΟΔΟΠΗΣ",
+  geniki: "Α.Μ.Θ.",
 };
 
 //Μην πειράξετε από εδώ και κάτω
@@ -465,6 +467,8 @@ ypiresiako.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.anakritikos = convertToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
+  state.dAstynomias = state.dAstynomias.toUpperCase();
+  state.geniki = state.geniki.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
