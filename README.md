@@ -17,16 +17,11 @@ A user, in order to fully use all the features will have to provide the local de
 
 **How to:**
 
-- Download all the files locally, from this [GitHub repo](https://github.com/NikEmman/vaxyp), click the `<> Code` button, "download as zip".
-- Extract the content, keep the files in the same folder. Open script.js (windows Notepad works fine) and at the very top, in the `data` section, replace the info with your own.
-- Save and close script.js, double-click index.html to open with the browser of choice.
+- Navigate to the form. Fill the data, hit "Αποθήκευση".
+- It will save the data to localStorage for future reference and will download it to a .json file
+- Can later upload the file on the front page to update the data if needed.
 - Local version is now live.
-
-### Localization Troubleshooting
-
-- Make sure all downloaded files are in the same folder as index.html
-- If you edited script.js, read `data` line by line, make really sure no comma `,` or quotemark `"` is missing. Compare it to the original version.
 
 ### See how it works
 
-In the fakeData.md file, you may find strings of a person's data, as if it would have been copied by the official ID finding application. Paste it in the relevant fields!
+In the fakeData.md file, you may find strings of a person's data, as if it would have been copied by the official ID finding application. Paste it in the relevant fields to see how the various documents get filled!
