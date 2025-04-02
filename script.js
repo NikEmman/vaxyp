@@ -29,6 +29,7 @@ const defaultData = {
   email: "ta.komotinis@astynomia.gr",
   dAstynomias: "ΡΟΔΟΠΗΣ",
   geniki: "Α.Μ.Θ.",
+  iatro: "ΡΟΔΟΠΗΣ",
 };
 
 //Μην πειράξετε από εδώ και κάτω
