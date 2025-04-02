@@ -48,6 +48,20 @@
           name="ypiresia"
           placeholder="Τ.Δ.Ε.Ε. Κομοτηνής"
         /><br /><br />
+        <label for="dAstynomias">Διευθ. Αστυνομίας:</label><br />
+        <input
+          type="text"
+          id="dAstynomias"
+          name="dAstynomias"
+          placeholder="ΡΟΔΟΠΗΣ"
+        /><br /><br />
+        <label for="geniki">Γ.Α.Δ./ΓΕ.Π.Α.Δ.</label><br />
+        <input
+          type="text"
+          id="geniki"
+          name="geniki"
+          placeholder="Α.Μ.Θ."
+        /><br /><br />
         <label for="doy">ΔΟΥ:</label><br />
         <input
           type="text"
@@ -77,6 +91,13 @@
           id="eisaggeleiaProtodikon"
           name="eisaggeleiaProtodikon"
           placeholder="Ροδόπης"
+        /><br /><br />
+        <label for="iatro">Ιατροδικαστική Υπηρεσία:</label><br />
+        <input
+          type="text"
+          id="iatro"
+          name="iatro"
+          placeholder="ΡΟΔΟΠΗΣ"
         /><br /><br />
         <label for="dieuthynsiYpiresias">Διεύθυνση Υπηρεσίας:</label><br />
         <input
@@ -126,6 +147,9 @@
           });
 
           document.getElementById("ypiresia").value = data.ypiresia || "";
+          document.getElementById("dAstynomias").value = data.dAstynomias || "";
+          document.getElementById("geniki").value = data.geniki || "";
+          document.getElementById("iatro").value = data.iatro || "";
           document.getElementById("doy").value = data.doy || "";
           document.getElementById("merosSyntaksisEkthesis").value =
             data.merosSyntaksisEkthesis || "";
@@ -200,6 +224,9 @@
               anakritikoi: anakritikoi,
               anakritikoiEnikos: anakritikoiEnikos,
               ypiresia: formData.get("ypiresia"),
+              dAstynomias: formData.get("dAstynomias"),
+              geniki: formData.get("geniki"),
+              iatro: formData.get("iatro"),
               doy: formData.get("doy"),
               merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
               xronosPeratosis: Number(formData.get("xronosPeratosis")),
