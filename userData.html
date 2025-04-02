@@ -48,6 +48,20 @@
           name="ypiresia"
           placeholder="Τ.Δ.Ε.Ε. Κομοτηνής"
         /><br /><br />
+        <label for="dAstynomias">Διευθ. Αστυνομίας:</label><br />
+        <input
+          type="text"
+          id="dAstynomias"
+          name="dAstynomias"
+          placeholder="ΡΟΔΟΠΗΣ"
+        /><br /><br />
+        <label for="geniki">Γ.Α.Δ./ΓΕ.Π.Α.Δ.</label><br />
+        <input
+          type="text"
+          id="geniki"
+          name="geniki"
+          placeholder="Α.Μ.Θ."
+        /><br /><br />
         <label for="doy">ΔΟΥ:</label><br />
         <input
           type="text"
@@ -126,6 +140,8 @@
           });
 
           document.getElementById("ypiresia").value = data.ypiresia || "";
+          document.getElementById("dAstynomias").value = data.dAstynomias || "";
+          document.getElementById("geniki").value = data.geniki || "";
           document.getElementById("doy").value = data.doy || "";
           document.getElementById("merosSyntaksisEkthesis").value =
             data.merosSyntaksisEkthesis || "";
@@ -200,6 +216,8 @@
               anakritikoi: anakritikoi,
               anakritikoiEnikos: anakritikoiEnikos,
               ypiresia: formData.get("ypiresia"),
+              dAstynomias: formData.get("dAstynomias"),
+              geniki: formData.get("geniki"),
               doy: formData.get("doy"),
               merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
               xronosPeratosis: Number(formData.get("xronosPeratosis")),
