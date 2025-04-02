@@ -510,14 +510,14 @@ thymaEndooik.addEventListener("click", () => {
   generateWord(ektheseis.martyraXorisEndooik, state);
 });
 
-// drastis endooik button
+// drastis -apologia -katigoroumenos endooik button
 const drastisEndooik = document.getElementById("drastis-endooik");
 drastisEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.katigoroumenouEndooiks, state);
+  generateWord(ektheseis.katigoroumenouEndooik, state);
 });
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
