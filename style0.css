@@ -1,0 +1,219 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+}
+body {
+  height: 100vh;
+  padding: 2em;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+}
+.fileUploader {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+}
+.top {
+  height: 20%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2em;
+  justify-content: space-between;
+}
+#initial,
+.output {
+  font-family: "Calibri", sans-serif;
+}
+#copy-initial {
+  align-self: center;
+}
+.anakritikoi {
+  display: flex;
+  width: 100%;
+  gap: 10%;
+  justify-content: center;
+}
+.anakritikoi div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  height: 35%;
+  padding-top: 1.5em;
+}
+.input,
+.output {
+  min-width: 30%;
+  height: 25vh;
+}
+summary {
+  cursor: pointer;
+}
+details {
+  padding-bottom: 2em;
+}
+
+.format {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+}
+.format p {
+  font-size: xx-large;
+  font-weight: 900;
+}
+.helpBtn {
+  background-color: rgb(22, 117, 180);
+  color: white;
+  border-radius: 5px;
+  width: 1em;
+  height: 1.5em;
+  text-align: center;
+  cursor: pointer;
+}
+.large {
+  width: fit-content;
+  padding: 0.5em;
+  height: 2em;
+}
+.helpBtn:active {
+  scale: 0.8;
+}
+.helpBtn:hover {
+  filter: grayscale(40%);
+}
+button {
+  padding: 5px;
+  cursor: pointer;
+}
+/* dialog styles  */
+dialog {
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  padding: 2em;
+
+  border-radius: 5px;
+  box-shadow: 0 0 1em rgb(0 0 0 / 0.3);
+}
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+dialog:focus {
+  border: none;
+  outline: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  position: relative;
+}
+.container img {
+  width: 70%;
+  height: auto;
+}
+.container p {
+  border: 1px solid black;
+  align-self: flex-end;
+  width: 1.5em;
+  height: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  position: sticky;
+  top: 10px;
+  cursor: pointer;
+}
+.container p:hover {
+  background-color: red;
+  color: white;
+}
+.container p:active {
+  scale: 0.8;
+}
+ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1em;
+  padding-bottom: 2em;
+}
+.protokolo-container {
+  align-self: flex-start;
+}
+@media screen and (max-width: 580px) {
+  .top {
+    height: fit-content;
+    gap: 1em;
+  }
+  .data {
+    flex-direction: column;
+    height: fit-content;
+  }
+  .input,
+  .output {
+    width: 50%;
+    height: 20vh;
+  }
+  .arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* page userDate */
+#dataForm {
+  display: flex;
+  gap: 2em;
+}
+.containerAnakritikoi {
+  display: flex;
+  gap: 2em;
+  padding-bottom: 1em;
+}
+#dataForm input {
+  width: 20em;
+}
+
+#anakritikoiContainer,
+#anakritikoiEnikosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.anakritikoiBtns {
+  display: flex;
+  justify-content: space-between;
+}
+#addAnakritikoi {
+  color: green;
+}
+#removeAnakritikoi {
+  color: darkred;
+}
+input:invalid {
+  background-color: rgb(224, 186, 199);
+  border: 2px solid red;
+}
