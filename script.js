@@ -757,7 +757,7 @@ function formatIdInfo(input, data, suspect = false) {
       nationality: getValue("Υπηκοότητα(ες)"),
     };
 
-    //   // extract the data for ypefthini dilosi usage
+    // extract the data for ypefthini dilosi usage
     suspect ? (state.ypoptosData = fields) : (state.ypefthiniData = fields);
 
     // Format the output string
@@ -765,6 +765,23 @@ function formatIdInfo(input, data, suspect = false) {
     return formattedString;
   }
 }
+
+//notifications display
+function displayNotification(documentTitle) {
+  const notifications = document.getElementById("notifications");
+  const newNotification = document.createElement("div");
+  newNotification.classList.add("notification");
+  newNotification.innerHTML = `Κατέβηκε επιτυχώς η ${documentTitle} &check;`;
+  notifications.innerHTML = "";
+  notifications.appendChild(newNotification);
+  notficationPhaseOut(newNotification);
+}
+//notification fade away timer
+const notficationPhaseOut = (notificationElement) => {
+  setTimeout(() => {
+    notificationElement.remove();
+  }, 3000);
+};
 
 //copy to clipboard
 function copyToClipboard(textToCopy) {
@@ -814,7 +831,7 @@ async function generateWord(ekthesi, replacements) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    console.log("Document generated successfully");
+    displayNotification(ekthesi.title);
   } catch (error) {
     console.error("Error generating Word document:", error);
     alert("Error generating Word document: " + error.message);
