@@ -687,7 +687,7 @@ function displayNotification(documentTitle) {
 const notficationPhaseOut = (notificationElement) => {
   setTimeout(() => {
     notificationElement.remove();
-  }, 3000);
+  }, 5000);
 };
 
 //copy to clipboard
