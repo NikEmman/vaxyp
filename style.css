@@ -20,6 +20,13 @@ header {
   border-top: 2px solid black;
   border-bottom: 2px solid black;
 }
+
+.notification {
+  width: 100%;
+  text-align: center;
+  background-color: rgb(196, 235, 196);
+  color: green;
+}
 .top {
   height: 20%;
   display: flex;
