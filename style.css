@@ -26,6 +26,7 @@ body {
   background-color: var(--background-light);
   color: var(--text-dark);
   line-height: 1.6;
+  position: relative;
 }
 
 header {
@@ -82,7 +83,15 @@ h2 {
   text-decoration: underline;
 }
 
+#notifications {
+  position: fixed;
+  left: 40%;
+  top: 5%;
+  z-index: 1;
+}
 .notification {
+  border-radius: 5px;
+  padding: 1em 0.5em;
   width: 100%;
   text-align: center;
   background-color: rgb(196, 235, 196);
