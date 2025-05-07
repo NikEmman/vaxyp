@@ -286,6 +286,7 @@ martyraGyn.addEventListener("click", () => {
 // martyraXorisOrko button
 const martyraXoris = document.getElementById("martyraXoris");
 martyraXoris.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -296,6 +297,7 @@ martyraXoris.addEventListener("click", () => {
 //syllipsi button
 const syllipsi = document.getElementById("syllipsi");
 syllipsi.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -306,6 +308,7 @@ syllipsi.addEventListener("click", () => {
 // anomoti button
 const anomoti = document.getElementById("anomoti");
 anomoti.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -315,6 +318,7 @@ anomoti.addEventListener("click", () => {
 // anomoti gyn
 const anomotiGyn = document.getElementById("anomotiGyn");
 anomotiGyn.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -324,6 +328,7 @@ anomotiGyn.addEventListener("click", () => {
 // katigoroumenou button
 const katigoroumenou = document.getElementById("katigoroumenou");
 katigoroumenou.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -334,6 +339,7 @@ katigoroumenou.addEventListener("click", () => {
 //apodosi button
 const apodosi = document.getElementById("apodosi");
 apodosi.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -343,6 +349,7 @@ apodosi.addEventListener("click", () => {
 // katasxesi button
 const katasxesi = document.getElementById("katasxesi");
 katasxesi.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -352,6 +359,7 @@ katasxesi.addEventListener("click", () => {
 // gnostopoiisi button
 const gnostopoiisi = document.getElementById("gnostopoiisi");
 gnostopoiisi.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -362,6 +370,7 @@ gnostopoiisi.addEventListener("click", () => {
 // egxeirisis button  printEgxeirisis(initial, person)
 const egxeirisis = document.getElementById("egxeirisis");
 egxeirisis.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -369,12 +378,36 @@ egxeirisis.addEventListener("click", () => {
 });
 const egxeirisisGyn = document.getElementById("egxeirisisGyn");
 egxeirisisGyn.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   generateWord(ektheseis.egxeirisisGyn, state);
 });
 
+// gnostopoiisiNarkwtikwn button
+const gnostopoiisiNarkwtikwn = document.getElementById(
+  "gnostopoiisiNarkwtikwn"
+);
+gnostopoiisiNarkwtikwn.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+
+  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state);
+});
+
+// praktikoZygisis button
+const praktikoZygisis = document.getElementById("praktikoZygisis");
+praktikoZygisis.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+
+  generateWord(ektheseis.praktikoZygisis, state);
+});
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
 ypiresiako.addEventListener("click", () => {
@@ -422,6 +455,7 @@ martyraEndooik.addEventListener("click", () => {
 // thyma endooik button
 const thymaEndooik = document.getElementById("thyma-endooik");
 thymaEndooik.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -432,6 +466,7 @@ thymaEndooik.addEventListener("click", () => {
 // drastis -apologia -katigoroumenos endooik button
 const drastisEndooik = document.getElementById("drastis-endooik");
 drastisEndooik.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -441,6 +476,7 @@ drastisEndooik.addEventListener("click", () => {
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
 iatrodikastiki.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -453,12 +489,14 @@ iatrodikastiki.addEventListener("click", () => {
 });
 const panicYes = document.getElementById("panicYes");
 panicYes.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
   generateWord(ektheseis.panicButtonYes, state);
 });
 const panicNo = document.getElementById("panicNo");
 panicNo.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
   generateWord(ektheseis.panicButtonNo, state);
