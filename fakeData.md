@@ -1,4 +1,4 @@
-## FAKE DATA FOR TESTING
+# FAKE DATA FOR TESTING
 
 Α.Δ.Τ
 ΓΖ123456
@@ -30,10 +30,10 @@ PAPADOPOULOS
 GEORGIOS
 
 Όνομα Πατρός
-ΔΗΜΗΤΡΗΣ
+ΔΗΜΗΤΡΙΟΣ
 
 Όνομα Πατέρα (Λατιν.)
-DIMITRIS
+DIMITRIOS
 
 Επώνυμο Πατρός
 ΠΑΠΑΔΟΠΟΥΛΟΣ
