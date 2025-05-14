@@ -516,6 +516,158 @@ function formatTime(date, extraTime = 0) {
 
   return `${formattedHour}:${formattedMinutes}`;
 }
+//helper functions to turn the name from onomastiki to geniki
+function toGenitiveMale(name) {
+  switch (name) {
+    case "ΑΓΓΕΛΟΣ":
+      return "ΑΓΓΕΛΟΥ";
+    case "ΑΘΑΝΑΣΙΟΣ":
+      return "ΑΘΑΝΑΣΙΟΥ";
+    case "ΑΛΕΞΑΝΔΡΟΣ":
+      return "ΑΛΕΞΑΝΔΡΟΥ";
+    case "ΑΝΤΩΝΙΟΣ":
+      return "ΑΝΤΩΝΙΟΥ";
+    case "ΑΝΔΡΕΑΣ":
+      return "ΑΝΔΡΕΑ";
+    case "ΑΡΙΣΤΕΙΔΗΣ":
+      return "ΑΡΙΣΤΕΙΔΗ";
+    case "ΒΑΣΙΛΕΙΟΣ":
+      return "ΒΑΣΙΛΕΙΟΥ";
+    case "ΓΕΩΡΓΙΟΣ":
+      return "ΓΕΩΡΓΙΟΥ";
+    case "ΓΡΗΓΟΡΙΟΣ":
+      return "ΓΡΗΓΟΡΙΟΥ";
+    case "ΔΗΜΗΤΡΙΟΣ":
+      return "ΔΗΜΗΤΡΙΟΥ";
+    case "ΕΛΕΥΘΕΡΙΟΣ":
+      return "ΕΛΕΥΘΕΡΙΟΥ";
+    case "ΕΥΑΓΓΕΛΟΣ":
+      return "ΕΥΑΓΓΕΛΟΥ";
+    case "ΕΥΘΥΜΙΟΣ":
+      return "ΕΥΘΥΜΙΟΥ";
+    case "ΗΛΙΑΣ":
+      return "ΗΛΙΑ";
+    case "ΘΕΟΔΩΡΟΣ":
+      return "ΘΕΟΔΩΡΟΥ";
+    case "ΙΩΑΝΝΗΣ":
+      return "ΙΩΑΝΝΗ";
+    case "ΚΩΝΣΤΑΝΤΙΝΟΣ":
+      return "ΚΩΝΣΤΑΝΤΙΝΟΥ";
+    case "ΛΑΖΑΡΟΣ":
+      return "ΛΑΖΑΡΟΥ";
+    case "ΛΕΩΝΙΔΑΣ":
+      return "ΛΕΩΝΙΔΑ";
+    case "ΜΑΡΚΟΣ":
+      return "ΜΑΡΚΟΥ";
+    case "ΝΙΚΟΛΑΟΣ":
+      return "ΝΙΚΟΛΑΟΥ";
+    case "ΠΑΝΑΓΙΩΤΗΣ":
+      return "ΠΑΝΑΓΙΩΤΗ";
+    case "ΠΑΥΛΟΣ":
+      return "ΠΑΥΛΟΥ";
+    case "ΠΕΤΡΟΣ":
+      return "ΠΕΤΡΟΥ";
+    case "ΣΑΒΒΑΣ":
+      return "ΣΑΒΒΑ";
+    case "ΣΠΥΡΙΔΩΝ":
+      return "ΣΠΥΡΙΔΩΝΑ";
+    case "ΣΤΥΛΙΑΝΟΣ":
+      return "ΣΤΥΛΙΑΝΟΥ";
+    case "ΣΤΑΥΡΟΣ":
+      return "ΣΤΑΥΡΟΥ";
+    case "ΑΝΑΣΤΑΣΙΟΣ":
+      return "ΑΝΑΣΤΑΣΙΟΥ";
+    case "ΧΑΡΑΛΑΜΠΟΣ":
+      return "ΧΑΡΑΛΑΜΠΟΥ";
+    case "ΧΡΗΣΤΟΣ":
+      return "ΧΡΗΣΤΟΥ";
+    default:
+      return name;
+  }
+}
+
+function toGenitiveFemale(name) {
+  switch (name) {
+    case "ΑΓΓΕΛΙΚΗ":
+      return "ΑΓΓΕΛΙΚΗΣ";
+    case "ΑΓΑΠΗ":
+      return "ΑΓΑΠΗΣ";
+    case "ΑΝΑΣΤΑΣΙΑ":
+      return "ΑΝΑΣΤΑΣΙΑΣ";
+    case "ΑΙΚΑΤΕΡΙΝΗ":
+      return "ΑΙΚΑΤΕΡΙΝΗΣ";
+    case "ΑΝΝΑ":
+      return "ΑΝΝΑΣ";
+    case "ΑΡΕΤΗ":
+      return "ΑΡΕΤΗΣ";
+    case "ΑΡΙΑΔΝΗ":
+      return "ΑΡΙΑΔΝΗΣ";
+    case "ΒΑΣΙΛΙΚΗ":
+      return "ΒΑΣΙΛΙΚΗΣ";
+    case "ΔΑΝΑΗ":
+      return "ΔΑΝΑΗΣ";
+    case "ΔΑΦΝΗ":
+      return "ΔΑΦΝΗΣ";
+    case "ΔΕΣΠΟΙΝΑ":
+      return "ΔΕΣΠΟΙΝΑΣ";
+    case "ΔΗΜΗΤΡΑ":
+      return "ΔΗΜΗΤΡΑΣ";
+    case "ΕΙΡΗΝΗ":
+      return "ΕΙΡΗΝΗΣ";
+    case "ΕΛΕΝΗ":
+      return "ΕΛΕΝΗΣ";
+    case "ΕΛΕΟΝΩΡΑ":
+      return "ΕΛΕΟΝΩΡΑΣ";
+    case "ΕΛΕΥΘΕΡΙΑ":
+      return "ΕΛΕΥΘΕΡΙΑΣ";
+    case "ΕΥΑΓΓΕΛΙΑ":
+      return "ΕΥΑΓΓΕΛΙΑΣ";
+    case "ΕΥΡΙΔΙΚΗ":
+      return "ΕΥΡΙΔΙΚΗΣ";
+    case "ΓΕΩΡΓΙΑ":
+      return "ΓΕΩΡΓΙΑΣ";
+    case "ΘΕΟΔΩΡΑ":
+      return "ΘΕΟΔΩΡΑΣ";
+    case "ΙΩΑΝΝΑ":
+      return "ΙΩΑΝΝΑΣ";
+    case "ΙΣΜΗΝΗ":
+      return "ΙΣΜΗΝΗΣ";
+    case "ΚΩΣΤΑΝΤΙΝΑ":
+      return "ΚΩΝΣΤΑΝΤΙΝΑΣ";
+    case "ΚΑΛΛΙΟΠΗ":
+      return "ΚΑΛΛΙΟΠΗΣ";
+    case "ΜΑΡΓΑΡΙΤΑ":
+      return "ΜΑΡΓΑΡΙΤΑΣ";
+    case "ΜΑΡΙΑ":
+      return "ΜΑΡΙΑΣ";
+    case "ΝΙΚΟΛΕΤΑ":
+      return "ΝΙΚΟΛΕΤΑΣ";
+    case "ΝΑΤΑΛΙΑ":
+      return "ΝΑΤΑΛΙΑΣ";
+    case "ΠΑΡΑΣΚΕΥΗ":
+      return "ΠΑΡΑΣΚΕΥΗΣ";
+    case "ΠΑΝΑΓΙΩΤΑ":
+      return "ΠΑΝΑΓΙΩΤΑΣ";
+    case "ΣΟΦΙΑ":
+      return "ΣΟΦΙΑΣ";
+    case "ΣΤΑΥΡΟΥΛΑ":
+      return "ΣΤΑΥΡΟΥΛΑΣ";
+    case "ΣΤΑΜΑΤΙΑ":
+      return "ΣΤΑΜΑΤΙΑΣ";
+    case "ΧΑΡΙΚΛΕΙΑ":
+      return "ΧΑΡΙΚΛΕΙΑΣ";
+    case "ΧΑΡΟΥΛΑ":
+      return "ΧΑΡΟΥΛΑΣ";
+    case "ΧΡΙΣΤΙΝΑ":
+      return "ΧΡΙΣΤΙΝΑΣ";
+    case "ΧΡΥΣΑ":
+      return "ΧΡΥΣΑΣ";
+    case "ΦΩΤΕΙΝΗ":
+      return "ΦΩΤΕΙΝΗΣ";
+    default:
+      return name;
+  }
+}
 
 // Helper function to capitalize first letter of each word
 function capitalize(str) {
@@ -674,13 +826,15 @@ function formatIdInfo(input, data, suspect = false) {
     // Format the output string
     const formattedString = `${fields.surname} ${capitalize(
       fields.firstName
-    )} του ${capitalize(fields.fatherName)} και της ${capitalize(
-      fields.motherName
-    )}, γεν. ${fields.birthDate} στην ${capitalize(
+    )} του ${capitalize(
+      toGenitiveMale(fields.fatherName)
+    )} και της ${capitalize(toGenitiveFemale(fields.motherName))}, γεν. ${
+      fields.birthDate
+    } στην ${capitalize(
       fields.birthPlace
     )}, κάτοικος ${residence}, οδός ${capitalize(fields.street)} αρ. ${
       fields.streetNumber
-    }, επάγγελμα ------- , κάτοχος του υπ'αριθ ${
+    }, επάγγελμα άνεργος, κάτοχος του υπ'αριθ ${
       fields.idNumber
     } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
       fields.issuingAuthority
