@@ -838,7 +838,7 @@ function formatIdInfo(input, data, suspect = false) {
       fields.birthPlace
     )}, κάτοικος ${residence}, οδός ${capitalize(fields.street)} αρ. ${
       fields.streetNumber
-    }, επάγγελμα άνεργος, κάτοχος του υπ'αριθ ${
+    }, επάγγελμα ***** , κάτοχος του υπ'αριθ ${
       fields.idNumber
     } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
       fields.issuingAuthority
