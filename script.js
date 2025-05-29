@@ -503,8 +503,12 @@ panicNo.addEventListener("click", () => {
 });
 
 //time formatter
+function roundDownMinutes(minutes) {
+  return minutes - (minutes % 5); // rounds down minues to miltiplicatives of 5, ie 39 becomes 35
+}
 function formatTime(date, extraTime = 0) {
-  let totalMinutes = date.getHours() * 60 + date.getMinutes() + extraTime;
+  let totalMinutes =
+    date.getHours() * 60 + roundDownMinutes(date.getMinutes()) + extraTime;
   // Ensure totalMinutes wraps correctly for negative cases
   totalMinutes = (totalMinutes + 1440) % 1440;
 
