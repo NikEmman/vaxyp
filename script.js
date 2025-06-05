@@ -139,7 +139,12 @@ anakritikosSelect.addEventListener("change", () => {
 bAnakritikosSelect.addEventListener("change", () => {
   initialText.textContent = constructInitialText();
 });
-// initial copy mech
+
+// initial refresh copy buttons
+const refreshInitialBtn = document.getElementById("refresh-initial");
+refreshInitialBtn.addEventListener("click", () => {
+  initialText.textContent = constructInitialText();
+});
 
 const copyInitialBtn = document.getElementById("copy-initial");
 copyInitialBtn.addEventListener("click", () => {
