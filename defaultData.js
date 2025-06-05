@@ -8,7 +8,7 @@ const defaultData = {
   eisaggeleiaProtodikon: "Ροδόπης",
   dieuthynsiYpiresias: "Λ Δημοκρατίας αρ. 3",
   tilefono: "25314 40177",
-  email: "ta.komotinis@astynomia.gr",
+  email: "tdee.komotinis@astynomia.gr",
   dAstynomias: "ΡΟΔΟΠΗΣ",
   geniki: "Α.Μ.Θ.",
   iatro: "ΡΟΔΟΠΗΣ",
