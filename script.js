@@ -1,7 +1,7 @@
 import ektheseis from "./ektheseis.js";
 import { defaultData, months, days } from "./defaultData.js";
 
-const today = new Date();
+let today = new Date();
 
 const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
@@ -143,6 +143,8 @@ bAnakritikosSelect.addEventListener("change", () => {
 // initial refresh copy buttons
 const refreshInitialBtn = document.getElementById("refresh-initial");
 refreshInitialBtn.addEventListener("click", () => {
+  //get a new timestamp
+  today = new Date();
   initialText.textContent = constructInitialText();
 });
 
