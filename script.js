@@ -145,6 +145,8 @@ const refreshInitialBtn = document.getElementById("refresh-initial");
 refreshInitialBtn.addEventListener("click", () => {
   //get a new timestamp
   today = new Date();
+  //reset time passed
+  state.timePassed = 0;
   initialText.textContent = constructInitialText();
 });
 
