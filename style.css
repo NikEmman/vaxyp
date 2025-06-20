@@ -65,6 +65,9 @@ h2 {
   border-radius: 8px;
   background-color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .fileUploader label {
@@ -82,7 +85,7 @@ h2 {
 .fileUploader a:hover {
   text-decoration: underline;
 }
-
+/* Notifications styles */
 #notifications {
   position: fixed;
   left: 40%;
@@ -264,7 +267,8 @@ details > h3 {
 }
 
 /* Buttons */
-button {
+button,
+input[type="file"]::file-selector-button {
   padding: 0.6em 1.2em;
   background-color: var(--secondary-blue);
   color: white;
@@ -275,11 +279,13 @@ button {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-button:hover {
+button:hover,
+input[type="file"]::file-selector-button:hover {
   background-color: var(--accent-blue);
 }
 
-button:active {
+button:active,
+input[type="file"]::file-selector-button {
   transform: scale(0.98);
 }
 
@@ -505,6 +511,10 @@ hr {
   .top {
     height: fit-content;
     gap: 1em;
+  }
+  .fileUploader {
+    flex-direction: column;
+    align-items: start;
   }
 
   .data {
