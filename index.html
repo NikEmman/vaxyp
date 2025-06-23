@@ -4,19 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon" />
     <script defer type="module" src="script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <title>Βοηθ. ΑΞ.ΥΠ</title>
   </head>
+
   <body>
     <header>
       <p class="helpBtn large" id="genikes-help">Οδηγίες χρήσης</p>
       <p class="helpBtn large" id="patch-help">Τι νέο υπάρχει;</p>
     </header>
     <div class="fileUploader">
-      <input id="localData" type="file" accept=".json">
-      <label for="localData"> Ανεβάστε το αρχείο data.json που δημιουργήσατε παλαιότερα ή δημιουργήστε νέο στη <a href="userData.html">Φόρμα</a> </label>
+      <label for="localData">
+        Ανεβάστε το αρχείο data.json που δημιουργήσατε παλαιότερα ή δημιουργήστε
+        νέο στη <a href="userData.html">Φόρμα</a>
+      </label>
+      <input id="localData" type="file" accept=".json" />
     </div>
     <div id="notifications"></div>
     <div class="top">
@@ -30,136 +34,134 @@
           <select name="" id="anakritikos-b"></select>
         </div>
       </div>
-      
+
       <p id="initial"></p>
       <button title="Ανανέωση" id="refresh-initial">&#10227;</button>
       <button id="copy-initial">Αντιγραφή</button>
-      
     </div>
     <hr />
-    
-    <details open >
-      <summary>
+
+    <div class="tabs">
+      <div class="clicked">
         <h2>Μετατροπέας ατόμων</h2>
-      </summary>
-      <h3>Παθών</h3>
-      <div class="person data">
-
-        <textarea
-          id="taytotita"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
-          <p class="arrow">→</p>
-          <button id="person-clear">Εκκαθάριση</button>
-        </div>
-        <textarea class="clipboard-id output"></textarea>
-        <button class="copy-id">Αντιγραφή</button>
       </div>
-      <br>
-      <hr>
-      <h3>Δράστης</h3>
-      <div class="person data">
-        <textarea
-          id="taytotita-ypoptos"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          
-          <p class="arrow">→</p>
-          <button id="person-ypoptos-clear">Εκκαθάριση</button>
-        </div>
-        <textarea class="clipboard-id-ypoptos output"></textarea>
-        <button class="copy-id-ypoptos">Αντιγραφή</button>
-      </div>
-    </details>
-    <hr />
-    
-    <details>
-      <summary>
+      <div class="tab">
         <h2>Μετατροπέας οχημάτων</h2>
-      </summary>
-      <div class="data">
-        <textarea
-          id="oxima"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
-          <p class="arrow">→</p>
-          <button id="vehicle-clear">Εκκαθάριση</button>
-        </div>
-        <textarea readonly class="clipboard-oxima output"></textarea>
-        <button class="copy-oxima">Αντιγραφή</button>
       </div>
-    </details>
-    <hr />
-    <h2>Εκθέσεις</h2>
-    <br />
-    <p>Με χρήση του πεδίου Παθών</p>
-    <br>
-    <div class="buttons">
-      <p class="helpBtn large" id="martyra">Ένορκη Μάρτυρα</p>
-      <p class="helpBtn large" id="martyraGyn">Ένορκη Μάρτυρα Γυν.</p>
-      <p class="helpBtn large" id="martyraXoris">Μάρτυρα Χωρίς Όρκο</p>
-      <p class="helpBtn large" id="egxeirisis">Έκθεση Εγχείρησης</p>
-      <p class="helpBtn large" id="egxeirisisGyn">Έκθεση Εγχείρ. Γυν.</p>
-      <p class="helpBtn large" id="katasxesi">Παράδ & Κατάσχ</p>
-      <p class="helpBtn large" id="apodosi">Απόδοσης</p>
-    </div>
-    <hr>
-    <br>
-    <p>Με χρήση του πεδίου Δράστης</p>   
-    <br> 
-    <div class="buttons">
-      <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
-      <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
-      <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
-      <p class="helpBtn large" id="ypoptoy">Δελτίο Υπόπτου</p>
-      <p class="helpBtn large" id="anomoti">Ανωμοτί</p>
-      <p class="helpBtn large" id="anomotiGyn">Ανωμοτί Γυν</p>
-      <p class="helpBtn large" id="praktikoZygisis">Πρακτικό Ζύγισης</p>
-      <p class="helpBtn large" id="gnostopoiisiNarkwtikwn">Γνωστοποίηση Ναρκ. Ουσιών</p>
-
-    </div>
-    <hr>
-    <br>
-    <p>Ενδοοικογενειακή</p>   
-    <br> 
-    <div class="buttons">
-      <p class="helpBtn large" id="martyra-endooik">Ένορκη Αστυνομικού</p>
-      <p class="helpBtn large" id="thyma-endooik">Χωρίς Όρκο Θύμα</p>
-      
-      <p class="helpBtn large" id="drastis-endooik">Απολογίας</p>
-      <p class="helpBtn large" id="iatrodikastiki-endooik">Ιατροδικαστική</p>
-      <p class="helpBtn large" id="panicYes">Θέλω Panic Button</p>
-      <p class="helpBtn large" id="panicNo">Δεν θέλω Panic Button</p>
-
-      
+      <div class="tab">
+        <h2>Εκθέσεις</h2>
+      </div>
+      <div class="tab">
+        <h2>Δήλωση απώλειας</h2>
+      </div>
     </div>
 
-    <hr>
-    <details  >
-      <summary><h2>Δήλωση απώλειας</h2></summary>
-      <div class="data">
-        <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
-        <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
-        <div class="protokolo-container">
-          <label for="protokolo">3005/4/</label>
-          <input type="text" id="protokolo">
+    <div class="tabContent">
+      <div class="personsTab data">
+        <h3>Παθών</h3>
+        <div class="person flex">
+          <textarea
+            id="taytotita"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
+            <p class="arrow">→</p>
+            <button id="person-clear">Εκκαθάριση</button>
+          </div>
+          <textarea class="clipboard-id output"></textarea>
+          <button class="copy-id">Αντιγραφή</button>
         </div>
-        <textarea class="input" id="apolesthen" placeholder="Απωλεσθέντα"></textarea>
-        <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
-        <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
-      </div>   
-
-
-    </details>
-    
+        <br />
+        <hr />
+        <h3>Δράστης</h3>
+        <div class="person flex">
+          <textarea
+            id="taytotita-ypoptos"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="arrow">→</p>
+            <button id="person-ypoptos-clear">Εκκαθάριση</button>
+          </div>
+          <textarea class="clipboard-id-ypoptos output"></textarea>
+          <button class="copy-id-ypoptos">Αντιγραφή</button>
+        </div>
+      </div>
+      <div class="vehicleTab hidden">
+        <div class="data flex">
+          <textarea
+            id="oxima"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
+            <p class="arrow">→</p>
+            <button id="vehicle-clear">Εκκαθάριση</button>
+          </div>
+          <textarea readonly class="clipboard-oxima output"></textarea>
+          <button class="copy-oxima">Αντιγραφή</button>
+        </div>
+      </div>
+      <div class="ektheseisTab data hidden">
+        <p>Με χρήση του πεδίου Παθών</p>
+        <div class="buttons">
+          <p class="helpBtn large" id="martyra">Ένορκη Μάρτυρα</p>
+          <p class="helpBtn large" id="martyraGyn">Ένορκη Μάρτυρα Γυν.</p>
+          <p class="helpBtn large" id="martyraXoris">Μάρτυρα Χωρίς Όρκο</p>
+          <p class="helpBtn large" id="egxeirisis">Έκθεση Εγχείρησης</p>
+          <p class="helpBtn large" id="egxeirisisGyn">Έκθεση Εγχείρ. Γυν.</p>
+          <p class="helpBtn large" id="katasxesi">Παράδ & Κατάσχ</p>
+          <p class="helpBtn large" id="apodosi">Απόδοσης</p>
+        </div>
+        <hr />
+        <p>Με χρήση του πεδίου Δράστης</p>
+        <div class="buttons">
+          <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
+          <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
+          <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
+          <p class="helpBtn large" id="ypoptoy">Δελτίο Υπόπτου</p>
+          <p class="helpBtn large" id="anomoti">Ανωμοτί</p>
+          <p class="helpBtn large" id="anomotiGyn">Ανωμοτί Γυν</p>
+          <p class="helpBtn large" id="praktikoZygisis">Πρακτικό Ζύγισης</p>
+          <p class="helpBtn large" id="gnostopoiisiNarkwtikwn">
+            Γνωστοποίηση Ναρκ. Ουσιών
+          </p>
+        </div>
+        <hr />
+        <p>Ενδοοικογενειακή</p>
+        <div class="buttons">
+          <p class="helpBtn large" id="martyra-endooik">Ένορκη Αστυνομικού</p>
+          <p class="helpBtn large" id="thyma-endooik">Χωρίς Όρκο Θύμα</p>
+          <p class="helpBtn large" id="drastis-endooik">Απολογίας</p>
+          <p class="helpBtn large" id="iatrodikastiki-endooik">
+            Ιατροδικαστική
+          </p>
+          <p class="helpBtn large" id="panicYes">Θέλω Panic Button</p>
+          <p class="helpBtn large" id="panicNo">Δεν θέλω Panic Button</p>
+        </div>
+      </div>
+      <div class="ypiresiakoTab hidden">
+        <div class="data flex">
+          <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
+          <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
+          <div class="protokolo-container">
+            <label for="protokolo">3005/4/</label>
+            <input type="text" id="protokolo" />
+          </div>
+          <textarea
+            class="input"
+            id="apolesthen"
+            placeholder="Απωλεσθέντα"
+          ></textarea>
+          <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
+          <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+        </div>
+      </div>
+    </div>
 
     <!-- modals -->
     <dialog id="person-dialog">
@@ -172,16 +174,22 @@
           </li>
           <li>Κάντε "Επικόληση"(ctrl + v) στο αριστερά πεδίο</li>
           <li>
-            Η μετατροπή γίνεται αυτόματα, τα στοιχεία περνάνε σε όλα τα έγγραφα πιο κάτω.
+            Η μετατροπή γίνεται αυτόματα, τα στοιχεία περνάνε σε όλα τα έγγραφα
+            πιο κάτω.
           </li>
-          <li>Πάτα στο κουμπί αντιγραφή και τα στοιχεία βρίσκονται στο "πρόχειρο" του υπολογιστή, κάνε απλά επικόλληση στο word που θες.</li>
+          <li>
+            Πάτα στο κουμπί αντιγραφή και τα στοιχεία βρίσκονται στο "πρόχειρο"
+            του υπολογιστή, κάνε απλά επικόλληση στο word που θες.
+          </li>
         </ol>
-        <hr>
+        <hr />
         <img src="xartografisi.png" alt="photo from xartografisi app" />
         <ul>
-          <li>Κάντε το ίδιο αν πρόκειται για αλλοδαπό, από την εφαρμογή χαρτογράφηση</li>
+          <li>
+            Κάντε το ίδιο αν πρόκειται για αλλοδαπό, από την εφαρμογή
+            χαρτογράφηση
+          </li>
         </ul>
-
       </div>
     </dialog>
     <dialog id="vehicle-dialog">
@@ -205,138 +213,266 @@
         <p id="genikes-close">&times;</p>
         <ol>
           <strong>Γενικές οδηγίες χρήσης:</strong>
-          <li>Βάλτε τα τοπικά σας στοιχεία στη <a href="userData.html">Φόρμα</a></li>
+          <li>
+            Βάλτε τα τοπικά σας στοιχεία στη <a href="userData.html">Φόρμα</a>
+          </li>
           <li>Αφού προσθέσετε τα απαραίτητα στοιχεία, πατήστε "Αποθήκευση"</li>
-          <li>Τα στοιχεία σας αποθηκεύτηκαν στο browser και στο αρχείο data.json που κατέβηκε, κρατήστε το κάπου αποθηκευμένο</li>
-          <li>Κατά κανόνα τα στοιχεία θα μείνουν αποθηκευμένα στο brower, εάν δεν εμφανίζονται/χαθούν όμως, ανεβάστε το αρχείο data.json</li>
-          <li>Από την εφαρμογή POL, αντιγράψτε το κείμενο του Δελτίου Ταυτότητας, στο αντίστοιχο πεδίο παθόντα/δράστη και θα τα δείτε δίπλα σε νέο στύλ, έτοιμο για χρήση σε Εκθέσεις.</li>
-          <li>Τα στοιχεία μετά τη μορφοποίηση είναι επεξεργάσιμα. Η επεξεργασμένη, τελική μορφή, περνάει στις αντίστοιχες Εκθέσεις</li>
-          <li>Η εφαρμογή μορφοποιεί πέρα από άτομα, και οχήματα. Δείτε στα σχετικά πεδία για περισσότερες λεπτομέρειες</li>
-          <li>Αφού επικολλήσετε και τυχόν επεξεργαστείτε το μορφοποιημένο κείμενο παθόντα/δράστη, πατήστε τα κουμπιά πιο κάτω για να κατεβάσετε τις αντίστοιχες Εκθέσεις, προ-συμπληρωμένες με τα δικά σας στοιχεία, ως ανακριτικοί, και του παθόντα/δράστη που βάλατε</li>
-          <li>Για προβλήματα ή προτάσεις βελτίωσης παρακαλώ επικοινωνήστε στο <a href="mailto:voithos.axyp@gmail.com">voithos.axyp@gmail.com</a></li>
+          <li>
+            Τα στοιχεία σας αποθηκεύτηκαν στο browser και στο αρχείο data.json
+            που κατέβηκε, κρατήστε το κάπου αποθηκευμένο
+          </li>
+          <li>
+            Κατά κανόνα τα στοιχεία θα μείνουν αποθηκευμένα στο brower, εάν δεν
+            εμφανίζονται/χαθούν όμως, ανεβάστε το αρχείο data.json
+          </li>
+          <li>
+            Από την εφαρμογή POL, αντιγράψτε το κείμενο του Δελτίου Ταυτότητας,
+            στο αντίστοιχο πεδίο παθόντα/δράστη και θα τα δείτε δίπλα σε νέο
+            στύλ, έτοιμο για χρήση σε Εκθέσεις.
+          </li>
+          <li>
+            Τα στοιχεία μετά τη μορφοποίηση είναι επεξεργάσιμα. Η επεξεργασμένη,
+            τελική μορφή, περνάει στις αντίστοιχες Εκθέσεις
+          </li>
+          <li>
+            Η εφαρμογή μορφοποιεί πέρα από άτομα, και οχήματα. Δείτε στα σχετικά
+            πεδία για περισσότερες λεπτομέρειες
+          </li>
+          <li>
+            Αφού επικολλήσετε και τυχόν επεξεργαστείτε το μορφοποιημένο κείμενο
+            παθόντα/δράστη, πατήστε τα κουμπιά πιο κάτω για να κατεβάσετε τις
+            αντίστοιχες Εκθέσεις, προ-συμπληρωμένες με τα δικά σας στοιχεία, ως
+            ανακριτικοί, και του παθόντα/δράστη που βάλατε
+          </li>
+          <li>
+            Για προβλήματα ή προτάσεις βελτίωσης παρακαλώ επικοινωνήστε στο
+            <a href="mailto:voithos.axyp@gmail.com">voithos.axyp@gmail.com</a>
+          </li>
         </ol>
-        
-        <ul><strong>Έκανα λάθος στα στοιχεία, ή έχασα το data.json, τι κάνω;</strong>
-          <li>Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα σωστά στοιχεία / δημιουργήστε νέο data.json</li>
+
+        <ul>
+          <strong
+            >Έκανα λάθος στα στοιχεία, ή έχασα το data.json, τι κάνω;</strong
+          >
+          <li>
+            Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα
+            σωστά στοιχεία / δημιουργήστε νέο data.json
+          </li>
         </ul>
-        <ul><strong>Άλλαξαν κάποια στοιχεία, ή άλλαξαν οι Αξ.Υπ, τι κάνω;</strong>
-          <li>Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα σωστά στοιχεία / δημιουργήστε νέο data.json. Εάν υπάρχουν παλαιότερα στοιχεία, είτε στο browser είτε στο data.json που ανεβάσατε, η φορμα θα προ-συμπληρωθεί με αυτά</li>
+        <ul>
+          <strong>Άλλαξαν κάποια στοιχεία, ή άλλαξαν οι Αξ.Υπ, τι κάνω;</strong>
+          <li>
+            Πλοηγηθείτε στην <a href="userData.html">Φόρμα</a>, και βάλτε τα
+            σωστά στοιχεία / δημιουργήστε νέο data.json. Εάν υπάρχουν παλαιότερα
+            στοιχεία, είτε στο browser είτε στο data.json που ανεβάσατε, η φορμα
+            θα προ-συμπληρωθεί με αυτά
+          </li>
         </ul>
-        
       </div>
     </dialog>
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
+        <ul>
+          <u>Αλλαγές 24-6-2025</u>
+          <li>
+            Οι περιοχές των μετατροπέων ατόμων / οχημάτων, του κατεβάσματος
+            εκθέσεων και της δήλωσης απώλειας οργανώθηακν οπτικά σε "καρτέλες"
+            για καλύτερη εμπειρία χρήστη
+          </li>
+        </ul>
+        <hr />
+
         <ul><u>Αλλαγές 7-6-2025</u>
           <li>Η σελίδα διατηρεί την επιλογή των ανακριτικών όταν ξαναφωρτώσει</li>
           <li>Στη μορφοποίηση ατόμου, όλα τα άγνωστα πεδία βγαίνουν ως **** </li>
         </ul>
         <ul><u>Αλλαγές 5-6-2025</u>
           <li>Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται ανανέωση σελίδας</li>
+          <li>
+            Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται
+            ανανέωση σελίδας
+          </li>
           <li>Άλλαξε μορφή η ανωμοτί, πλέον με 2 υπογραφές</li>
         </ul>
-        <ul><u>Αλλαγές 7-5-2025</u>
-          <li>Προστέθηκαν 2 νέες εκθέσεις, το Πρακτικό Ζύγισης και η Γνωστοποίηση Ναρκ. Ουσιών</li>
-          <li>Στους χρόνους έναρξης / λήξης κάθε Έκθεσης μετά την αρχική Ένορκη Μαρτυρική, προστίθονται επιπλέον λεπτά (όσα ορίσατε στο χρόνο περάτωσης) για συνεχόμενο κατέβασμα εκθέσεων, χωρίς την ανάγκη ανανέωσης της σελίδας για λήψη νέας ώρας</li>        
+        <hr />
+        <ul>
+          <u>Αλλαγές 7-5-2025</u>
+          <li>
+            Προστέθηκαν 2 νέες εκθέσεις, το Πρακτικό Ζύγισης και η Γνωστοποίηση
+            Ναρκ. Ουσιών
+          </li>
+          <li>
+            Στους χρόνους έναρξης / λήξης κάθε Έκθεσης μετά την αρχική Ένορκη
+            Μαρτυρική, προστίθονται επιπλέον λεπτά (όσα ορίσατε στο χρόνο
+            περάτωσης) για συνεχόμενο κατέβασμα εκθέσεων, χωρίς την ανάγκη
+            ανανέωσης της σελίδας για λήψη νέας ώρας
+          </li>
           <li>Ανανεωμένες οδηγίες χρήσης</li>
         </ul>
-        <ul><u>Αλλαγές 6-5-2025</u>
-          <li>Κατεβάζοντας επιτυχώς μια έκθεση, πλέον ο χρήστης λαμβάνει αντίστοιχη ειδοποίηση</li>          
-        </ul>
-        <ul><u>Αλλαγές 2-4-2025</u>
-          <li>Προστέθηκαν στη φόρμα τα πεδία Ιατροδικαστική Υπηρεσία, Δ.Α. και Γ.Α.Δ./ΓΕ.Π.Α.Δ.</li>
-          <li>Φορτώστε το προηγούμενο data.json για να συμπληρώσετε τα νέα πεδία</li>
-          <li>Τα νέα αυτά πεδία χρησιμοποιούνται από την Ιατροδικαστική έκθεση της Ενδοοικογενειακής και απο το Υπηρεσιακό Σημείωμα</li>
-          
-        </ul>
-        <ul><u>Αλλαγές 27-3-2025</u>
-          <li>Πλέον για να βάλετε τα δικά σας δεδομένα δεν απαιτείται να κατεβάσετε τίποτα</li>
-          <li>Βάζετε τα δεδομένα σας στη νέα φόρμα. Βρείτε την στις νέες οδηγίες αλλαγής ανακριτικών</li>
-          <li>Τα δεδομένα σας θα αποθηκευτούν στο browser και σε ένα αρχείο που θα κατεβάσετε συμπληρώνοντας τη φόρμα</li>         
-          
-        </ul>
-        <ul><u>Αλλαγές 22-3-2025</u>
-          <li>Προσθήκη Ιατροδικαστικής και Panic Button στην Ενδοοικογενειακή</li>          
-          
-        </ul>
-        <ul><u>Αλλαγές 21-3-2025</u>
-          <li>Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.</li>          
-          
-        </ul>
-        <ul><u>Αλλαγές 28-2-2025</u>
-          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
-          <li> Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές περνάνε και στις εκθέσεις </li>
-          <li>Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από χαρτογράφηση</li>
-        </ul>
-        <ul><u>Αλλαγές 21-3-2025</u>
-          <li>Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.</li>
-          
-          
-        </ul>
-        <ul><u>Αλλαγές 28-2-2025</u>
-          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
-          <li> Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές περνάνε και στις εκθέσεις </li>
-          <li>Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από χαρτογράφηση</li>
-        </ul>
-        <ul><u>Αλλαγές 3-3-2025</u>
-          <li>Προσθήκη Εκθέσεων για Ενδοοικογενειακή</li>
-          
-        </ul>
-        <ul><u>Αλλαγές 28-2-2025</u>
-          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
-          <li> Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές περνάνε και στις εκθέσεις </li>
-          <li>Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από χαρτογράφηση</li>
-        </ul>
-
-        <ul><u>Αλλαγές 27-2-2025</u>
-          <li>Κάθε έκθεση μετά την Ένορκη Μαρτυρική, προσθέτει τον χρόνο περάτωσης* στους νέους χρόνους έναρξης/ λήξης</li>
-          <ul>* Ο χρόνος περάτωσης αρχικά είναι 10 λεπτά, τον αλλάζετε από το πεδίο xronosPeratosis, μετά τον ορισμό δικών σας Ανακριτικών </ul>
-          
-        </ul>
-        <ul><u>Αλλαγές 26-2-2025</u>
-          <li>Προσθήκη πεδίων για δράστη, και η Σύλληψη ή Απολογία ή Ανομωτί κτλ τραβάνε αυτά τα στοιχεία</li>
-          <li>Προσθήκη Δελτίου Υπόπτου</li>
-          
-        </ul>
+        <hr />
         <ul>
-          <ul><u>Αλλαγές 25-2-2025</u>
+          <u>Αλλαγές 6-5-2025</u>
+          <li>
+            Κατεβάζοντας επιτυχώς μια έκθεση, πλέον ο χρήστης λαμβάνει
+            αντίστοιχη ειδοποίηση
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 2-4-2025</u>
+          <li>
+            Προστέθηκαν στη φόρμα τα πεδία Ιατροδικαστική Υπηρεσία, Δ.Α. και
+            Γ.Α.Δ./ΓΕ.Π.Α.Δ.
+          </li>
+          <li>
+            Φορτώστε το προηγούμενο data.json για να συμπληρώσετε τα νέα πεδία
+          </li>
+          <li>
+            Τα νέα αυτά πεδία χρησιμοποιούνται από την Ιατροδικαστική έκθεση της
+            Ενδοοικογενειακής και απο το Υπηρεσιακό Σημείωμα
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 27-3-2025</u>
+          <li>
+            Πλέον για να βάλετε τα δικά σας δεδομένα δεν απαιτείται να
+            κατεβάσετε τίποτα
+          </li>
+          <li>
+            Βάζετε τα δεδομένα σας στη νέα φόρμα. Βρείτε την στις νέες οδηγίες
+            αλλαγής ανακριτικών
+          </li>
+          <li>
+            Τα δεδομένα σας θα αποθηκευτούν στο browser και σε ένα αρχείο που θα
+            κατεβάσετε συμπληρώνοντας τη φόρμα
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 22-3-2025</u>
+          <li>
+            Προσθήκη Ιατροδικαστικής και Panic Button στην Ενδοοικογενειακή
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 21-3-2025</u>
+          <li>
+            Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 28-2-2025</u>
+          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
+          <li>
+            Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές
+            περνάνε και στις εκθέσεις
+          </li>
+          <li>
+            Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από
+            χαρτογράφηση
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 21-3-2025</u>
+          <li>
+            Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 28-2-2025</u>
+          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
+          <li>
+            Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές
+            περνάνε και στις εκθέσεις
+          </li>
+          <li>
+            Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από
+            χαρτογράφηση
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 3-3-2025</u>
+          <li>Προσθήκη Εκθέσεων για Ενδοοικογενειακή</li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 28-2-2025</u>
+          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
+          <li>
+            Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές
+            περνάνε και στις εκθέσεις
+          </li>
+          <li>
+            Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από
+            χαρτογράφηση
+          </li>
+        </ul>
+        <hr />
+
+        <ul>
+          <u>Αλλαγές 27-2-2025</u>
+          <li>
+            Κάθε έκθεση μετά την Ένορκη Μαρτυρική, προσθέτει τον χρόνο
+            περάτωσης* στους νέους χρόνους έναρξης/ λήξης
+          </li>
+          <ul>
+            * Ο χρόνος περάτωσης αρχικά είναι 10 λεπτά, τον αλλάζετε από το
+            πεδίο xronosPeratosis, μετά τον ορισμό δικών σας Ανακριτικών
+          </ul>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 26-2-2025</u>
+          <li>
+            Προσθήκη πεδίων για δράστη, και η Σύλληψη ή Απολογία ή Ανομωτί κτλ
+            τραβάνε αυτά τα στοιχεία
+          </li>
+          <li>Προσθήκη Δελτίου Υπόπτου</li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 25-2-2025</u>
           <li>Προσθήκη Έκθεσης Μάρτυρα Χωρίς Όρκο</li>
-          <li> Προσθήκη πεδίων για δηλώσεις απώλειας. Βάζεις άτομο στον μετατροπέα ατόμων, πρωτ/λο και απολεσθέντα στα πεδία δήλωσης απώλειας, κατεβάζεις αντοίστιχα έγγραφα</li>
-          <li> Οι ώρες περάτωσης πλέον δεν πάνε π.χ. 14.62 αλλα πάνε, σωστά, 15.02</li></ul>
+          <li>
+            Προσθήκη πεδίων για δηλώσεις απώλειας. Βάζεις άτομο στον μετατροπέα
+            ατόμων, πρωτ/λο και απολεσθέντα στα πεδία δήλωσης απώλειας,
+            κατεβάζεις αντοίστιχα έγγραφα
+          </li>
+          <li>
+            Οι ώρες περάτωσης πλέον δεν πάνε π.χ. 14.62 αλλα πάνε, σωστά, 15.02
+          </li>
+        </ul>
+        <hr />
         <ul>
           <u>Αλλαγές 24-2-2025</u>
           <li>Τα κουμπιά των εκθέσεων πλέον κατεβάζουν πλήρες έγγραφο word</li>
           <li>Βελτίωση κειμένου στα στοιχεία ατόμου</li>
           <li>Ενοίηση αρχείων για να δουλεύουν τοπικά</li>
-          <li>Πλέον δεν υπάρχει data.js. Τα τοπικά σας στοιχεία θα τα βάλετε στο scrip.js, στην κορυφή (Ανοίγει με Νotepad/Σημειωματάριο)</li>
-          <li>Αντιγράψτε το περιεχόμενο του σας data.js στο script.js, φροντίζοντας να υπάρχουν όλα τα πεδία (π.χ. χρόνος περάτωσης, εισσαγελία πρωτοδικών κτλ)</li>          
+          <li>
+            Πλέον δεν υπάρχει data.js. Τα τοπικά σας στοιχεία θα τα βάλετε στο
+            scrip.js, στην κορυφή (Ανοίγει με Νotepad/Σημειωματάριο)
+          </li>
+          <li>
+            Αντιγράψτε το περιεχόμενο του σας data.js στο script.js,
+            φροντίζοντας να υπάρχουν όλα τα πεδία (π.χ. χρόνος περάτωσης,
+            εισσαγελία πρωτοδικών κτλ)
+          </li>
         </ul>
-        <hr>
-
+        <hr />
         <ul>
           <u>Αλλαγές 23-2-2025</u>
           <li>Η μετατροπή ατόμων/οχημάτων γίνεται αυτόματα</li>
           <li>Προσθήκη βασικών εκθέσεων</li>
         </ul>
-        <ul>
-          <u>Οδηγίες χρήσης εκθέσεων:</u>
-        </ul>
-        <li>
-          Στο data.js πρόσθεσε τα έξτρα στοιχεία όπως μέρος σύνταξης έκθεσης,
-          χρόνος περάτωσης έκθεσης, τοπική εισαγγελία, διεύθυνση υπηρεσίας
-        </li>
-        <li>
-          Αφού ορίσεις ανακριτικούς και βάλεις την ταυτότητα του
-          μάρτυρα/εξεταζόμενου/συλληφθέντα, πάτα την έκθεση που θες
-        </li>
-        <li>
-          Το κείμενο της έκθεσης είναι συμπληρωμένο και αντιγραμμένο στο
-          πρόχειρο, κάνε επικόλληση στο αντίστοιχο word
-        </li>
       </div>
     </dialog>
-    
+    <footer></footer>
   </body>
-
 </html>
