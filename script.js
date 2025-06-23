@@ -114,6 +114,31 @@ document
       reader.readAsText(file);
     }
   });
+// tabs and content
+const tabContainer = document.querySelector(".tabs");
+const tabs = Array.from(tabContainer.children);
+const tabContents = Array.from(document.querySelector(".tabContent").children);
+
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", (event) => {
+    event.preventDefault();
+    // Remove 'clicked' class and add 'tab' class to all tabs
+    tabs.forEach((t) => {
+      t.classList.remove("clicked");
+      if (!t.classList.contains("tab")) t.classList.add("tab");
+    });
+
+    // Add 'clicked' to the current tab and remove 'tab'
+    tab.classList.add("clicked");
+    tab.classList.remove("tab");
+
+    // Hide all tab content sections
+    tabContents.forEach((content) => content.classList.add("hidden"));
+
+    // Show the corresponding content section
+    tabContents[index].classList.remove("hidden");
+  });
+});
 
 //dilosi apoleias
 

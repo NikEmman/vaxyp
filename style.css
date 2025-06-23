@@ -29,7 +29,8 @@ body {
   position: relative;
 }
 
-header {
+header,
+footer {
   display: flex;
   justify-content: space-between;
   background-color: var(--primary-blue);
@@ -37,6 +38,7 @@ header {
   padding: 1em 2em;
   color: var(--text-light);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  height: 10vh;
 }
 
 header a {
@@ -47,14 +49,6 @@ header a {
 
 header a:hover {
   text-decoration: underline;
-}
-
-h2 {
-  color: var(--primary-blue);
-  margin: 0.5em 0;
-  border-bottom: 2px solid var(--secondary-blue);
-  padding-bottom: 0.5em;
-  width: fit-content;
 }
 
 /* File Uploader Section */
@@ -183,17 +177,16 @@ h2 {
 }
 
 /* Details/Summary Sections  */
-details {
-  margin-bottom: 2em;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-  width: 200px;
+.hidden {
+  display: none;
+}
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  padding: 1.5em;
 }
 
-summary {
+.tab {
   cursor: pointer;
   padding: 0.8em 1.2em;
   background: linear-gradient(
@@ -209,25 +202,35 @@ summary {
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
+  justify-content: center;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  width: 300px;
 }
 
-summary h2 {
+.tab h2 {
   margin: 0;
   padding: 0;
   color: inherit;
   border: none;
   font-size: 1.2em;
 }
+.clicked {
+  cursor: pointer;
+  color: var(--primary-blue);
+  margin: 0.5em 0;
+  border-bottom: 4px solid var(--secondary-blue);
+  padding-bottom: 0.5em;
+  width: fit-content;
+}
 
-summary::marker,
-summary::-webkit-details-marker {
+.tab::marker,
+.tab::-webkit-details-marker {
   color: var(--text-light);
   font-size: 1.2em;
 }
 
-summary:hover {
+.tab:hover {
   background: linear-gradient(
     to bottom,
     var(--primary-blue),
@@ -235,24 +238,9 @@ summary:hover {
   );
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2) inset;
 }
-details[open] {
-  width: 100%;
-}
-
-details[open] summary {
-  border-radius: 8px 8px 0 0;
-  border-bottom: 2px solid var(--light-blue);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-details > div:not(.buttons) {
-  padding: 1.5em;
-}
-
-details > h3 {
-  padding: 0 1em;
-  color: var(--accent-blue);
-  margin-top: 1em;
+.tabContent {
+  height: fit-content;
+  padding-bottom: 1.5em;
 }
 
 /* Format Controls */
