@@ -40,15 +40,24 @@ let state = getState(data, today);
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
 
+function getAnakritikoiSelection() {
+  const localStorageData = JSON.parse(localStorage.getItem("anakr"));
+  return localStorageData ? localStorageData : { aAnakr: 0, bAnakr: 1 };
+}
+
 const paintSelectMenus = () => {
   anakritikosSelect.innerHTML = "";
   bAnakritikosSelect.innerHTML = "";
+  const selectA = getAnakritikoiSelection().aAnakr;
+  const selectB = getAnakritikoiSelection().bAnakr;
+
   state.anakritikoi.forEach((anakritikos, index) => {
     // Populate a anakr select
     const anakr = document.createElement("option");
     anakr.value = anakritikos;
     anakr.textContent = anakritikos.split(" ")[1];
-    if (index === 0) {
+
+    if (index === selectA) {
       anakr.setAttribute("selected", "");
     }
     anakritikosSelect.appendChild(anakr);
@@ -57,7 +66,8 @@ const paintSelectMenus = () => {
     const bAnakr = document.createElement("option");
     bAnakr.value = anakritikos;
     bAnakr.textContent = anakritikos.split(" ")[1];
-    if (index === 1) {
+
+    if (index === selectB) {
       bAnakr.setAttribute("selected", "");
     }
     bAnakritikosSelect.appendChild(bAnakr);
@@ -156,13 +166,19 @@ protokolo.addEventListener("input", () => {
 initialText.textContent = constructInitialText();
 
 // Update text when anakritikos selections change
-anakritikosSelect.addEventListener("change", () => {
+anakritikosSelect.addEventListener("change", (e) => {
   initialText.textContent = constructInitialText();
-  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  state.anakritikos = convertAnakritikosToEnikos(e.target.value);
+  let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
+  anakritikoiSelections.aAnakr = e.target.selectedIndex;
+  localStorage.setItem("anakr", JSON.stringify(anakritikoiSelections));
 });
 
-bAnakritikosSelect.addEventListener("change", () => {
+bAnakritikosSelect.addEventListener("change", (e) => {
   initialText.textContent = constructInitialText();
+  let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
+  anakritikoiSelections.bAnakr = e.target.selectedIndex;
+  localStorage.setItem("anakr", JSON.stringify(anakritikoiSelections));
 });
 
 // initial refresh copy buttons
@@ -840,19 +856,19 @@ function formatIdInfo(input, data, suspect = false) {
       fields.streetNumber = "--- ";
     }
     if (fields.street === "Αριθμός") {
-      fields.street = "---------- ";
+      fields.street = " ******** ";
     }
     if (fields.phoneNumber === "Άλλα στοιχεία επικοινωνίας") {
-      fields.phoneNumber = "(στερείται) ";
+      fields.phoneNumber = " ******** ";
     }
     if (fields.area === "Οδός") {
-      fields.area = "--- ";
+      fields.area = " ******** ";
     }
     if (fields.area === fields.birthPlace) {
       fields.area = "ομοίως";
     }
     if (fields.region === "Περιοχή") {
-      fields.region = "--- ";
+      fields.region = " ******** ";
     }
     const residence =
       fields.area === "ομοίως"
@@ -876,9 +892,9 @@ function formatIdInfo(input, data, suspect = false) {
       fields.idNumber
     } Δ.Α.Τ. εκδοθέντος ${fields.issueDate} από ${
       fields.issuingAuthority
-    }, με Α.Φ.Μ ------- / Δ.Ο.Υ. ${data.doy}, χρήστη της υπ'αριθ. ${
+    }, με Α.Φ.Μ ******** / Δ.Ο.Υ. ${data.doy}, χρήστης της υπ'αριθ. ${
       fields.phoneNumber
-    } τηλεφωνικής σύνδεσης, με διεύθυνση ηλεκτρονικού ταχυδρομείου (στερείται)`;
+    } τηλεφωνικής σύνδεσης, email: ********`;
     return formattedString;
   } else {
     // Extract all required fields
