@@ -37,6 +37,7 @@ header {
   padding: 1em 2em;
   color: var(--text-light);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  height: 8vh;
 }
 
 header a {
@@ -48,13 +49,15 @@ header a {
 header a:hover {
   text-decoration: underline;
 }
-
-h2 {
-  color: var(--primary-blue);
-  margin: 0.5em 0;
-  border-bottom: 2px solid var(--secondary-blue);
-  padding-bottom: 0.5em;
-  width: fit-content;
+footer {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--primary-blue);
+  margin: 0 -2em -2em -2em;
+  padding: 1em 2em;
+  color: var(--text-light);
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  height: 8vh;
 }
 
 /* File Uploader Section */
@@ -65,6 +68,9 @@ h2 {
   border-radius: 8px;
   background-color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .fileUploader label {
@@ -82,7 +88,7 @@ h2 {
 .fileUploader a:hover {
   text-decoration: underline;
 }
-
+/* Notifications styles */
 #notifications {
   position: fixed;
   left: 40%;
@@ -150,10 +156,12 @@ h2 {
 }
 
 /* Data Containers */
-.data {
+.flex {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+.data {
   gap: 2em;
   padding: 1.5em;
   background-color: white;
@@ -179,37 +187,61 @@ h2 {
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-/* Details/Summary Sections  */
-details {
-  margin-bottom: 2em;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
+/* Tabs/Tab Content  */
+.hidden {
+  display: none;
 }
-
-summary {
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 1.5em 1em 0 1em;
+  border-bottom: 2px solid var(--border-color);
+  background-color: var(--background-light);
+  position: relative;
+}
+.tab {
   cursor: pointer;
   padding: 0.8em 1.2em;
-  background: linear-gradient(
-    to bottom,
-    var(--summary-bg),
-    var(--primary-blue)
-  );
+  background-color: var(--summary-bg);
   color: var(--text-light);
   font-weight: 600;
-  border-radius: 7px;
+  border: 1px solid var(--secondary-blue);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
   position: relative;
   outline: none;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  text-align: center;
+  z-index: 1;
 }
-
-summary h2 {
+.tab:hover {
+  background-color: var(--summary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.clicked {
+  cursor: default;
+  padding: 0.8em 1.2em;
+  /* background: var(--light-blue); */
+  background: linear-gradient(to left, var(--light-blue), #ffffff);
+  color: var(--primary-blue);
+  font-weight: 700;
+  border: 2px solid var(--secondary-blue);
+  border-bottom: 2px solid var(--background-light);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  top: -2px;
+  min-width: 250px;
+  text-align: center;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+.tab h2,
+.clicked h2 {
   margin: 0;
   padding: 0;
   color: inherit;
@@ -217,35 +249,28 @@ summary h2 {
   font-size: 1.2em;
 }
 
-summary::marker,
-summary::-webkit-details-marker {
+.tab::marker,
+.tab::-webkit-details-marker,
+.clicked::marker,
+.clicked::-webkit-details-marker {
   color: var(--text-light);
   font-size: 1.2em;
 }
 
-summary:hover {
-  background: linear-gradient(
-    to bottom,
-    var(--primary-blue),
-    var(--summary-bg)
-  );
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2) inset;
+.tabContent {
+  height: fit-content;
+  padding-bottom: 1.5em;
 }
-
-details[open] summary {
-  border-radius: 8px 8px 0 0;
-  border-bottom: 2px solid var(--light-blue);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.tabContent > div {
+  animation: fadeIn 0.3s ease;
 }
-
-details > div:not(.buttons) {
-  padding: 1.5em;
-}
-
-details > h3 {
-  padding: 0 1em;
-  color: var(--accent-blue);
-  margin-top: 1em;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Format Controls */
@@ -264,7 +289,8 @@ details > h3 {
 }
 
 /* Buttons */
-button {
+button,
+input[type="file"]::file-selector-button {
   padding: 0.6em 1.2em;
   background-color: var(--secondary-blue);
   color: white;
@@ -275,11 +301,13 @@ button {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-button:hover {
+button:hover,
+input[type="file"]::file-selector-button:hover {
   background-color: var(--accent-blue);
 }
 
-button:active {
+button:active,
+input[type="file"]::file-selector-button {
   transform: scale(0.98);
 }
 
@@ -501,10 +529,23 @@ hr {
 }
 
 /* Media Queries - minimal mobile support */
-@media screen and (max-width: 768px) {
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tab,
+  .clicked {
+    min-width: 100%;
+  }
+
   .top {
     height: fit-content;
     gap: 1em;
+  }
+  .fileUploader {
+    flex-direction: column;
+    align-items: start;
   }
 
   .data {
