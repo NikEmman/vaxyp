@@ -190,6 +190,7 @@ details {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   border: 1px solid var(--border-color);
+  width: 200px;
 }
 
 summary {
@@ -233,6 +234,9 @@ summary:hover {
     var(--summary-bg)
   );
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2) inset;
+}
+details[open] {
+  width: 100%;
 }
 
 details[open] summary {
