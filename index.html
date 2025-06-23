@@ -41,71 +41,74 @@
     </div>
     <hr />
 
-    <details open>
-      <summary>
+    <div class="tabs">
+      <div class="clicked">
         <h2>Μετατροπέας ατόμων</h2>
-      </summary>
-      <h3>Παθών</h3>
-      <div class="person data">
-        <textarea
-          id="taytotita"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
-          <p class="arrow">→</p>
-          <button id="person-clear">Εκκαθάριση</button>
-        </div>
-        <textarea class="clipboard-id output"></textarea>
-        <button class="copy-id">Αντιγραφή</button>
       </div>
-      <br />
-      <hr />
-      <h3>Δράστης</h3>
-      <div class="person data">
-        <textarea
-          id="taytotita-ypoptos"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          <p class="arrow">→</p>
-          <button id="person-ypoptos-clear">Εκκαθάριση</button>
-        </div>
-        <textarea class="clipboard-id-ypoptos output"></textarea>
-        <button class="copy-id-ypoptos">Αντιγραφή</button>
-      </div>
-    </details>
-    <hr />
-
-    <details>
-      <summary>
+      <div class="tab">
         <h2>Μετατροπέας οχημάτων</h2>
-      </summary>
-      <div class="data">
-        <textarea
-          id="oxima"
-          class="input"
-          placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
-        ></textarea>
-        <div class="format">
-          <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
-          <p class="arrow">→</p>
-          <button id="vehicle-clear">Εκκαθάριση</button>
-        </div>
-        <textarea readonly class="clipboard-oxima output"></textarea>
-        <button class="copy-oxima">Αντιγραφή</button>
       </div>
-    </details>
-    <hr />
-    <details>
-      <summary>
+      <div class="tab">
         <h2>Εκθέσεις</h2>
-      </summary>
-      <div class="data">
+      </div>
+      <div class="tab">
+        <h2>Δήλωση απώλειας</h2>
+      </div>
+    </div>
+
+    <div class="tabContent">
+      <div class="personsTab">
+        <h3>Παθών</h3>
+        <div class="person data">
+          <textarea
+            id="taytotita"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
+            <p class="arrow">→</p>
+            <button id="person-clear">Εκκαθάριση</button>
+          </div>
+          <textarea class="clipboard-id output"></textarea>
+          <button class="copy-id">Αντιγραφή</button>
+        </div>
+        <br />
+        <hr />
+        <h3>Δράστης</h3>
+        <div class="person data">
+          <textarea
+            id="taytotita-ypoptos"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="arrow">→</p>
+            <button id="person-ypoptos-clear">Εκκαθάριση</button>
+          </div>
+          <textarea class="clipboard-id-ypoptos output"></textarea>
+          <button class="copy-id-ypoptos">Αντιγραφή</button>
+        </div>
+      </div>
+      <div class="vehicleTab hidden">
+        <div class="data">
+          <textarea
+            id="oxima"
+            class="input"
+            placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
+          ></textarea>
+          <div class="format">
+            <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
+            <p class="arrow">→</p>
+            <button id="vehicle-clear">Εκκαθάριση</button>
+          </div>
+          <textarea readonly class="clipboard-oxima output"></textarea>
+          <button class="copy-oxima">Αντιγραφή</button>
+        </div>
+      </div>
+      <div class="ektheseisTab hidden">
+        <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
-          <p>Με χρήση του πεδίου Παθών</p>
           <p class="helpBtn large" id="martyra">Ένορκη Μάρτυρα</p>
           <p class="helpBtn large" id="martyraGyn">Ένορκη Μάρτυρα Γυν.</p>
           <p class="helpBtn large" id="martyraXoris">Μάρτυρα Χωρίς Όρκο</p>
@@ -114,8 +117,9 @@
           <p class="helpBtn large" id="katasxesi">Παράδ & Κατάσχ</p>
           <p class="helpBtn large" id="apodosi">Απόδοσης</p>
         </div>
+        <hr />
+        <p>Με χρήση του πεδίου Δράστης</p>
         <div class="buttons">
-          <p>Με χρήση του πεδίου Δράστης</p>
           <p class="helpBtn large" id="syllipsi">Σύλληψης</p>
           <p class="helpBtn large" id="gnostopoiisi">Γνωστοποίηση Δικ.</p>
           <p class="helpBtn large" id="katigoroumenou">Απολογίας</p>
@@ -127,40 +131,37 @@
             Γνωστοποίηση Ναρκ. Ουσιών
           </p>
         </div>
-      </div>
-
-      <div class="buttons">
+        <hr />
         <p>Ενδοοικογενειακή</p>
-        <p class="helpBtn large" id="martyra-endooik">Ένορκη Αστυνομικού</p>
-        <p class="helpBtn large" id="thyma-endooik">Χωρίς Όρκο Θύμα</p>
-        <p class="helpBtn large" id="drastis-endooik">Απολογίας</p>
-        <p class="helpBtn large" id="iatrodikastiki-endooik">Ιατροδικαστική</p>
-        <p class="helpBtn large" id="panicYes">Θέλω Panic Button</p>
-        <p class="helpBtn large" id="panicNo">Δεν θέλω Panic Button</p>
-      </div>
-    </details>
-
-    <hr />
-    <details>
-      <summary>
-        <h2>Δήλωση απώλειας</h2>
-      </summary>
-      <div class="data">
-        <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
-        <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
-        <div class="protokolo-container">
-          <label for="protokolo">3005/4/</label>
-          <input type="text" id="protokolo" />
+        <div class="buttons">
+          <p class="helpBtn large" id="martyra-endooik">Ένορκη Αστυνομικού</p>
+          <p class="helpBtn large" id="thyma-endooik">Χωρίς Όρκο Θύμα</p>
+          <p class="helpBtn large" id="drastis-endooik">Απολογίας</p>
+          <p class="helpBtn large" id="iatrodikastiki-endooik">
+            Ιατροδικαστική
+          </p>
+          <p class="helpBtn large" id="panicYes">Θέλω Panic Button</p>
+          <p class="helpBtn large" id="panicNo">Δεν θέλω Panic Button</p>
         </div>
-        <textarea
-          class="input"
-          id="apolesthen"
-          placeholder="Απωλεσθέντα"
-        ></textarea>
-        <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
-        <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
       </div>
-    </details>
+      <div class="ypiresiakoTab hidden">
+        <div class="data">
+          <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
+          <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
+          <div class="protokolo-container">
+            <label for="protokolo">3005/4/</label>
+            <input type="text" id="protokolo" />
+          </div>
+          <textarea
+            class="input"
+            id="apolesthen"
+            placeholder="Απωλεσθέντα"
+          ></textarea>
+          <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
+          <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+        </div>
+      </div>
+    </div>
 
     <!-- modals -->
     <dialog id="person-dialog">
@@ -458,5 +459,6 @@
         </ul>
       </div>
     </dialog>
+    <footer></footer>
   </body>
 </html>
