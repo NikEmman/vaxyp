@@ -29,8 +29,7 @@ body {
   position: relative;
 }
 
-header,
-footer {
+header {
   display: flex;
   justify-content: space-between;
   background-color: var(--primary-blue);
@@ -38,7 +37,7 @@ footer {
   padding: 1em 2em;
   color: var(--text-light);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  height: 10vh;
+  height: 8vh;
 }
 
 header a {
@@ -49,6 +48,16 @@ header a {
 
 header a:hover {
   text-decoration: underline;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--primary-blue);
+  margin: 0 -2em -2em -2em;
+  padding: 1em 2em;
+  color: var(--text-light);
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  height: 8vh;
 }
 
 /* File Uploader Section */
@@ -147,10 +156,12 @@ header a:hover {
 }
 
 /* Data Containers */
-.data {
+.flex {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+.data {
   gap: 2em;
   padding: 1.5em;
   background-color: white;
@@ -176,71 +187,90 @@ header a:hover {
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-/* Details/Summary Sections  */
+/* Tabs/Tab Content  */
 .hidden {
   display: none;
 }
 .tabs {
   display: flex;
-  justify-content: space-around;
-  padding: 1.5em;
+  justify-content: center;
+  gap: 8px;
+  padding: 1.5em 1em 0 1em;
+  border-bottom: 2px solid var(--border-color);
+  background-color: var(--background-light);
+  position: relative;
 }
-
 .tab {
   cursor: pointer;
   padding: 0.8em 1.2em;
-  background: linear-gradient(
-    to bottom,
-    var(--summary-bg),
-    var(--primary-blue)
-  );
+  background-color: var(--summary-bg);
   color: var(--text-light);
   font-weight: 600;
-  border-radius: 7px;
+  border: 1px solid var(--secondary-blue);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
   position: relative;
   outline: none;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  width: 300px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  text-align: center;
+  z-index: 1;
 }
-
-.tab h2 {
+.tab:hover {
+  background-color: var(--summary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.clicked {
+  cursor: default;
+  padding: 0.8em 1.2em;
+  /* background: var(--light-blue); */
+  background: linear-gradient(to left, var(--light-blue), #ffffff);
+  color: var(--primary-blue);
+  font-weight: 700;
+  border: 2px solid var(--secondary-blue);
+  border-bottom: 2px solid var(--background-light);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  top: -2px;
+  min-width: 250px;
+  text-align: center;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+.tab h2,
+.clicked h2 {
   margin: 0;
   padding: 0;
   color: inherit;
   border: none;
   font-size: 1.2em;
 }
-.clicked {
-  cursor: pointer;
-  color: var(--primary-blue);
-  margin: 0.5em 0;
-  border-bottom: 4px solid var(--secondary-blue);
-  padding-bottom: 0.5em;
-  width: fit-content;
-}
 
 .tab::marker,
-.tab::-webkit-details-marker {
+.tab::-webkit-details-marker,
+.clicked::marker,
+.clicked::-webkit-details-marker {
   color: var(--text-light);
   font-size: 1.2em;
 }
 
-.tab:hover {
-  background: linear-gradient(
-    to bottom,
-    var(--primary-blue),
-    var(--summary-bg)
-  );
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2) inset;
-}
 .tabContent {
   height: fit-content;
   padding-bottom: 1.5em;
+}
+.tabContent > div {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Format Controls */
@@ -499,7 +529,16 @@ hr {
 }
 
 /* Media Queries - minimal mobile support */
-@media screen and (max-width: 768px) {
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tab,
+  .clicked {
+    min-width: 100%;
+  }
+
   .top {
     height: fit-content;
     gap: 1em;
