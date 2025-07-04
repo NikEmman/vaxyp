@@ -143,6 +143,35 @@
           <p class="helpBtn large" id="panicYes">Θέλω Panic Button</p>
           <p class="helpBtn large" id="panicNo">Δεν θέλω Panic Button</p>
         </div>
+        <hr />
+        <p>Έκδοση Ταυτότητας</p>
+        <div class="buttons">
+          <div>
+            <label for="newId">Νέος αριθμός Δ.Τ.</label>
+            <input id="newId" type="text" placeholder="A01982834" />
+          </div>
+          <div>
+            <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
+            <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+          </div>
+          <select id="n" name="reason">
+            <option value="1">1. ΑΠΩΛΕΙΑ</option>
+            <option value="2">2. ΚΛΟΠΗ</option>
+            <option value="3">3. ΦΘΟΡΑ</option>
+            <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
+            <option value="5">5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.</option>
+            <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
+            <option value="7">
+              7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
+            </option>
+            <option value="8">8. ΑΠΟΒΟΛΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+            <option value="9">9. ΑΠΟΠΟΙΗΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+            <option value="10">10. ΕΚΠΤΩΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+            <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
+            <option value="12">12. ΘΑΝΑΤΟΣ</option>
+          </select>
+          <p class="helpBtn large" id="a130">Α 130-2</p>
+        </div>
       </div>
       <div class="ypiresiakoTab hidden">
         <div class="data flex">
@@ -274,6 +303,14 @@
       <div class="container">
         <p id="patch-close">&times;</p>
         <ul>
+          <u>Αλλαγές 04-7-2025</u>
+          <li>Στα στοιχεία χρήστη προστέθηκε το πεδίο Α.Μ.Υ.</li>
+          <li>
+            Στις Εκθέσεις προστέθηκε ενότητα για το Α-130-2 που αφορά έκδοση
+            Δ.Τ.
+          </li>
+        </ul>
+        <ul>
           <u>Αλλαγές 24-6-2025</u>
           <li>
             Οι περιοχές των μετατροπέων ατόμων / οχημάτων, του κατεβάσματος
@@ -283,12 +320,19 @@
         </ul>
         <hr />
 
-        <ul><u>Αλλαγές 7-6-2025</u>
-          <li>Η σελίδα διατηρεί την επιλογή των ανακριτικών όταν ξαναφωρτώσει</li>
-          <li>Στη μορφοποίηση ατόμου, όλα τα άγνωστα πεδία βγαίνουν ως **** </li>
+        <ul>
+          <u>Αλλαγές 7-6-2025</u>
+          <li>
+            Η σελίδα διατηρεί την επιλογή των ανακριτικών όταν ξαναφωρτώσει
+          </li>
+          <li>Στη μορφοποίηση ατόμου, όλα τα άγνωστα πεδία βγαίνουν ως ****</li>
         </ul>
-        <ul><u>Αλλαγές 5-6-2025</u>
-          <li>Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται ανανέωση σελίδας</li>
+        <ul>
+          <u>Αλλαγές 5-6-2025</u>
+          <li>
+            Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται
+            ανανέωση σελίδας
+          </li>
           <li>
             Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται
             ανανέωση σελίδας
