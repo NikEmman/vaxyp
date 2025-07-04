@@ -552,6 +552,22 @@ panicNo.addEventListener("click", () => {
   generateWord(ektheseis.panicButtonNo, state);
 });
 
+// new IDs btn
+const a130 = document.getElementById("a130");
+a130.addEventListener("click", () => {
+  Object.assign(state, { ...state.ypefthiniData });
+  state.n = document.getElementById("n").value;
+  state.newId = document.getElementById("newId").value;
+  console.log(state.newId);
+  state.newIdAppDate = document.getElementById("newIdAppDate").value;
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  state.ypiresia = state.ypiresia.toUpperCase();
+  state.anakritikosName =
+    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
+  state.rank = state.anakritikos.split(" ")[0];
+  generateWord(ektheseis.a130, state);
+});
+
 //time formatter
 function roundDownMinutes(minutes) {
   return minutes - (minutes % 5); // rounds down minues to miltiplicatives of 5, ie 39 becomes 35
