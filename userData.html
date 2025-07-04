@@ -47,28 +47,23 @@
           id="ypiresia"
           name="ypiresia"
           placeholder="Τ.Δ.Ε.Ε. Κομοτηνής"
-        /><br /><br />
+        /><br />
         <label for="dAstynomias">Διευθ. Αστυνομίας:</label><br />
         <input
           type="text"
           id="dAstynomias"
           name="dAstynomias"
           placeholder="ΡΟΔΟΠΗΣ"
-        /><br /><br />
+        /><br />
         <label for="geniki">Γ.Α.Δ./ΓΕ.Π.Α.Δ.</label><br />
         <input
           type="text"
           id="geniki"
           name="geniki"
           placeholder="Α.Μ.Θ."
-        /><br /><br />
+        /><br />
         <label for="doy">ΔΟΥ:</label><br />
-        <input
-          type="text"
-          id="doy"
-          name="doy"
-          placeholder="Κομοτηνής"
-        /><br /><br />
+        <input type="text" id="doy" name="doy" placeholder="Κομοτηνής" /><br />
         <label for="merosSyntaksisEkthesis">Μέρος Σύνταξης Έκθεσης:</label
         ><br />
         <input
@@ -76,7 +71,7 @@
           id="merosSyntaksisEkthesis"
           name="merosSyntaksisEkthesis"
           placeholder="Κομοτηνή"
-        /><br /><br />
+        /><br />
         <label for="xronosPeratosis">Χρόνος Περάτωσης:</label><br />
         <input
           type="number"
@@ -84,28 +79,28 @@
           name="xronosPeratosis"
           min="0"
           placeholder="10"
-        /><br /><br />
+        /><br />
         <label for="eisaggeleiaProtodikon">Εισαγγελία Πρωτοδικών:</label><br />
         <input
           type="text"
           id="eisaggeleiaProtodikon"
           name="eisaggeleiaProtodikon"
           placeholder="Ροδόπης"
-        /><br /><br />
+        /><br />
         <label for="iatro">Ιατροδικαστική Υπηρεσία:</label><br />
         <input
           type="text"
           id="iatro"
           name="iatro"
           placeholder="ΡΟΔΟΠΗΣ"
-        /><br /><br />
+        /><br />
         <label for="dieuthynsiYpiresias">Διεύθυνση Υπηρεσίας:</label><br />
         <input
           type="text"
           id="dieuthynsiYpiresias"
           name="dieuthynsiYpiresias"
           placeholder="Λ Δημοκρατίας αρ. 3"
-        /><br /><br />
+        /><br />
         <label for="tilefono">Τηλέφωνο:</label><br />
         <input
           type="text"
@@ -114,14 +109,16 @@
           placeholder="25314 40177"
           minlength="10"
           maxlength="10"
-        /><br /><br />
+        /><br />
         <label for="email">Email:</label><br />
         <input
           type="email"
           id="email"
           name="email"
           placeholder="ta.komotinis@astynomia.gr"
-        /><br /><br />
+        /><br />
+        <label for="email">Email:</label><br />
+        <input type="text" id="amy" name="amy" placeholder="4587" /><br />
         <button type="button" id="submitForm">Αποθήκευση</button>
       </div>
     </form>
@@ -161,6 +158,7 @@
             data.dieuthynsiYpiresias || "";
           document.getElementById("tilefono").value = data.tilefono || "";
           document.getElementById("email").value = data.email || "";
+          document.getElementById("amy").value = data.amy || "";
         }
 
         function addAnakritikoi(value, valueEnikos) {
@@ -234,6 +232,7 @@
               dieuthynsiYpiresias: formData.get("dieuthynsiYpiresias"),
               tilefono: formData.get("tilefono"),
               email: formData.get("email"),
+              amy: formData.get("amy"),
             };
             // Save to local storage
             localStorage.setItem("dataObject", JSON.stringify(data));

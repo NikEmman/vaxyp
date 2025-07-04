@@ -12,6 +12,7 @@ const defaultData = {
   dAstynomias: "ΡΟΔΟΠΗΣ",
   geniki: "Α.Μ.Θ.",
   iatro: "ΡΟΔΟΠΗΣ",
+  amy: "4587",
 };
 const months = [
   "Ιανουαρίου",

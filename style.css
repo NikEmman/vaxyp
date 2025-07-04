@@ -148,7 +148,8 @@ footer {
   font-weight: 500;
 }
 
-.anakritikoi select {
+.anakritikoi select,
+select {
   padding: 0.5em;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -264,6 +265,7 @@ footer {
 .tabContent > div {
   animation: fadeIn 0.3s ease;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
