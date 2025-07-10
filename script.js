@@ -353,7 +353,7 @@ syllipsi.addEventListener("click", () => {
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 10);
 
-  generateWord(ektheseis.syllipsi, state);
+  generateWord(ektheseis.syllipsi, state, state.ypoptosData);
 });
 // anomoti button
 const anomoti = document.getElementById("anomoti");
@@ -363,7 +363,7 @@ anomoti.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.anomoti, state);
+  generateWord(ektheseis.anomoti, state, state.ypoptosData);
 });
 // anomoti gyn
 const anomotiGyn = document.getElementById("anomotiGyn");
@@ -373,7 +373,7 @@ anomotiGyn.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.anomotiGyn, state);
+  generateWord(ektheseis.anomotiGyn, state, state.ypoptosData);
 });
 // katigoroumenou button
 const katigoroumenou = document.getElementById("katigoroumenou");
@@ -383,7 +383,7 @@ katigoroumenou.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.katigoroumenou, state);
+  generateWord(ektheseis.katigoroumenou, state, state.ypoptosData);
 });
 
 //apodosi button
@@ -414,7 +414,7 @@ gnostopoiisi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.gnostopoiisi, state);
+  generateWord(ektheseis.gnostopoiisi, state, state.ypoptosData);
 });
 
 // egxeirisis button  printEgxeirisis(initial, person)
@@ -445,7 +445,7 @@ gnostopoiisiNarkwtikwn.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state);
+  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state, state.ypoptosData);
 });
 
 // praktikoZygisis button
@@ -456,7 +456,7 @@ praktikoZygisis.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.praktikoZygisis, state);
+  generateWord(ektheseis.praktikoZygisis, state, state.ypoptosData);
 });
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
@@ -488,7 +488,7 @@ ypoptoy.addEventListener("click", () => {
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
-  generateWord(ektheseis.deltioYpoptou, state);
+  generateWord(ektheseis.deltioYpoptou, state, state.ypoptosData);
 });
 
 /// ENDOOIKOGENIAKI
@@ -521,7 +521,7 @@ drastisEndooik.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.katigoroumenouEndooik, state);
+  generateWord(ektheseis.katigoroumenouEndooik, state, state.ypoptosData);
 });
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
@@ -978,7 +978,11 @@ function copyToClipboard(textToCopy) {
     document.body.removeChild(textArea);
   }
 }
-async function generateWord(ekthesi, replacements) {
+async function generateWord(
+  ekthesi,
+  replacements,
+  person = state.ypefthiniData
+) {
   let decodedArrayBuffer = base64ToArrayBuffer(ekthesi.string);
 
   try {
@@ -995,12 +999,13 @@ async function generateWord(ekthesi, replacements) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${ekthesi.title}.docx`;
+    const docTitle = `${ekthesi.title}-${person.surname}`;
+    a.download = `${docTitle}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    displayNotification(ekthesi.title);
+    displayNotification(docTitle);
   } catch (error) {
     console.error("Error generating Word document:", error);
     alert("Error generating Word document: " + error.message);
