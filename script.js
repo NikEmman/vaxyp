@@ -467,6 +467,7 @@ ypiresiako.addEventListener("click", () => {
   state.ypiresia = state.ypiresia.toUpperCase();
   state.dAstynomias = state.dAstynomias.toUpperCase();
   state.geniki = state.geniki.toUpperCase();
+  state.victim = shortenFormattedPerson(state.victim);
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
@@ -562,6 +563,7 @@ a130.addEventListener("click", () => {
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
   state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
+  state.issuingAuthority = state.issuingAuthority.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
@@ -752,6 +754,10 @@ function convertAnakritikosToEnikos(value) {
   return state.anakritikoiEnikos[state.anakritikoi.indexOf(value)];
 }
 
+// helper function to shorten victim's formatted text
+function shortenFormattedPerson(formattedString) {
+  return formattedString.split(", με Α.Φ.Μ")[0];
+}
 // formatters
 function formatVehicleInfo(input) {
   // Parse input text into an array of key-value pairs
