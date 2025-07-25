@@ -312,6 +312,16 @@ vehicleClear.addEventListener("click", () => {
   clipboardOxima.value = "";
   state.vehicle = "";
 });
+// a130 select menu
+const a130SelectMenu = document.getElementById("n");
+a130SelectMenu.addEventListener("change", () => {
+  const changeDate = document.querySelector(".changeDate");
+  if (a130SelectMenu.value > 3) {
+    changeDate.classList.add("hidden");
+  } else {
+    changeDate.classList.remove("hidden");
+  }
+});
 
 // ektheseis
 const initial = document.getElementById("initial");
@@ -559,7 +569,6 @@ a130.addEventListener("click", () => {
   Object.assign(state, { ...state.ypefthiniData });
   state.n = document.getElementById("n").value;
   state.newId = document.getElementById("newId").value;
-  console.log(state.newId);
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
   state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
   state.ypiresia = state.ypiresia.toUpperCase();
