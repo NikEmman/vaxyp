@@ -150,16 +150,15 @@
             <label for="newId">Νέος αριθμός Δ.Τ.</label>
             <input id="newId" type="text" placeholder="A01982834" />
           </div>
-          <div>
-            <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
-            <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
-          </div>
+
           <select id="n" name="reason">
             <option value="1">1. ΑΠΩΛΕΙΑ</option>
             <option value="2">2. ΚΛΟΠΗ</option>
             <option value="3">3. ΦΘΟΡΑ</option>
             <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
-            <option value="5">5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.</option>
+            <option selected value="5">
+              5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.
+            </option>
             <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
             <option value="7">
               7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
@@ -170,6 +169,10 @@
             <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
             <option value="12">12. ΘΑΝΑΤΟΣ</option>
           </select>
+          <div class="changeDate hidden">
+            <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
+            <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+          </div>
           <p class="helpBtn large" id="a130">Α 130-2</p>
         </div>
       </div>
