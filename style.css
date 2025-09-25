@@ -93,7 +93,7 @@ footer {
   position: fixed;
   left: 40%;
   top: 5%;
-  z-index: 1;
+  z-index: 2112121;
 }
 .notification {
   border-radius: 5px;
@@ -102,6 +102,16 @@ footer {
   text-align: center;
   background-color: rgb(196, 235, 196);
   color: green;
+}
+.alert {
+  background-color: #ffe8e8;
+  color: red;
+}
+.error {
+  border: 1px dashed red;
+  color: red;
+  background-color: #ffe8e8;
+  outline: none;
 }
 
 /* Top Section with Anakritikoi */
