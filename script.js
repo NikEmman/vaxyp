@@ -201,8 +201,14 @@ copyInitialBtn.addEventListener("click", () => {
 const taytotita = document.getElementById("taytotita");
 const clipboardId = document.querySelector(".clipboard-id");
 const copyIdBtn = document.querySelector(".copy-id");
+if (taytotita.value) {
+  clipboardId.value = formatIdInfo(taytotita.value, data);
+  state.victim = clipboardId.value;
+} else {
+  state.victim = "";
+}
+
 taytotita.addEventListener("input", () => {
-  // id = taytotita.value;
   clipboardId.value = formatIdInfo(taytotita.value, data);
   state.victim = clipboardId.value;
 });
@@ -217,6 +223,13 @@ copyIdBtn.addEventListener("click", () => {
 const taytotitaYpoptos = document.getElementById("taytotita-ypoptos");
 const clipboardIdYpoptos = document.querySelector(".clipboard-id-ypoptos");
 const copyIdYpoptosBtn = document.querySelector(".copy-id-ypoptos");
+
+if (taytotitaYpoptos.value) {
+  clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data);
+  state.suspect = clipboardIdYpoptos.value;
+} else {
+  state.suspect = "";
+}
 
 taytotitaYpoptos.addEventListener("input", () => {
   clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data, true);
@@ -594,17 +607,35 @@ a130.addEventListener("click", () => {
   state.newId = document.getElementById("newId").value;
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
   state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
-  state.ypiresia = state.ypiresia.toUpperCase();
-  state.issuingAuthority = state.issuingAuthority.toUpperCase();
+  state.ypiresia = state.ypiresia?.toUpperCase();
+  state.issuingAuthority = state.issuingAuthority?.toUpperCase();
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.a130, state);
 });
 
+// ypefthiniDAT button
+const ypefthiniDAT = document.getElementById("ypefthiniDAT");
+
+ypefthiniDAT.addEventListener("click", () => {
+  Object.assign(state, { ...state.ypefthiniData });
+  state.idNumber1 = state.idNumber;
+  generateWord(ektheseis.ypefthiniDAT, state);
+});
+
+//form validations
+const newidData = document.getElementById("newId");
+newidData.addEventListener("input", () => {
+  newidData.classList.remove("error");
+  if (newidData.value === "") {
+    newidData.classList.add("error");
+  }
+});
+
 //time formatter
 function roundDownMinutes(minutes) {
-  return minutes - (minutes % 5); // rounds down minues to miltiplicatives of 5, ie 39 becomes 35
+  return minutes - (minutes % 5); // rounds down minutes to miltiplicatives of 5, ie 39 becomes 35
 }
 function formatTime(date, extraTime = 0) {
   let totalMinutes =
@@ -856,6 +887,7 @@ function formatVehicleInfo(input) {
 }
 function formatIdInfo(input, data, suspect = false) {
   // Parse input text into an array of lines
+  if (input.trim() === "") return "";
   const lines = input
     .split("\n")
     .map((line) => line.trim())
@@ -975,11 +1007,18 @@ function formatIdInfo(input, data, suspect = false) {
 }
 
 //notifications display
-function displayNotification(documentTitle) {
+function displayNotification(text, alert = false) {
   const notifications = document.getElementById("notifications");
   const newNotification = document.createElement("div");
   newNotification.classList.add("notification");
-  newNotification.innerHTML = `Κατέβηκε επιτυχώς η ${documentTitle} &check;`;
+  if (alert) {
+    newNotification.classList.add("alert");
+  }
+
+  newNotification.innerHTML = text;
+
+  newNotification.innerHTML = text;
+
   notifications.innerHTML = "";
   notifications.appendChild(newNotification);
   notficationPhaseOut(newNotification);
@@ -1022,6 +1061,12 @@ async function generateWord(
   replacements,
   person = state.ypefthiniData
 ) {
+  if (!person.surname) {
+    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη. &cross;`;
+    displayNotification(notificationText, true);
+    return;
+  }
+
   let decodedArrayBuffer = base64ToArrayBuffer(ekthesi.string);
 
   try {
@@ -1038,13 +1083,15 @@ async function generateWord(
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
+
     const docTitle = `${ekthesi.title}-${person.surname}`;
+    const notificationText = `Κατέβηκε επιτυχώς η ${docTitle} &check;`;
     a.download = `${docTitle}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    displayNotification(docTitle);
+    displayNotification(notificationText);
   } catch (error) {
     console.error("Error generating Word document:", error);
     alert("Error generating Word document: " + error.message);
