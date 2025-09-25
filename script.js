@@ -578,10 +578,17 @@ a130.addEventListener("click", () => {
   state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.a130, state);
 });
+// ypefthiniDAT button
+const ypefthiniDAT = document.getElementById("ypefthiniDAT");
 
+ypefthiniDAT.addEventListener("click", () => {
+  Object.assign(state, { ...state.ypefthiniData });
+  state.idNumber1 = state.idNumber;
+  generateWord(ektheseis.ypefthiniDAT, state);
+});
 //time formatter
 function roundDownMinutes(minutes) {
-  return minutes - (minutes % 5); // rounds down minues to miltiplicatives of 5, ie 39 becomes 35
+  return minutes - (minutes % 5); // rounds down minutes to miltiplicatives of 5, ie 39 becomes 35
 }
 function formatTime(date, extraTime = 0) {
   let totalMinutes =
