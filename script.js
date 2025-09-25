@@ -958,11 +958,16 @@ function formatIdInfo(input, data, suspect = false) {
 }
 
 //notifications display
-function displayNotification(documentTitle) {
+function displayNotification(documentTitle, alert = false) {
   const notifications = document.getElementById("notifications");
   const newNotification = document.createElement("div");
   newNotification.classList.add("notification");
-  newNotification.innerHTML = `Κατέβηκε επιτυχώς η ${documentTitle} &check;`;
+  alert && newNotification.classList.add("alert");
+  if (alert) {
+    newNotification.innerHTML = `Η ${documentTitle} έχει σφάλμα! Έβαλες παθών/δράστη? &cross;`;
+  } else {
+    newNotification.innerHTML = `Κατέβηκε επιτυχώς η ${documentTitle} &check;`;
+  }
   notifications.innerHTML = "";
   notifications.appendChild(newNotification);
   notficationPhaseOut(newNotification);
@@ -1021,13 +1026,17 @@ async function generateWord(
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    const docTitle = `${ekthesi.title}-${person.surname}`;
-    a.download = `${docTitle}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    displayNotification(docTitle);
+    if (person.surname) {
+      const docTitle = `${ekthesi.title}-${person.surname}`;
+      a.download = `${docTitle}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      displayNotification(docTitle);
+    } else {
+      displayNotification(ekthesi.title, true);
+    }
   } catch (error) {
     console.error("Error generating Word document:", error);
     alert("Error generating Word document: " + error.message);

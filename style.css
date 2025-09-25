@@ -103,6 +103,10 @@ footer {
   background-color: rgb(196, 235, 196);
   color: green;
 }
+.alert {
+  background-color: #ffcccc;
+  color: red;
+}
 
 /* Top Section with Anakritikoi */
 .top {
