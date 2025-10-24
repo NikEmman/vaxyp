@@ -515,6 +515,29 @@ ypoptoy.addEventListener("click", () => {
   generateWord(ektheseis.deltioYpoptou, state, state.ypoptosData);
 });
 
+//deltio feromenou button
+const feromenou = document.getElementById("feromenou");
+feromenou.addEventListener("click", () => {
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  Object.assign(state, { ...state.ypoptosData });
+  state.timeStart = formatTime(today, state.timePassed);
+  state.anakritikosName =
+    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
+  state.rank = state.anakritikos.split(" ")[0];
+  console.log(state.ypoptosData);
+  state.man = " ";
+  state.woman = " ";
+  state.sex == "Γυναίκα" ? (state.woman = "X") : (state.man = "X");
+  state.anakritikosName =
+    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
+  state.rank = state.anakritikos.split(" ")[0];
+  state.isuYear = state.issueDate.split("-")[2];
+  state.issuingAuthority = state.issuingAuthority.toUpperCase();
+  state.merosSyntaksisEkthesis = state.merosSyntaksisEkthesis.toUpperCase();
+  state.ypiresia = state.ypiresia.toUpperCase();
+  generateWord(ektheseis.feromenou, state, state.ypoptosData);
+});
+
 /// ENDOOIKOGENIAKI
 
 //martyra astyn button
@@ -912,6 +935,7 @@ function formatIdInfo(input, data, suspect = false) {
       phoneNumber: getValue("Τηλέφωνο"),
       street: getValue("Οδός"),
       streetNumber: getValue("Αριθμός"),
+      sex: getValue("Φύλο"),
     };
 
     // Handle special cases
