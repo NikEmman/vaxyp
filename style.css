@@ -542,6 +542,21 @@ hr {
 
 /* Media Queries - minimal mobile support */
 @media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    height: fit-content;
+  }
+  .anakritikoi {
+    flex-direction: column;
+    align-items: center;
+  }
+  .person {
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
   .tabs {
     flex-direction: column;
     gap: 4px;
