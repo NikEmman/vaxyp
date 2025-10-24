@@ -341,7 +341,7 @@ input[type="file"]::file-selector-button {
 .large {
   width: fit-content;
   padding: 0.6em 1.2em;
-  height: auto;
+  height: 50px;
 }
 
 .helpBtn:hover {
@@ -484,6 +484,17 @@ ul li {
   font-weight: 500;
   margin-bottom: 0.3em;
   display: inline-block;
+}
+.fields {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+.fields div {
+  display: flex;
+  flex-direction: column;
 }
 
 #anakritikoiContainer,
