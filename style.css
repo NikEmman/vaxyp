@@ -427,6 +427,7 @@ dialog:focus {
   cursor: pointer;
   border-radius: 50%;
   z-index: 10;
+  margin-right: 15px;
 }
 
 .container p#person-close:hover,
@@ -490,11 +491,16 @@ ul li {
   width: 100%;
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(267px, 1fr));
 }
 .fields div {
   display: flex;
   flex-direction: column;
+  justify-self: end;
+}
+.fields button.helpBtn {
+  grid-column: 1 / -1;
+  justify-self: end;
 }
 
 #anakritikoiContainer,
