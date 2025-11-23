@@ -345,15 +345,12 @@ martyra.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  generateWord(ektheseis.martyra, state);
-});
-const martyraGyn = document.getElementById("martyraGyn");
-
-martyraGyn.addEventListener("click", () => {
-  state.initial = constructInitialText();
-  state.timeStart = formatTime(today, state.timePassed);
-  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  generateWord(ektheseis.martyraGyn, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "martyra",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 
 // martyraXorisOrko button
@@ -363,8 +360,12 @@ martyraXoris.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-
-  generateWord(ektheseis.martyraXoris, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "martyraXoris",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 
 //syllipsi button
@@ -375,8 +376,13 @@ syllipsi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "syllipsi",
+    ektheseis
+  );
 
-  generateWord(ektheseis.syllipsi, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 // anomoti button
 const anomoti = document.getElementById("anomoti");
@@ -385,19 +391,11 @@ anomoti.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(state.ypoptosData.sex, "anomoti", ektheseis);
 
-  generateWord(ektheseis.anomoti, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
-// anomoti gyn
-const anomotiGyn = document.getElementById("anomotiGyn");
-anomotiGyn.addEventListener("click", () => {
-  state.timePassed += state.xronosPeratosis * 2;
-  state.initial = constructInitialText();
-  state.timeStart = formatTime(today, state.timePassed);
-  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
-  generateWord(ektheseis.anomotiGyn, state, state.ypoptosData);
-});
 // katigoroumenou button
 const katigoroumenou = document.getElementById("katigoroumenou");
 katigoroumenou.addEventListener("click", () => {
@@ -405,8 +403,13 @@ katigoroumenou.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "katigoroumenou",
+    ektheseis
+  );
 
-  generateWord(ektheseis.katigoroumenou, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 
 //apodosi button
@@ -416,8 +419,12 @@ apodosi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-
-  generateWord(ektheseis.apodosi, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "apodosi",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 // katasxesi button
 const katasxesi = document.getElementById("katasxesi");
@@ -426,6 +433,7 @@ katasxesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+
   generateWord(ektheseis.katasxesi, state);
 });
 
@@ -436,8 +444,13 @@ gnostopoiisi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "gnostopoiisi",
+    ektheseis
+  );
 
-  generateWord(ektheseis.gnostopoiisi, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 
 // egxeirisis button  printEgxeirisis(initial, person)
@@ -447,15 +460,12 @@ egxeirisis.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  generateWord(ektheseis.egxeirisis, state);
-});
-const egxeirisisGyn = document.getElementById("egxeirisisGyn");
-egxeirisisGyn.addEventListener("click", () => {
-  state.timePassed += state.xronosPeratosis * 2;
-  state.initial = constructInitialText();
-  state.timeStart = formatTime(today, state.timePassed);
-  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  generateWord(ektheseis.egxeirisisGyn, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "egxeirisis",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 
 // gnostopoiisiNarkwtikwn button
@@ -467,8 +477,13 @@ gnostopoiisiNarkwtikwn.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "gnostopoiisiNarkwtikwn",
+    ektheseis
+  );
 
-  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 
 // praktikoZygisis button
@@ -478,8 +493,13 @@ praktikoZygisis.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "praktikoZygisis",
+    ektheseis
+  );
 
-  generateWord(ektheseis.praktikoZygisis, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
@@ -556,8 +576,12 @@ thymaEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-
-  generateWord(ektheseis.martyraXorisEndooik, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "martyraXorisEndooik",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 
 // drastis -apologia -katigoroumenos endooik button
@@ -567,8 +591,13 @@ drastisEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "katigoroumenouEndooik",
+    ektheseis
+  );
 
-  generateWord(ektheseis.katigoroumenouEndooik, state, state.ypoptosData);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
@@ -582,21 +611,37 @@ iatrodikastiki.addEventListener("click", () => {
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
-  generateWord(ektheseis.iatrodikastiki, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "iatrodikastiki",
+    ektheseis
+  );
+
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 const panicYes = document.getElementById("panicYes");
 panicYes.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
-  generateWord(ektheseis.panicButtonYes, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "panicButtonYes",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 const panicNo = document.getElementById("panicNo");
 panicNo.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
-  generateWord(ektheseis.panicButtonNo, state);
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "panicButtonNo",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 
 // deltio drasti Endo button
@@ -1166,4 +1211,15 @@ function base64ToArrayBuffer(base64) {
     buffer[i] = binary.charCodeAt(i);
   }
   return buffer.buffer;
+}
+function getDocumentBySex(sex, docKey, documents) {
+  // For female, try to fetch the "Fem" variant
+  if (sex === "Γυναίκα") {
+    const femKey = `${docKey}Gyn`;
+    if (documents[femKey]) {
+      return documents[femKey];
+    }
+  }
+  // Default: return the base key (male or fallback)
+  return documents[docKey] || null;
 }
