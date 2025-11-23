@@ -599,6 +599,17 @@ panicNo.addEventListener("click", () => {
   generateWord(ektheseis.panicButtonNo, state);
 });
 
+// deltio drasti button
+const ypoptoyEndo = document.getElementById("ypoptoyEndo");
+ypoptoyEndo.addEventListener("click", () => {
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  Object.assign(state, { ...state.ypoptosData });
+  state.anakritikosName =
+    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
+  state.rank = state.anakritikos.split(" ")[0];
+  generateWord(ektheseis.deltioYpoptouEndo, state, state.ypoptosData);
+});
+
 // new IDs btn
 const a130 = document.getElementById("a130");
 a130.addEventListener("click", () => {
