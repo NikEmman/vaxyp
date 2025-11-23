@@ -599,7 +599,7 @@ panicNo.addEventListener("click", () => {
   generateWord(ektheseis.panicButtonNo, state);
 });
 
-// deltio drasti button
+// deltio drasti Endo button
 const ypoptoyEndo = document.getElementById("ypoptoyEndo");
 ypoptoyEndo.addEventListener("click", () => {
   state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
@@ -608,6 +608,17 @@ ypoptoyEndo.addEventListener("click", () => {
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.deltioYpoptouEndo, state, state.ypoptosData);
+});
+
+// Γ.Ε.Ε. button
+const simansi = document.getElementById("simansi");
+simansi.addEventListener("click", () => {
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  Object.assign(state, { ...state.ypoptosData });
+  state.anakritikosName =
+    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
+  state.rank = state.anakritikos.split(" ")[0];
+  generateWord(ektheseis.simansi, state, state.ypoptosData);
 });
 
 // new IDs btn
