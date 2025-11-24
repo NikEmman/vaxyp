@@ -565,6 +565,7 @@ const martyraEndooik = document.getElementById("martyra-endooik");
 martyraEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
+  state.endoTimeStart = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
   generateWord(ektheseis.astynomikosEndooik, state);
@@ -575,6 +576,8 @@ thymaEndooik.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
+  state.endoStartTime = state.timeStart;
+
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   const ekthesi = getDocumentBySex(
     state.ypefthiniData.sex,
@@ -664,6 +667,12 @@ simansi.addEventListener("click", () => {
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.simansi, state, state.ypoptosData);
+});
+
+// ΒΑΣ button
+const vasEndo = document.getElementById("vasEndo");
+vasEndo.addEventListener("click", () => {
+  generateWord(ektheseis.vasEndo, state, state.ypoptosData);
 });
 
 // new IDs btn
