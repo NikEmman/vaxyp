@@ -646,6 +646,22 @@ panicNo.addEventListener("click", () => {
   );
   generateWord(ekthesi, state);
 });
+//syllipsi button
+const syllipsiEndo = document.getElementById("syllipsiEndo");
+syllipsiEndo.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis * 2;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  state.arrestTime = formatTime(today, state.timePassed - 5);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "syllipsiEndo",
+    ektheseis
+  );
+
+  generateWord(ekthesi, state, state.ypoptosData);
+});
 
 // deltio drasti Endo button
 const ypoptoyEndo = document.getElementById("ypoptoyEndo");
