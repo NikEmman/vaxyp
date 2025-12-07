@@ -567,8 +567,21 @@ martyraEndooik.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.endoTimeStart = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-
-  generateWord(ektheseis.astynomikosEndooik, state);
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.ton = "τον";
+  }
+  const ekthesi = getDocumentBySex(
+    state.ypefthiniData.sex,
+    "astynomikosEndooik",
+    ektheseis
+  );
+  generateWord(ekthesi, state);
 });
 // thyma endooik button
 const thymaEndooik = document.getElementById("thyma-endooik");
@@ -577,6 +590,15 @@ thymaEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.endoStartTime = state.timeStart;
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.ton = "τον";
+  }
 
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   const ekthesi = getDocumentBySex(
@@ -594,6 +616,15 @@ drastisEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  if (state.ypefthiniData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.ton = "τον";
+  }
   const ekthesi = getDocumentBySex(
     state.ypoptosData.sex,
     "katigoroumenouEndooik",
@@ -614,6 +645,15 @@ iatrodikastiki.addEventListener("click", () => {
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.ton = "τον";
+  }
   const ekthesi = getDocumentBySex(
     state.ypefthiniData.sex,
     "iatrodikastiki",
@@ -682,7 +722,8 @@ simansi.addEventListener("click", () => {
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
-  generateWord(ektheseis.simansi, state, state.ypoptosData);
+  const ekthesi = getDocumentBySex(state.ypoptosData.sex, "simansi", ektheseis);
+  generateWord(ekthesi, state, state.ypoptosData);
 });
 
 // ΒΑΣ button
