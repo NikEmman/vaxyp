@@ -108,16 +108,40 @@ document
 
       reader.onload = function (e) {
         try {
-          localStorage.clear();
-          localStorage.setItem("dataObject", e.target.result);
+          const result = JSON.parse(e.target.result);
 
-          data = getData();
+          // 1. Strict Validation Check
+          // We check: Is it an object? Does it have 'anakritikoi'? Is that an array?
+          const hasOfficers =
+            result.anakritikoi &&
+            Array.isArray(result.anakritikoi) &&
+            result.anakritikoi.length > 0;
+          const hasService = !!result.ypiresia; // Ensures ypiresia is not empty or undefined
+
+          if (!hasOfficers || !hasService) {
+            // If validation fails, we stop IMMEDIATELY
+            alert(
+              "Σφάλμα: Το αρχείο JSON δεν περιέχει τα απαραίτητα δεδομένα (π.χ. Ανακριτικοί υπάλληλοι)."
+            );
+            return;
+          }
+
+          // 2. Only proceed if the code reaches this point
+          localStorage.clear();
+          localStorage.setItem("dataObject", JSON.stringify(result));
+
+          // Update global variables
+          data = result;
           state = getState(data, today);
+
+          // Refresh UI
           paintSelectMenus();
           initial.textContent = constructInitialText();
+
+          console.log("Success: Data loaded.");
         } catch (error) {
-          console.error("Invalid JSON file:", error);
-          alert("Το αρχείο δεν έχει σωστή μορφή JSON.");
+          console.error("Parsing Error:", error);
+          alert("Το αρχείο δεν είναι έγκυρο JSON.");
         }
       };
 
