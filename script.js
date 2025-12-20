@@ -710,6 +710,33 @@ panicNo.addEventListener("click", () => {
   );
   generateWord(ekthesi, state);
 });
+
+//afairesi button
+const afairesi = document.getElementById("afairesi");
+afairesi.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis * 2;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  const ekthesi = getDocumentBySex(
+    state.ypoptosData.sex,
+    "afairesi",
+    ektheseis
+  );
+
+  generateWord(ekthesi, state, state.ypoptosData);
+});
+// katasxesiEndo button
+const katasxesiEndo = document.getElementById("katasxesiEndo");
+katasxesiEndo.addEventListener("click", () => {
+  state.timePassed += state.xronosPeratosis * 2;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+
+  generateWord(ektheseis.katasxesiEndo, state);
+});
+
 //syllipsi button
 const syllipsiEndo = document.getElementById("syllipsiEndo");
 syllipsiEndo.addEventListener("click", () => {
