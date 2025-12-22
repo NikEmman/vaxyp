@@ -27,7 +27,10 @@ const getState = (localData, todayDate) => {
     ypoptosData: {},
     timePassed: 0,
     apolesthen: "",
-    protokolo: 0,
+    protokolo: "",
+    protokoloEndo: "",
+    apodexetai: "",
+    enMeri: "",
   };
   //combine data and state so the new Ektheseis replacement argument works
 
@@ -185,6 +188,45 @@ const protokolo = document.getElementById("protokolo");
 protokolo.addEventListener("input", () => {
   state.protokolo = protokolo.value;
 });
+const protokoloEndo = document.getElementById("protokoloEndo");
+protokoloEndo.addEventListener("input", () => {
+  state.protokoloEndo = protokoloEndo.value;
+});
+
+// Apodexetai radio buttons for endooikogeniaki
+const apodexetaiRadioButtons = document.querySelectorAll(
+  'input[name="apodexetai"]'
+);
+
+function updateVariables() {
+  const selected = document.querySelector(
+    'input[name="apodexetai"]:checked'
+  ).value;
+
+  // Logic for "apodexetai" variable
+  // If Yes or enMeri, it's empty. Otherwise (No), it's "ΔΕΝ"
+  if (selected === "Yes" || selected === "enMeri") {
+    state.apodexetai = "";
+  } else {
+    state.apodexetai = "ΔΕΝ";
+  }
+
+  // Logic for "enMeri" variable
+  // If Yes or No, it's empty. Otherwise (enMeri), it's "ΕΝ ΜΕΡΗ"
+  if (selected === "Yes" || selected === "No") {
+    state.enMeri = "";
+  } else {
+    state.enMeri = "ΕΝ ΜΕΡΗ";
+  }
+}
+
+// Attach an event listener to every apodexetai radio button
+apodexetaiRadioButtons.forEach((radio) => {
+  radio.addEventListener("change", updateVariables);
+});
+
+// Run once on page load to set initial values based on the 'checked' attribute
+updateVariables();
 
 // Initial setup
 initialText.textContent = constructInitialText();
@@ -764,6 +806,112 @@ ypoptoyEndo.addEventListener("click", () => {
   state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.deltioYpoptouEndo, state, state.ypoptosData);
 });
+//ypovlitiki button
+const ypovoliEndo = document.getElementById("ypovoliEndo");
+ypovoliEndo.addEventListener("click", () => {
+  Object.assign(state, { ...state.ypefthiniData });
+  state.nextDay = getNextDay(state.formattedDate);
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.os = "η";
+    state.ou = "ης";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.os = "ος";
+    state.ou = "ου";
+  }
+  if (state.ypefthiniData.sex == "Γυναίκα") {
+    state.o2 = "η";
+    state.tou2 = "της";
+    state.ton2 = "την";
+    state.ou2 = "ης";
+    state.ontas2 = "ούσα";
+  } else {
+    state.o2 = "ο";
+    state.tou2 = "του";
+    state.ton2 = "τον";
+    state.ou2 = "ου";
+    state.ontas2 = "όντας";
+  }
+  if (
+    document.querySelector('input[name="autoforo"]:checked').value == "true"
+  ) {
+    state.autoforo = `Γίνεται μνεία ότι δράστης αναζητήθηκε στα όρια του αυτοφώρου μέχρι και την 23.59 ώρα της ${state.nextDay} με αρνητικό αποτέλεσμα.`;
+  } else {
+    state.autoforo =
+      "Δράστης δεν αναζητήθηκε στα όρια του αυτοφώρου διότι έχει παρέλθει η προθεσμία αυτού.";
+  }
+  state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
+  state.iatrodik = document.querySelector(
+    'input[name="iatrodik"]:checked'
+  ).value;
+  state.oplo = document.querySelector('input[name="oplo"]:checked').value;
+  state.ypotropos = document.querySelector(
+    'input[name="ypotropos"]:checked'
+  ).value;
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  state.ypiresia = state.ypiresia?.toUpperCase();
+  state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
+  console.log("ProtokoloEndo", state.protokoloEndo);
+
+  generateWord(ektheseis.ypovoliEndo, state);
+});
+//ypovlitiki button
+const apostoliEndo = document.getElementById("apostoliEndo");
+apostoliEndo.addEventListener("click", () => {
+  Object.assign(state, { ...state.ypefthiniData });
+  state.nextDay = getNextDay(state.formattedDate);
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.os = "η";
+    state.ou = "ης";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.os = "ος";
+    state.ou = "ου";
+    state.ton = "τον";
+  }
+  if (state.ypefthiniData.sex == "Γυναίκα") {
+    state.o2 = "η";
+    state.tou2 = "της";
+    state.ton2 = "την";
+    state.ou2 = "ης";
+    state.ontas2 = "ούσα";
+  } else {
+    state.o2 = "ο";
+    state.tou2 = "του";
+    state.ton2 = "τον";
+    state.ou2 = "ου";
+    state.ontas2 = "όντας";
+  }
+  if (
+    document.querySelector('input[name="autoforo"]:checked').value == "true"
+  ) {
+    state.autoforo = `Γίνεται μνεία ότι δράστης αναζητήθηκε στα όρια του αυτοφώρου μέχρι και την 23.59 ώρα της ${state.nextDay} με αρνητικό αποτέλεσμα.`;
+  } else {
+    state.autoforo =
+      "Δράστης δεν αναζητήθηκε στα όρια του αυτοφώρου διότι έχει παρέλθει η προθεσμία αυτού.";
+  }
+  state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
+  state.iatrodik = document.querySelector(
+    'input[name="iatrodik"]:checked'
+  ).value;
+  state.oplo = document.querySelector('input[name="oplo"]:checked').value;
+  state.ypotropos = document.querySelector(
+    'input[name="ypotropos"]:checked'
+  ).value;
+  state.anakritikos = convertAnakritikosToEnikos(anakritikosSelect.value);
+  state.ypiresia = state.ypiresia?.toUpperCase();
+  state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
+  console.log("ProtokoloEndo", state.protokoloEndo);
+
+  generateWord(ektheseis.apostoliEndo, state);
+});
 
 // Γ.Ε.Ε. button
 const simansi = document.getElementById("simansi");
@@ -835,6 +983,28 @@ function formatTime(date, extraTime = 0) {
 
   return `${formattedHour}:${formattedMinutes}`;
 }
+
+// helper function to get the next date
+function getNextDay(dateString) {
+  // 1. Split the dd-mm-yyyy string
+  const [day, month, year] = dateString.split("-").map(Number);
+
+  // 2. Create a Date object
+  // Note: Month is 0-indexed in JS (January is 0, February is 1, etc.)
+  const date = new Date(year, month - 1, day);
+
+  // 3. Add one day
+  date.setDate(date.getDate() + 1);
+
+  // 4. Extract the new day, month, and year
+  const nextDay = String(date.getDate()).padStart(2, "0");
+  const nextMonth = String(date.getMonth() + 1).padStart(2, "0");
+  const nextYear = date.getFullYear();
+
+  // 5. Return in the same format
+  return `${nextDay}-${nextMonth}-${nextYear}`;
+}
+
 //helper functions to turn the name from onomastiki to geniki
 function toGenitiveMale(name) {
   switch (name) {
