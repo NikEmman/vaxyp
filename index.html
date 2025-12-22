@@ -52,7 +52,7 @@
         <h2>Εκθέσεις</h2>
       </div>
       <div class="tab">
-        <h2>Δήλωση απώλειας</h2>
+        <h2>Ταυτότητες / Απώλειες</h2>
       </div>
     </div>
 
@@ -131,6 +131,7 @@
             Δελτίο Φερομένου (Δακτυλικά)
           </p>
         </div>
+
         <hr />
         <p>Ενδοοικογενειακή</p>
         <div class="buttons">
@@ -149,56 +150,207 @@
           <p class="helpBtn large" id="ypoptoyEndo">Δελτίο Στοιχείων</p>
           <p class="helpBtn large" id="simansi">Γ.Ε.Ε.</p>
           <p class="helpBtn large" id="vasEndo">ΒΑΣ</p>
-        </div>
-        <hr />
-        <p>Έκδοση Ταυτότητας</p>
-        <div class="buttons">
-          <div>
-            <label for="newId">Νέος αριθμός Δ.Τ.</label>
-            <input id="newId" type="text" placeholder="A01982834" />
-          </div>
 
-          <select id="n" name="reason">
-            <option value="1">1. ΑΠΩΛΕΙΑ</option>
-            <option value="2">2. ΚΛΟΠΗ</option>
-            <option value="3">3. ΦΘΟΡΑ</option>
-            <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
-            <option selected value="5">
-              5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.
-            </option>
-            <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
-            <option value="7">
-              7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
-            </option>
-            <option value="8">8. ΑΠΟΒΟΛΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-            <option value="9">9. ΑΠΟΠΟΙΗΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-            <option value="10">10. ΕΚΠΤΩΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-            <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
-            <option value="12">12. ΘΑΝΑΤΟΣ</option>
-          </select>
-          <div class="changeDate hidden">
-            <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
-            <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+          <fieldset>
+            <legend>Επιθυμεί ποιν.δίωξη δράστη:</legend>
+
+            <div>
+              <input
+                type="radio"
+                id="dioksiNai"
+                name="dioksi"
+                value=""
+                checked
+              />
+              <label for="dioksiNai">Ναι</label>
+            </div>
+
+            <div>
+              <input type="radio" id="dioksiOxi" name="dioksi" value="ΔΕΝ" />
+              <label for="dioksiOxi">Όχι</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Δράστης αποδέχεται:</legend>
+            <div>
+              <input
+                type="radio"
+                id="drastisYes"
+                name="apodexetai"
+                value="Yes"
+              />
+              <label for="drastisYes">Ναι</label>
+            </div>
+
+            <div>
+              <input
+                type="radio"
+                id="drastisOXi"
+                value="No"
+                name="apodexetai"
+                checked
+              />
+              <label for="drastisOXi">Όχι</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="drastisEnMeri"
+                value="enMeri"
+                name="apodexetai"
+              />
+              <label for="drastisEnMeri">Έν μέρη</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Χορηγήθηκε Ιατροδικαστική:</legend>
+
+            <div>
+              <input
+                type="radio"
+                id="iatrodikNai"
+                name="iatrodik"
+                value=""
+                checked
+              />
+              <label for="iatrodikNai">Ναι</label>
+            </div>
+
+            <div>
+              <input
+                type="radio"
+                id="iatrodikOxi"
+                name="iatrodik"
+                value="ΔΕΝ"
+              />
+              <label for="iatrodikOxi">Όχι</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Δράστης κατέχει όπλο:</legend>
+
+            <div>
+              <input
+                type="radio"
+                id="oploNai"
+                name="oplo"
+                value="ΘΕΤΙΚΟ"
+                checked
+              />
+              <label for="oploNai">Ναι</label>
+            </div>
+
+            <div>
+              <input type="radio" id="oploOxi" name="oplo" value="ΑΡΝΗΤΙΚΟ" />
+              <label for="oploOxi">Όχι</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Δράστης υπότροπος:</legend>
+
+            <div>
+              <input
+                type="radio"
+                id="ypotroposNai"
+                name="ypotropos"
+                value=""
+                checked
+              />
+              <label for="ypotroposNai">Ναι</label>
+            </div>
+
+            <div>
+              <input
+                type="radio"
+                id="ypotroposOxi"
+                name="ypotropos"
+                value="ΔΕΝ"
+              />
+              <label for="ypotroposOxi">Όχι</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Στα πλαίσια αυτοφώρου:</legend>
+
+            <div>
+              <input
+                type="radio"
+                id="autoforoNai"
+                name="autoforo"
+                value="true"
+                checked
+              />
+              <label for="autoforoNai">Ναι</label>
+            </div>
+
+            <div>
+              <input
+                type="radio"
+                id="autoforoOxi"
+                name="autoforo"
+                value="false"
+              />
+              <label for="autoforoOxi">Όχι</label>
+            </div>
+          </fieldset>
+
+          <div class="protokolo-container">
+            <label for="protokoloEndo">1049/2/</label>
+            <input type="text" id="protokoloEndo" />
           </div>
-          <p class="helpBtn large" id="a130">Α 130-2</p>
-          <p class="helpBtn large" id="ypefthiniDAT">Υ/Δ Απώλειας ΔΑΤ</p>
+          <p class="helpBtn large" id="ypovoliEndo">Υποβολή προανακριτικού</p>
+          <p class="helpBtn large" id="apostoliEndo">Αποστολή συνοδείας</p>
         </div>
       </div>
       <div class="ypiresiakoTab hidden">
-        <div class="data flex">
-          <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
-          <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
-          <div class="protokolo-container">
-            <label for="protokolo">3005/4/</label>
-            <input type="text" id="protokolo" />
+        <div class="data">
+          <div class="flex">
+            <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
+            <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
+            <div class="protokolo-container">
+              <label for="protokolo">3005/4/</label>
+              <input type="text" id="protokolo" />
+            </div>
+            <textarea
+              class="input"
+              id="apolesthen"
+              placeholder="Απωλεσθέντα"
+            ></textarea>
+            <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
+            <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
           </div>
-          <textarea
-            class="input"
-            id="apolesthen"
-            placeholder="Απωλεσθέντα"
-          ></textarea>
-          <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
-          <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+          <hr />
+          <p>Έκδοση Ταυτότητας</p>
+          <div class="buttons">
+            <div>
+              <label for="newId">Νέος αριθμός Δ.Τ.</label>
+              <input id="newId" type="text" placeholder="A01982834" />
+            </div>
+            <select id="n" name="reason">
+              <option value="1">1. ΑΠΩΛΕΙΑ</option>
+              <option value="2">2. ΚΛΟΠΗ</option>
+              <option value="3">3. ΦΘΟΡΑ</option>
+              <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
+              <option selected value="5">
+                5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.
+              </option>
+              <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
+              <option value="7">
+                7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
+              </option>
+              <option value="8">8. ΑΠΟΒΟΛΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+              <option value="9">9. ΑΠΟΠΟΙΗΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+              <option value="10">10. ΕΚΠΤΩΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+              <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
+              <option value="12">12. ΘΑΝΑΤΟΣ</option>
+            </select>
+            <div class="changeDate hidden">
+              <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
+              <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+            </div>
+            <p class="helpBtn large" id="a130">Α 130-2</p>
+            <p class="helpBtn large" id="ypefthiniDAT">Υ/Δ Απώλειας ΔΑΤ</p>
+          </div>
         </div>
       </div>
     </div>
@@ -321,6 +473,24 @@
     <dialog id="patch-dialog">
       <div class="container">
         <p id="patch-close">&times;</p>
+        <ul>
+          <u>Αλλαγές 22-12-2025</u>
+          <li>
+            Προστέθηκαν Έκθεση Αφαίρεσης και Έκθεση Κατάσχεσης σε
+            Ενδοοικογενειακή
+          </li>
+          <li>
+            Προστέθηκαν για Ενδοοικογενειακή Υποβολή προανακριτικού και Αποστολή
+            συνοδείας, μαζί με τις επιλογές τους
+          </li>
+
+          <li>Η καρτέλα Δήλωση Απώλειας μετονομάστηκε Ταυτότητες / Απώλειες</li>
+          <li>
+            Τα πεδία για Α-130 μεταφέρθηκαν στην 4η καρτέλα Ταυτότητες /
+            Απώλειες
+          </li>
+        </ul>
+        <hr />
         <ul>
           <u>Αλλαγές 23-11-2025</u>
           <li>
