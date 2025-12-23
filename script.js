@@ -773,6 +773,15 @@ const katasxesiEndo = document.getElementById("katasxesiEndo");
 katasxesiEndo.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.initial = constructInitialText();
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.ton = "τον";
+  }
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
 
@@ -928,6 +937,42 @@ simansi.addEventListener("click", () => {
 // ΒΑΣ button
 const vasEndo = document.getElementById("vasEndo");
 vasEndo.addEventListener("click", () => {
+  state.nextDay = getNextDay(state.formattedDate);
+
+  if (state.ypoptosData.sex == "Γυναίκα") {
+    state.o = "η";
+    state.tou = "της";
+    state.os = "η";
+    state.ou = "ης";
+    state.ton = "την";
+  } else {
+    state.o = "ο";
+    state.tou = "του";
+    state.os = "ος";
+    state.ou = "ου";
+    state.ton = "τον";
+  }
+  if (state.ypefthiniData.sex == "Γυναίκα") {
+    state.o2 = "η";
+    state.tou2 = "της";
+    state.ton2 = "την";
+    state.ou2 = "ης";
+    state.on2 = "ούσα";
+  } else {
+    state.o2 = "ο";
+    state.tou2 = "του";
+    state.ton2 = "τον";
+    state.ou2 = "ου";
+    state.on2 = "όντας";
+  }
+  state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
+  state.iatrodik = document.querySelector(
+    'input[name="iatrodik"]:checked'
+  ).value;
+  state.oplo = document.querySelector('input[name="oplo"]:checked').value;
+  state.ypotropos = document.querySelector(
+    'input[name="ypotropos"]:checked'
+  ).value;
   generateWord(ektheseis.vasEndo, state, state.ypoptosData);
 });
 
