@@ -59,7 +59,8 @@ paintSelectMenus();
 const initialText = document.getElementById("initial");
 
 function constructInitialText() {
-  return `Στην ${state.merosSyntaksisEkthesis} σήμερα την ${
+  const arthro = state.arthro ? capitalize(state.arthro) : "Στην";
+  return `${arthro} ${state.merosSyntaksisEkthesis} σήμερα την ${
     state.day
   }η του μήνα ${state.month} του έτους ${state.year} ημέρα ${
     state.dayName

@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("geniki").value = data.geniki || "";
     document.getElementById("iatro").value = data.iatro || "";
     document.getElementById("doy").value = data.doy || "";
+    document.getElementById("arthro").value = data.arthro || "";
     document.getElementById("merosSyntaksisEkthesis").value =
       data.merosSyntaksisEkthesis || "";
     document.getElementById("xronosPeratosis").value =
@@ -93,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       geniki: formData.get("geniki"),
       iatro: formData.get("iatro"),
       doy: formData.get("doy"),
+      arthro: formData.get("arthro"),
       merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
       xronosPeratosis: Number(formData.get("xronosPeratosis")),
       eisaggeleiaProtodikon: formData.get("eisaggeleiaProtodikon"),
