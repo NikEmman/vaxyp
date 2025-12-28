@@ -58,13 +58,173 @@
 
     <div class="tabContent">
       <div class="personsTab data">
-        <h3>Παθών</h3>
+        <div class="tabTitle">
+          <h3>Παθών</h3>
+          <div class="anakritikoi">
+            <label for="polVictim">Άτομο από POL:</label>
+            <select name="polVictim" id="polVictim">
+              <option selected value="yes">Ναι</option>
+              <option value="no">Όχι</option>
+            </select>
+          </div>
+        </div>
         <div class="person flex">
           <textarea
             id="taytotita"
             class="input"
             placeholder="Αντέγραψε στοιχεία ατόμου και βάλτα εδώ"
           ></textarea>
+          <form id="dataForm" class="dataForm hidden">
+            <div class="fields">
+              <div>
+                <label for="nationality">Υπηκοός:</label>
+                <input
+                  type="text"
+                  id="nationality"
+                  name="nationality"
+                  placeholder="Ζουαζηλάνδης"
+                />
+              </div>
+              <div>
+                <label for="surname">Επίθετο:</label>
+                <input
+                  type="text"
+                  id="surname"
+                  name="surname"
+                  placeholder="Doe"
+                />
+              </div>
+              <div>
+                <label for="firstName">Όνομα:</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  placeholder="John"
+                />
+              </div>
+              <div>
+                <label for="fatherName">Πατρώνυμο:</label>
+                <input
+                  type="text"
+                  id="fatherName"
+                  name="fatherName"
+                  placeholder="Robert"
+                />
+              </div>
+              <div>
+                <label for="motherName">Μητρώνυμο:</label>
+                <input
+                  type="text"
+                  id="motherName"
+                  name="motherName"
+                  placeholder="Anna"
+                />
+              </div>
+              <div>
+                <label for="birthDate">Ημερ/νία Γέννησης</label>
+                <input type="date" id="birthDate" name="birthDate" />
+              </div>
+              <div>
+                <label for="birthPlace">Τόπος Γέννησης:</label>
+                <input
+                  type="text"
+                  id="birthPlace"
+                  name="birthPlace"
+                  placeholder="London"
+                />
+              </div>
+              <div>
+                <label for="docType">Όνομα εγγρ. ταυτ/σης</label>
+                <input
+                  type="text"
+                  id="docType"
+                  name="docType"
+                  placeholder="Διαβατήριο ή Άδεια Παραμονής"
+                />
+              </div>
+              <div>
+                <label for="idNumber">Αριθ. εγγρ. ταυτ/σης</label>
+                <input
+                  type="text"
+                  id="idNumber"
+                  name="idNumber"
+                  placeholder="AA123456789"
+                />
+              </div>
+              <div>
+                <label for="issueDate">Ημερ/νία Έκδοσης</label>
+                <input type="date" id="issueDate" name="issueDate" />
+              </div>
+              <div>
+                <label for="issuingAuthority">Αρχή Έκδοσης:</label>
+                <input
+                  type="text"
+                  id="issuingAuthority"
+                  name="issuingAuthority"
+                  placeholder="Αρχές Ζουαζηλάνδης"
+                />
+              </div>
+              <div>
+                <label for="phoneNumber">Τηλέφωνο:</label>
+                <input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  placeholder="25314 40177"
+                  minlength="10"
+                  maxlength="15"
+                />
+              </div>
+              <div>
+                <label for="email">Email:</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="johnDoe45@gmail.com"
+                />
+              </div>
+              <div>
+                <label for="street">Διευθ/νση κατοικίας:</label>
+                <input
+                  type="text"
+                  id="street"
+                  name="street"
+                  placeholder="Αριστοτέλους"
+                />
+              </div>
+              <div>
+                <label for="streetNumber">Αρ.:</label>
+                <input
+                  type="text"
+                  id="streetNumber"
+                  name="streetNumber"
+                  placeholder="48"
+                />
+              </div>
+              <div>
+                <label for="region">Πόλη κατοικίας</label>
+                <input
+                  type="text"
+                  id="region"
+                  name="region"
+                  placeholder="Αλεξανδρούπολη"
+                />
+              </div>
+              <div>
+                <label for="sex">Φύλο:</label>
+                <select type="text" id="sex" name="sex">
+                  <option value="Άντρας">Άντρας</option>
+                  <option value="Γυναίκα">Γυναίκα</option>
+                </select>
+              </div>
+              <button class="helpBtn large" type="button" id="submitForm">
+                Μετατροπή
+              </button>
+            </div>
+          </form>
+
           <div class="format">
             <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
             <p class="arrow">→</p>

@@ -16,6 +16,8 @@ import {
   shortenFormattedPerson,
   formatVehicleInfo,
   formatIdInfo,
+  formatFormData,
+  extractPersonInfo,
 } from "./formatters.js";
 import { getData, getState, getAnakritikoiSelection } from "./stateMAnager.js";
 
@@ -156,6 +158,37 @@ tabs.forEach((tab, index) => {
     tabContents[index].classList.remove("hidden");
   });
 });
+
+//  victim / suspect select menus
+const victimSelect = document.getElementById("polVictim");
+if (victimSelect.value == "no") {
+  document.getElementById("taytotita").classList.add("hidden");
+  document.querySelector(".dataForm").classList.remove("hidden");
+} else {
+  document.getElementById("taytotita").classList.remove("hidden");
+  document.querySelector(".dataForm").classList.add("hidden");
+}
+victimSelect.addEventListener("change", () => {
+  if (victimSelect.value == "no") {
+    document.getElementById("taytotita").classList.add("hidden");
+    document.querySelector(".dataForm").classList.remove("hidden");
+  } else {
+    document.getElementById("taytotita").classList.remove("hidden");
+    document.querySelector(".dataForm").classList.add("hidden");
+  }
+});
+// submit button event
+document
+  .getElementById("submitForm")
+  .addEventListener("click", (event, suspect = false) => {
+    event.preventDefault();
+    const data = extractPersonInfo("dataForm");
+    suspect ? (state.ypoptosData = data) : (state.ypefthiniData = data);
+    const text = formatFormData(data);
+    //clipboard class name
+    const className = suspect ? "-ypoptos" : "";
+    document.querySelector(`.clipboard-id${className}`).value = text;
+  });
 
 //dilosi apoleias
 
@@ -368,6 +401,7 @@ personClear.addEventListener("click", () => {
   taytotita.value = "";
   clipboardId.value = "";
   state.victim = "";
+  document.querySelector(".dataForm").reset();
 });
 
 const vehicleClear = document.getElementById("vehicle-clear");
