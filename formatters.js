@@ -238,3 +238,43 @@ export function formatIdInfo(input, data, state, suspect = false) {
     return formattedString;
   }
 }
+
+//person formatter for manual info entry
+export function extractPersonInfo(formId) {
+  const formData = new FormData(document.getElementById(formId));
+
+  return {
+    nationality: formData.get("nationality"),
+    surname: formData.get("surname"),
+    firstName: formData.get("firstName"),
+    fatherName: formData.get("fatherName"),
+    motherName: formData.get("motherName"),
+    birthDate: formData.get("birthDate"),
+    birthPlace: formData.get("birthPlace"),
+    docType: Number(formData.get("docType")),
+    idNumber: formData.get("idNumber"),
+    issuingAuthority: formData.get("issuingAuthority"),
+    issueDate: formData.get("issueDate"),
+    tilefono: formData.get("phoneNumber"),
+    email: formData.get("email"),
+    street: formData.get("street"),
+    streetNumber: formData.get("streetNumber"),
+    region: formData.get("region"),
+    sex: formData.get("sex"),
+  };
+}
+export function formatFormData(data) {
+  return `(Επ)${data.surname} (Ον)${capitalize(
+    data.firstName
+  )} του ${capitalize(toGenitiveMale(data.fatherName))} και της ${capitalize(
+    toGenitiveFemale(data.motherName)
+  )}, γεν. ${data.birthDate} στην ${capitalize(
+    data.birthPlace
+  )}, κάτοικος ${capitalize(data.region)}, οδός ${capitalize(
+    data.street
+  )} αρ. ${data.streetNumber}, κάτοχος του υπ'αριθ ${data.idNumber} ${
+    data.docType
+  } εκδ. ${data.issueDate} από ${data.issuingAuthority} χρήστης της υπ'αριθ. ${
+    data.phoneNumber
+  } τηλεφωνικής σύνδεσης, email: ${data.email}`;
+}

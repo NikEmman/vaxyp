@@ -200,9 +200,7 @@ select {
 }
 
 /* Tabs/Tab Content  */
-.hidden {
-  display: none;
-}
+
 .tabs {
   display: flex;
   justify-content: center;
@@ -275,6 +273,16 @@ select {
 }
 .tabContent > div {
   animation: fadeIn 0.3s ease;
+}
+.tabTitle {
+  display: flex;
+  gap: 40px;
+}
+.tabTitle .anakritikoi {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
 }
 
 @keyframes fadeIn {
@@ -453,7 +461,7 @@ ul li {
 }
 
 /* Form Styles */
-#dataForm {
+.dataForm {
   display: flex;
   gap: 3em;
   background-color: white;
@@ -469,7 +477,7 @@ ul li {
   flex-wrap: wrap;
 }
 
-#dataForm input {
+.dataForm input {
   width: 20em;
   padding: 0.6em;
   border: 1px solid var(--border-color);
@@ -477,13 +485,13 @@ ul li {
   margin-bottom: 0.5em;
 }
 
-#dataForm input:focus {
+.dataForm input:focus {
   outline: none;
   border-color: var(--secondary-blue);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-#dataForm label {
+.dataForm label {
   color: var(--accent-blue);
   font-weight: 500;
   margin-bottom: 0.3em;
@@ -645,7 +653,7 @@ hr {
     transform: rotate(90deg);
   }
 
-  #dataForm {
+  .dataForm {
     flex-direction: column;
   }
 
@@ -653,7 +661,10 @@ hr {
     flex-direction: column;
   }
 
-  #dataForm input {
+  .dataForm input {
     width: 100%;
   }
+}
+.hidden {
+  display: none;
 }
