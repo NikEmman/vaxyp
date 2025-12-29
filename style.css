@@ -477,7 +477,8 @@ ul li {
   flex-wrap: wrap;
 }
 
-.dataForm input {
+.dataForm input,
+.dataForm select {
   width: 20em;
   padding: 0.6em;
   border: 1px solid var(--border-color);
@@ -490,6 +491,13 @@ ul li {
   border-color: var(--secondary-blue);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
+.smallForm {
+  width: 40%;
+}
+.smallForm input,
+.smallForm select {
+  width: 12em;
+}
 
 .dataForm label {
   color: var(--accent-blue);
@@ -501,6 +509,7 @@ ul li {
   flex: 1;
   width: 100%;
   display: grid;
+  justify-items: center;
   gap: 4px;
   grid-template-columns: repeat(auto-fit, minmax(267px, 1fr));
 }
@@ -508,6 +517,9 @@ ul li {
   display: flex;
   flex-direction: column;
   justify-self: end;
+}
+.smallForm .fields div {
+  justify-self: center;
 }
 .fields button.helpBtn {
   grid-column: 1 / -1;
@@ -641,6 +653,7 @@ hr {
     flex-direction: column;
     height: fit-content;
     align-items: center;
+    padding: 1em;
   }
 
   .input,
@@ -655,14 +668,24 @@ hr {
 
   .dataForm {
     flex-direction: column;
+    width: 100%;
+    padding: 1em;
   }
 
   .containerAnakritikoi {
     flex-direction: column;
   }
 
-  .dataForm input {
+  .dataForm input,
+  .fields input {
     width: 100%;
+  }
+  .fields div {
+    justify-self: center;
+    width: 100%;
+  }
+  .smallForm input {
+    width: 10em;
   }
 }
 .hidden {
