@@ -251,15 +251,15 @@ export function extractPersonInfo(formId) {
     motherName: formData.get("motherName"),
     birthDate: formData.get("birthDate"),
     birthPlace: formData.get("birthPlace"),
-    docType: Number(formData.get("docType")),
+    docuType: formData.get("docuType"),
     idNumber: formData.get("idNumber"),
     issuingAuthority: formData.get("issuingAuthority"),
     issueDate: formData.get("issueDate"),
-    tilefono: formData.get("phoneNumber"),
+    phoneNumber: formData.get("phoneNumber"),
     email: formData.get("email"),
     street: formData.get("street"),
     streetNumber: formData.get("streetNumber"),
-    region: formData.get("region"),
+    area: formData.get("area"),
     sex: formData.get("sex"),
   };
 }
@@ -270,11 +270,11 @@ export function formatFormData(data) {
     toGenitiveFemale(data.motherName)
   )}, γεν. ${data.birthDate} στην ${capitalize(
     data.birthPlace
-  )}, κάτοικος ${capitalize(data.region)}, οδός ${capitalize(
-    data.street
-  )} αρ. ${data.streetNumber}, κάτοχος του υπ'αριθ ${data.idNumber} ${
-    data.docType
-  } εκδ. ${data.issueDate} από ${data.issuingAuthority} χρήστης της υπ'αριθ. ${
+  )}, κάτοικος ${capitalize(data.area)}, οδός ${capitalize(data.street)} αρ. ${
+    data.streetNumber
+  }, κάτοχος του υπ'αριθ ${data.idNumber} ${data.docuType} εκδ. ${
+    data.issueDate
+  } από ${data.issuingAuthority} χρήστης της υπ'αριθ. ${
     data.phoneNumber
   } τηλεφωνικής σύνδεσης, email: ${data.email}`;
 }

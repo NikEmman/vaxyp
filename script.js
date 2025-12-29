@@ -163,31 +163,57 @@ tabs.forEach((tab, index) => {
 const victimSelect = document.getElementById("polVictim");
 if (victimSelect.value == "no") {
   document.getElementById("taytotita").classList.add("hidden");
-  document.querySelector(".dataForm").classList.remove("hidden");
+  document.getElementById("dataForm").classList.remove("hidden");
 } else {
   document.getElementById("taytotita").classList.remove("hidden");
-  document.querySelector(".dataForm").classList.add("hidden");
+  document.getElementById("dataForm").classList.add("hidden");
 }
 victimSelect.addEventListener("change", () => {
   if (victimSelect.value == "no") {
     document.getElementById("taytotita").classList.add("hidden");
-    document.querySelector(".dataForm").classList.remove("hidden");
+    document.getElementById("dataForm").classList.remove("hidden");
   } else {
     document.getElementById("taytotita").classList.remove("hidden");
-    document.querySelector(".dataForm").classList.add("hidden");
+    document.getElementById("dataForm").classList.add("hidden");
+  }
+});
+
+const suspectSelect = document.getElementById("polSuspect");
+if (suspectSelect.value == "no") {
+  document.getElementById("taytotita-ypoptos").classList.add("hidden");
+  document.getElementById("dataForm-ypoptos").classList.remove("hidden");
+} else {
+  document.getElementById("taytotita-ypoptos").classList.remove("hidden");
+  document.getElementById("dataForm-ypoptos").classList.add("hidden");
+}
+suspectSelect.addEventListener("change", () => {
+  if (suspectSelect.value == "no") {
+    document.getElementById("taytotita-ypoptos").classList.add("hidden");
+    document.getElementById("dataForm-ypoptos").classList.remove("hidden");
+  } else {
+    document.getElementById("taytotita-ypoptos").classList.remove("hidden");
+    document.getElementById("dataForm-ypoptos").classList.add("hidden");
   }
 });
 // submit button event
+document.getElementById("submitForm").addEventListener("click", (event) => {
+  event.preventDefault();
+  const data = extractPersonInfo("dataForm");
+  state.ypefthiniData = data;
+  const text = formatFormData(data);
+  state.victim = text;
+  document.querySelector(".clipboard-id").value = text;
+});
+// submit-ypoptos button event
 document
-  .getElementById("submitForm")
-  .addEventListener("click", (event, suspect = false) => {
+  .getElementById("submitForm-ypoptos")
+  .addEventListener("click", (event) => {
     event.preventDefault();
-    const data = extractPersonInfo("dataForm");
-    suspect ? (state.ypoptosData = data) : (state.ypefthiniData = data);
+    const data = extractPersonInfo("dataForm-ypoptos");
+    state.ypoptosData = data;
     const text = formatFormData(data);
-    //clipboard class name
-    const className = suspect ? "-ypoptos" : "";
-    document.querySelector(`.clipboard-id${className}`).value = text;
+    state.suspect = text;
+    document.querySelector(".clipboard-id-ypoptos").value = text;
   });
 
 //dilosi apoleias
@@ -333,6 +359,8 @@ clearYpoptosBtn.addEventListener("click", () => {
   taytotitaYpoptos.value = "";
   clipboardIdYpoptos.value = "";
   state.suspect = "";
+  state.ypoptosData = {};
+  document.getElementById("dataForm-ypoptos").reset();
 });
 
 //vehicle parser fields
@@ -401,7 +429,8 @@ personClear.addEventListener("click", () => {
   taytotita.value = "";
   clipboardId.value = "";
   state.victim = "";
-  document.querySelector(".dataForm").reset();
+  state.ypefthiniData = {};
+  document.getElementById("dataForm").reset();
 });
 
 const vehicleClear = document.getElementById("vehicle-clear");
