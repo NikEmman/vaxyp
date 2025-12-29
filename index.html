@@ -135,11 +135,11 @@
                 />
               </div>
               <div>
-                <label for="docType">Όνομα εγγρ. ταυτ/σης</label>
+                <label for="docuType">Όνομα εγγρ. ταυτ/σης</label>
                 <input
                   type="text"
-                  id="docType"
-                  name="docType"
+                  id="docuType"
+                  name="docuType"
                   placeholder="Διαβατήριο ή Άδεια Παραμονής"
                 />
               </div>
@@ -196,11 +196,11 @@
                 />
               </div>
               <div>
-                <label for="region">Πόλη κατοικίας</label>
+                <label for="area">Πόλη κατοικίας</label>
                 <input
                   type="text"
-                  id="region"
-                  name="region"
+                  id="area"
+                  name="area"
                   placeholder="Αλεξανδρούπολη"
                 />
               </div>
@@ -236,13 +236,178 @@
         </div>
         <br />
         <hr />
-        <h3>Δράστης</h3>
+        <div class="tabTitle">
+          <h3>Δράστης</h3>
+          <div class="anakritikoi">
+            <label for="polSuspect">Άτομο από POL:</label>
+            <select name="polSuspect" id="polSuspect">
+              <option selected value="yes">Ναι</option>
+              <option value="no">Όχι</option>
+            </select>
+          </div>
+        </div>
+
         <div class="person flex">
           <textarea
             id="taytotita-ypoptos"
             class="input"
             placeholder="Αντέγραψε στοιχεία δράστη και βάλτα εδώ"
           ></textarea>
+          <form id="dataForm-ypoptos" class="dataForm smallForm hidden">
+            <div class="fields">
+              <div>
+                <label for="nationality-ypoptos">Υπηκοός:</label>
+                <input
+                  type="text"
+                  id="nationality-ypoptos"
+                  name="nationality"
+                  placeholder="Ζουαζηλάνδης"
+                />
+              </div>
+              <div>
+                <label for="surname-ypoptos">Επίθετο:</label>
+                <input
+                  type="text"
+                  id="surname-ypoptos"
+                  name="surname"
+                  placeholder="Doe"
+                />
+              </div>
+              <div>
+                <label for="firstName-ypoptos">Όνομα:</label>
+                <input
+                  type="text"
+                  id="firstName-ypoptos"
+                  name="firstName"
+                  placeholder="John"
+                />
+              </div>
+              <div>
+                <label for="fatherName-ypoptos">Πατρώνυμο:</label>
+                <input
+                  type="text"
+                  id="fatherName-ypoptos"
+                  name="fatherName"
+                  placeholder="Robert"
+                />
+              </div>
+              <div>
+                <label for="motherName-ypoptos">Μητρώνυμο:</label>
+                <input
+                  type="text"
+                  id="motherName-ypoptos"
+                  name="motherName"
+                  placeholder="Anna"
+                />
+              </div>
+              <div>
+                <label for="birthDate-ypoptos">Ημερ/νία Γέννησης</label>
+                <input type="date" id="birthDate-ypoptos" name="birthDate" />
+              </div>
+              <div>
+                <label for="birthPlace-ypoptos">Τόπος Γέννησης:</label>
+                <input
+                  type="text"
+                  id="birthPlace-ypoptos"
+                  name="birthPlace"
+                  placeholder="London"
+                />
+              </div>
+              <div>
+                <label for="docuType-ypoptos">Όνομα εγγρ. ταυτ/σης</label>
+                <input
+                  type="text"
+                  id="docuType-ypoptos"
+                  name="docuType"
+                  placeholder="Διαβατήριο ή Άδεια Παραμονής"
+                />
+              </div>
+              <div>
+                <label for="idNumber-ypoptos">Αριθ. εγγρ. ταυτ/σης</label>
+                <input
+                  type="text"
+                  id="idNumber-ypoptos"
+                  name="idNumber"
+                  placeholder="AA123456789"
+                />
+              </div>
+              <div>
+                <label for="issueDate-ypoptos">Ημερ/νία Έκδοσης</label>
+                <input type="date" id="issueDate-ypoptos" name="issueDate" />
+              </div>
+              <div>
+                <label for="issuingAuthority-ypoptos">Αρχή Έκδοσης:</label>
+                <input
+                  type="text"
+                  id="issuingAuthority-ypoptos"
+                  name="issuingAuthority"
+                  placeholder="Αρχές Ζουαζηλάνδης"
+                />
+              </div>
+              <div>
+                <label for="phoneNumber-ypoptos">Τηλέφωνο:</label>
+                <input
+                  type="text"
+                  id="phoneNumber-ypoptos"
+                  name="phoneNumber"
+                  placeholder="25314 40177"
+                  minlength="10"
+                  maxlength="15"
+                />
+              </div>
+
+              <div>
+                <label for="street-ypoptos">Διευθ/νση κατοικίας:</label>
+                <input
+                  type="text"
+                  id="street-ypoptos"
+                  name="street"
+                  placeholder="Αριστοτέλους"
+                />
+              </div>
+              <div>
+                <label for="streetNumber-ypoptos">Αρ.:</label>
+                <input
+                  type="text"
+                  id="streetNumber-ypoptos"
+                  name="streetNumber"
+                  placeholder="48"
+                />
+              </div>
+              <div>
+                <label for="area-ypoptos">Πόλη κατοικίας</label>
+                <input
+                  type="text"
+                  id="area-ypoptos"
+                  name="area"
+                  placeholder="Αλεξανδρούπολη"
+                />
+              </div>
+              <div>
+                <label for="email-ypoptos">Email:</label>
+                <input
+                  type="email"
+                  id="email-ypoptos"
+                  name="email"
+                  placeholder="johnDoe45@gmail.com"
+                />
+              </div>
+              <div>
+                <label for="sex-ypoptos">Φύλο:</label>
+                <select type="text" id="sex-ypoptos" name="sex">
+                  <option value="Άντρας">Άντρας</option>
+                  <option value="Γυναίκα">Γυναίκα</option>
+                </select>
+              </div>
+              <button
+                class="helpBtn large"
+                type="button"
+                id="submitForm-ypoptos"
+              >
+                Μετατροπή
+              </button>
+            </div>
+          </form>
           <div class="format">
             <p class="arrow">→</p>
             <button id="person-ypoptos-clear">Εκκαθάριση</button>

@@ -486,7 +486,8 @@ ul li {
   margin-bottom: 0.5em;
 }
 
-.dataForm input:focus {
+.dataForm input:focus,
+select:focus {
   outline: none;
   border-color: var(--secondary-blue);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
