@@ -152,7 +152,8 @@ footer {
   width: 45%;
 }
 
-.anakritikoi label {
+.anakritikoi label,
+.selectLabel {
   margin-bottom: 0.5em;
   color: var(--accent-blue);
   font-weight: 500;
@@ -165,7 +166,9 @@ select {
   border-radius: 4px;
   background-color: white;
 }
-
+.ektheseisTab > .anakritikoi {
+  justify-content: end;
+}
 /* Data Containers */
 .flex {
   display: flex;
@@ -627,7 +630,8 @@ hr {
     flex-direction: column;
     align-items: center;
   }
-  .person {
+  .person,
+  .flex {
     flex-direction: column;
     gap: 4px;
     align-items: center;
