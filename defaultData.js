@@ -38,4 +38,40 @@ const days = [
   "Παρασκευή",
   "Σάββατο",
 ];
-export { defaultData, months, days };
+const dikografies = {
+  drugs: [
+    "martyra",
+    "katasxesi",
+    "syllipsi",
+    "gnostopoiisi",
+    "katigoroumenou",
+    "praktikoZygisis",
+    "gnostopoiisiNarkwtikwn",
+    "ypoptoy",
+    "feromenou",
+  ],
+  // endo: [
+  //   "martyra-endooik",
+  //   "thyma-endooik",
+  //   "syllipsiEndo",
+  //   "drastis-endooik",
+  //   "iatrodikastiki-endooik",
+  //   "panicYes",
+  //   "panicNo",
+  //   "afairesi",
+  //   "katasxesiEndo",
+  //   "ypoptoyEndo",
+  //   "simansi",
+  //   "vasEndo",
+  //   "dioksiEndo",
+  //   "drastisEndo",
+  //   "iatrodikEndo",
+  //   "oploEndo",
+  //   "ypotroposEndo",
+  //   "autoforoEndo",
+  //   "protokEndo",
+  //   "ypovoliEndo",
+  //   "apostoliEndo",
+  // ],
+};
+export { defaultData, months, days, dikografies };

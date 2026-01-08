@@ -1,4 +1,5 @@
 import ektheseis from "./ektheseis.js";
+import { dikografies } from "./defaultData.js";
 import {
   generateWord,
   processDocument,
@@ -19,7 +20,7 @@ import {
   formatFormData,
   extractPersonInfo,
 } from "./formatters.js";
-import { getData, getState, getAnakritikoiSelection } from "./stateMAnager.js";
+import { getData, getState, getAnakritikoiSelection } from "./stateManager.js";
 
 let today = new Date();
 
@@ -1083,4 +1084,28 @@ newidData.addEventListener("input", () => {
   if (newidData.value === "") {
     newidData.classList.add("error");
   }
+});
+
+const dikografiesSelect = document.getElementById("dikografies");
+
+dikografiesSelect.addEventListener("change", () => {
+  const value = dikografiesSelect.value;
+  const allButtons = document.querySelectorAll(".dikografiesHiddable");
+
+  // If nothing is selected, show everything and exit
+  if (!value) {
+    allButtons.forEach((btn) => btn.classList.remove("hidden"));
+    return;
+  }
+
+  const allowed = dikografies[value] || [];
+
+  allButtons.forEach((btn) => {
+    // Check if the current button's ID is in the "allowed" array
+    if (allowed.includes(btn.id)) {
+      btn.classList.remove("hidden");
+    } else {
+      btn.classList.add("hidden");
+    }
+  });
 });
