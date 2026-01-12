@@ -41,7 +41,9 @@ const paintSelectMenus = () => {
     const anakr = document.createElement("option");
     anakr.value = anakritikos;
     anakr.textContent = anakritikos.split(" ")[1];
-
+    //set data value for sex
+    const sex = state.anakrSex ? state.anakrSex[index] : "Άντρας";
+    anakr.setAttribute("data-sex", sex);
     if (index === selectA) {
       anakr.setAttribute("selected", "");
     }
@@ -51,6 +53,7 @@ const paintSelectMenus = () => {
     const bAnakr = document.createElement("option");
     bAnakr.value = anakritikos;
     bAnakr.textContent = anakritikos.split(" ")[1];
+    bAnakr.setAttribute("data-sex", sex);
 
     if (index === selectB) {
       bAnakr.setAttribute("selected", "");
@@ -63,13 +66,23 @@ const initialText = document.getElementById("initial");
 
 function constructInitialText() {
   const arthro = state.arthro ? capitalize(state.arthro) : "Στην";
+  // Access the data-sex attribute of the currently SELECTED option
+  const sexA = anakritikosSelect.selectedOptions[0].dataset.sex;
+  const sexB = bAnakritikosSelect.selectedOptions[0].dataset.sex;
+
+  const arthroAnakrA = sexA === "Γυναίκα" ? "της" : "του";
+  const arthroAnakrB = sexB === "Γυναίκα" ? "της" : "του";
+
   return `${arthro} ${state.merosSyntaksisEkthesis} σήμερα την ${
     state.day
   }η του μήνα ${state.month} του έτους ${state.year} ημέρα ${
     state.dayName
-  } και ώρα ${formatTime(today, state.timePassed)} ενώπιον εμού, του ${
-    anakritikosSelect.value
-  } του ${data.ypiresia}, παρισταμένου και του ${bAnakritikosSelect.value} `;
+  } και ώρα ${formatTime(
+    today,
+    state.timePassed
+  )} ενώπιον εμού, ${arthroAnakrA} ${anakritikosSelect.value} του ${
+    data.ypiresia
+  }, παρισταμένου και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
 }
 
 //  file uploader validation
