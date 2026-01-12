@@ -19,6 +19,8 @@ import {
   formatIdInfo,
   formatFormData,
   extractPersonInfo,
+  getOfficerSurname,
+  shortenFormattedOfficer,
 } from "./formatters.js";
 import {
   getData,
@@ -67,6 +69,7 @@ const paintSelectMenus = () => {
   });
 };
 paintSelectMenus();
+
 const initialText = document.getElementById("initial");
 
 function constructInitialText() {
@@ -351,20 +354,34 @@ clipboardAstynomikos.value = state.astynomikos
   ? state.astynomikos
   : defaultAstynomikos;
 
-clipboardAstynomikos.addEventListener("onchange", (e) => {
+clipboardAstynomikos.addEventListener("change", (e) => {
   state.astynomikos = e.target.value;
 });
 //save officer button
 const storeOfficerBtn = document.querySelector(".save-astynomikos");
 storeOfficerBtn.addEventListener("click", () => {
+  console.log(state.astynomikos);
   if (state.astynomikos) {
     const localStorageData = getData();
     state.astynomikoi.push(state.astynomikos);
     const newItem = { astynomikoi: state.astynomikoi };
     saveData(localStorageData, newItem);
+    paintAstynomikosSelect();
+    console.log(state.astynomikoi);
   }
 });
 const astynomikosSelect = document.getElementById("astynomikoi");
+function paintAstynomikosSelect() {
+  if (state.astynomikoi) {
+    state.astynomikoi.forEach((value, index) => {
+      const astynomikosOption = document.createElement("option");
+      astynomikosOption.value = index;
+      astynomikosOption.innerText = getOfficerSurname(value);
+      astynomikosSelect.appendChild(astynomikosOption);
+    });
+  }
+}
+paintAstynomikosSelect();
 
 // Suspect parser fields
 const taytotitaYpoptos = document.getElementById("taytotita-ypoptos");
