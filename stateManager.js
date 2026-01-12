@@ -29,14 +29,14 @@ export const getState = (localData, todayDate) => {
     protokoloEndo: "",
     apodexetai: "",
     enMeri: "",
-    officers: [],
+    astynomikoi: [],
   };
 
   Object.assign(dataObject, { ...localData });
   return dataObject;
 };
 export function saveData(currentData, newObject) {
-  const mergedData = Object.assign(...currentData, { ...newObject });
+  const mergedData = Object.assign({ ...currentData }, { ...newObject });
   localStorage.setItem("dataObject", JSON.stringify(mergedData));
 }
 

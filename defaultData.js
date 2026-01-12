@@ -38,7 +38,7 @@ const days = [
   "Παρασκευή",
   "Σάββατο",
 ];
-const defaultAstynomikos = `ΒΑΘΜΟΣ ΕΠΙΘΕΤΟ Όνομα, γεν ΗΗ/ΜΜ/ΧΧΧΧ στην ΤΟΠΟΣ ΓΕΝ, κάτοικος ${defaultData.merosSyntaksisEkthesis}, οδός ${defaultData.dieuthynsiYpiresias}, κάτοχος του υπ'αριθμ. 222333 Υπηρεσιακού Δελτίου Ταυτότητας, εκδοθέν το 2025 από ΕΛ.ΑΣ,με ΑΦΜ 111222333 / Δ.Ο.Υ ${defaultData.doy}, επαγγέλματος Αστυνομικός, χρήστης της υπ'αριθμ. ${defaultData.tilefono} τηλεφωνικής σύνδεσης και της ${defaultData.email} διεύθυνσης ηλεκτρονικής αλληλογραφίας`;
+const defaultAstynomikos = `ΒΑΘΜΟΣ ΕΠΙΘΕΤΟ Όνομα, γεν ΗΗ/ΜΜ/ΧΧΧΧ στην ΤΟΠΟΣ ΓΕΝ, κάτοικος ${defaultData.merosSyntaksisEkthesis}, οδός ${defaultData.dieuthynsiYpiresias}, κάτοχος του υπ'αριθμ. 222333 Υπηρεσιακού Δελτίου Ταυτότητας, εκδοθέν το 2025 από ΕΛ.ΑΣ, με ΑΦΜ 111222333 / Δ.Ο.Υ ${defaultData.doy}, επαγγέλματος Αστυνομικός, χρήστης της υπ'αριθμ. ${defaultData.tilefono} τηλεφωνικής σύνδεσης και της ${defaultData.email} διεύθυνσης ηλεκτρονικής αλληλογραφίας`;
 const dikografies = {
   drugs: [
     "martyra",

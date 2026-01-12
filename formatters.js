@@ -289,3 +289,6 @@ export function removeRank(officerString) {
   //remove the first element and join with gap
   return splitString.shift().join(" ");
 }
+export function getOfficerSurname(officerString) {
+  return officerString.split(" ")[1];
+}
