@@ -14,12 +14,20 @@
     <form id="dataForm" class="dataForm">
       <div>
         <div class="containerAnakritikoi">
+          <div id="sexContainer">
+            <label for="anakrSex">Φύλο</label>
+            <select name="anakrSex[]" id="anakrSex">
+              <option value="Άντρας">Άντρας</option>
+              <option value="Γυναίκα">Γυναίκα</option>
+            </select>
+          </div>
           <div id="anakritikoiContainer">
             <label for="anakritikoi">Ανακριτικοί (Γενική):</label>
             <input
               type="text"
               name="anakritikoi[]"
               placeholder="Αρχ/κα ΠΑΠΠΑ Ανέστη"
+              id="anakritikoi"
             />
           </div>
           <div id="anakritikoiEnikosContainer">
@@ -28,6 +36,7 @@
               type="text"
               name="anakritikoiEnikos[]"
               placeholder="Αρχ/κας ΠΑΠΠΑΣ Ανέστης"
+              id="anakritikoiEnikos"
             />
           </div>
         </div>

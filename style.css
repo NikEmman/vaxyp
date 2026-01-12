@@ -531,10 +531,14 @@ select:focus {
 }
 
 #anakritikoiContainer,
-#anakritikoiEnikosContainer {
+#anakritikoiEnikosContainer,
+#sexContainer {
   display: flex;
   flex-direction: column;
   gap: 1em;
+}
+#sexContainer select {
+  width: 6em;
 }
 
 .anakritikoiBtns {
