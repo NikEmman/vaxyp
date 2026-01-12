@@ -6,13 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Populate inputs with stored data
     data.anakritikoi.forEach((value, index) => {
+      // Check if anakrSex exists and has a value for this index, otherwise default
+      const sexValue =
+        data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
+
       if (index === 0) {
         document.querySelector("input[name='anakritikoi[]']").value =
           data.anakritikoi[0] || "";
         document.querySelector("input[name='anakritikoiEnikos[]']").value =
           data.anakritikoiEnikos[0] || "";
+
+        // Safely set the sex for the first row
+        document.querySelector("select[name='anakrSex[]']").value = sexValue;
       } else {
-        addAnakritikoi(value, data.anakritikoiEnikos[index]);
+        addAnakritikoi(value, data.anakritikoiEnikos[index], sexValue);
       }
     });
 
@@ -35,7 +42,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("amy").value = data.amy || "";
   }
 
-  function addAnakritikoi(value, valueEnikos) {
+  function addAnakritikoi(value, valueEnikos, sexValue = "Άντρας") {
+    //add to the "Fylo" list
+    const sexContainer = document.getElementById("sexContainer");
+    const select = document.createElement("select");
+    const man = document.createElement("option");
+    const woman = document.createElement("option");
+    man.value = "Άντρας";
+    man.innerText = "Άντρας";
+    woman.value = "Γυναίκα";
+    woman.innerText = "Γυναίκα";
+    select.name = "anakrSex[]";
+    select.appendChild(man);
+    select.appendChild(woman);
+    select.value = sexValue;
+    sexContainer.appendChild(select);
+    //add to the "Γενική" list
     const container = document.getElementById("anakritikoiContainer");
     const input = document.createElement("input");
     input.type = "text";
@@ -43,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.placeholder = "Αρχ/κα ΠΑΠΠΑ Ανέστη";
     input.value = value || "";
     container.appendChild(input);
-
+    // add to the "Ονομαστικη" list
     const containerEnikos = document.getElementById(
       "anakritikoiEnikosContainer"
     );
@@ -74,11 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const anakritikoiEnikos = document.querySelectorAll(
       "input[name='anakritikoiEnikos[]']"
     );
+    const sexContainer = document.getElementById("sexContainer");
+    const anakrSex = document.querySelectorAll("select[name='anakrSex[]']");
+
     if (anakritikoi.length > 1) {
       anakritikoiContainer.removeChild(anakritikoi[anakritikoi.length - 1]);
       anakritikoiEnikosContainer.removeChild(
         anakritikoiEnikos[anakritikoiEnikos.length - 1]
       );
+      sexContainer.removeChild(anakrSex[anakrSex.length - 1]);
     }
   });
 
@@ -86,9 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(document.getElementById("dataForm"));
     const anakritikoi = formData.getAll("anakritikoi[]");
     const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
+    const anakrSex = formData.getAll("anakrSex[]");
     const data = {
       anakritikoi: anakritikoi,
       anakritikoiEnikos: anakritikoiEnikos,
+      anakrSex: anakrSex,
       ypiresia: formData.get("ypiresia"),
       dAstynomias: formData.get("dAstynomias"),
       geniki: formData.get("geniki"),
