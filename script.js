@@ -1,5 +1,5 @@
 import ektheseis from "./ektheseis.js";
-import { dikografies } from "./defaultData.js";
+import { dikografies, defaultAstynomikos } from "./defaultData.js";
 import {
   generateWord,
   processDocument,
@@ -20,7 +20,12 @@ import {
   formatFormData,
   extractPersonInfo,
 } from "./formatters.js";
-import { getData, getState, getAnakritikoiSelection } from "./stateManager.js";
+import {
+  getData,
+  getState,
+  getAnakritikoiSelection,
+  saveData,
+} from "./stateManager.js";
 
 let today = new Date();
 
@@ -337,6 +342,29 @@ clipboardId.addEventListener("input", () => {
 copyIdBtn.addEventListener("click", () => {
   copyToClipboard(state.victim);
 });
+
+// officer fields
+const clipboardAstynomikos = document.querySelector(
+  ".clipboard-id-astynomikos"
+);
+clipboardAstynomikos.value = state.astynomikos
+  ? state.astynomikos
+  : defaultAstynomikos;
+
+clipboardAstynomikos.addEventListener("onchange", (e) => {
+  state.astynomikos = e.target.value;
+});
+//save officer button
+const storeOfficerBtn = document.querySelector(".save-astynomikos");
+// storeOfficerBtn.addEventListener("click", () => {
+//   if (state.astynomikos) {
+//     const localStorageData = getData();
+//     state.astynomikoi.push(state.astynomikos);
+//     const newItem = { astynomikoi: state.astynomikoi };
+//     saveData(localStorageData, newItem);
+//   }
+// });
+const astynomikosSelect = document.getElementById("astynomikoi");
 
 // Suspect parser fields
 const taytotitaYpoptos = document.getElementById("taytotita-ypoptos");

@@ -278,3 +278,14 @@ export function formatFormData(data) {
     data.phoneNumber
   } τηλεφωνικής σύνδεσης, email: ${data.email}`;
 }
+
+export function shortenFormattedOfficer(officerString) {
+  const splitString = officerString.split(" ");
+  // gets the first 3 elements of the array, rank, surname, name
+  return `${splitString[0]} ${splitString[1]} ${splitString[2]}`;
+}
+export function removeRank(officerString) {
+  const splitString = officerString.split(" ");
+  //remove the first element and join with gap
+  return splitString.shift().join(" ");
+}
