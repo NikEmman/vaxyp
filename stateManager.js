@@ -29,11 +29,16 @@ export const getState = (localData, todayDate) => {
     protokoloEndo: "",
     apodexetai: "",
     enMeri: "",
+    officers: [],
   };
 
   Object.assign(dataObject, { ...localData });
   return dataObject;
 };
+export function saveData(currentData, newObject) {
+  const mergedData = Object.assign(...currentData, { ...newObject });
+  localStorage.setItem("dataObject", JSON.stringify(mergedData));
+}
 
 export function getAnakritikoiSelection() {
   const localStorageData = JSON.parse(localStorage.getItem("anakr"));
