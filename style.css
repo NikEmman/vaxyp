@@ -123,6 +123,9 @@ footer {
   margin-bottom: 2em;
 }
 
+#initial {
+  margin-top: 1em;
+}
 #initial,
 .output {
   font-family: "Calibri", sans-serif;
@@ -130,7 +133,6 @@ footer {
   padding: 1em;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  margin-top: 1em;
 }
 
 #copy-initial {
@@ -639,6 +641,7 @@ hr {
     flex-direction: column;
     gap: 4px;
     align-items: center;
+    justify-content: flex-start;
   }
   .tabs {
     flex-direction: column;
