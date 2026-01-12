@@ -356,14 +356,14 @@ clipboardAstynomikos.addEventListener("onchange", (e) => {
 });
 //save officer button
 const storeOfficerBtn = document.querySelector(".save-astynomikos");
-// storeOfficerBtn.addEventListener("click", () => {
-//   if (state.astynomikos) {
-//     const localStorageData = getData();
-//     state.astynomikoi.push(state.astynomikos);
-//     const newItem = { astynomikoi: state.astynomikoi };
-//     saveData(localStorageData, newItem);
-//   }
-// });
+storeOfficerBtn.addEventListener("click", () => {
+  if (state.astynomikos) {
+    const localStorageData = getData();
+    state.astynomikoi.push(state.astynomikos);
+    const newItem = { astynomikoi: state.astynomikoi };
+    saveData(localStorageData, newItem);
+  }
+});
 const astynomikosSelect = document.getElementById("astynomikoi");
 
 // Suspect parser fields
