@@ -316,6 +316,7 @@ select {
 
 /* Buttons */
 button,
+.button,
 input[type="file"]::file-selector-button {
   padding: 0.6em 1.2em;
   background-color: var(--secondary-blue);
@@ -328,12 +329,14 @@ input[type="file"]::file-selector-button {
 }
 
 button:hover,
+.button:hover,
 input[type="file"]::file-selector-button:hover {
   background-color: var(--accent-blue);
 }
 
 button:active,
-input[type="file"]::file-selector-button {
+.button:active,
+input[type="file"]::file-selector-button:active {
   transform: scale(0.98);
 }
 
