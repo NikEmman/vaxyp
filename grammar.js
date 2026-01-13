@@ -98,20 +98,29 @@ const genderMap = {
     on: "όντας",
   },
 };
-export function applyGrammar(state, gender, role = "A1") {
-  const suffixMap = { suspect: "S", victim: "V", anakr1: "A1", anakr2: "A2" };
-  const suffix = suffixMap[role] || "";
+export function applyAllGrammar(state) {
+  // Define everything in one place: The source of the gender and the suffix to use
+  const config = [
+    { gender: state.ypoptosData?.sex, suffix: "S" }, // Suspect
+    { gender: state.victimData?.sex, suffix: "V" }, // Victim
+    { gender: state.aAnakrSex, suffix: "A1" }, // Officer 1
+    { gender: state.bAnakrSex, suffix: "A2" }, // Officer 2
+  ];
 
-  // If no gender is provided, clear the variables
-  if (!gender) {
-    ["o", "tou", "os", "ou", "ton", "on"].forEach((key) => {
-      state[`${key}${suffix}`] = "";
-    });
-    return;
-  }
+  const keys = ["o", "tou", "os", "ou", "ton", "on"];
 
-  const rules = genderMap[gender] || genderMap["Άνδρας"];
-  Object.keys(rules).forEach((key) => {
-    state[`${key}${suffix}`] = rules[key];
+  config.forEach(({ gender, suffix }) => {
+    if (!gender) {
+      // Clear variables if sex is not defined
+      keys.forEach((key) => (state[`${key}${suffix}`] = ""));
+    } else {
+      // Get the Greek rules (Defaulting to "Άνδρας" if mapping fails)
+      const rules = genderMap[gender] || genderMap["Άνδρας"];
+
+      // Map each grammar rule to the state with the suffix (e.g., state.oS = "η")
+      Object.keys(rules).forEach((key) => {
+        state[`${key}${suffix}`] = rules[key];
+      });
+    }
   });
 }
