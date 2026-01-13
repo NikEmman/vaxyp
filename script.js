@@ -360,13 +360,28 @@ clipboardAstynomikos.addEventListener("change", (e) => {
 //save officer button
 const storeOfficerBtn = document.querySelector(".save-astynomikos");
 storeOfficerBtn.addEventListener("click", () => {
-  console.log(state.astynomikos);
   if (state.astynomikos) {
     const localStorageData = getData();
-    state.astynomikoi.push(state.astynomikos);
+    const selectedValue = astynomikosSelect.value;
+
+    if (selectedValue === "placeholder") {
+      // Add a new officer to the end of the list
+      state.astynomikoi.push(state.astynomikos);
+    } else {
+      // Replace the officer at the selected index
+      const index = parseInt(selectedValue);
+      state.astynomikoi[index] = state.astynomikos;
+    }
+
+    // Save the updated array to localStorage
     const newItem = { astynomikoi: state.astynomikoi };
     saveData(localStorageData, newItem);
+
+    // Re-draw the menu to reflect changes
     paintAstynomikosSelect();
+
+    //Keep the selection
+    astynomikosSelect.value = selectedValue;
   }
 });
 
@@ -399,6 +414,32 @@ function paintAstynomikosSelect() {
 }
 // call it to draw the select on page load
 paintAstynomikosSelect();
+
+const deleteBtn = document.querySelector("#astynomikos-delete");
+
+deleteBtn.addEventListener("click", () => {
+  const select = document.querySelector("#astynomikoi");
+  const index = select.value;
+
+  if (index !== "placeholder") {
+    // Remove from the local array
+    state.astynomikoi.splice(parseInt(index), 1);
+
+    // Save the updated list back to localStorage
+    const localStorageData = getData();
+    saveData(localStorageData, { astynomikoi: state.astynomikoi });
+
+    // Re-draw the select menu so the name disappears
+    paintAstynomikosSelect();
+    state.astynomikos = "";
+    document.querySelector(".clipboard-id-astynomikos").value =
+      defaultAstynomikos;
+
+    displayNotification("Ο αστυνομικός διαγράφηκε.");
+  } else {
+    displayNotification("Παρακαλώ επιλέξτε έναν αστυνομικό πρώτα.", true);
+  }
+});
 
 // Suspect parser fields
 const taytotitaYpoptos = document.getElementById("taytotita-ypoptos");
@@ -464,6 +505,19 @@ personHelp.addEventListener("click", () => {
 });
 personClose.addEventListener("click", () => {
   personDialog.close();
+});
+
+//astynomikos help / modal
+
+const astynomikosDialog = document.getElementById("astynomikos-dialog");
+const astynomikosHelp = document.getElementById("astynomikos-help");
+const astynomikosClose = document.getElementById("astynomikos-close");
+
+astynomikosHelp.addEventListener("click", () => {
+  astynomikosDialog.showModal();
+});
+astynomikosClose.addEventListener("click", () => {
+  astynomikosDialog.close();
 });
 
 const vehicleDialog = document.getElementById("vehicle-dialog");

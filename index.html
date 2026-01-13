@@ -253,8 +253,9 @@
           </select>
 
           <div class="format">
+            <p class="helpBtn" id="astynomikos-help" title="Βοήθεια">?</p>
             <p class="arrow">→</p>
-            <button id="astynomikos-clear">Εκκαθάριση</button>
+            <button class="deleteBtn" id="astynomikos-delete">Διαγραφή</button>
           </div>
           <textarea
             class="clipboard-id-astynomikos output"
@@ -771,7 +772,7 @@
     <!-- modals -->
     <dialog id="person-dialog">
       <div class="container">
-        <p id="person-close">&times;</p>
+        <p class="closeModal" id="person-close">&times;</p>
         <img src="./images/tautotita.jpg" alt="photo from id app" />
         <ol>
           <li>
@@ -800,9 +801,33 @@
         </ul>
       </div>
     </dialog>
+    <dialog id="astynomikos-dialog">
+      <div class="container">
+        <p class="closeModal" id="astynomikos-close">&times;</p>
+
+        <ol>
+          <li>Επιλέξτε από το μενού "Νέος Αστυνμικός"</li>
+          <li>Επεξεργαστείτε το κείμενο ή κάντε επικόλληση το δικό σας</li>
+          <li>
+            <strong><em>ΠΡΟΣΟΧΗ!</em> </strong>Στο κείμενο πρέπει η πρώτη λέξη
+            να είναι ο βαθμός, δεύτερη επίθετο, τρίτη όνομα, μετά ότι άλλο
+            θέλετε
+          </li>
+          <li>Πατήστε την "Αποθήκευση" αν θέλετε να κρατήσετε τα στοιχεία</li>
+          <li>
+            Απο το μενού αριστερά μπορείτε να επιλέξετε από τους αποθηκευμένους
+            αστυνομικούς
+          </li>
+          <li>
+            Εάν θέλετε να διαγράψετε κάποιον, επιλέξτε τον από το μενού και
+            πατήστε "Διαγραφή"
+          </li>
+        </ol>
+      </div>
+    </dialog>
     <dialog id="vehicle-dialog">
       <div class="container">
-        <p id="vehicle-close">&times;</p>
+        <p class="closeModal" id="vehicle-close">&times;</p>
         <img src="./images/oxima.jpg" alt="photo from id app" />
         <ol>
           <li>
@@ -818,7 +843,7 @@
     </dialog>
     <dialog id="genikes-dialog">
       <div class="container">
-        <p id="genikes-close">&times;</p>
+        <p class="closeModal" id="genikes-close">&times;</p>
         <ol>
           <strong>Γενικές οδηγίες χρήσης:</strong>
           <li>
@@ -888,7 +913,7 @@
     </dialog>
     <dialog id="patch-dialog">
       <div class="container">
-        <p id="patch-close">&times;</p>
+        <p class="closeModal" id="patch-close">&times;</p>
         <ul>
           <u>Αλλαγές 12-01-2026</u>
           <li>Οι ανακριτικοί διαλέγουν φύλο για να περαστεί στις εκθέσεις</li>
