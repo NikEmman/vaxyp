@@ -83,17 +83,7 @@ export function base64ToArrayBuffer(base64) {
   }
   return buffer.buffer;
 }
-export function getDocumentBySex(sex, docKey, documents) {
-  // For female, try to fetch the "Fem" variant
-  if (sex === "Γυναίκα") {
-    const femKey = `${docKey}Gyn`;
-    if (documents[femKey]) {
-      return documents[femKey];
-    }
-  }
-  // Default: return the base key (male or fallback)
-  return documents[docKey] || null;
-}
+
 //notifications display
 export function displayNotification(text, alert = false) {
   const notifications = document.getElementById("notifications");

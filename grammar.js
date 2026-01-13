@@ -98,7 +98,7 @@ const genderMap = {
     on: "όντας",
   },
 };
-export function applyGrammar(gender, role = "A1") {
+export function applyGrammar(state, gender, role = "A1") {
   const suffixMap = { suspect: "S", victim: "V", anakr1: "A1", anakr2: "A2" };
   const suffix = suffixMap[role] || "";
 
@@ -110,7 +110,7 @@ export function applyGrammar(gender, role = "A1") {
     return;
   }
 
-  const rules = genderRules[gender] || genderRules["Άνδρας"];
+  const rules = genderMap[gender] || genderMap["Άνδρας"];
   Object.keys(rules).forEach((key) => {
     state[`${key}${suffix}`] = rules[key];
   });
