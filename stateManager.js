@@ -4,15 +4,22 @@ export const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
   return localStorageData ? localStorageData : defaultData;
 };
+export function getAnakritikoiSelection() {
+  const localStorageData = JSON.parse(localStorage.getItem("anakr"));
+  return localStorageData ? localStorageData : { aAnakr: 0, bAnakr: 1 };
+}
 
 export const getState = (localData, todayDate) => {
-  let stringYear = todayDate.getFullYear();
-  let stringMonth = String(todayDate.getMonth() + 1).padStart(2, "0");
-  let stringDay = String(todayDate.getDate()).padStart(2, "0");
-  let formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
-  let specificDate = new Date(formattedDate);
-
-  let dataObject = {
+  const stringYear = todayDate.getFullYear();
+  const stringMonth = String(todayDate.getMonth() + 1).padStart(2, "0");
+  const stringDay = String(todayDate.getDate()).padStart(2, "0");
+  const formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
+  const specificDate = new Date(formattedDate);
+  const aAnakrSex =
+    localData.anakrSex[getAnakritikoiSelection().aAnakr] || "Άντρας";
+  const bAnakrSex =
+    localData.anakrSex[getAnakritikoiSelection().bAnakr] || "Άντρας";
+  const dataObject = {
     victim: "",
     suspect: "",
     vehicle: "",
@@ -30,6 +37,8 @@ export const getState = (localData, todayDate) => {
     apodexetai: "",
     enMeri: "",
     astynomikoi: [],
+    aAnakrSex: aAnakrSex,
+    bAnakrSex: bAnakrSex,
   };
 
   Object.assign(dataObject, { ...localData });
@@ -38,9 +47,4 @@ export const getState = (localData, todayDate) => {
 export function saveData(currentData, newObject) {
   const mergedData = Object.assign({ ...currentData }, { ...newObject });
   localStorage.setItem("dataObject", JSON.stringify(mergedData));
-}
-
-export function getAnakritikoiSelection() {
-  const localStorageData = JSON.parse(localStorage.getItem("anakr"));
-  return localStorageData ? localStorageData : { aAnakr: 0, bAnakr: 1 };
 }
