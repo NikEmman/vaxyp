@@ -21,7 +21,7 @@ export const getState = (localData, todayDate) => {
     year: todayDate.getFullYear(),
     month: months[todayDate.getMonth()],
     day: todayDate.getDate(),
-    ypefthiniData: {},
+    victimData: {},
     ypoptosData: {},
     timePassed: 0,
     apolesthen: "",

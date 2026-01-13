@@ -195,7 +195,7 @@ export function formatIdInfo(input, data, state, suspect = false) {
         ? fields.area
         : `${capitalize(fields.area)} ${capitalize(fields.region)}`;
     // extract the data for ypefthini dilosi usage
-    suspect ? (state.ypoptosData = fields) : (state.ypefthiniData = fields);
+    suspect ? (state.ypoptosData = fields) : (state.victimData = fields);
 
     // Format the output string
     const formattedString = `${fields.surname} ${capitalize(
@@ -231,7 +231,7 @@ export function formatIdInfo(input, data, state, suspect = false) {
     };
 
     // extract the data for ypefthini dilosi usage
-    suspect ? (state.ypoptosData = fields) : (state.ypefthiniData = fields);
+    suspect ? (state.ypoptosData = fields) : (state.victimData = fields);
 
     // Format the output string
     const formattedString = `(Επ)${fields.surname} (Ον.)${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
