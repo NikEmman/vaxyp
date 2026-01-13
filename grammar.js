@@ -80,3 +80,38 @@ export function toGenitiveMale(name) {
 export function toGenitiveFemale(name) {
   return FEMALE_NAMES_MAP[name] ?? name;
 }
+const genderMap = {
+  Γυναίκα: {
+    o: "η",
+    tou: "της",
+    os: "η",
+    ou: "ης",
+    ton: "την",
+    on: "ούσα",
+  },
+  Άνδρας: {
+    o: "ο",
+    tou: "του",
+    os: "ος",
+    ou: "ου",
+    ton: "τον",
+    on: "όντας",
+  },
+};
+export function applyGrammar(gender, role = "A1") {
+  const suffixMap = { suspect: "S", victim: "V", anakr1: "A1", anakr2: "A2" };
+  const suffix = suffixMap[role] || "";
+
+  // If no gender is provided, clear the variables
+  if (!gender) {
+    ["o", "tou", "os", "ou", "ton", "on"].forEach((key) => {
+      state[`${key}${suffix}`] = "";
+    });
+    return;
+  }
+
+  const rules = genderRules[gender] || genderRules["Άνδρας"];
+  Object.keys(rules).forEach((key) => {
+    state[`${key}${suffix}`] = rules[key];
+  });
+}
