@@ -367,11 +367,21 @@ storeOfficerBtn.addEventListener("click", () => {
     const newItem = { astynomikoi: state.astynomikoi };
     saveData(localStorageData, newItem);
     paintAstynomikosSelect();
-    console.log(state.astynomikoi);
   }
 });
+function paintAstynomikosOption(astynomikosText) {
+  const astynomikosSelect = document.getElementById("astynomikoi");
+  const astynomikosOption = document.createElement("option");
+  astynomikosOption.value = index;
+  astynomikosOption.innerText = getOfficerSurname(astynomikosText);
+  astynomikosSelect.appendChild(astynomikosOption);
+}
 const astynomikosSelect = document.getElementById("astynomikoi");
 function paintAstynomikosSelect() {
+  // Clear all options but the first:
+  const firstOption = astynomikosSelect.firstElementChild;
+  astynomikosSelect.innerHTML = "";
+  astynomikosSelect.appendChild(firstOption);
   if (state.astynomikoi) {
     state.astynomikoi.forEach((value, index) => {
       const astynomikosOption = document.createElement("option");
@@ -381,6 +391,7 @@ function paintAstynomikosSelect() {
     });
   }
 }
+// call it to draw the select on page load
 paintAstynomikosSelect();
 
 // Suspect parser fields
