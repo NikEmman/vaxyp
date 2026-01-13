@@ -369,14 +369,20 @@ storeOfficerBtn.addEventListener("click", () => {
     paintAstynomikosSelect();
   }
 });
-function paintAstynomikosOption(astynomikosText) {
-  const astynomikosSelect = document.getElementById("astynomikoi");
-  const astynomikosOption = document.createElement("option");
-  astynomikosOption.value = index;
-  astynomikosOption.innerText = getOfficerSurname(astynomikosText);
-  astynomikosSelect.appendChild(astynomikosOption);
-}
+
 const astynomikosSelect = document.getElementById("astynomikoi");
+astynomikosSelect.addEventListener("change", (e) => {
+  const clipboardAstynomikos = document.querySelector(
+    ".clipboard-id-astynomikos"
+  );
+
+  if (e.target.value === "placeholder") {
+    clipboardAstynomikos.value = defaultAstynomikos;
+    return;
+  }
+  const index = parseInt(e.target.value);
+  clipboardAstynomikos.value = state.astynomikoi[index];
+});
 function paintAstynomikosSelect() {
   // Clear all options but the first:
   const firstOption = astynomikosSelect.firstElementChild;
