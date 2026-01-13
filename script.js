@@ -5,7 +5,6 @@ import {
   generateWord,
   processDocument,
   base64ToArrayBuffer,
-  getDocumentBySex,
   displayNotification,
   copyToClipboard,
 } from "./wordGenerators.js";
@@ -299,13 +298,16 @@ anakritikosSelect.addEventListener("change", (e) => {
   state.anakritikos = convertAnakritikosToEnikos(e.target.value, state);
   let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
   anakritikoiSelections.aAnakr = e.target.selectedIndex;
+  state.aAnakrSex = e.target.selectedOptions[0].dataset.sex;
+
   localStorage.setItem("anakr", JSON.stringify(anakritikoiSelections));
 });
 
 bAnakritikosSelect.addEventListener("change", (e) => {
   initialText.textContent = constructInitialText();
-  let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
+  const anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
   anakritikoiSelections.bAnakr = e.target.selectedIndex;
+  state.bAnakrSex = e.target.selectedOptions[0].dataset.sex;
   localStorage.setItem("anakr", JSON.stringify(anakritikoiSelections));
 });
 
