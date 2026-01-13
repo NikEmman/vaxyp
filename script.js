@@ -1,6 +1,6 @@
 import ektheseis from "./ektheseis.js";
 import { dikografies, defaultAstynomikos } from "./defaultData.js";
-import { applyGrammar } from "./grammar.js";
+import { applyAllGrammar } from "./grammar.js";
 import {
   generateWord,
   processDocument,
@@ -592,8 +592,8 @@ martyra.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(state.victimData.sex, "martyra", ektheseis);
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.martyra, state, state.victimData);
 });
 
 // martyraXorisOrko button
