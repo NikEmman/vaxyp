@@ -1,5 +1,6 @@
 import ektheseis from "./ektheseis.js";
 import { dikografies, defaultAstynomikos } from "./defaultData.js";
+import { applyGrammar } from "./grammar.js";
 import {
   generateWord,
   processDocument,
