@@ -628,9 +628,8 @@ anomoti.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(state.ypoptosData.sex, "anomoti", ektheseis);
-
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.anomoti, state, state.ypoptosData);
 });
 
 // katigoroumenou button
@@ -640,13 +639,8 @@ katigoroumenou.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "katigoroumenou",
-    ektheseis
-  );
-
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.katigoroumenou, state, state.ypoptosData);
 });
 
 //apodosi button
