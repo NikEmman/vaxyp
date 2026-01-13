@@ -88,6 +88,11 @@ const genderMap = {
     ou: "ης",
     ton: "την",
     on: "ούσα",
+    ellinas: "Ελληνίδα",
+    osa: "α",
+    ontas: "ούσα",
+    eis: "είσα",
+    oY: "Η",
   },
   Άνδρας: {
     o: "ο",
@@ -96,6 +101,11 @@ const genderMap = {
     ou: "ου",
     ton: "τον",
     on: "όντας",
+    ellinas: "Έλληνας",
+    osa: "ος",
+    ontas: "όντας",
+    eis: "είς",
+    oY: "Ο",
   },
 };
 export function applyAllGrammar(state) {
