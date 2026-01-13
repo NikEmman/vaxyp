@@ -400,6 +400,7 @@ astynomikosSelect.addEventListener("change", (e) => {
   }
   const index = parseInt(e.target.value);
   clipboardAstynomikos.value = state.astynomikoi[index];
+  state.astynomikos = clipboardAstynomikos.value;
 });
 function paintAstynomikosSelect() {
   // Clear all options but the first:
@@ -603,12 +604,8 @@ martyraXoris.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "martyraXoris",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.martyraXoris, state, state.victimData);
 });
 
 //syllipsi button
@@ -619,13 +616,10 @@ syllipsi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "syllipsi",
-    ektheseis
-  );
+  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  applyAllGrammar(state);
 
-  generateWord(ekthesi, state, state.ypoptosData);
+  generateWord(ektheseis.syllipsi, state, state.ypoptosData);
 });
 // anomoti button
 const anomoti = document.getElementById("anomoti");
