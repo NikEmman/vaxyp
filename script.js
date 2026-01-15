@@ -792,21 +792,8 @@ martyraEndooik.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.endoTimeStart = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.ton = "τον";
-  }
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "astynomikosEndooik",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.astynomikosEndooik, state, state.victimData);
 });
 // thyma endooik button
 const thymaEndooik = document.getElementById("thyma-endooik");
@@ -815,23 +802,9 @@ thymaEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.endoStartTime = state.timeStart;
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.ton = "τον";
-  }
-
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "martyraXorisEndooik",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.martyraXorisEndooik, state, state.victimData);
 });
 
 // drastis -apologia -katigoroumenos endooik button
