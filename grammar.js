@@ -83,6 +83,7 @@ export function toGenitiveFemale(name) {
 const genderMap = {
   Γυναίκα: {
     o: "η",
+    oo: "α",
     tou: "της",
     os: "η",
     ou: "ης",
@@ -101,6 +102,7 @@ const genderMap = {
   },
   Άνδρας: {
     o: "ο",
+    oo: "ο",
     tou: "του",
     os: "ος",
     as: "ου",

@@ -814,22 +814,8 @@ drastisEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  if (state.victimData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.ton = "τον";
-  }
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "katigoroumenouEndooik",
-    ektheseis
-  );
-
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.katigoroumenouEndooik, state, state.ypoptosData);
 });
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
@@ -846,22 +832,8 @@ iatrodikastiki.addEventListener("click", () => {
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.ton = "τον";
-  }
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "iatrodikastiki",
-    ektheseis
-  );
-
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.iatrodikastiki, state, state.ypoptosData);
 });
 const panicYes = document.getElementById("panicYes");
 panicYes.addEventListener("click", () => {
