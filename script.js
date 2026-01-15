@@ -675,13 +675,9 @@ gnostopoiisi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "gnostopoiisi",
-    ektheseis
-  );
+  applyAllGrammar(state);
 
-  generateWord(ekthesi, state, state.ypoptosData);
+  generateWord(ektheseis.gnostopoiisi, state, state.ypoptosData);
 });
 
 // egxeirisis button  printEgxeirisis(initial, person)
@@ -691,12 +687,8 @@ egxeirisis.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "egxeirisis",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.egxeirisis, state, state.victimData);
 });
 
 // gnostopoiisiNarkwtikwn button

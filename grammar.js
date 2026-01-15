@@ -96,6 +96,7 @@ const genderMap = {
     ontas: "ούσα",
     eis: "είσα",
     oY: "Η",
+    sa: "σα",
   },
   Άνδρας: {
     o: "ο",
@@ -112,6 +113,7 @@ const genderMap = {
     ontas: "όντας",
     eis: "είς",
     oY: "Ο",
+    sa: "ς",
   },
 };
 export function applyAllGrammar(state) {
