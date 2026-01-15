@@ -700,13 +700,9 @@ gnostopoiisiNarkwtikwn.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "gnostopoiisiNarkwtikwn",
-    ektheseis
-  );
+  applyAllGrammar(state);
 
-  generateWord(ekthesi, state, state.ypoptosData);
+  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state, state.ypoptosData);
 });
 
 // praktikoZygisis button
@@ -716,13 +712,8 @@ praktikoZygisis.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "praktikoZygisis",
-    ektheseis
-  );
-
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.praktikoZygisis, state, state.ypoptosData);
 });
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
