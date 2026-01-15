@@ -650,8 +650,10 @@ apodosi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(state.victimData.sex, "apodosi", ektheseis);
-  generateWord(ekthesi, state, state.victimData);
+  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  applyAllGrammar(state);
+
+  generateWord(ektheseis.apodosi, state, state.victimData);
 });
 // katasxesi button
 const katasxesi = document.getElementById("katasxesi");
@@ -660,6 +662,8 @@ katasxesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesi, state, state.victimData);
 });
