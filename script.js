@@ -87,7 +87,7 @@ function constructInitialText() {
     state.dayName
   } και ώρα ${formatTime(
     today,
-    state.timePassed
+    state.timePassed,
   )} ενώπιον εμού, ${arthroAnakrA} ${anakritikosSelect.value} του ${
     data.ypiresia
   }, παρισταμένου και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
@@ -128,7 +128,7 @@ document
           if (!hasOfficers || !hasService) {
             // If validation fails, we stop IMMEDIATELY
             alert(
-              "Σφάλμα: Το αρχείο JSON δεν περιέχει τα απαραίτητα δεδομένα (π.χ. Ανακριτικοί υπάλληλοι)."
+              "Σφάλμα: Το αρχείο JSON δεν περιέχει τα απαραίτητα δεδομένα (π.χ. Ανακριτικοί υπάλληλοι).",
             );
             return;
           }
@@ -256,12 +256,12 @@ protokoloEndo.addEventListener("input", () => {
 
 // Apodexetai radio buttons for endooikogeniaki
 const apodexetaiRadioButtons = document.querySelectorAll(
-  'input[name="apodexetai"]'
+  'input[name="apodexetai"]',
 );
 
 function updateVariables() {
   const selected = document.querySelector(
-    'input[name="apodexetai"]:checked'
+    'input[name="apodexetai"]:checked',
   ).value;
 
   // Logic for "apodexetai" variable
@@ -351,7 +351,7 @@ copyIdBtn.addEventListener("click", () => {
 
 // officer fields
 const clipboardAstynomikos = document.querySelector(
-  ".clipboard-id-astynomikos"
+  ".clipboard-id-astynomikos",
 );
 clipboardAstynomikos.value = state.astynomikos
   ? state.astynomikos
@@ -391,7 +391,7 @@ storeOfficerBtn.addEventListener("click", () => {
 const astynomikosSelect = document.getElementById("astynomikoi");
 astynomikosSelect.addEventListener("change", (e) => {
   const clipboardAstynomikos = document.querySelector(
-    ".clipboard-id-astynomikos"
+    ".clipboard-id-astynomikos",
   );
 
   if (e.target.value === "placeholder") {
@@ -462,7 +462,7 @@ taytotitaYpoptos.addEventListener("input", () => {
     taytotitaYpoptos.value,
     data,
     state,
-    true
+    true,
   );
   state.suspect = clipboardIdYpoptos.value;
 });
@@ -693,7 +693,7 @@ egxeirisis.addEventListener("click", () => {
 
 // gnostopoiisiNarkwtikwn button
 const gnostopoiisiNarkwtikwn = document.getElementById(
-  "gnostopoiisiNarkwtikwn"
+  "gnostopoiisiNarkwtikwn",
 );
 gnostopoiisiNarkwtikwn.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
@@ -722,7 +722,7 @@ ypiresiako.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   state.ypiresia = state.ypiresia.toUpperCase();
   state.dAstynomias = state.dAstynomias.toUpperCase();
@@ -739,7 +739,7 @@ ypefthini.addEventListener("click", () => {
   Object.assign(state, { ...state.victimData });
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   generateWord(ektheseis.ypefthini, state, state.victimData);
 });
@@ -749,7 +749,7 @@ const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   Object.assign(state, { ...state.ypoptosData });
   state.anakritikosName =
@@ -763,7 +763,7 @@ const feromenou = document.getElementById("feromenou");
 feromenou.addEventListener("click", () => {
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   Object.assign(state, { ...state.ypoptosData });
   state.timeStart = formatTime(today, state.timePassed);
@@ -826,7 +826,7 @@ iatrodikastiki.addEventListener("click", () => {
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   state.ypiresia = state.ypiresia.toUpperCase();
   state.anakritikosName =
@@ -840,24 +840,18 @@ panicYes.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "panicButtonYes",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+
+  generateWord(ektheseis.panicButtonYes, state, state.victimData);
 });
 const panicNo = document.getElementById("panicNo");
 panicNo.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.victimData.sex,
-    "panicButtonNo",
-    ektheseis
-  );
-  generateWord(ekthesi, state, state.victimData);
+  applyAllGrammar(state);
+
+  generateWord(ektheseis.panicButtonNo, state, state.victimData);
 });
 
 //afairesi button
@@ -867,30 +861,20 @@ afairesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "afairesi",
-    ektheseis
-  );
 
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+
+  generateWord(ektheseis.afairesi, state, state.ypoptosData);
 });
 // katasxesiEndo button
 const katasxesiEndo = document.getElementById("katasxesiEndo");
 katasxesiEndo.addEventListener("click", () => {
   state.timePassed += state.xronosPeratosis * 2;
   state.initial = constructInitialText();
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.ton = "τον";
-  }
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesiEndo, state, state.victimData);
 });
@@ -903,13 +887,10 @@ syllipsiEndo.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  const ekthesi = getDocumentBySex(
-    state.ypoptosData.sex,
-    "syllipsiEndo",
-    ektheseis
-  );
+  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  applyAllGrammar(state);
 
-  generateWord(ekthesi, state, state.ypoptosData);
+  generateWord(ektheseis.syllipsiEndo, state, state.ypoptosData);
 });
 
 // deltio drasti Endo button
@@ -917,7 +898,7 @@ const ypoptoyEndo = document.getElementById("ypoptoyEndo");
 ypoptoyEndo.addEventListener("click", () => {
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   Object.assign(state, { ...state.ypoptosData });
   state.anakritikosName =
@@ -930,30 +911,7 @@ const ypovoliEndo = document.getElementById("ypovoliEndo");
 ypovoliEndo.addEventListener("click", () => {
   Object.assign(state, { ...state.victimData });
   state.nextDay = getNextDay(state.formattedDate);
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.os = "η";
-    state.ou = "ης";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.os = "ος";
-    state.ou = "ου";
-  }
-  if (state.victimData.sex == "Γυναίκα") {
-    state.o2 = "η";
-    state.tou2 = "της";
-    state.ton2 = "την";
-    state.ou2 = "ης";
-    state.ontas2 = "ούσα";
-  } else {
-    state.o2 = "ο";
-    state.tou2 = "του";
-    state.ton2 = "τον";
-    state.ou2 = "ου";
-    state.ontas2 = "όντας";
-  }
+
   if (
     document.querySelector('input[name="autoforo"]:checked').value == "true"
   ) {
@@ -964,18 +922,19 @@ ypovoliEndo.addEventListener("click", () => {
   }
   state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
   state.iatrodik = document.querySelector(
-    'input[name="iatrodik"]:checked'
+    'input[name="iatrodik"]:checked',
   ).value;
   state.oplo = document.querySelector('input[name="oplo"]:checked').value;
   state.ypotropos = document.querySelector(
-    'input[name="ypotropos"]:checked'
+    'input[name="ypotropos"]:checked',
   ).value;
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
+  applyAllGrammar(state);
 
   generateWord(ektheseis.ypovoliEndo, state, state.victimData);
 });
@@ -984,32 +943,7 @@ const apostoliEndo = document.getElementById("apostoliEndo");
 apostoliEndo.addEventListener("click", () => {
   Object.assign(state, { ...state.victimData });
   state.nextDay = getNextDay(state.formattedDate);
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.os = "η";
-    state.ou = "ης";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.os = "ος";
-    state.ou = "ου";
-    state.ton = "τον";
-  }
-  if (state.victimData.sex == "Γυναίκα") {
-    state.o2 = "η";
-    state.tou2 = "της";
-    state.ton2 = "την";
-    state.ou2 = "ης";
-    state.ontas2 = "ούσα";
-  } else {
-    state.o2 = "ο";
-    state.tou2 = "του";
-    state.ton2 = "τον";
-    state.ou2 = "ου";
-    state.ontas2 = "όντας";
-  }
+
   if (
     document.querySelector('input[name="autoforo"]:checked').value == "true"
   ) {
@@ -1020,18 +954,19 @@ apostoliEndo.addEventListener("click", () => {
   }
   state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
   state.iatrodik = document.querySelector(
-    'input[name="iatrodik"]:checked'
+    'input[name="iatrodik"]:checked',
   ).value;
   state.oplo = document.querySelector('input[name="oplo"]:checked').value;
   state.ypotropos = document.querySelector(
-    'input[name="ypotropos"]:checked'
+    'input[name="ypotropos"]:checked',
   ).value;
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
+  applyAllGrammar(state);
 
   generateWord(ektheseis.apostoliEndo, state, state.victimData);
 });
@@ -1041,14 +976,14 @@ const simansi = document.getElementById("simansi");
 simansi.addEventListener("click", () => {
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   Object.assign(state, { ...state.ypoptosData });
   state.anakritikosName =
     state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
   state.rank = state.anakritikos.split(" ")[0];
-  const ekthesi = getDocumentBySex(state.ypoptosData.sex, "simansi", ektheseis);
-  generateWord(ekthesi, state, state.ypoptosData);
+  applyAllGrammar(state);
+  generateWord(ektheseis.simansi, state, state.ypoptosData);
 });
 
 // ΒΑΣ button
@@ -1056,40 +991,16 @@ const vasEndo = document.getElementById("vasEndo");
 vasEndo.addEventListener("click", () => {
   state.nextDay = getNextDay(state.formattedDate);
 
-  if (state.ypoptosData.sex == "Γυναίκα") {
-    state.o = "η";
-    state.tou = "της";
-    state.os = "η";
-    state.ou = "ης";
-    state.ton = "την";
-  } else {
-    state.o = "ο";
-    state.tou = "του";
-    state.os = "ος";
-    state.ou = "ου";
-    state.ton = "τον";
-  }
-  if (state.victimData.sex == "Γυναίκα") {
-    state.o2 = "η";
-    state.tou2 = "της";
-    state.ton2 = "την";
-    state.ou2 = "ης";
-    state.on2 = "ούσα";
-  } else {
-    state.o2 = "ο";
-    state.tou2 = "του";
-    state.ton2 = "τον";
-    state.ou2 = "ου";
-    state.on2 = "όντας";
-  }
   state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
   state.iatrodik = document.querySelector(
-    'input[name="iatrodik"]:checked'
+    'input[name="iatrodik"]:checked',
   ).value;
   state.oplo = document.querySelector('input[name="oplo"]:checked').value;
   state.ypotropos = document.querySelector(
-    'input[name="ypotropos"]:checked'
+    'input[name="ypotropos"]:checked',
   ).value;
+  applyAllGrammar(state);
+
   generateWord(ektheseis.vasEndo, state, state.ypoptosData);
 });
 
@@ -1102,7 +1013,7 @@ a130.addEventListener("click", () => {
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
   state.anakritikos = convertAnakritikosToEnikos(
     anakritikosSelect.value,
-    state
+    state,
   );
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.issuingAuthority = state.issuingAuthority?.toUpperCase();
