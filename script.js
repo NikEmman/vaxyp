@@ -616,7 +616,7 @@ syllipsi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
   applyAllGrammar(state);
 
   generateWord(ektheseis.syllipsi, state, state.ypoptosData);
@@ -650,7 +650,7 @@ apodosi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
   applyAllGrammar(state);
 
   generateWord(ektheseis.apodosi, state, state.victimData);
@@ -662,7 +662,7 @@ katasxesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomikos = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
   applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesi, state, state.victimData);
