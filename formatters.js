@@ -249,6 +249,7 @@ export function extractPersonInfo(formId) {
     firstName: formData.get("firstName"),
     fatherName: formData.get("fatherName"),
     motherName: formData.get("motherName"),
+    motherSurname: "",
     birthDate: formData.get("birthDate"),
     birthPlace: formData.get("birthPlace"),
     docuType: formData.get("docuType"),
