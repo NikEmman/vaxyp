@@ -1,4 +1,9 @@
-import { defaultData, months, days } from "./defaultData.js";
+import {
+  defaultData,
+  months,
+  days,
+  defaultAstynomikos,
+} from "./defaultData.js";
 
 export const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
@@ -39,6 +44,7 @@ export const getState = (localData, todayDate) => {
     astynomikoi: [],
     aAnakrSex: aAnakrSex,
     bAnakrSex: bAnakrSex,
+    astynomikos: defaultAstynomikos,
   };
 
   Object.assign(dataObject, { ...localData });
