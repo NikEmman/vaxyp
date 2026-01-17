@@ -104,8 +104,8 @@ export function formatVehicleInfo(input) {
     fields.type === "ΔΙΚΥΚΛΟ"
       ? "δίκυκλο"
       : fields.usage.match(/Ι.Χ|Δ.Χ/)
-      ? `${fields.usage}.${Array.from(fields.type)[0]}`
-      : fields.usage;
+        ? `${fields.usage}.${Array.from(fields.type)[0]}`
+        : fields.usage;
 
   // Format the output string
   return `${fields.licensePlate} ${formattedUsage} χρώματος ${
@@ -115,7 +115,7 @@ export function formatVehicleInfo(input) {
   } και αριθμό κινητήρα ${fields.engineNumber} ιδιοκτησίας του ${
     fields.ownerSurname
   } ${capitalize(fields.ownerFirstName)} του ${capitalize(
-    fields.ownerFatherName
+    fields.ownerFatherName,
   )}`;
 }
 export function formatIdInfo(input, data, state, suspect = false) {
@@ -199,13 +199,13 @@ export function formatIdInfo(input, data, state, suspect = false) {
 
     // Format the output string
     const formattedString = `${fields.surname} ${capitalize(
-      fields.firstName
+      fields.firstName,
     )} του ${capitalize(
-      toGenitiveMale(fields.fatherName)
+      toGenitiveMale(fields.fatherName),
     )} και της ${capitalize(toGenitiveFemale(fields.motherName))}, γεν. ${
       fields.birthDate
     } στην ${capitalize(
-      fields.birthPlace
+      fields.birthPlace,
     )}, κάτοικος ${residence}, οδός ${capitalize(fields.street)} αρ. ${
       fields.streetNumber
     }, επάγγελμα ***** , κάτοχος του υπ'αριθ ${
@@ -265,11 +265,11 @@ export function extractPersonInfo(formId) {
 }
 export function formatFormData(data) {
   return `(Επ)${data.surname} (Ον)${capitalize(
-    data.firstName
+    data.firstName,
   )} του ${capitalize(toGenitiveMale(data.fatherName))} και της ${capitalize(
-    toGenitiveFemale(data.motherName)
+    toGenitiveFemale(data.motherName),
   )}, γεν. ${data.birthDate} στην ${capitalize(
-    data.birthPlace
+    data.birthPlace,
   )}, κάτοικος ${capitalize(data.area)}, οδός ${capitalize(data.street)} αρ. ${
     data.streetNumber
   }, κάτοχος του υπ'αριθ ${data.idNumber} ${data.docuType} εκδ. ${
@@ -282,7 +282,7 @@ export function formatFormData(data) {
 export function shortenFormattedOfficer(officerString) {
   const splitString = officerString.split(" ");
   // gets the first 3 elements of the array, rank, surname, name
-  return `${splitString[0]} ${splitString[1]} ${splitString[2]}`;
+  return `${splitString[0]} ${splitString[1]} ${splitString[2].replaceAll(",", "")}`;
 }
 export function removeRank(officerString) {
   const splitString = officerString.split(" ");
