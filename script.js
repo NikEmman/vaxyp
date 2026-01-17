@@ -853,6 +853,13 @@ panicNo.addEventListener("click", () => {
 
   generateWord(ektheseis.panicButtonNo, state, state.victimData);
 });
+//domi button
+const domi = document.getElementById("domi");
+domi.addEventListener("click", () => {
+  applyAllGrammar(state);
+
+  generateWord(ektheseis.domi, state, state.victimData);
+});
 
 //afairesi button
 const afairesi = document.getElementById("afairesi");
