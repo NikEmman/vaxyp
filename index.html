@@ -237,7 +237,7 @@
             <button id="person-clear">Εκκαθάριση</button>
           </div>
           <textarea class="clipboard-id output"></textarea>
-          <button class="copy-id">Αντιγραφή</button>
+          <div class="format"><button class="copy-id">Αντιγραφή</button></div>
         </div>
         <br />
         <hr />
@@ -261,7 +261,9 @@
             class="clipboard-id-astynomikos output"
             placeholder="Στοιχεία Αστυνομικού"
           ></textarea>
-          <button class="save-astynomikos">&#128190; Αποθήκευση</button>
+          
+            <div class="format"><button class="save-astynomikos">&#128190; Αποθήκευση</button></div>
+          </div>
         </div>
         <br />
         <hr />
@@ -272,6 +274,10 @@
             <select name="polSuspect" id="polSuspect">
               <option selected value="yes">Ναι</option>
               <option value="no">Όχι</option>
+            </select>
+            <label class="selectLabel" for="suspects"> Επιλογή Δράστη:</label>
+            <select name="suspects" id="suspects">
+              <option value="placeholder">Νέος Δράστης</option>
             </select>
           </div>
         </div>
@@ -440,9 +446,13 @@
           <div class="format">
             <p class="arrow">→</p>
             <button id="person-ypoptos-clear">Εκκαθάριση</button>
+            <button class="deleteBtn" id="remove-suspect">Διαγραφή</button>
           </div>
           <textarea class="clipboard-id-ypoptos output"></textarea>
-          <button class="copy-id-ypoptos">Αντιγραφή</button>
+          <div class="format">
+            <button class="copy-id-ypoptos">Αντιγραφή</button>
+            <button id="add-suspect">Προσθήκη</button>
+          </div>
         </div>
       </div>
       <div class="vehicleTab hidden">
