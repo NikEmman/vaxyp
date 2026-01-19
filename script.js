@@ -21,6 +21,7 @@ import {
   extractPersonInfo,
   getOfficerSurname,
   shortenFormattedOfficer,
+  getSuspectSurname,
 } from "./formatters.js";
 import {
   getData,
@@ -483,6 +484,22 @@ clearYpoptosBtn.addEventListener("click", () => {
   state.ypoptosData = {};
   document.getElementById("dataForm-ypoptos").reset();
 });
+
+function paintSuspectSelect() {
+  const suspectSelect = document.getElementById("suspects");
+  // Clear all options but the first:
+  const firstOption = suspectSelect.firstElementChild;
+  suspectSelect.innerHTML = "";
+  suspectSelect.appendChild(firstOption);
+  if (state.suspects) {
+    state.suspects.forEach((value, index) => {
+      const suspectOption = document.createElement("option");
+      suspectOption.value = index;
+      suspectOption.innerText = getSuspectSurname(value);
+      suspectSelect.appendChild(suspectOption);
+    });
+  }
+}
 
 //vehicle parser fields
 
