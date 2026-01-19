@@ -293,3 +293,6 @@ export function removeRank(officerString) {
 export function getOfficerSurname(officerString) {
   return officerString.split(" ")[1];
 }
+export function getSuspectSurname(suspectString) {
+  return suspectString.split(" ")[0];
+}
