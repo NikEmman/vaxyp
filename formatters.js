@@ -234,7 +234,7 @@ export function formatIdInfo(input, data, state, suspect = false) {
     suspect ? (state.ypoptosData = fields) : (state.victimData = fields);
 
     // Format the output string
-    const formattedString = `(Επ)${fields.surname} (Ον.)${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
+    const formattedString = `${fields.surname} ${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
     return formattedString;
   }
 }
@@ -265,7 +265,7 @@ export function extractPersonInfo(formId) {
   };
 }
 export function formatFormData(data) {
-  return `(Επ)${data.surname} (Ον)${capitalize(
+  return `${data.surname.toUpperCase()} ${capitalize(
     data.firstName,
   )} του ${capitalize(toGenitiveMale(data.fatherName))} και της ${capitalize(
     toGenitiveFemale(data.motherName),
