@@ -20,10 +20,12 @@ export const getState = (localData, todayDate) => {
   const stringDay = String(todayDate.getDate()).padStart(2, "0");
   const formattedDate = `${stringYear}-${stringMonth}-${stringDay}`;
   const specificDate = new Date(formattedDate);
-  const aAnakrSex =
-    localData.anakrSex[getAnakritikoiSelection().aAnakr] || "Άντρας";
-  const bAnakrSex =
-    localData.anakrSex[getAnakritikoiSelection().bAnakr] || "Άντρας";
+  const aAnakrSex = localData.anakrSex
+    ? localData.anakrSex[getAnakritikoiSelection().aAnakr]
+    : "Άντρας";
+  const bAnakrSex = localData.anakrSex
+    ? localData.anakrSex[getAnakritikoiSelection().bAnakr]
+    : "Άντρας";
   const dataObject = {
     victim: "",
     suspect: "",
