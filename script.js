@@ -495,7 +495,7 @@ function paintSuspectSelect() {
     state.suspects.forEach((value, index) => {
       const suspectOption = document.createElement("option");
       suspectOption.value = index;
-      suspectOption.innerText = getSuspectSurname(value);
+      suspectOption.innerText = getSuspectSurname(value.string);
       suspectSelect.appendChild(suspectOption);
     });
   }
@@ -503,12 +503,30 @@ function paintSuspectSelect() {
 const addSuspect = document.getElementById("add-suspect");
 addSuspect.addEventListener("click", () => {
   // adds the current suspect to the list
-  state.suspects.push(state.suspect);
+  const suspect = { string: state.suspect, data: state.ypoptosData };
+  state.suspects.push(suspect);
   // clears the input fields
   document.getElementById("person-ypoptos-clear").click();
   // re-paints the suspect menu
-  console.log(state.suspects);
   paintSuspectSelect();
+});
+
+// suspect select menu functionality
+const suspectSelectMenu = document.getElementById("suspects");
+suspectSelectMenu.addEventListener("change", (e) => {
+  const clipboardSuspect = document.querySelector(".clipboard-id-ypoptos");
+
+  if (e.target.value === "placeholder") {
+    // clear values
+    clipboardSuspect.value = "";
+    state.suspect = "";
+    state.ypoptosData = {};
+    return;
+  }
+  const index = parseInt(e.target.value);
+  clipboardSuspect.value = state.suspects[index].string;
+  state.suspect = state.suspects[index].string;
+  state.ypoptosData = state.suspects[index].data;
 });
 
 //vehicle parser fields
