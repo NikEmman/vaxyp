@@ -500,6 +500,16 @@ function paintSuspectSelect() {
     });
   }
 }
+const addSuspect = document.getElementById("add-suspect");
+addSuspect.addEventListener("click", () => {
+  // adds the current suspect to the list
+  state.suspects.push(state.suspect);
+  // clears the input fields
+  document.getElementById("person-ypoptos-clear").click();
+  // re-paints the suspect menu
+  console.log(state.suspects);
+  paintSuspectSelect();
+});
 
 //vehicle parser fields
 
