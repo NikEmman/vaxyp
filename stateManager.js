@@ -42,6 +42,7 @@ export const getState = (localData, todayDate) => {
     apodexetai: "",
     enMeri: "",
     astynomikoi: [],
+    suspects: [],
     aAnakrSex: aAnakrSex,
     bAnakrSex: bAnakrSex,
     astynomikos: defaultAstynomikos,
