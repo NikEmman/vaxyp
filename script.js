@@ -518,15 +518,36 @@ suspectSelectMenu.addEventListener("change", (e) => {
 
   if (e.target.value === "placeholder") {
     // clear values
-    clipboardSuspect.value = "";
-    state.suspect = "";
-    state.ypoptosData = {};
+
+    document.getElementById("person-ypoptos-clear").click();
     return;
   }
   const index = parseInt(e.target.value);
   clipboardSuspect.value = state.suspects[index].string;
   state.suspect = state.suspects[index].string;
   state.ypoptosData = state.suspects[index].data;
+});
+
+// delete suspect btn
+const suspectDelBtn = document.querySelector("#remove-suspect");
+
+suspectDelBtn.addEventListener("click", () => {
+  const select = document.getElementById("suspects");
+  const index = select.value;
+
+  if (index !== "placeholder") {
+    // Remove from the local array
+    state.suspects.splice(parseInt(index), 1);
+
+    // Re-draw the select menu so the name disappears
+    paintSuspectSelect();
+    //clear values
+    document.getElementById("person-ypoptos-clear").click();
+
+    displayNotification("Ο δράστης διαγράφηκε.");
+  } else {
+    displayNotification("Παρακαλώ επιλέξτε έναν δράστη πρώτα.", true);
+  }
 });
 
 //vehicle parser fields
