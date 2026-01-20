@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.appendChild(input);
     // add to the "Ονομαστικη" list
     const containerEnikos = document.getElementById(
-      "anakritikoiEnikosContainer"
+      "anakritikoiEnikosContainer",
     );
     const inputEnikos = document.createElement("input");
     inputEnikos.type = "text";
@@ -85,16 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("removeAnakritikoi").addEventListener("click", () => {
     const anakritikoiContainer = document.getElementById(
-      "anakritikoiContainer"
+      "anakritikoiContainer",
     );
     const anakritikoiEnikosContainer = document.getElementById(
-      "anakritikoiEnikosContainer"
+      "anakritikoiEnikosContainer",
     );
     const anakritikoi = document.querySelectorAll(
-      "input[name='anakritikoi[]']"
+      "input[name='anakritikoi[]']",
     );
     const anakritikoiEnikos = document.querySelectorAll(
-      "input[name='anakritikoiEnikos[]']"
+      "input[name='anakritikoiEnikos[]']",
     );
     const sexContainer = document.getElementById("sexContainer");
     const anakrSex = document.querySelectorAll("select[name='anakrSex[]']");
@@ -102,19 +102,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (anakritikoi.length > 1) {
       anakritikoiContainer.removeChild(anakritikoi[anakritikoi.length - 1]);
       anakritikoiEnikosContainer.removeChild(
-        anakritikoiEnikos[anakritikoiEnikos.length - 1]
+        anakritikoiEnikos[anakritikoiEnikos.length - 1],
       );
       sexContainer.removeChild(anakrSex[anakrSex.length - 1]);
     }
   });
 
   document.getElementById("submitForm").addEventListener("click", function () {
+    const astynomikoi = JSON.parse(
+      localStorage.getItem("dataObject"),
+    ).astynomikoi;
     const formData = new FormData(document.getElementById("dataForm"));
     const anakritikoi = formData.getAll("anakritikoi[]");
     const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
     const anakrSex = formData.getAll("anakrSex[]");
     const data = {
       anakritikoi: anakritikoi,
+      astynomikoi: astynomikoi ? astynomikoi : [],
       anakritikoiEnikos: anakritikoiEnikos,
       anakrSex: anakrSex,
       ypiresia: formData.get("ypiresia"),

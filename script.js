@@ -144,6 +144,7 @@ document
 
           // Refresh UI
           paintSelectMenus();
+          paintAstynomikosSelect();
           initial.textContent = constructInitialText();
 
           console.log("Success: Data loaded.");
