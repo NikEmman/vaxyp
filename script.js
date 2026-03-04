@@ -4,12 +4,10 @@ import { applyAllGrammar } from "./grammar.js";
 import {
   generateWord,
   processDocument,
-  base64ToArrayBuffer,
   displayNotification,
   copyToClipboard,
 } from "./wordGenerators.js";
 import {
-  roundDownMinutes,
   formatTime,
   getNextDay,
   capitalize,
@@ -36,6 +34,78 @@ let today = new Date();
 
 let data = getData();
 let state = getState(data, today);
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function handleDocxUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  const sortedFiles = Array.from(files).sort((a, b) =>
+    a.name.localeCompare(b.name, "el"),
+  );
+
+  const data = getData();
+  const dataSource = document.getElementById("docx-replacement-source").value;
+  const personData =
+    dataSource === "victimData" ? state.victimData : state.ypoptosData;
+
+  if (!personData.surname) {
+    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. &cross;`;
+    displayNotification(notificationText, true);
+    return;
+  }
+
+  applyAllGrammar(state);
+
+  for (const file of sortedFiles) {
+    try {
+      state.initial = constructInitialText();
+      state.timeStart = formatTime(today, state.timePassed);
+      state.timeEnd = formatTime(
+        today,
+        data.xronosPeratosis + state.timePassed,
+      );
+
+      const arrayBuffer = await readFileAsArrayBuffer(file);
+
+      const modifiedDocx = await processDocument(arrayBuffer, state);
+      const blob = new Blob([modifiedDocx], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const originalName = file.name.replace(".docx", "");
+      a.download = `${originalName}-${personData.surname}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      state.timePassed += data.xronosPeratosis * 2;
+
+      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx &check;`;
+      displayNotification(notificationText);
+    } catch (error) {
+      console.error("Error processing document:", error);
+      displayNotification(
+        `Σφάλμα στο ${file.name}: ${error.message} &cross;`,
+        true,
+      );
+    }
+  }
+
+  event.target.value = "";
+}
 
 const applyTheme = (theme) => {
   if (theme === "dark") {
@@ -661,6 +731,44 @@ const patchClose = document.getElementById("patch-close");
 patchHelp.addEventListener("click", () => {
   patchDialog.showModal();
 });
+// docx import help button
+const docxDialog = document.getElementById("docx-dialog");
+const docxHelp = document.getElementById("docx-help");
+const docxClose = document.getElementById("docx-close");
+
+docxHelp.addEventListener("click", () => {
+  docxDialog.showModal();
+});
+docxClose.addEventListener("click", () => {
+  docxDialog.close();
+});
+
+const keywordsLink = document.getElementById("keywords-link");
+const keywordsDialog = document.getElementById("keywords-dialog");
+const keywordsClose = document.getElementById("keywords-close");
+
+keywordsLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  docxDialog.close();
+  keywordsDialog.showModal();
+});
+
+keywordsClose.addEventListener("click", () => {
+  keywordsDialog.close();
+  docxDialog.showModal();
+});
+
+document
+  .getElementById("download-martyra-sample")
+  .addEventListener("click", () => {
+    generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" });
+  });
+
+document
+  .getElementById("download-martyra-full")
+  .addEventListener("click", () => {
+    generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" });
+  });
 patchClose.addEventListener("click", () => {
   patchDialog.close();
 });
@@ -1179,3 +1287,27 @@ dikografiesSelect.addEventListener("change", () => {
     }
   });
 });
+
+document
+  .getElementById("docx-file-input")
+  .addEventListener("change", handleDocxUpload);
+
+//PATCH NOTES EFFECT
+// Check if latest patch note is within 2 weeks
+const patchDateText = document.querySelector("#patch-dialog u").textContent;
+const dateMatch = patchDateText.match(/Αλλαγές (\d{2})-(\d{2})-(\d{4})/);
+if (dateMatch) {
+  const patchDate = new Date(dateMatch[3], dateMatch[2] - 1, dateMatch[1]);
+  const today = new Date();
+  const diffDays = Math.floor((today - patchDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 14) {
+    const whatsNewBtn = document.getElementById("patch-help");
+    whatsNewBtn.classList.add("glow-new");
+
+    // Remove animation after 15 seconds
+    setTimeout(() => {
+      whatsNewBtn.classList.remove("glow-new");
+    }, 15000);
+  }
+}
