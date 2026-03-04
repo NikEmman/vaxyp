@@ -100,6 +100,58 @@ header a:hover {
   display: flex;
   gap: 20px;
 }
+/* ── Patch-glow animation ───────────────────────────────────── */
+@keyframes badge-pop {
+  0% {
+    transform: scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes badge-fade {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.glow-new {
+  position: relative;
+  box-shadow: 0 0 8px 3px rgba(255, 77, 77, 0.5);
+}
+
+/* "NEW" badge */
+.glow-new::after {
+  content: "ΝΕΟ";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4d4d;
+  color: #fff;
+  font-size: 0.55em;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(255, 77, 77, 0.5);
+  animation:
+    badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    badge-fade 15s linear forwards;
+  pointer-events: none;
+}
 footer {
   display: flex;
   flex-direction: column;

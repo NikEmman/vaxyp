@@ -4,12 +4,10 @@ import { applyAllGrammar } from "./grammar.js";
 import {
   generateWord,
   processDocument,
-  base64ToArrayBuffer,
   displayNotification,
   copyToClipboard,
 } from "./wordGenerators.js";
 import {
-  roundDownMinutes,
   formatTime,
   getNextDay,
   capitalize,
@@ -50,8 +48,8 @@ async function handleDocxUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
 
-  const sortedFiles = Array.from(files).sort((a, b) => 
-    a.name.localeCompare(b.name, 'el')
+  const sortedFiles = Array.from(files).sort((a, b) =>
+    a.name.localeCompare(b.name, "el"),
   );
 
   const data = getData();
@@ -71,7 +69,10 @@ async function handleDocxUpload(event) {
     try {
       state.initial = constructInitialText();
       state.timeStart = formatTime(today, state.timePassed);
-      state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+      state.timeEnd = formatTime(
+        today,
+        data.xronosPeratosis + state.timePassed,
+      );
 
       const arrayBuffer = await readFileAsArrayBuffer(file);
 
@@ -757,13 +758,17 @@ keywordsClose.addEventListener("click", () => {
   docxDialog.showModal();
 });
 
-document.getElementById("download-martyra-sample").addEventListener("click", () => {
-  generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" });
-});
+document
+  .getElementById("download-martyra-sample")
+  .addEventListener("click", () => {
+    generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" });
+  });
 
-document.getElementById("download-martyra-full").addEventListener("click", () => {
-  generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" });
-});
+document
+  .getElementById("download-martyra-full")
+  .addEventListener("click", () => {
+    generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" });
+  });
 patchClose.addEventListener("click", () => {
   patchDialog.close();
 });
@@ -1286,3 +1291,23 @@ dikografiesSelect.addEventListener("change", () => {
 document
   .getElementById("docx-file-input")
   .addEventListener("change", handleDocxUpload);
+
+//PATCH NOTES EFFECT
+// Check if latest patch note is within 2 weeks
+const patchDateText = document.querySelector("#patch-dialog u").textContent;
+const dateMatch = patchDateText.match(/Αλλαγές (\d{2})-(\d{2})-(\d{4})/);
+if (dateMatch) {
+  const patchDate = new Date(dateMatch[3], dateMatch[2] - 1, dateMatch[1]);
+  const today = new Date();
+  const diffDays = Math.floor((today - patchDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 14) {
+    const whatsNewBtn = document.getElementById("patch-help");
+    whatsNewBtn.classList.add("glow-new");
+
+    // Remove animation after 15 seconds
+    setTimeout(() => {
+      whatsNewBtn.classList.remove("glow-new");
+    }, 15000);
+  }
+}
