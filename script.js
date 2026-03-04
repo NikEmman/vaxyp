@@ -742,28 +742,12 @@ docxClose.addEventListener("click", () => {
   docxDialog.close();
 });
 
-function downloadTemplate(ekthesi, isFull) {
-  const suffix = isFull ? "ΠΛΗΡΗΣ-ΔΕΙΓΜΑ" : "ΔΕΙΓΜΑ";
-  const arrayBuffer = base64ToArrayBuffer(ekthesi.string);
-  const blob = new Blob([arrayBuffer], {
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${ekthesi.title}-${suffix}.docx`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
 document.getElementById("download-martyra-sample").addEventListener("click", () => {
-  downloadTemplate(ektheseis.martyraSample, false);
+  generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" }, "ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ-ΔΕΙΓΜΑ");
 });
 
 document.getElementById("download-martyra-full").addEventListener("click", () => {
-  downloadTemplate(ektheseis.martyra, true);
+  generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" }, "ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ-ΠΛΗΡΗΣ-ΔΕΙΓΜΑ");
 });
 patchClose.addEventListener("click", () => {
   patchDialog.close();

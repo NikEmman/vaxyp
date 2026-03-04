@@ -1,4 +1,4 @@
-export async function generateWord(ekthesi, replacements, person) {
+export async function generateWord(ekthesi, replacements, person, customFilename = null) {
   if (!person.surname) {
     const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη. &cross;`;
     displayNotification(notificationText, true);
@@ -22,7 +22,7 @@ export async function generateWord(ekthesi, replacements, person) {
     const a = document.createElement("a");
     a.href = url;
 
-    const docTitle = `${ekthesi.title}-${person.surname}`;
+    const docTitle = customFilename || `${ekthesi.title}-${person.surname}`;
     const notificationText = `Κατέβηκε επιτυχώς η ${docTitle} &check;`;
     a.download = `${docTitle}.docx`;
     document.body.appendChild(a);
