@@ -57,3 +57,13 @@ export function saveData(currentData, newObject) {
   const mergedData = Object.assign({ ...currentData }, { ...newObject });
   localStorage.setItem("dataObject", JSON.stringify(mergedData));
 }
+
+export const getTheme = () => {
+  const stored = localStorage.getItem("vaxyp-theme");
+  if (stored) return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
+
+export const saveTheme = (theme) => {
+  localStorage.setItem("vaxyp-theme", theme);
+};
