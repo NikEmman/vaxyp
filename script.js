@@ -730,6 +730,41 @@ const patchClose = document.getElementById("patch-close");
 patchHelp.addEventListener("click", () => {
   patchDialog.showModal();
 });
+// docx import help button
+const docxDialog = document.getElementById("docx-dialog");
+const docxHelp = document.getElementById("docx-help");
+const docxClose = document.getElementById("docx-close");
+
+docxHelp.addEventListener("click", () => {
+  docxDialog.showModal();
+});
+docxClose.addEventListener("click", () => {
+  docxDialog.close();
+});
+
+function downloadTemplate(ekthesi, isFull) {
+  const suffix = isFull ? "ΠΛΗΡΗΣ-ΔΕΙΓΜΑ" : "ΔΕΙΓΜΑ";
+  const arrayBuffer = base64ToArrayBuffer(ekthesi.string);
+  const blob = new Blob([arrayBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${ekthesi.title}-${suffix}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("download-martyra-sample").addEventListener("click", () => {
+  downloadTemplate(ektheseis.martyraSample, false);
+});
+
+document.getElementById("download-martyra-full").addEventListener("click", () => {
+  downloadTemplate(ektheseis.martyra, true);
+});
 patchClose.addEventListener("click", () => {
   patchDialog.close();
 });
