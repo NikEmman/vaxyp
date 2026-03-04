@@ -743,11 +743,11 @@ docxClose.addEventListener("click", () => {
 });
 
 document.getElementById("download-martyra-sample").addEventListener("click", () => {
-  generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" }, "ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ-ΔΕΙΓΜΑ");
+  generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" });
 });
 
 document.getElementById("download-martyra-full").addEventListener("click", () => {
-  generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" }, "ΕΚΘΕΣΗ ΕΝΟΡΚΗΣ ΕΞΕΤΑΣΗΣ ΜΑΡΤΥΡΑ-ΠΛΗΡΗΣ-ΔΕΙΓΜΑ");
+  generateWord(ektheseis.martyra, {}, { surname: "ΔΕΙΓΜΑ" });
 });
 patchClose.addEventListener("click", () => {
   patchDialog.close();
