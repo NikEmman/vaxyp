@@ -28,12 +28,53 @@ import {
   getState,
   getAnakritikoiSelection,
   saveData,
+  getTheme,
+  saveTheme,
 } from "./stateManager.js";
 
 let today = new Date();
 
 let data = getData();
 let state = getState(data, today);
+
+const applyTheme = (theme) => {
+  if (theme === "dark") {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
+  }
+  const toggleBtn = document.getElementById("theme-toggle");
+  // if (toggleBtn) {
+  //   toggleBtn.textContent = theme === "dark" ? "🌙" : "☀️";
+  // }
+};
+
+const initTheme = () => {
+  const theme = getTheme();
+  applyTheme(theme);
+
+  const toggleBtn = document.getElementById("theme-toggle");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains("dark")
+        ? "dark"
+        : "light";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      saveTheme(newTheme);
+      applyTheme(newTheme);
+    });
+  }
+
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (e) => {
+      if (!localStorage.getItem("vaxyp-theme")) {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    });
+};
+
+initTheme();
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
