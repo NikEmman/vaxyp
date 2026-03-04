@@ -37,6 +37,75 @@ let today = new Date();
 let data = getData();
 let state = getState(data, today);
 
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function handleDocxUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  const sortedFiles = Array.from(files).sort((a, b) => 
+    a.name.localeCompare(b.name, 'el')
+  );
+
+  const data = getData();
+  const dataSource = document.getElementById("docx-replacement-source").value;
+  const personData =
+    dataSource === "victimData" ? state.victimData : state.ypoptosData;
+
+  if (!personData.surname) {
+    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. &cross;`;
+    displayNotification(notificationText, true);
+    return;
+  }
+
+  applyAllGrammar(state);
+
+  for (const file of sortedFiles) {
+    try {
+      state.initial = constructInitialText();
+      state.timeStart = formatTime(today, state.timePassed);
+      state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+
+      const arrayBuffer = await readFileAsArrayBuffer(file);
+
+      const modifiedDocx = await processDocument(arrayBuffer, state);
+      const blob = new Blob([modifiedDocx], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const originalName = file.name.replace(".docx", "");
+      a.download = `${originalName}-${personData.surname}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      state.timePassed += data.xronosPeratosis * 2;
+
+      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx &check;`;
+      displayNotification(notificationText);
+    } catch (error) {
+      console.error("Error processing document:", error);
+      displayNotification(
+        `Σφάλμα στο ${file.name}: ${error.message} &cross;`,
+        true,
+      );
+    }
+  }
+
+  event.target.value = "";
+}
+
 const applyTheme = (theme) => {
   if (theme === "dark") {
     document.body.classList.add("dark");
@@ -1179,3 +1248,7 @@ dikografiesSelect.addEventListener("change", () => {
     }
   });
 });
+
+document
+  .getElementById("docx-file-input")
+  .addEventListener("change", handleDocxUpload);
