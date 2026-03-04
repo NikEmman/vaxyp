@@ -16,9 +16,54 @@
   --text-light: #ffffff;
   --border-color: #90caf9;
   --background-light: #f5f9ff;
+  --background-white: #ffffff;
   --error-red: #f44336;
   --summary-bg: #1565c0;
   --summary-hover: #0d47a1;
+  --invalid-bg: #ffebee;
+  --notification-bg: rgb(196, 235, 196);
+  --notification-color: green;
+  --alert-bg: #ffe8e8;
+  --alert-color: red;
+  --error-bg: #ffe8e8;
+  --error-color: red;
+  --label-color: #1976d2;
+  --btn-hover: #0d47a1;
+  --btn-hover-text: #ffffff;
+}
+.dark {
+  color-scheme: dark;
+}
+.dark {
+  --background-light: #0e1117;
+  --background-white: #161c27;
+  --light-blue: #1a2236;
+
+  --primary-blue: #4a8fd4;
+  --secondary-blue: #3a7bbf;
+  --accent-blue: #6aaee8;
+  --label-color: #89b8e8;
+
+  --text-dark: #c8d3e0;
+  --text-light: #eef3f8;
+
+  --border-color: #2a3547;
+  --disabled: #3d4d60;
+
+  --summary-bg: #1d2840;
+  --summary-hover: #253252;
+
+  --notification-bg: #1a3028;
+  --notification-color: #5cc98a;
+  --alert-bg: #2e1f1f;
+  --alert-color: #e07070;
+  --error-bg: #281818;
+  --error-color: #e07070;
+  --invalid-bg: #2a1515;
+
+  /* Button Hovers */
+  --btn-hover: #5aa0d8;
+  --btn-hover-text: #ffffff;
 }
 
 body {
@@ -50,6 +95,10 @@ header a {
 
 header a:hover {
   text-decoration: underline;
+}
+.navButtons {
+  display: flex;
+  gap: 20px;
 }
 footer {
   display: flex;
@@ -83,7 +132,7 @@ footer a {
   padding: 1.5em;
   border: 2px solid var(--border-color);
   border-radius: 8px;
-  background-color: white;
+  background-color: var(--background-white);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
@@ -93,7 +142,7 @@ footer a {
 .fileUploader label {
   display: block;
   margin-top: 0.5em;
-  color: var(--accent-blue);
+  color: var(--label-color);
 }
 
 .fileUploader a {
@@ -117,23 +166,23 @@ footer a {
   padding: 1em 0.5em;
   width: 100%;
   text-align: center;
-  background-color: rgb(196, 235, 196);
-  color: green;
+  background-color: var(--notification-bg);
+  color: var(--notification-color);
 }
 .alert {
-  background-color: #ffe8e8;
-  color: red;
+  background-color: var(--alert-bg);
+  color: var(--alert-color);
 }
 .error {
-  border: 1px dashed red;
-  color: red;
-  background-color: #ffe8e8;
+  border: 1px dashed var(--error-color);
+  color: var(--error-color);
+  background-color: var(--error-bg);
   outline: none;
 }
 
 /* Top Section with Anakritikoi */
 .top {
-  background-color: white;
+  background-color: var(--background-white);
   padding: 1.5em;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -147,6 +196,7 @@ footer a {
 .output {
   font-family: "Calibri", sans-serif;
   background-color: var(--background-light);
+  color: var(--text-dark);
   padding: 1em;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -174,7 +224,7 @@ footer a {
 .anakritikoi label,
 .selectLabel {
   margin-bottom: 0.5em;
-  color: var(--accent-blue);
+  color: var(--label-color);
   font-weight: 500;
 }
 
@@ -183,7 +233,8 @@ select {
   padding: 0.5em;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--background-white);
+  color: var(--text-dark);
 }
 .ektheseisTab > .anakritikoi {
   justify-content: end;
@@ -197,7 +248,7 @@ select {
 .data {
   gap: 2em;
   padding: 1.5em;
-  background-color: white;
+  background-color: var(--background-white);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 1.5em;
@@ -212,10 +263,34 @@ select {
   border-radius: 4px;
   resize: vertical;
   max-height: 40vh;
+  background-color: var(--background-white);
+  color: var(--text-dark);
 }
 
 .input:focus,
 .output:focus {
+  outline: none;
+  border-color: var(--secondary-blue);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="email"],
+textarea {
+  background-color: var(--background-white);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  padding: 0.5em;
+  border-radius: 4px;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+textarea:focus {
   outline: none;
   border-color: var(--secondary-blue);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
@@ -258,8 +333,12 @@ select {
   cursor: default;
   padding: 0.8em 1.2em;
   /* background: var(--light-blue); */
-  background: linear-gradient(to left, var(--light-blue), #ffffff);
-  color: var(--primary-blue);
+  background: linear-gradient(
+    to left,
+    var(--light-blue),
+    var(--background-white)
+  );
+  color: var(--text-dark);
   font-weight: 700;
   border: 2px solid var(--secondary-blue);
   border-bottom: 2px solid var(--background-light);
@@ -337,7 +416,7 @@ button,
 input[type="file"]::file-selector-button {
   padding: 0.6em 1.2em;
   background-color: var(--secondary-blue);
-  color: white;
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -368,7 +447,7 @@ button:disabled,
 
 .helpBtn {
   background-color: var(--accent-blue);
-  color: white;
+  color: #ffffff;
   border-radius: 5px;
   width: 1.5em;
   height: 1.5em;
@@ -391,11 +470,12 @@ button:disabled,
 }
 
 .helpBtn:hover {
-  background-color: var(--primary-blue);
+  background-color: var(--btn-hover);
+  color: var(--btn-hover-text);
 }
 .large:hover {
-  background-color: var(--light-blue);
-  color: var(--primary-blue);
+  background-color: var(--btn-hover);
+  color: var(--btn-hover-text);
 }
 .helpBtn:active {
   transform: scale(0.95);
@@ -428,7 +508,8 @@ dialog {
   border-radius: 8px;
   box-shadow: 0 0 2em rgba(0, 0, 0, 0.3);
   border: none;
-  background-color: white;
+  background-color: var(--background-white);
+  color: var(--text-dark);
 }
 
 dialog::backdrop {
@@ -460,7 +541,7 @@ dialog:focus {
 .closeModal {
   border: none;
   background-color: var(--error-red);
-  color: white;
+  color: #ffffff;
   align-self: flex-end;
   width: 1.5em;
   height: 1.5em;
@@ -497,7 +578,7 @@ ul li {
 .dataForm {
   display: flex;
   gap: 3em;
-  background-color: white;
+  background-color: var(--background-white);
   padding: 2em;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -517,6 +598,8 @@ ul li {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 0.5em;
+  background-color: var(--background-white);
+  color: var(--text-dark);
 }
 
 .dataForm input:focus,
@@ -534,7 +617,7 @@ select:focus {
 }
 
 .dataForm label {
-  color: var(--accent-blue);
+  color: var(--label-color);
   font-weight: 500;
   margin-bottom: 0.3em;
   display: inline-block;
@@ -597,7 +680,7 @@ select:focus {
 }
 
 input:invalid {
-  background-color: #ffebee;
+  background-color: var(--invalid-bg);
   border: 2px solid var(--error-red);
 }
 
@@ -619,7 +702,7 @@ fieldset {
   border-radius: 8px;
   padding: 1em;
   margin-bottom: 1.5em;
-  background-color: #fff;
+  background-color: var(--background-white);
   display: flex;
   flex-wrap: wrap;
   gap: 1.5em;
@@ -627,7 +710,7 @@ fieldset {
 
 legend {
   font-weight: bold;
-  color: var(--accent-blue);
+  color: var(--label-color);
   padding: 0 0.5em;
   font-size: 0.95em;
 }
@@ -661,6 +744,14 @@ hr {
     align-items: center;
     gap: 5px;
     height: fit-content;
+  }
+  .navButtons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .theme-toggle {
+    align-self: flex-end;
+    margin-top: 5px;
   }
   .anakritikoi {
     flex-direction: column;
@@ -732,4 +823,64 @@ hr {
 }
 .hidden {
   display: none;
+}
+
+.theme-toggle {
+  /* pill track */
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  width: 64px;
+  height: 32px;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+  overflow: visible;
+}
+
+/* the sliding knob */
+.theme-toggle::before {
+  content: "☀️";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  line-height: 24px;
+  text-align: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: none;
+}
+
+/* dark mode state: knob slides right, shows moon */
+.dark .theme-toggle {
+  background: rgba(70, 102, 147, 0.25);
+  border-color: rgba(35, 45, 63, 0.5);
+}
+
+.dark .theme-toggle::before {
+  content: "🌙";
+  transform: translateX(32px);
+  background: #161c27;
+}
+
+.dark .theme-toggle:hover {
+  background: rgba(44, 67, 100, 0.25);
+  border-color: rgba(18, 24, 34, 0.5);
 }

@@ -1,4 +1,52 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const getTheme = () => {
+    const stored = localStorage.getItem("vaxyp-theme");
+    if (stored) return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  };
+
+  const saveTheme = (theme) => {
+    localStorage.setItem("vaxyp-theme", theme);
+  };
+
+  const applyTheme = (theme) => {
+    if (theme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+    const toggleBtn = document.getElementById("theme-toggle");
+  };
+
+  const initTheme = () => {
+    const theme = getTheme();
+    applyTheme(theme);
+
+    const toggleBtn = document.getElementById("theme-toggle");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", () => {
+        const currentTheme = document.body.classList.contains("dark")
+          ? "dark"
+          : "light";
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        saveTheme(newTheme);
+        applyTheme(newTheme);
+      });
+    }
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (!localStorage.getItem("vaxyp-theme")) {
+          applyTheme(e.matches ? "dark" : "light");
+        }
+      });
+  };
+
+  initTheme();
+
   // Check if localStorage dataObject exists and populate form fields
   const savedData = localStorage.getItem("dataObject");
   if (savedData) {
