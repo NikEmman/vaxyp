@@ -525,6 +525,19 @@
             <!-- <option value="endo">Ενδοοικογενειακή</option> -->
           </select>
         </div>
+        <div class="anakritikoi">
+          <label class="selectLabel" for="docx-replacement-source"
+            >Επιλέξτε πηγή δεδομένων:</label
+          >
+          <select id="docx-replacement-source">
+            <option value="victimData" selected>Παθών</option>
+            <option value="ypoptosData">Δράστης</option>
+          </select>
+          <label class="selectLabel" for="docx-file-input"
+            >Επιλέξτε αρχεία .docx:</label
+          >
+          <input type="file" id="docx-file-input" accept=".docx" multiple />
+        </div>
         <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
           <p class="helpBtn large dikografiesHiddable" id="martyra">
@@ -981,6 +994,7 @@
         <p class="closeModal" id="patch-close">&times;</p>
         <ul>
           <u>Αλλαγές 04-03-2026</u>
+          <li>Προστέθηκε δυνατότητα εισαγωγής εξωτερικών .docx αρχείων στην καρτέλα Εκθέσεις με αυτόματη συμπλήρωση στοιχείων και υπολογισμό χρόνων</li>
           <li>Προστέθηκε dark / light mode</li>
         </ul>
         <hr />
