@@ -525,20 +525,7 @@
             <!-- <option value="endo">Ενδοοικογενειακή</option> -->
           </select>
         </div>
-        <div class="anakritikoi">
-          <label class="selectLabel" for="docx-replacement-source"
-            >Επιλέξτε πηγή δεδομένων:</label
-          >
-          <select id="docx-replacement-source">
-            <option value="victimData" selected>Παθών</option>
-            <option value="ypoptosData">Δράστης</option>
-          </select>
-          <label class="selectLabel" for="docx-file-input"
-            >Επιλέξτε αρχεία .docx:</label
-          >
-          <input type="file" id="docx-file-input" accept=".docx" multiple />
-          <p class="helpBtn" id="docx-help" title="Βοήθεια">?</p>
-        </div>
+        
         <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
           <p class="helpBtn large dikografiesHiddable" id="martyra">
@@ -780,6 +767,22 @@
             Αποστολή συνοδείας
           </p>
         </div>
+        <hr>
+        <p>Με templates χρήστη</p>
+        <div class="customDocs">
+          <label class="selectLabel" for="docx-replacement-source"
+            >Με όνομα:</label
+          >
+          <select id="docx-replacement-source">
+            <option value="victimData" selected>Παθών</option>
+            <option value="ypoptosData">Δράστης</option>
+          </select>
+          <label class="selectLabel" for="docx-file-input"
+            >Επιλέξτε αρχεία .docx:</label
+          >
+          <input type="file" id="docx-file-input" accept=".docx" multiple />
+          <p class="helpBtn" id="docx-help" title="Βοήθεια">?</p>
+        </div>
       </div>
       <div class="ypiresiakoTab hidden">
         <div class="data">
@@ -995,7 +998,11 @@
         <p class="closeModal" id="patch-close">&times;</p>
         <ul>
           <u>Αλλαγές 04-03-2026</u>
-          <li>Προστέθηκε δυνατότητα εισαγωγής εξωτερικών .docx αρχείων στην καρτέλα Εκθέσεις με αυτόματη συμπλήρωση στοιχείων και υπολογισμό χρόνων</li>
+          <li>
+            Προστέθηκε δυνατότητα εισαγωγής εξωτερικών .docx αρχείων στην
+            καρτέλα Εκθέσεις με αυτόματη συμπλήρωση στοιχείων 
+          </li>
+          <li>Για την δημιουργία προ-μορφωποιημένων εκθέσεων (templates) ανατρέξτε στην σχετική βοήθεια, στο τέλος της καρτέλας "Εκθέσεις"</li>
           <li>Προστέθηκε dark / light mode</li>
         </ul>
         <hr />
@@ -1320,16 +1327,127 @@
       <div class="container">
         <p class="closeModal" id="docx-close">&times;</p>
         <ol>
-          <li>Ονομάστε τα αρχεία σας με αριθμούς για σωστή σειροποίηση (π.χ. 1-Σύλληψη, 2-Μάρτυρας)</li>
-          <li>Επιλέξτε πηγή δεδομένων (Παθών ή Δράστης)</li>
-          <li>Επιλέξτε τα .docx αρχεία που θέλετε να επεξεργαστούν</li>
-          <li>Τα αρχεία θα συμπληρωθούν αυτόματα με τα στοιχεία και τους χρόνους</li>
+          <li>
+            Ονομάστε τα αρχεία σας με αριθμούς για σωστή σειρά επεξεργασίας
+            (π.χ. 1-Μάρτυρας, 2-Σύλληψη ...κτλ)
+          </li>
+          <li>
+            Επιλέξτε Παθών ή Δράστης για το όνομα που θα μπει στον τίτλο του
+            αρχείου και για έντυπα τύπου Υ/Δ ή δελτίο υπόπτου που τα στοιχεία
+            μορφοποιούνται με διαφορετικό τρόπο
+          </li>
+          <li>
+            Σε κάθε αρχείο το πρόγραμμα θα αλλάξει τα στοιχεία σε αγκύλες {}, πχ
+            {victim} με τα στοιχεία υπόπτου.
+          </li>
+          <li>
+            ΠΡΟΣΟΧΗ: Κάθε λέξη κλειδί, μαζί και οι αγκύλες, θα πρέπει να γραφούν
+            στα <strong><em>Αγγλικά</em></strong> αλλιώς δεν θα αντικατασταθούν</li>
+          </li>
+          <li> Δείτε την <a id="keywords-link">λίστα</a> με όλες τις διαθέσιμες λέξεις κλειδιά</li>  
+          <li>
+            Πιο κάτω πατήστε και κατεβάστε τα 2 δείγματα (templates) για να δείτε
+            τι πρέπει να αλλάξετε για να δημιουργήσετε τα δικά σας templates.
+          </li>
+          
+          <li>Επιλέξτε τα .docx αρχεία που θέλετε να επεξεργαστείτε</li>
+          <li>
+            Τα αρχεία θα συμπληρωθούν αυτόματα με τα στοιχεία και τους χρόνους
+          </li>
           <li>Οι χρόνοι υπολογίζονται αθροιστικά (κάθε έγγραφο +20 λεπτά)</li>
           <li>
             <button id="download-martyra-sample">Μάρτυρα (απλή)</button>
-            <button id="download-martyra-full">Μάρτυρα (με φύλο)</button>
           </li>
+          <li><button id="download-martyra-full">Μάρτυρα (με φύλο)</button></li>
         </ol>
+      </div>
+    </dialog>
+    <dialog id="keywords-dialog">
+      <div class="container">
+        <p class="closeModal" id="keywords-close">&times;</p>
+        <h2>Διαθέσιμες Λέξεις Κλειδιά</h2>
+
+        <h3>Βασικές Λέξεις Κλειδιά</h3>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή / Παράδειγμα</th></tr>
+          <tr><td>{initial}</td><td>Στην Κομοτηνή σήμερα την 4η του μήνα Μαρτίου του έτους 2026 ημέρα Τετάρτη και ώρα 22:45 ενώπιον εμού, του Αρχ/κα ΠΑΠΑ Ιωάννη του Τ.Δ.Ε.Ε. Κομοτηνής, παρισταμένου και του Ανθ/μου ΠΑΠΑΔΟΠΟΥΛΟΥ Γεωργίου </td></tr>
+          <tr><td>{victim}</td><td>Μορφοποιημένο κείμενο παθόντα (ΠΑΠΑΣ ΙΩΑΝΝΗΣ του ΝΙΚΟΛΑΟΥ...)</td></tr>
+          <tr><td>{suspect}</td><td>Μορφοποιημένο κείμενο δράστη</td></tr>
+          <tr><td>{timeStart}</td><td>Ώρα έναρξης (π.χ. 22:15)</td></tr>
+          <tr><td>{timeEnd}</td><td>Ώρα λήξης (π.χ. 22:25)</td></tr>
+        </table>
+
+        <h3>Στοιχεία Παθόντα/Δράστη</h3>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
+          <tr><td>{surname}</td><td>Επώνυμο</td></tr>
+          <tr><td>{firstName}</td><td>Όνομα</td></tr>
+          <tr><td>{fatherName}</td><td>Πατρώνυμο</td></tr>
+          <tr><td>{motherName}</td><td>Μητρώνυμο</td></tr>
+          <tr><td>{birthDate}</td><td>Ημερομηνία γέννησης</td></tr>
+          <tr><td>{birthPlace}</td><td>Τόπος γέννησης</td></tr>
+          <tr><td>{idNumber}</td><td>Αριθμός Δ.Τ.</td></tr>
+          <tr><td>{issuingAuthority}</td><td>Αρχή έκδοσης</td></tr>
+          <tr><td>{phoneNumber}</td><td>Τηλέφωνο</td></tr>
+          <tr><td>{street}</td><td>Οδός</td></tr>
+          <tr><td>{streetNumber}</td><td>Αριθμός</td></tr>
+          <tr><td>{area}</td><td>Περιοχή</td></tr>
+          <tr><td>{sex}</td><td>Φύλο</td></tr>
+          <tr><td>{nationality}</td><td>Υπηκοότητα</td></tr>
+        </table>
+
+        <h3>Στοιχεία Υπηρεσίας</h3>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
+          <tr><td>{ypiresia}</td><td>Υπηρεσία</td></tr>
+          <tr><td>{doy}</td><td>Δ.Ο.Υ.</td></tr>
+          <tr><td>{merosSyntaksisEkthesis}</td><td>Τόπος σύνταξης</td></tr>
+          <tr><td>{eisaggeleiaProtodikon}</td><td>Εισαγγελία</td></tr>
+          <tr><td>{dieuthynsiYpiresias}</td><td>Διεύθυνση υπηρεσίας</td></tr>
+          <tr><td>{tilefono}</td><td>Τηλέφωνο</td></tr>
+          <tr><td>{dAstynomias}</td><td>Δ.Α.</td></tr>
+          <tr><td>{geniki}</td><td>Γενική</td></tr>
+          <tr><td>{iatro}</td><td>Ιατρός</td></tr>
+        </table>
+
+        <h3>Ημερομηνία/Ώρα</h3>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
+          <tr><td>{formattedDate}</td><td>Ημερομηνία (DD-MM-YYYY)</td></tr>
+          <tr><td>{year}</td><td>Έτος</td></tr>
+          <tr><td>{month}</td><td>Μήνας</td></tr>
+          <tr><td>{day}</td><td>Ημέρα μήνα</td></tr>
+          <tr><td>{dayName}</td><td>Όνομα ημέρας (Δευτέρα, κλπ)</td></tr>
+        </table>
+
+        <h3>Λέξεις Κλειδιά Φύλου</h3>
+        <p>Προστίθενται αυτόματα ανάλογα με το φύλο του παθόντα/δράστη/ανακριτικού</p>
+        <table>
+          <tr><th>Βάση</th><th>Δράστης (S)<br/>Άνδρας</th><th>Δράστης (S)<br/>Γυναίκα</th><th>Παθών (V)<br/>Άνδρας</th><th>Παθών (V)<br/>Γυναίκα</th><th>Ανακριτικός 1 (A1)</th><th>Ανακριτικός 2 (A2)</th></tr>
+          <tr><td>o</td><td>ο</td><td>η</td><td>ο</td><td>η</td><td>-</td><td>-</td></tr>
+          <tr><td>oo</td><td>ο</td><td>α</td><td>ο</td><td>α</td><td>-</td><td>-</td></tr>
+          <tr><td>tou</td><td>του</td><td>της</td><td>του</td><td>της</td><td>-</td><td>-</td></tr>
+          <tr><td>os</td><td>ος</td><td>η</td><td>ος</td><td>η</td><td>-</td><td>-</td></tr>
+          <tr><td>as</td><td>ου</td><td>ας</td><td>ου</td><td>ας</td><td>-</td><td>-</td></tr>
+          <tr><td>ou</td><td>ου</td><td>ης</td><td>ου</td><td>ης</td><td>-</td><td>-</td></tr>
+          <tr><td>ouu</td><td>ού</td><td>ής</td><td>ού</td><td>ής</td><td>-</td><td>-</td></tr>
+          <tr><td>ton</td><td>τον</td><td>την</td><td>τον</td><td>την</td><td>-</td><td>-</td></tr>
+          <tr><td>on</td><td>όντας</td><td>ούσα</td><td>όντας</td><td>ούσα</td><td>-</td><td>-</td></tr>
+          <tr><td>hs</td><td>ης</td><td>ιδα</td><td>ης</td><td>ιδα</td><td>-</td><td>-</td></tr>
+          <tr><td>wn</td><td>ών</td><td>ούσα</td><td>ών</td><td>ούσα</td><td>-</td><td>-</td></tr>
+          <tr><td>wnn</td><td>ων</td><td>ουσα</td><td>ων</td><td>ουσα</td><td>-</td><td>-</td></tr>
+          <tr><td>wnnY</td><td>ΩΝ</td><td>ΟΥΣΑ</td><td>ΩΝ</td><td>ΟΥΣΑ</td><td>-</td><td>-</td></tr>
+          <tr><td>onn</td><td>όν</td><td>ήν</td><td>όν</td><td>ήν</td><td>-</td><td>-</td></tr>
+          <tr><td>ellinas</td><td>Έλληνας</td><td>Ελληνίδα</td><td>Έλληνας</td><td>Ελληνίδα</td><td>-</td><td>-</td></tr>
+          <tr><td>osa</td><td>ος</td><td>α</td><td>ος</td><td>α</td><td>-</td><td>-</td></tr>
+          <tr><td>ontas</td><td>όντας</td><td>ούσα</td><td>όντας</td><td>ούσα</td><td>-</td><td>-</td></tr>
+          <tr><td>onta</td><td>όντας</td><td>ούσας</td><td>όντας</td><td>ούσας</td><td>-</td><td>-</td></tr>
+          <tr><td>eis</td><td>είς</td><td>είσα</td><td>είς</td><td>είσα</td><td>-</td><td>-</td></tr>
+          <tr><td>enta</td><td>έντα</td><td>είσα</td><td>έντα</td><td>είσα</td><td>-</td><td>-</td></tr>
+          <tr><td>oY</td><td>Ο</td><td>Η</td><td>Ο</td><td>Η</td><td>Ο/Η</td><td>Ο/Η</td></tr>
+          <tr><td>sa</td><td>ς</td><td>σα</td><td>ς</td><td>σα</td><td>-</td><td>-</td></tr>
+        </table>
+        <p><em>Παράδειγμα: {oS} = "ο" για άνδρα δράστη, {touV} = "της" για γυναίκα παθόντα, {oYA1} = "Ο" για υπογραφή άντρα Ά ανακριτικού</em></p>
       </div>
     </dialog>
     <footer>
