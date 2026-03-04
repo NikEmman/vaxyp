@@ -537,6 +537,7 @@
             >Επιλέξτε αρχεία .docx:</label
           >
           <input type="file" id="docx-file-input" accept=".docx" multiple />
+          <p class="helpBtn" id="docx-help" title="Βοήθεια">?</p>
         </div>
         <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
@@ -1313,6 +1314,22 @@
           <li>Η μετατροπή ατόμων/οχημάτων γίνεται αυτόματα</li>
           <li>Προσθήκη βασικών εκθέσεων</li>
         </ul>
+      </div>
+    </dialog>
+    <dialog id="docx-dialog">
+      <div class="container">
+        <p class="closeModal" id="docx-close">&times;</p>
+        <ol>
+          <li>Ονομάστε τα αρχεία σας με αριθμούς για σωστή σειροποίηση (π.χ. 1-Σύλληψη, 2-Μάρτυρας)</li>
+          <li>Επιλέξτε πηγή δεδομένων (Παθών ή Δράστης)</li>
+          <li>Επιλέξτε τα .docx αρχεία που θέλετε να επεξεργαστούν</li>
+          <li>Τα αρχεία θα συμπληρωθούν αυτόματα με τα στοιχεία και τους χρόνους</li>
+          <li>Οι χρόνοι υπολογίζονται αθροιστικά (κάθε έγγραφο +20 λεπτά)</li>
+          <li>
+            <button id="download-martyra-sample">Μάρτυρα (απλή)</button>
+            <button id="download-martyra-full">Μάρτυρα (με φύλο)</button>
+          </li>
+        </ol>
       </div>
     </dialog>
     <footer>
