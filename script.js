@@ -742,6 +742,21 @@ docxClose.addEventListener("click", () => {
   docxDialog.close();
 });
 
+const keywordsLink = document.getElementById("keywords-link");
+const keywordsDialog = document.getElementById("keywords-dialog");
+const keywordsClose = document.getElementById("keywords-close");
+
+keywordsLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  docxDialog.close();
+  keywordsDialog.showModal();
+});
+
+keywordsClose.addEventListener("click", () => {
+  keywordsDialog.close();
+  docxDialog.showModal();
+});
+
 document.getElementById("download-martyra-sample").addEventListener("click", () => {
   generateWord(ektheseis.martyraSample, {}, { surname: "ΔΕΙΓΜΑ" });
 });
