@@ -157,16 +157,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("submitForm").addEventListener("click", function () {
-    const astynomikoi = JSON.parse(
-      localStorage.getItem("dataObject"),
-    ).astynomikoi;
+    const astynomikoi =
+      JSON.parse(localStorage.getItem("dataObject"))?.astynomikoi || [];
     const formData = new FormData(document.getElementById("dataForm"));
     const anakritikoi = formData.getAll("anakritikoi[]");
     const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
     const anakrSex = formData.getAll("anakrSex[]");
     const data = {
       anakritikoi: anakritikoi,
-      astynomikoi: astynomikoi ? astynomikoi : [],
+      astynomikoi: astynomikoi,
       anakritikoiEnikos: anakritikoiEnikos,
       anakrSex: anakrSex,
       ypiresia: formData.get("ypiresia"),
