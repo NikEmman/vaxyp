@@ -676,11 +676,55 @@ ul li {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.containerAnakritikoi {
+#anakritikoiList {
   display: flex;
-  gap: 2em;
-  padding-bottom: 1.5em;
+  flex-direction: column;
+  gap: 1em;
+  width: 100%;
+}
+
+.anakritikoi-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 1em;
+  background-color: var(--background-light, #f5f5f5);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.anakritikoi-row .row-label {
+  font-weight: 600;
+  color: var(--label-color);
+  font-size: 0.95em;
+}
+
+.anakritikoi-row .row-fields {
+  display: flex;
+  gap: 1em;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.anakritikoi-row .row-fields select {
+  width: 7em;
+}
+
+.anakritikoi-row .row-fields input {
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (max-width: 600px) {
+  .anakritikoi-row .row-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .anakritikoi-row .row-fields select,
+  .anakritikoi-row .row-fields input {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 .dataForm input,
@@ -735,22 +779,12 @@ select:focus {
   justify-self: end;
 }
 
-#anakritikoiContainer,
-#anakritikoiEnikosContainer,
-#sexContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-#sexContainer select {
-  width: 6em;
-}
-
 .anakritikoiBtns {
   display: flex;
   justify-content: space-between;
   width: 100%;
   margin-bottom: 1.5em;
+  padding-top: 1.5em;
 }
 
 #addAnakritikoi {
@@ -829,6 +863,13 @@ hr {
   margin: 1em 0;
 }
 
+@media (max-width: 1100px) {
+  .tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 /* Media Queries - minimal mobile support */
 @media (max-width: 768px) {
   header {
@@ -898,10 +939,6 @@ hr {
     flex-direction: column;
     width: 100%;
     padding: 1em;
-  }
-
-  .containerAnakritikoi {
-    flex-direction: column;
   }
 
   .dataForm input,
