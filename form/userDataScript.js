@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Populate inputs with stored data
     data.anakritikoi.forEach((value, index) => {
-      // Check if anakrSex exists and has a value for this index, otherwise default
       const sexValue =
         data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
 
@@ -63,11 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
           data.anakritikoi[0] || "";
         document.querySelector("input[name='anakritikoiEnikos[]']").value =
           data.anakritikoiEnikos[0] || "";
-
-        // Safely set the sex for the first row
         document.querySelector("select[name='anakrSex[]']").value = sexValue;
       } else {
-        addAnakritikoi(value, data.anakritikoiEnikos[index], sexValue);
+        addAnakritikoi(
+          value,
+          data.anakritikoiEnikos[index],
+          sexValue,
+        );
       }
     });
 
@@ -90,39 +91,59 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("amy").value = data.amy || "";
   }
 
-  function addAnakritikoi(value, valueEnikos, sexValue = "Άντρας") {
-    //add to the "Fylo" list
-    const sexContainer = document.getElementById("sexContainer");
+  function updateRowLabels() {
+    const rows = document.querySelectorAll(".anakritikoi-row");
+    rows.forEach((row, index) => {
+      row.querySelector(".row-label").textContent = `Ανακριτικός #${index + 1}`;
+    });
+  }
+
+  function addAnakritikoi(value = "", valueEnikos = "", sexValue = "Άντρας") {
+    const container = document.getElementById("anakritikoiList");
+    const rowCount = container.querySelectorAll(".anakritikoi-row").length;
+
+    const row = document.createElement("div");
+    row.className = "anakritikoi-row";
+    row.dataset.index = rowCount;
+
+    const label = document.createElement("span");
+    label.className = "row-label";
+    label.textContent = `Ανακριτικός #${rowCount + 1}`;
+
+    const fieldsDiv = document.createElement("div");
+    fieldsDiv.className = "row-fields";
+
     const select = document.createElement("select");
-    const man = document.createElement("option");
-    const woman = document.createElement("option");
-    man.value = "Άντρας";
-    man.innerText = "Άντρας";
-    woman.value = "Γυναίκα";
-    woman.innerText = "Γυναίκα";
     select.name = "anakrSex[]";
+    const man = document.createElement("option");
+    man.value = "Άντρας";
+    man.textContent = "Άντρας";
+    const woman = document.createElement("option");
+    woman.value = "Γυναίκα";
+    woman.textContent = "Γυναίκα";
     select.appendChild(man);
     select.appendChild(woman);
     select.value = sexValue;
-    sexContainer.appendChild(select);
-    //add to the "Γενική" list
-    const container = document.getElementById("anakritikoiContainer");
+
     const input = document.createElement("input");
     input.type = "text";
     input.name = "anakritikoi[]";
     input.placeholder = "Αρχ/κα ΠΑΠΠΑ Ανέστη";
-    input.value = value || "";
-    container.appendChild(input);
-    // add to the "Ονομαστικη" list
-    const containerEnikos = document.getElementById(
-      "anakritikoiEnikosContainer",
-    );
+    input.value = value;
+
     const inputEnikos = document.createElement("input");
     inputEnikos.type = "text";
     inputEnikos.name = "anakritikoiEnikos[]";
     inputEnikos.placeholder = "Αρχ/κας ΠΑΠΠΑΣ Ανέστης";
-    inputEnikos.value = valueEnikos || "";
-    containerEnikos.appendChild(inputEnikos);
+    inputEnikos.value = valueEnikos;
+
+    fieldsDiv.appendChild(select);
+    fieldsDiv.appendChild(input);
+    fieldsDiv.appendChild(inputEnikos);
+
+    row.appendChild(label);
+    row.appendChild(fieldsDiv);
+    container.appendChild(row);
   }
 
   document
@@ -132,27 +153,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   document.getElementById("removeAnakritikoi").addEventListener("click", () => {
-    const anakritikoiContainer = document.getElementById(
-      "anakritikoiContainer",
-    );
-    const anakritikoiEnikosContainer = document.getElementById(
-      "anakritikoiEnikosContainer",
-    );
-    const anakritikoi = document.querySelectorAll(
-      "input[name='anakritikoi[]']",
-    );
-    const anakritikoiEnikos = document.querySelectorAll(
-      "input[name='anakritikoiEnikos[]']",
-    );
-    const sexContainer = document.getElementById("sexContainer");
-    const anakrSex = document.querySelectorAll("select[name='anakrSex[]']");
+    const container = document.getElementById("anakritikoiList");
+    const rows = container.querySelectorAll(".anakritikoi-row");
 
-    if (anakritikoi.length > 1) {
-      anakritikoiContainer.removeChild(anakritikoi[anakritikoi.length - 1]);
-      anakritikoiEnikosContainer.removeChild(
-        anakritikoiEnikos[anakritikoiEnikos.length - 1],
-      );
-      sexContainer.removeChild(anakrSex[anakrSex.length - 1]);
+    if (rows.length > 1) {
+      container.removeChild(rows[rows.length - 1]);
+      updateRowLabels();
     }
   });
 
