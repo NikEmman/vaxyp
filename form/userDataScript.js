@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = JSON.parse(savedData);
 
     // Populate inputs with stored data
+    if (!data.anakritikoi) return;
+
     data.anakritikoi.forEach((value, index) => {
       const sexValue =
         data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
@@ -159,14 +161,14 @@ document.addEventListener("DOMContentLoaded", () => {
       astynomikoi: astynomikoi,
       anakritikoiEnikos: anakritikoiEnikos,
       anakrSex: anakrSex,
-      ypiresia: formData.get("ypiresia").toUpperCase(),
-      dAstynomias: formData.get("dAstynomias").toUpperCase(),
-      geniki: formData.get("geniki").toUpperCase(),
-      iatro: formData.get("iatro").toUpperCase(),
+      ypiresia: formData.get("ypiresia")?.toUpperCase() || "",
+      dAstynomias: formData.get("dAstynomias")?.toUpperCase() || "",
+      geniki: formData.get("geniki")?.toUpperCase() || "",
+      iatro: formData.get("iatro")?.toUpperCase() || "",
       doy: formData.get("doy"),
       arthro: formData.get("arthro"),
       merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
-      xronosPeratosis: Number(formData.get("xronosPeratosis")),
+      xronosPeratosis: Number(formData.get("xronosPeratosis")) || 0,
       eisaggeleiaProtodikon: formData.get("eisaggeleiaProtodikon"),
       dieuthynsiYpiresias: formData.get("dieuthynsiYpiresias"),
       tilefono: formData.get("tilefono"),
