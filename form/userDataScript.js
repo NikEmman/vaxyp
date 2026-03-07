@@ -1,23 +1,12 @@
+import { getTheme, saveTheme } from "../stateManager.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-  const getTheme = () => {
-    const stored = localStorage.getItem("vaxyp-theme");
-    if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
-
-  const saveTheme = (theme) => {
-    localStorage.setItem("vaxyp-theme", theme);
-  };
-
   const applyTheme = (theme) => {
     if (theme === "dark") {
       document.body.classList.add("dark");
     } else {
       document.body.classList.remove("dark");
     }
-    const toggleBtn = document.getElementById("theme-toggle");
   };
 
   const initTheme = () => {
@@ -64,11 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
           data.anakritikoiEnikos[0] || "";
         document.querySelector("select[name='anakrSex[]']").value = sexValue;
       } else {
-        addAnakritikoi(
-          value,
-          data.anakritikoiEnikos[index],
-          sexValue,
-        );
+        addAnakritikoi(value, data.anakritikoiEnikos[index], sexValue);
       }
     });
 
