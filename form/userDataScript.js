@@ -1,47 +1,126 @@
 import { getTheme, saveTheme } from "../stateManager.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const applyTheme = (theme) => {
-    if (theme === "dark") {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
+function applyTheme(theme) {
+  if (theme === "dark") {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
+  }
+}
+
+function updateRowLabels() {
+  const rows = document.querySelectorAll(".anakritikoi-row");
+  rows.forEach((row, index) => {
+    row.querySelector(".row-label").textContent = `Ανακριτικός #${index + 1}`;
+  });
+}
+
+function addAnakritikoi(value = "", valueEnikos = "", sexValue = "Άντρας") {
+  const container = document.getElementById("anakritikoiList");
+  const rowCount = container.querySelectorAll(".anakritikoi-row").length;
+
+  const row = document.createElement("div");
+  row.className = "anakritikoi-row";
+  row.dataset.index = rowCount;
+
+  const label = document.createElement("span");
+  label.className = "row-label";
+  label.textContent = `Ανακριτικός #${rowCount + 1}`;
+
+  const fieldsDiv = document.createElement("div");
+  fieldsDiv.className = "row-fields";
+
+  const select = document.createElement("select");
+  select.name = "anakrSex[]";
+  const man = document.createElement("option");
+  man.value = "Άντρας";
+  man.textContent = "Άντρας";
+  const woman = document.createElement("option");
+  woman.value = "Γυναίκα";
+  woman.textContent = "Γυναίκα";
+  select.appendChild(man);
+  select.appendChild(woman);
+  select.value = sexValue;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.name = "anakritikoi[]";
+  input.placeholder = "Αρχ/κα ΠΑΠΠΑ Ανέστη";
+  input.value = value;
+
+  const inputEnikos = document.createElement("input");
+  inputEnikos.type = "text";
+  inputEnikos.name = "anakritikoiEnikos[]";
+  inputEnikos.placeholder = "Αρχ/κας ΠΑΠΠΑΣ Ανέστης";
+  inputEnikos.value = valueEnikos;
+
+  fieldsDiv.appendChild(select);
+  fieldsDiv.appendChild(input);
+  fieldsDiv.appendChild(inputEnikos);
+
+  row.appendChild(label);
+  row.appendChild(fieldsDiv);
+  container.appendChild(row);
+}
+
+export function buildFormData() {
+  const astynomikoi =
+    JSON.parse(localStorage.getItem("dataObject"))?.astynomikoi || [];
+  const formData = new FormData(document.getElementById("dataForm"));
+  const anakritikoi = formData.getAll("anakritikoi[]");
+  const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
+  const anakrSex = formData.getAll("anakrSex[]");
+  return {
+    anakritikoi: anakritikoi,
+    astynomikoi: astynomikoi,
+    anakritikoiEnikos: anakritikoiEnikos,
+    anakrSex: anakrSex,
+    ypiresia: formData.get("ypiresia")?.toUpperCase() || "",
+    dAstynomias: formData.get("dAstynomias")?.toUpperCase() || "",
+    geniki: formData.get("geniki")?.toUpperCase() || "",
+    iatro: formData.get("iatro")?.toUpperCase() || "",
+    doy: formData.get("doy"),
+    arthro: formData.get("arthro"),
+    merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
+    xronosPeratosis: Number(formData.get("xronosPeratosis")) || 0,
+    eisaggeleiaProtodikon: formData.get("eisaggeleiaProtodikon"),
+    dieuthynsiYpiresias: formData.get("dieuthynsiYpiresias"),
+    tilefono: formData.get("tilefono"),
+    email: formData.get("email"),
+    amy: formData.get("amy"),
   };
+}
 
-  const initTheme = () => {
-    const theme = getTheme();
-    applyTheme(theme);
+function initTheme() {
+  const theme = getTheme();
+  applyTheme(theme);
 
-    const toggleBtn = document.getElementById("theme-toggle");
-    if (toggleBtn) {
-      toggleBtn.addEventListener("click", () => {
-        const currentTheme = document.body.classList.contains("dark")
-          ? "dark"
-          : "light";
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        saveTheme(newTheme);
-        applyTheme(newTheme);
-      });
-    }
+  const toggleBtn = document.getElementById("theme-toggle");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains("dark")
+        ? "dark"
+        : "light";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      saveTheme(newTheme);
+      applyTheme(newTheme);
+    });
+  }
 
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (e) => {
-        if (!localStorage.getItem("vaxyp-theme")) {
-          applyTheme(e.matches ? "dark" : "light");
-        }
-      });
-  };
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (e) => {
+      if (!localStorage.getItem("vaxyp-theme")) {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    });
+}
 
-  initTheme();
-
-  // Check if localStorage dataObject exists and populate form fields
+function populateFormFromStorage() {
   const savedData = localStorage.getItem("dataObject");
   if (savedData) {
     const data = JSON.parse(savedData);
 
-    // Populate inputs with stored data
     if (!data.anakritikoi) return;
 
     data.anakritikoi.forEach((value, index) => {
@@ -77,62 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("email").value = data.email || "";
     document.getElementById("amy").value = data.amy || "";
   }
+}
 
-  function updateRowLabels() {
-    const rows = document.querySelectorAll(".anakritikoi-row");
-    rows.forEach((row, index) => {
-      row.querySelector(".row-label").textContent = `Ανακριτικός #${index + 1}`;
-    });
-  }
-
-  function addAnakritikoi(value = "", valueEnikos = "", sexValue = "Άντρας") {
-    const container = document.getElementById("anakritikoiList");
-    const rowCount = container.querySelectorAll(".anakritikoi-row").length;
-
-    const row = document.createElement("div");
-    row.className = "anakritikoi-row";
-    row.dataset.index = rowCount;
-
-    const label = document.createElement("span");
-    label.className = "row-label";
-    label.textContent = `Ανακριτικός #${rowCount + 1}`;
-
-    const fieldsDiv = document.createElement("div");
-    fieldsDiv.className = "row-fields";
-
-    const select = document.createElement("select");
-    select.name = "anakrSex[]";
-    const man = document.createElement("option");
-    man.value = "Άντρας";
-    man.textContent = "Άντρας";
-    const woman = document.createElement("option");
-    woman.value = "Γυναίκα";
-    woman.textContent = "Γυναίκα";
-    select.appendChild(man);
-    select.appendChild(woman);
-    select.value = sexValue;
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.name = "anakritikoi[]";
-    input.placeholder = "Αρχ/κα ΠΑΠΠΑ Ανέστη";
-    input.value = value;
-
-    const inputEnikos = document.createElement("input");
-    inputEnikos.type = "text";
-    inputEnikos.name = "anakritikoiEnikos[]";
-    inputEnikos.placeholder = "Αρχ/κας ΠΑΠΠΑΣ Ανέστης";
-    inputEnikos.value = valueEnikos;
-
-    fieldsDiv.appendChild(select);
-    fieldsDiv.appendChild(input);
-    fieldsDiv.appendChild(inputEnikos);
-
-    row.appendChild(label);
-    row.appendChild(fieldsDiv);
-    container.appendChild(row);
-  }
-
+function setupEventListeners() {
   document
     .getElementById("addAnakritikoi")
     .addEventListener("click", function () {
@@ -150,35 +176,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("submitForm").addEventListener("click", function () {
-    const astynomikoi =
-      JSON.parse(localStorage.getItem("dataObject"))?.astynomikoi || [];
-    const formData = new FormData(document.getElementById("dataForm"));
-    const anakritikoi = formData.getAll("anakritikoi[]");
-    const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
-    const anakrSex = formData.getAll("anakrSex[]");
-    const data = {
-      anakritikoi: anakritikoi,
-      astynomikoi: astynomikoi,
-      anakritikoiEnikos: anakritikoiEnikos,
-      anakrSex: anakrSex,
-      ypiresia: formData.get("ypiresia")?.toUpperCase() || "",
-      dAstynomias: formData.get("dAstynomias")?.toUpperCase() || "",
-      geniki: formData.get("geniki")?.toUpperCase() || "",
-      iatro: formData.get("iatro")?.toUpperCase() || "",
-      doy: formData.get("doy"),
-      arthro: formData.get("arthro"),
-      merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
-      xronosPeratosis: Number(formData.get("xronosPeratosis")) || 0,
-      eisaggeleiaProtodikon: formData.get("eisaggeleiaProtodikon"),
-      dieuthynsiYpiresias: formData.get("dieuthynsiYpiresias"),
-      tilefono: formData.get("tilefono"),
-      email: formData.get("email"),
-      amy: formData.get("amy"),
-    };
-    // Save to local storage
+    const data = buildFormData();
+
     localStorage.setItem("dataObject", JSON.stringify(data));
 
-    // Create a downloadable JSON file
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
@@ -190,4 +191,10 @@ document.addEventListener("DOMContentLoaded", () => {
     a.click();
     document.body.removeChild(a);
   });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  populateFormFromStorage();
+  setupEventListeners();
 });
