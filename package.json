@@ -5,7 +5,8 @@
   "main": "defaultData.js",
   "scripts": {
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:e2e": "playwright test"
   },
   "type": "module",
   "repository": {
