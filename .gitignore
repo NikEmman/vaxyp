@@ -1,2 +1,6 @@
 reverse.html
 converter.html
+node_modules/
+package-lock.json
+.vitest/
+.vite/

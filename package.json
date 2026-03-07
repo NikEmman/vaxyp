@@ -1,0 +1,28 @@
+{
+  "name": "vaxyp",
+  "version": "1.0.0",
+  "description": "This is a tool to help myself and other on day-to-day paper-work of interrogator/investigation duties of a Hellenic Police Officer. The language used in the tool is Greek only, since it is no-use to anyone but. It is HTML/CSS/JavaScript only due to design constraints.",
+  "main": "defaultData.js",
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NikEmman/vaxyp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NikEmman/vaxyp/issues"
+  },
+  "homepage": "https://github.com/NikEmman/vaxyp#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@vitest/browser-playwright": "^4.0.18",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
+  }
+}
