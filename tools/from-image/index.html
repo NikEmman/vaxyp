@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
+    <title>Εικόνα σε PDF</title>
+    <style>
+      body { position: static; }
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background: var(--background-white);
+        padding: 3.5em 2em;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s, padding 0.3s;
+        margin-bottom: 1.2em;
+      }
+      .upload-zone.compact { padding: 1.2em 2em; }
+      .upload-zone.compact svg, .upload-zone.compact p { display: none; }
+      .upload-zone.compact h2 { font-size: 0.95em; margin: 0; }
+      .upload-zone.drag-over { border-color: var(--secondary-blue); background: var(--light-blue); }
+      .upload-zone svg {
+        width: 52px; height: 52px;
+        stroke: var(--secondary-blue); fill: none;
+        stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+        display: block; margin: 0 auto 0.6em;
+      }
+      .upload-zone h2 { font-size: 1.15em; color: var(--primary-blue); margin-bottom: 0.3em; }
+      .upload-zone p  { font-size: 0.9em; color: var(--text-dark); opacity: 0.6; }
+      #file-input { display: none; }
+
+      /* ── Options panel ────────────────────────────────────────── */
+      .options-panel {
+        display: flex; align-items: center; gap: 1.5em; flex-wrap: wrap;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px; padding: 0.8em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      }
+      .option-group { display: flex; align-items: center; gap: 0.5em; }
+      .option-group label { font-size: 0.85em; font-weight: 600; color: var(--label-color); white-space: nowrap; }
+      .toggle-group { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
+      .toggle-btn {
+        padding: 0.35em 0.9em;
+        background: var(--background-white); color: var(--text-dark);
+        border: none; border-radius: 0;
+        font-size: 0.85em; font-weight: 600;
+        cursor: pointer; transition: background 0.15s, color 0.15s;
+      }
+      .toggle-btn:not(:last-child) { border-right: 1px solid var(--border-color); }
+      .toggle-btn.active { background: var(--secondary-blue); color: #fff; }
+      .toggle-btn:hover:not(.active) { background: var(--light-blue); }
+      .toggle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      /* ── Image list ───────────────────────────────────────────── */
+      .list-header {
+        display: flex; align-items: center; gap: 0.8em;
+        margin-bottom: 0.6em;
+      }
+      .list-header .summary { flex: 1; font-size: 0.9em; color: var(--text-dark); opacity: 0.65; }
+
+      #image-list {
+        list-style: none; padding: 0; margin: 0 0 7em;
+        display: flex; flex-direction: column; gap: 0.6em;
+      }
+      .img-item {
+        display: flex; align-items: center; gap: 0.8em;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px; padding: 0.6em 0.8em;
+        transition: box-shadow 0.15s, border-color 0.15s, opacity 0.15s;
+      }
+      .img-item.drag-over-item { border-color: var(--secondary-blue); box-shadow: 0 0 0 2px var(--secondary-blue); }
+      .img-item.dragging { opacity: 0.35; }
+
+      .drag-handle {
+        cursor: grab; color: var(--border-color);
+        font-size: 1.2em; line-height: 1;
+        padding: 0 2px; user-select: none; flex-shrink: 0;
+      }
+      .drag-handle:active { cursor: grabbing; }
+
+      .img-thumb {
+        width: 48px; height: 48px; flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px; overflow: hidden;
+        background: var(--background-light);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .img-thumb img {
+        width: 100%; height: 100%;
+        object-fit: contain; display: block;
+      }
+
+      .img-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15em; }
+      .img-meta .name {
+        font-weight: 600; font-size: 0.92em; color: var(--text-dark);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .img-meta .dims { font-size: 0.78em; color: var(--text-dark); opacity: 0.55; }
+
+      .order-badge {
+        width: 24px; height: 24px; border-radius: 50%;
+        background: var(--light-blue); color: var(--primary-blue);
+        font-size: 0.75em; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+
+      .btn-remove {
+        background: transparent; color: var(--error-red);
+        border: 1px solid var(--error-red); border-radius: 50%;
+        width: 26px; height: 26px; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8em; flex-shrink: 0;
+        transition: background 0.15s, color 0.15s;
+      }
+      .btn-remove:hover { background: var(--error-red); color: #fff; }
+
+      /* ── Progress overlay ─────────────────────────────────────── */
+      #progress-overlay {
+        position: sticky; inset: 0;
+        background: rgba(0,0,0,0.45);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        z-index: 200; gap: 1em;
+      }
+      #progress-overlay.hidden { display: none; }
+      #progress-overlay .spinner {
+        width: 44px; height: 44px; margin: 0;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top-color: #fff; border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      #progress-overlay p { color: #fff; font-size: 0.95em; opacity: 0.9; }
+
+      /* ── Action bar ───────────────────────────────────────────── */
+      .action-bar {
+        position: sticky; bottom: -2em;
+        margin: 0 -2em -2em;
+        background: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85em 2em;
+        display: flex; gap: 0.8em; align-items: center;
+        box-shadow: 0 -3px 12px rgba(0,0,0,0.08); z-index: 100;
+      }
+      .action-bar .hint { flex: 1; font-size: 0.88em; color: var(--text-dark); opacity: 0.55; }
+      #output-name { width: 200px; font-size: 0.88em; }
+
+      @media (max-width: 600px) {
+        .action-bar { flex-wrap: wrap; }
+        .action-bar .hint { width: 100%; }
+        #output-name { width: 100%; }
+        .options-panel { gap: 0.8em; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
+    </header>
+
+    <main>
+      <div class="upload-zone" id="upload-zone">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <h2>Προσθέστε εικόνες</h2>
+        <p>PNG, JPEG, WebP, GIF · Σύρετε &amp; αφήστε ή κάντε κλικ · μπορείτε να επιλέξετε πολλές εικόνες</p>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple />
+
+      <!-- Options — always visible once images are added -->
+      <div class="options-panel hidden" id="options-panel">
+        <div class="option-group">
+          <label>Μέγεθος σελίδας</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-size="fit">Fit</button>
+            <button class="toggle-btn active" data-size="a4">A4</button>
+            <button class="toggle-btn" data-size="letter">Letter</button>
+          </div>
+        </div>
+        <div class="option-group" id="orient-group">
+          <label>Προσανατολισμός</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" data-orient="portrait">↕ Κατακόρυφα</button>
+            <button class="toggle-btn" data-orient="landscape">↔ Οριζόντια</button>
+          </div>
+        </div>
+        <div class="option-group">
+          <label>Περιθώρια</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-margin="0">Καμία</button>
+            <button class="toggle-btn active" data-margin="18">Μικρά</button>
+            <button class="toggle-btn" data-margin="36">Κανονικά</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="list-section" class="hidden">
+        <div class="list-header">
+          <span class="summary" id="summary"></span>
+          <button id="btn-clear" style="background:var(--error-red)">Καθαρισμός</button>
+        </div>
+        <ul id="image-list"></ul>
+      </div>
+    </main>
+
+    <div id="progress-overlay" class="hidden">
+      <div class="spinner"></div>
+      <p id="progress-msg">Επεξεργασία…</p>
+    </div>
+
+    <div class="action-bar">
+      <span class="hint" id="action-hint">Προσθέστε τουλάχιστον 1 εικόνα για να ξεκινήσετε</span>
+      <input type="text" id="output-name" placeholder="images.pdf" title="Όνομα αρχείου εξόδου" />
+      <button id="btn-create" disabled>Δημιουργία PDF</button>
+    </div>
+
+    <script src="../libs/pdf-lib.min.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const applyTheme = (t) =>
+        t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("vaxyp-theme")) applyTheme(e.matches ? "dark" : "light");
+      });
+
+      // ── State ─────────────────────────────────────────────────────
+      let images  = []; // { id, name, file, objUrl, width, height }
+      let nextId  = 0;
+      let optSize   = "a4";
+      let optOrient = "portrait";
+      let optMargin = 18;
+
+      const PAGE = {
+        a4:     { w: 595.28, h: 841.89 },
+        letter: { w: 612,    h: 792    },
+      };
+
+      const $ = (id) => document.getElementById(id);
+
+      // ── Options wiring ────────────────────────────────────────────
+      document.querySelectorAll("[data-size]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-size]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          optSize = btn.dataset.size;
+          const isFit = optSize === "fit";
+          $("orient-group").querySelectorAll(".toggle-btn").forEach((b) => b.disabled = isFit);
+        })
+      );
+
+      document.querySelectorAll("[data-orient]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-orient]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          optOrient = btn.dataset.orient;
+        })
+      );
+
+      document.querySelectorAll("[data-margin]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-margin]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          optMargin = parseInt(btn.dataset.margin);
+        })
+      );
+
+      // ── Upload ────────────────────────────────────────────────────
+      const uploadZone = $("upload-zone");
+      const fileInput  = $("file-input");
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () => uploadZone.classList.remove("drag-over"))
+      );
+      uploadZone.addEventListener("drop", (e) => { e.preventDefault(); addFiles(Array.from(e.dataTransfer.files)); });
+      fileInput.addEventListener("change", () => { addFiles(Array.from(fileInput.files)); fileInput.value = ""; });
+      $("btn-clear").addEventListener("click", () => {
+        images.forEach((img) => URL.revokeObjectURL(img.objUrl));
+        images = [];
+        $("image-list").innerHTML = "";
+        updateUI();
+      });
+
+      async function addFiles(incoming) {
+        const imgs = incoming.filter((f) => f.type.startsWith("image/"));
+        if (!imgs.length) return;
+
+        for (const file of imgs) {
+          const id     = nextId++;
+          const objUrl = URL.createObjectURL(file);
+          const { w, h } = await getImageDimensions(objUrl);
+          images.push({ id, name: file.name, file, objUrl, width: w, height: h });
+          appendListItem({ id, name: file.name, objUrl, width: w, height: h });
+        }
+        updateUI();
+      }
+
+      function getImageDimensions(url) {
+        return new Promise((res) => {
+          const img = new Image();
+          img.onload = () => res({ w: img.naturalWidth, h: img.naturalHeight });
+          img.onerror = () => res({ w: 0, h: 0 });
+          img.src = url;
+        });
+      }
+
+      // ── List item ─────────────────────────────────────────────────
+      function appendListItem({ id, name, objUrl, width, height }) {
+        const li = document.createElement("li");
+        li.className  = "img-item";
+        li.dataset.id = id;
+        li.draggable  = true;
+
+        li.innerHTML = `
+          <span class="drag-handle" title="Σύρετε για αναδιάταξη">⠿</span>
+          <div class="img-thumb"><img src="${objUrl}" alt="" /></div>
+          <div class="img-meta">
+            <span class="name" title="${name}">${name}</span>
+            <span class="dims">${width > 0 ? `${width} × ${height} px` : ""}</span>
+          </div>
+          <span class="order-badge"></span>
+          <button class="btn-remove" title="Αφαίρεση">✕</button>
+        `;
+
+        li.querySelector(".btn-remove").addEventListener("click", () => removeImage(id));
+        wireDragEvents(li, id);
+        $("image-list").appendChild(li);
+      }
+
+      function removeImage(id) {
+        const entry = images.find((i) => i.id === id);
+        if (entry) URL.revokeObjectURL(entry.objUrl);
+        images = images.filter((i) => i.id !== id);
+        rebuildList();
+        updateUI();
+      }
+
+      function rebuildList() {
+        $("image-list").innerHTML = "";
+        images.forEach((img) => appendListItem(img));
+      }
+
+      function updateUI() {
+        const n = images.length;
+        $("list-section") .classList.toggle("hidden",  n === 0);
+        $("options-panel").classList.toggle("hidden",  n === 0);
+        uploadZone.classList.toggle("compact", n > 0);
+        $("summary").textContent = n > 0 ? `${n} εικόν${n === 1 ? "α" : "ες"}` : "";
+        $("btn-create").disabled = n === 0;
+        $("action-hint").textContent = n > 0
+          ? `${n} εικόν${n === 1 ? "α" : "ες"} → 1 PDF`
+          : "Προσθέστε τουλάχιστον 1 εικόνα για να ξεκινήσετε";
+
+        document.querySelectorAll(".img-item").forEach((li, i) => {
+          const badge = li.querySelector(".order-badge");
+          if (badge) badge.textContent = i + 1;
+        });
+      }
+
+      // ── Drag & drop reorder ───────────────────────────────────────
+      function wireDragEvents(li, id) {
+        li.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", id);
+          requestAnimationFrame(() => li.classList.add("dragging"));
+        });
+        li.addEventListener("dragend", () => {
+          li.classList.remove("dragging");
+          document.querySelectorAll(".img-item").forEach((el) => el.classList.remove("drag-over-item"));
+        });
+        li.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          document.querySelectorAll(".img-item").forEach((el) => el.classList.remove("drag-over-item"));
+          li.classList.add("drag-over-item");
+        });
+        li.addEventListener("drop", (e) => {
+          e.preventDefault();
+          li.classList.remove("drag-over-item");
+          const draggedId = parseInt(e.dataTransfer.getData("text/plain"));
+          if (draggedId === id) return;
+          const fromIdx = images.findIndex((i) => i.id === draggedId);
+          const toIdx   = images.findIndex((i) => i.id === id);
+          if (fromIdx === -1 || toIdx === -1) return;
+          const [moved] = images.splice(fromIdx, 1);
+          images.splice(toIdx, 0, moved);
+          rebuildList();
+          updateUI();
+        });
+      }
+
+      // ── Convert any image file to PNG/JPEG bytes for pdf-lib ──────
+      async function getEmbeddableBytes(file) {
+        const type = file.type;
+
+        // pdf-lib natively supports JPEG and PNG
+        if (type === "image/jpeg") {
+          return { bytes: new Uint8Array(await file.arrayBuffer()), fmt: "jpeg" };
+        }
+        if (type === "image/png") {
+          return { bytes: new Uint8Array(await file.arrayBuffer()), fmt: "png" };
+        }
+
+        // All other formats (WebP, GIF, BMP, …): convert to PNG via canvas
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+        URL.revokeObjectURL(url);
+
+        const canvas = document.createElement("canvas");
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+
+        return new Promise((res) =>
+          canvas.toBlob(async (blob) => {
+            res({ bytes: new Uint8Array(await blob.arrayBuffer()), fmt: "png" });
+          }, "image/png")
+        );
+      }
+
+      // ── Create PDF ────────────────────────────────────────────────
+      $("btn-create").addEventListener("click", async () => {
+        const btn = $("btn-create");
+        btn.disabled    = true;
+        $("progress-overlay").classList.remove("hidden");
+
+        try {
+          const { PDFDocument } = PDFLib;
+          const doc = await PDFDocument.create();
+
+          for (let i = 0; i < images.length; i++) {
+            const entry = images[i];
+            $("progress-msg").textContent = `Επεξεργασία εικόνας ${i + 1} από ${images.length}…`;
+
+            const { bytes, fmt } = await getEmbeddableBytes(entry.file);
+            let embedded;
+            try {
+              embedded = fmt === "jpeg" ? await doc.embedJpg(bytes) : await doc.embedPng(bytes);
+            } catch {
+              // fallback: force-convert to PNG if embed fails (e.g. CMYK JPEG)
+              const canvas = document.createElement("canvas");
+              const img    = new Image();
+              const url    = URL.createObjectURL(entry.file);
+              await new Promise((res) => { img.onload = res; img.src = url; });
+              URL.revokeObjectURL(url);
+              canvas.width  = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              canvas.getContext("2d").drawImage(img, 0, 0);
+              const blob    = await new Promise((res) => canvas.toBlob(res, "image/png"));
+              const pngBytes = new Uint8Array(await blob.arrayBuffer());
+              embedded = await doc.embedPng(pngBytes);
+            }
+
+            let pageW, pageH;
+            if (optSize === "fit") {
+              pageW = embedded.width;
+              pageH = embedded.height;
+            } else {
+              const base = PAGE[optSize];
+              pageW = optOrient === "portrait" ? base.w : base.h;
+              pageH = optOrient === "portrait" ? base.h : base.w;
+            }
+
+            const page = doc.addPage([pageW, pageH]);
+
+            const avail = { w: pageW - 2 * optMargin, h: pageH - 2 * optMargin };
+            const scale = Math.min(avail.w / embedded.width, avail.h / embedded.height);
+            const dw    = embedded.width  * scale;
+            const dh    = embedded.height * scale;
+            const dx    = (pageW - dw) / 2;
+            const dy    = (pageH - dh) / 2;
+
+            page.drawImage(embedded, { x: dx, y: dy, width: dw, height: dh });
+          }
+
+          $("progress-msg").textContent = "Αποθήκευση PDF…";
+          const bytes    = await doc.save();
+          const rawName  = $("output-name").value.trim() || "images";
+          const outName  = rawName.endsWith(".pdf") ? rawName : rawName + ".pdf";
+          const url      = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          Object.assign(document.createElement("a"), { href: url, download: outName }).click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } finally {
+          $("progress-overlay").classList.add("hidden");
+          btn.disabled    = false;
+        }
+      });
+    </script>
+  </body>
+</html>
