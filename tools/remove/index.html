@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
+    <title>Διαγραφή σελίδων PDF</title>
+    <style>
+      body { position: static; }
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background: var(--background-white);
+        padding: 3.5em 2em;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        margin-bottom: 1.5em;
+      }
+      .upload-zone.drag-over { border-color: var(--secondary-blue); background: var(--light-blue); }
+      .upload-zone svg {
+        width: 52px; height: 52px;
+        stroke: var(--secondary-blue); fill: none;
+        stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+        display: block; margin: 0 auto 0.6em;
+      }
+      .upload-zone h2 { font-size: 1.15em; color: var(--primary-blue); margin-bottom: 0.3em; }
+      .upload-zone p  { font-size: 0.9em; color: var(--text-dark); opacity: 0.6; }
+      #file-input { display: none; }
+
+      .spinner {
+        width: 44px; height: 44px;
+        border: 4px solid var(--border-color);
+        border-top-color: var(--secondary-blue);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin: 3em auto 1em;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      #loading-msg { text-align: center; color: var(--text-dark); opacity: 0.65; font-size: 0.95em; }
+
+      .toolbar {
+        display: flex; align-items: center; gap: 0.8em; flex-wrap: wrap;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px; padding: 0.75em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      }
+      .toolbar .file-info {
+        font-weight: 600; color: var(--primary-blue);
+        flex: 1; min-width: 0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      #selection-info { font-size: 0.88em; color: var(--error-red); opacity: 0.85; white-space: nowrap; }
+
+      .page-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1em;
+        padding-bottom: 7em;
+      }
+      .page-card {
+        position: relative;
+        background: var(--background-white);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5em 0.5em 0.4em;
+        cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 0.4em;
+        transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+        user-select: none;
+      }
+      .page-card:hover {
+        border-color: var(--error-red);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 14px rgba(0,0,0,0.1);
+      }
+      /* selected = marked for deletion → red */
+      .page-card.selected {
+        border-color: var(--error-red);
+        background: var(--invalid-bg);
+        box-shadow: 0 0 0 2px var(--error-red);
+      }
+      .page-card canvas {
+        width: 100%; height: auto; display: block;
+        border-radius: 3px; border: 1px solid var(--border-color);
+        transition: opacity 0.15s;
+      }
+      .page-card.selected canvas { opacity: 0.45; }
+      .page-num { font-size: 0.75em; color: var(--text-dark); opacity: 0.6; }
+
+      /* delete overlay badge */
+      .delete-badge {
+        position: absolute; top: 6px; right: 6px;
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        background: var(--error-red);
+        color: #fff;
+        font-size: 0.8em; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0;
+        transition: opacity 0.15s, transform 0.15s;
+        transform: scale(0.6);
+        pointer-events: none;
+      }
+      .page-card.selected .delete-badge { opacity: 1; transform: scale(1); }
+
+      .action-bar {
+        position: sticky; bottom: -2em;
+        margin: 0 -2em -2em;
+        background: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85em 2em;
+        display: flex; gap: 0.8em; align-items: center;
+        box-shadow: 0 -3px 12px rgba(0,0,0,0.08);
+        z-index: 100;
+      }
+      .action-bar .hint { flex: 1; font-size: 0.88em; color: var(--text-dark); opacity: 0.55; }
+
+      @media (max-width: 600px) {
+        .action-bar { flex-wrap: wrap; }
+        .action-bar .hint { width: 100%; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
+    </header>
+
+    <main>
+      <div id="upload-section">
+        <div class="upload-zone" id="upload-zone">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <h2>Ανεβάστε ένα PDF αρχείο</h2>
+          <p>Σύρετε &amp; αφήστε, ή κάντε κλικ για επιλογή</p>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,application/pdf" />
+      </div>
+
+      <div id="loading-section" class="hidden">
+        <div class="spinner"></div>
+        <p id="loading-msg">Φόρτωση σελίδων…</p>
+      </div>
+
+      <div id="ready-section" class="hidden">
+        <div class="toolbar">
+          <span class="file-info" id="file-name"></span>
+          <span id="selection-info"></span>
+          <button id="btn-select-all">Επιλογή όλων</button>
+          <button id="btn-deselect">Καμία</button>
+          <button id="btn-change-file">Άλλο αρχείο</button>
+        </div>
+        <div class="page-grid" id="page-grid"></div>
+      </div>
+    </main>
+
+    <div class="action-bar hidden" id="action-bar">
+      <span class="hint" id="action-hint">Επιλέξτε σελίδες προς διαγραφή</span>
+      <button id="btn-remove" disabled style="background:var(--error-red)">Διαγραφή επιλεγμένων</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const applyTheme = (t) =>
+        t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("vaxyp-theme")) applyTheme(e.matches ? "dark" : "light");
+      });
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ── State ─────────────────────────────────────────────────────
+      let pdfBytes  = null;
+      let pageCount = 0;
+      let baseName  = "";
+      const selected = new Set();
+
+      const $ = (id) => document.getElementById(id);
+
+      function setState(s) {
+        $("upload-section") .classList.toggle("hidden", s !== "idle");
+        $("loading-section").classList.toggle("hidden", s !== "loading");
+        $("ready-section")  .classList.toggle("hidden", s !== "ready");
+        $("action-bar")     .classList.toggle("hidden", s !== "ready");
+      }
+
+      function updateUI() {
+        const n    = selected.size;
+        const keep = pageCount - n;
+        $("selection-info").textContent =
+          n > 0 ? `${n} προς διαγραφή · ${keep} θα παραμείνουν` : "";
+        $("action-hint").textContent = n > 0
+          ? `Θα διαγραφούν ${n} σελίδ${n === 1 ? "α" : "ες"} · θα παραμείνουν ${keep}`
+          : "Επιλέξτε σελίδες προς διαγραφή";
+        $("btn-remove").disabled = n === 0 || keep === 0;
+      }
+
+      // ── Upload ────────────────────────────────────────────────────
+      const uploadZone = $("upload-zone");
+      const fileInput  = $("file-input");
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () => uploadZone.classList.remove("drag-over"))
+      );
+      uploadZone.addEventListener("drop", (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+      fileInput.addEventListener("change", () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+      $("btn-change-file").addEventListener("click", () => {
+        setState("idle"); fileInput.value = ""; selected.clear(); $("page-grid").innerHTML = "";
+      });
+
+      // ── Load & render ─────────────────────────────────────────────
+      async function handleFile(file) {
+        if (file.type && file.type !== "application/pdf") { alert("Παρακαλώ επιλέξτε αρχείο PDF."); return; }
+        baseName = file.name.replace(/\.pdf$/i, "");
+        setState("loading");
+        pdfBytes = await file.arrayBuffer();
+        selected.clear();
+
+        $("loading-msg").textContent = "Φόρτωση αρχείου…";
+        const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+        pageCount = pdfDoc.numPages;
+        $("page-grid").innerHTML = "";
+
+        for (let i = 1; i <= pageCount; i++) {
+          $("loading-msg").textContent = `Επεξεργασία σελίδας ${i} από ${pageCount}…`;
+          await renderThumbnail(pdfDoc, i);
+        }
+
+        $("file-name").textContent = file.name;
+        updateUI();
+        setState("ready");
+      }
+
+      async function renderThumbnail(pdfDoc, n) {
+        const page     = await pdfDoc.getPage(n);
+        const viewport = page.getViewport({ scale: 0.28 });
+        const canvas   = document.createElement("canvas");
+        canvas.width   = viewport.width;
+        canvas.height  = viewport.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+
+        const card   = document.createElement("div");
+        card.className    = "page-card";
+        card.dataset.page = n;
+
+        const badge = document.createElement("span");
+        badge.className   = "delete-badge";
+        badge.textContent = "✕";
+
+        const num = document.createElement("span");
+        num.className   = "page-num";
+        num.textContent = `Σελίδα ${n}`;
+
+        card.appendChild(canvas);
+        card.appendChild(num);
+        card.appendChild(badge);
+        card.addEventListener("click", () => togglePage(n, card));
+        $("page-grid").appendChild(card);
+      }
+
+      function togglePage(n, card) {
+        if (selected.has(n)) { selected.delete(n); card.classList.remove("selected"); }
+        else                  { selected.add(n);    card.classList.add("selected"); }
+        updateUI();
+      }
+
+      $("btn-select-all").addEventListener("click", () => {
+        document.querySelectorAll(".page-card").forEach((c) => { selected.add(parseInt(c.dataset.page)); c.classList.add("selected"); });
+        updateUI();
+      });
+      $("btn-deselect").addEventListener("click", () => {
+        selected.clear();
+        document.querySelectorAll(".page-card").forEach((c) => c.classList.remove("selected"));
+        updateUI();
+      });
+
+      // ── Remove & download ─────────────────────────────────────────
+      $("btn-remove").addEventListener("click", async () => {
+        const btn = $("btn-remove");
+        btn.disabled    = true;
+        btn.textContent = "Επεξεργασία…";
+        try {
+          const { PDFDocument } = PDFLib;
+          const src        = await PDFDocument.load(pdfBytes);
+          const out        = await PDFDocument.create();
+          const keepIndices = [];
+          for (let i = 1; i <= pageCount; i++) {
+            if (!selected.has(i)) keepIndices.push(i - 1);
+          }
+          const pages = await out.copyPages(src, keepIndices);
+          pages.forEach((p) => out.addPage(p));
+
+          const bytes = await out.save();
+          const url   = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          Object.assign(document.createElement("a"), { href: url, download: `${baseName}_edited.pdf` }).click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } finally {
+          btn.disabled    = false;
+          btn.textContent = "Διαγραφή επιλεγμένων";
+        }
+      });
+    </script>
+  </body>
+</html>
