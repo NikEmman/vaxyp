@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link
+      rel="shortcut icon"
+      href="../../images/logo.png"
+      type="image/x-icon"
+    />
+    <title>Συγχώνευση PDF</title>
+    <style>
+      body {
+        position: static;
+      }
+      /* ── Upload zone ──────────────────────────────────────────── */
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background: var(--background-white);
+        padding: 3.5em 2em;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          padding 0.3s;
+        margin-bottom: 1.2em;
+      }
+      .upload-zone.compact {
+        padding: 1.2em 2em;
+      }
+      .upload-zone.compact svg {
+        display: none;
+      }
+      .upload-zone.compact h2 {
+        font-size: 0.95em;
+        margin: 0;
+      }
+      .upload-zone.compact p {
+        display: none;
+      }
+      .upload-zone.drag-over {
+        border-color: var(--secondary-blue);
+        background: var(--light-blue);
+      }
+      .upload-zone svg {
+        width: 52px;
+        height: 52px;
+        stroke: var(--secondary-blue);
+        fill: none;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        display: block;
+        margin: 0 auto 0.6em;
+      }
+      .upload-zone h2 {
+        font-size: 1.15em;
+        color: var(--primary-blue);
+        margin-bottom: 0.3em;
+      }
+      .upload-zone p {
+        font-size: 0.9em;
+        color: var(--text-dark);
+        opacity: 0.6;
+      }
+      #file-input {
+        display: none;
+      }
+
+      /* ── File list header ─────────────────────────────────────── */
+      .list-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        margin-bottom: 0.6em;
+      }
+      .list-header .summary {
+        flex: 1;
+        font-size: 0.9em;
+        color: var(--text-dark);
+        opacity: 0.65;
+      }
+
+      /* ── File list ────────────────────────────────────────────── */
+      #file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 7em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6em;
+      }
+      .file-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.6em 0.8em;
+        transition:
+          box-shadow 0.15s,
+          border-color 0.15s,
+          opacity 0.15s;
+        cursor: default;
+      }
+      .file-item.drag-over-item {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 2px var(--secondary-blue);
+      }
+      .file-item.dragging {
+        opacity: 0.4;
+      }
+
+      /* drag handle */
+      .drag-handle {
+        cursor: grab;
+        color: var(--border-color);
+        font-size: 1.2em;
+        line-height: 1;
+        padding: 0 2px;
+        user-select: none;
+        flex-shrink: 0;
+      }
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
+      /* thumbnail */
+      .file-thumb {
+        width: 40px;
+        height: 52px;
+        flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--background-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .file-thumb canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .file-thumb .thumb-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border-color);
+        border-top-color: var(--secondary-blue);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* file info */
+      .file-meta {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15em;
+      }
+      .file-meta .name {
+        font-weight: 600;
+        font-size: 0.92em;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-meta .pages {
+        font-size: 0.78em;
+        color: var(--text-dark);
+        opacity: 0.55;
+      }
+
+      /* order badge */
+      .order-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        font-size: 0.75em;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* remove button */
+      .btn-remove {
+        background: transparent;
+        color: var(--error-red);
+        border: 1px solid var(--error-red);
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8em;
+        flex-shrink: 0;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .btn-remove:hover {
+        background: var(--error-red);
+        color: #fff;
+      }
+
+      /* ── Action bar ───────────────────────────────────────────── */
+      .action-bar {
+        position: sticky;
+        bottom: -2em;
+        margin: 0 -2em -2em;
+        background: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85em 2em;
+        display: flex;
+        gap: 0.8em;
+        align-items: center;
+        box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08);
+        z-index: 100;
+      }
+      #action-bar.hidden {
+        display: none;
+      }
+      .action-bar .hint {
+        flex: 1;
+        font-size: 0.88em;
+        color: var(--text-dark);
+        opacity: 0.55;
+      }
+      #output-name {
+        width: 220px;
+        font-size: 0.88em;
+      }
+
+      @media (max-width: 600px) {
+        .action-bar {
+          flex-wrap: wrap;
+        }
+        .action-bar .hint {
+          width: 100%;
+        }
+        #output-name {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        title="Αλλαγή θέματος"
+      ></button>
+    </header>
+
+    <main>
+      <div class="upload-zone" id="upload-zone">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <h2>Προσθέστε PDF αρχεία</h2>
+        <p>
+          Σύρετε &amp; αφήστε, ή κάντε κλικ για επιλογή · μπορείτε να επιλέξετε
+          πολλά αρχεία
+        </p>
+      </div>
+      <input
+        type="file"
+        id="file-input"
+        accept=".pdf,application/pdf"
+        multiple
+      />
+
+      <div id="list-section" class="hidden">
+        <div class="list-header">
+          <span class="summary" id="summary"></span>
+          <button id="btn-clear" style="background: var(--error-red)">
+            Καθαρισμός
+          </button>
+        </div>
+        <ul id="file-list"></ul>
+      </div>
+      <div class="action-bar hidden" id="action-bar">
+        <span class="hint" id="action-hint"
+          >Προσθέστε τουλάχιστον 2 αρχεία για να ξεκινήσετε</span
+        >
+        <input
+          type="text"
+          id="output-name"
+          placeholder="merged.pdf"
+          title="Όνομα αρχείου εξόδου"
+        />
+        <button id="btn-merge" disabled>Συγχώνευση → PDF</button>
+      </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light");
+      const applyTheme = (t) =>
+        t === "dark"
+          ? document.body.classList.add("dark")
+          : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", (e) => {
+          if (!localStorage.getItem("vaxyp-theme"))
+            applyTheme(e.matches ? "dark" : "light");
+        });
+
+      // ── pdf.js worker ─────────────────────────────────────────────
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ── State ─────────────────────────────────────────────────────
+      // Each entry: { id, name, bytes (ArrayBuffer), pageCount }
+      let files = [];
+      let nextId = 0;
+
+      // ── DOM ───────────────────────────────────────────────────────
+      const $ = (id) => document.getElementById(id);
+      const uploadZone = $("upload-zone");
+      const fileInput = $("file-input");
+      const listSection = $("list-section");
+      const fileList = $("file-list");
+      const summaryEl = $("summary");
+      const actionHint = $("action-hint");
+      const btnMerge = $("btn-merge");
+      const outputName = $("output-name");
+
+      // ── Upload wiring ─────────────────────────────────────────────
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag-over");
+      });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () =>
+          uploadZone.classList.remove("drag-over"),
+        ),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        addFiles(Array.from(e.dataTransfer.files));
+      });
+      fileInput.addEventListener("change", () => {
+        addFiles(Array.from(fileInput.files));
+        fileInput.value = "";
+      });
+      $("btn-clear").addEventListener("click", () => {
+        files = [];
+        fileList.innerHTML = "";
+        updateUI();
+      });
+
+      // ── Add files ─────────────────────────────────────────────────
+      async function addFiles(incoming) {
+        const pdfs = incoming.filter(
+          (f) =>
+            f.type === "application/pdf" ||
+            f.name.toLowerCase().endsWith(".pdf"),
+        );
+        if (!pdfs.length) return;
+
+        for (const file of pdfs) {
+          const id = nextId++;
+          const bytes = await file.arrayBuffer();
+
+          // Get page count synchronously via pdf-lib (fast, no rendering)
+          const { PDFDocument } = PDFLib;
+          const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+          const pageCount = doc.getPageCount();
+
+          files.push({ id, name: file.name, bytes, pageCount });
+          appendListItem({ id, name: file.name, pageCount });
+          renderFirstPageThumb(id, bytes);
+        }
+        updateUI();
+      }
+
+      // ── Render first-page thumbnail asynchronously ────────────────
+      async function renderFirstPageThumb(id, bytes) {
+        try {
+          const pdfDoc = await pdfjsLib.getDocument({ data: bytes.slice(0) })
+            .promise;
+          const page = await pdfDoc.getPage(1);
+          const viewport = page.getViewport({ scale: 0.12 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({
+            canvasContext: canvas.getContext("2d"),
+            viewport,
+          }).promise;
+
+          const thumb = document.querySelector(`[data-id="${id}"] .file-thumb`);
+          if (thumb) {
+            thumb.innerHTML = "";
+            thumb.appendChild(canvas);
+          }
+        } catch (_) {
+          /* thumbnail optional, ignore errors */
+        }
+      }
+
+      // ── Build list item ────────────────────────────────────────────
+      function appendListItem({ id, name, pageCount }) {
+        const li = document.createElement("li");
+        li.className = "file-item";
+        li.dataset.id = id;
+        li.draggable = true;
+
+        li.innerHTML = `
+          <span class="drag-handle" title="Σύρετε για αναδιάταξη">⠿</span>
+          <div class="file-thumb"><div class="thumb-spinner"></div></div>
+          <div class="file-meta">
+            <span class="name" title="${name}">${name}</span>
+            <span class="pages">${pageCount} σελίδ${pageCount === 1 ? "α" : "ες"}</span>
+          </div>
+          <span class="order-badge"></span>
+          <button class="btn-remove" title="Αφαίρεση">✕</button>
+        `;
+
+        li.querySelector(".btn-remove").addEventListener("click", () =>
+          removeFile(id),
+        );
+
+        // ── Drag & drop reorder ─────────────────────────────────────
+        li.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", id);
+          li.classList.add("dragging");
+        });
+        li.addEventListener("dragend", () => {
+          li.classList.remove("dragging");
+          document
+            .querySelectorAll(".file-item")
+            .forEach((el) => el.classList.remove("drag-over-item"));
+        });
+        li.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          document
+            .querySelectorAll(".file-item")
+            .forEach((el) => el.classList.remove("drag-over-item"));
+          li.classList.add("drag-over-item");
+        });
+        li.addEventListener("drop", (e) => {
+          e.preventDefault();
+          li.classList.remove("drag-over-item");
+          const draggedId = parseInt(e.dataTransfer.getData("text/plain"));
+          const targetId = id;
+          if (draggedId === targetId) return;
+
+          const fromIdx = files.findIndex((f) => f.id === draggedId);
+          const toIdx = files.findIndex((f) => f.id === targetId);
+          if (fromIdx === -1 || toIdx === -1) return;
+
+          const [moved] = files.splice(fromIdx, 1);
+          files.splice(toIdx, 0, moved);
+          rebuildList();
+          updateUI();
+        });
+
+        fileList.appendChild(li);
+      }
+
+      function removeFile(id) {
+        files = files.filter((f) => f.id !== id);
+        rebuildList();
+        updateUI();
+      }
+
+      function rebuildList() {
+        fileList.innerHTML = "";
+        files.forEach((f) => appendListItem(f));
+        // Re-render thumbnails for rebuilt items
+        files.forEach((f) => renderFirstPageThumb(f.id, f.bytes));
+      }
+
+      // ── Update UI state ───────────────────────────────────────────
+      function updateUI() {
+        const n = files.length;
+        const totalPages = files.reduce((s, f) => s + f.pageCount, 0);
+
+        listSection.classList.toggle("hidden", n === 0);
+        uploadZone.classList.toggle("compact", n > 0);
+        $("action-bar").classList.toggle("hidden", n === 0);
+
+        summaryEl.textContent =
+          n > 0
+            ? `${n} αρχεί${n === 1 ? "ο" : "α"} · ${totalPages} σελίδες συνολικά`
+            : "";
+
+        btnMerge.disabled = n < 2;
+        actionHint.textContent =
+          n < 2
+            ? "Προσθέστε τουλάχιστον 2 αρχεία για να ξεκινήσετε"
+            : `${n} αρχεία έτοιμα για συγχώνευση`;
+
+        // Update order badges
+        document.querySelectorAll(".file-item").forEach((li, i) => {
+          const badge = li.querySelector(".order-badge");
+          if (badge) badge.textContent = i + 1;
+        });
+      }
+
+      // ── Merge ─────────────────────────────────────────────────────
+      btnMerge.addEventListener("click", async () => {
+        btnMerge.disabled = true;
+        btnMerge.textContent = "Επεξεργασία…";
+        try {
+          const { PDFDocument } = PDFLib;
+          const out = await PDFDocument.create();
+
+          for (const entry of files) {
+            const src = await PDFDocument.load(entry.bytes);
+            const indices = Array.from(
+              { length: src.getPageCount() },
+              (_, i) => i,
+            );
+            const pages = await out.copyPages(src, indices);
+            pages.forEach((p) => out.addPage(p));
+          }
+
+          const bytes = await out.save();
+          const rawName = outputName.value.trim() || "merged";
+          const outName = rawName.endsWith(".pdf") ? rawName : rawName + ".pdf";
+          const url = URL.createObjectURL(
+            new Blob([bytes], { type: "application/pdf" }),
+          );
+          const a = Object.assign(document.createElement("a"), {
+            href: url,
+            download: outName,
+          });
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } finally {
+          btnMerge.disabled = false;
+          btnMerge.textContent = "Συγχώνευση → PDF";
+        }
+      });
+    </script>
+  </body>
+</html>

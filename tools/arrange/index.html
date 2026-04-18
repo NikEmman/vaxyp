@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
+    <title>Αναδιάταξη σελίδων PDF</title>
+    <style>
+      body { position: static; }
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background: var(--background-white);
+        padding: 3.5em 2em;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        margin-bottom: 1.5em;
+      }
+      .upload-zone.drag-over { border-color: var(--secondary-blue); background: var(--light-blue); }
+      .upload-zone svg {
+        width: 52px; height: 52px;
+        stroke: var(--secondary-blue); fill: none;
+        stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+        display: block; margin: 0 auto 0.6em;
+      }
+      .upload-zone h2 { font-size: 1.15em; color: var(--primary-blue); margin-bottom: 0.3em; }
+      .upload-zone p  { font-size: 0.9em; color: var(--text-dark); opacity: 0.6; }
+      #file-input { display: none; }
+
+      .spinner {
+        width: 44px; height: 44px;
+        border: 4px solid var(--border-color);
+        border-top-color: var(--secondary-blue);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin: 3em auto 1em;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      #loading-msg { text-align: center; color: var(--text-dark); opacity: 0.65; font-size: 0.95em; }
+
+      .toolbar {
+        display: flex; align-items: center; gap: 0.8em; flex-wrap: wrap;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px; padding: 0.75em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      }
+      .toolbar .file-info {
+        font-weight: 600; color: var(--primary-blue);
+        flex: 1; min-width: 0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+
+      /* ── Page grid ────────────────────────────────────────────── */
+      .page-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1em;
+        padding-bottom: 7em;
+      }
+
+      .page-card {
+        position: relative;
+        background: var(--background-white);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5em 0.5em 0.4em;
+        display: flex; flex-direction: column; align-items: center; gap: 0.4em;
+        cursor: grab;
+        transition: box-shadow 0.15s, border-color 0.15s, opacity 0.15s;
+        user-select: none;
+      }
+      .page-card:active { cursor: grabbing; }
+      .page-card:hover  { box-shadow: 0 4px 14px rgba(0,0,0,0.1); border-color: var(--secondary-blue); }
+
+      .page-card.dragging {
+        opacity: 0.35;
+        box-shadow: none;
+      }
+      /* drop-before: glowing left border */
+      .page-card.drop-before {
+        border-left-color: var(--secondary-blue);
+        border-left-width: 4px;
+        box-shadow: -4px 0 0 0 var(--secondary-blue);
+      }
+      /* drop-after: glowing right border */
+      .page-card.drop-after {
+        border-right-color: var(--secondary-blue);
+        border-right-width: 4px;
+        box-shadow: 4px 0 0 0 var(--secondary-blue);
+      }
+
+      .page-card canvas {
+        width: 100%; height: auto; display: block;
+        border-radius: 3px; border: 1px solid var(--border-color);
+        pointer-events: none;
+      }
+
+      .card-footer {
+        width: 100%; display: flex; align-items: center; justify-content: space-between;
+      }
+      .page-num-orig {
+        font-size: 0.72em; color: var(--text-dark); opacity: 0.5;
+      }
+      /* current position badge */
+      .order-badge {
+        font-size: 0.72em; font-weight: 700;
+        background: var(--primary-blue); color: #fff;
+        width: 20px; height: 20px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      /* highlight when moved from original position */
+      .page-card.moved .order-badge {
+        background: var(--secondary-blue);
+        box-shadow: 0 0 0 2px var(--light-blue);
+      }
+
+      /* drag handle icon */
+      .drag-hint {
+        position: absolute; top: 6px; left: 6px;
+        color: var(--border-color); font-size: 0.9em; line-height: 1;
+        pointer-events: none;
+      }
+
+      /* ── Action bar ───────────────────────────────────────────── */
+      .action-bar {
+        position: sticky; bottom: -2em;
+        margin: 0 -2em -2em;
+        background: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85em 2em;
+        display: flex; gap: 0.8em; align-items: center;
+        box-shadow: 0 -3px 12px rgba(0,0,0,0.08);
+        z-index: 100;
+      }
+      .action-bar .hint { flex: 1; font-size: 0.88em; color: var(--text-dark); opacity: 0.55; }
+
+      @media (max-width: 600px) {
+        .action-bar { flex-wrap: wrap; }
+        .action-bar .hint { width: 100%; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
+    </header>
+
+    <main>
+      <div id="upload-section">
+        <div class="upload-zone" id="upload-zone">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <h2>Ανεβάστε ένα PDF αρχείο</h2>
+          <p>Σύρετε &amp; αφήστε, ή κάντε κλικ για επιλογή</p>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,application/pdf" />
+      </div>
+
+      <div id="loading-section" class="hidden">
+        <div class="spinner"></div>
+        <p id="loading-msg">Φόρτωση σελίδων…</p>
+      </div>
+
+      <div id="ready-section" class="hidden">
+        <div class="toolbar">
+          <span class="file-info" id="file-name"></span>
+          <span id="move-info" style="font-size:0.88em; color:var(--text-dark); opacity:0.6"></span>
+          <button id="btn-reverse">Αντιστροφή σειράς</button>
+          <button id="btn-reset">Επαναφορά</button>
+          <button id="btn-change-file">Άλλο αρχείο</button>
+        </div>
+        <div class="page-grid" id="page-grid"></div>
+      </div>
+    </main>
+
+    <div class="action-bar hidden" id="action-bar">
+      <span class="hint" id="action-hint">Σύρετε τις σελίδες για να αλλάξετε σειρά</span>
+      <button id="btn-download">Λήψη PDF</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const applyTheme = (t) =>
+        t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("vaxyp-theme")) applyTheme(e.matches ? "dark" : "light");
+      });
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ── State ─────────────────────────────────────────────────────
+      let pdfBytes  = null;
+      let baseName  = "";
+      let pageCount = 0;
+      let pageOrder = []; // current order: pageOrder[i] = original 1-based page number at position i
+      const cardMap = new Map(); // original page number → card DOM element
+
+      const $ = (id) => document.getElementById(id);
+
+      function setState(s) {
+        $("upload-section") .classList.toggle("hidden", s !== "idle");
+        $("loading-section").classList.toggle("hidden", s !== "loading");
+        $("ready-section")  .classList.toggle("hidden", s !== "ready");
+        $("action-bar")     .classList.toggle("hidden", s !== "ready");
+      }
+
+      // ── Upload ────────────────────────────────────────────────────
+      const uploadZone = $("upload-zone");
+      const fileInput  = $("file-input");
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () => uploadZone.classList.remove("drag-over"))
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      });
+      fileInput.addEventListener("change", () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+      $("btn-change-file").addEventListener("click", () => {
+        setState("idle"); fileInput.value = ""; cardMap.clear(); $("page-grid").innerHTML = "";
+      });
+
+      // ── Load & render ─────────────────────────────────────────────
+      async function handleFile(file) {
+        if (file.type && file.type !== "application/pdf") { alert("Παρακαλώ επιλέξτε αρχείο PDF."); return; }
+        baseName = file.name.replace(/\.pdf$/i, "");
+        setState("loading");
+        pdfBytes = await file.arrayBuffer();
+        cardMap.clear();
+
+        $("loading-msg").textContent = "Φόρτωση αρχείου…";
+        const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+        pageCount = pdfDoc.numPages;
+        pageOrder = Array.from({ length: pageCount }, (_, i) => i + 1);
+
+        $("page-grid").innerHTML = "";
+        for (let i = 1; i <= pageCount; i++) {
+          $("loading-msg").textContent = `Επεξεργασία σελίδας ${i} από ${pageCount}…`;
+          await renderThumbnail(pdfDoc, i);
+        }
+
+        $("file-name").textContent = file.name;
+        updateBadges();
+        setState("ready");
+      }
+
+      async function renderThumbnail(pdfDoc, n) {
+        const page     = await pdfDoc.getPage(n);
+        const viewport = page.getViewport({ scale: 0.28 });
+        const canvas   = document.createElement("canvas");
+        canvas.width   = viewport.width;
+        canvas.height  = viewport.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+
+        const card   = document.createElement("div");
+        card.className    = "page-card";
+        card.dataset.page = n;
+        card.draggable    = true;
+
+        const hint = document.createElement("span");
+        hint.className   = "drag-hint";
+        hint.textContent = "⠿";
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+        footer.innerHTML = `
+          <span class="page-num-orig">σελ. ${n}</span>
+          <span class="order-badge" data-badge>${n}</span>
+        `;
+
+        card.appendChild(hint);
+        card.appendChild(canvas);
+        card.appendChild(footer);
+
+        wireDragEvents(card, n);
+        cardMap.set(n, card);
+        $("page-grid").appendChild(card);
+      }
+
+      // ── Drag & drop ───────────────────────────────────────────────
+      let draggedPage = null;
+
+      function wireDragEvents(card, n) {
+        card.addEventListener("dragstart", (e) => {
+          draggedPage = n;
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", n);
+          // defer adding class so the drag image captures the un-faded card
+          requestAnimationFrame(() => card.classList.add("dragging"));
+        });
+
+        card.addEventListener("dragend", () => {
+          draggedPage = null;
+          card.classList.remove("dragging");
+          clearDropIndicators();
+        });
+
+        card.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          if (draggedPage === null || draggedPage === n) return;
+          e.dataTransfer.dropEffect = "move";
+
+          clearDropIndicators();
+          const rect   = card.getBoundingClientRect();
+          const isAfter = e.clientX > rect.left + rect.width / 2;
+          card.classList.add(isAfter ? "drop-after" : "drop-before");
+        });
+
+        card.addEventListener("dragleave", (e) => {
+          // only clear if leaving the card entirely
+          if (!card.contains(e.relatedTarget)) clearDropIndicators();
+        });
+
+        card.addEventListener("drop", (e) => {
+          e.preventDefault();
+          if (draggedPage === null || draggedPage === n) { clearDropIndicators(); return; }
+
+          const rect    = card.getBoundingClientRect();
+          const isAfter = e.clientX > rect.left + rect.width / 2;
+          clearDropIndicators();
+
+          const fromIdx = pageOrder.indexOf(draggedPage);
+          let   toIdx   = pageOrder.indexOf(n);
+          if (isAfter) toIdx += 1;
+
+          pageOrder.splice(fromIdx, 1);
+          // adjust toIdx if we removed an element before it
+          const adjustedTo = fromIdx < toIdx ? toIdx - 1 : toIdx;
+          pageOrder.splice(adjustedTo, 0, draggedPage);
+
+          reorderDOM();
+          updateBadges();
+        });
+      }
+
+      function clearDropIndicators() {
+        document.querySelectorAll(".page-card").forEach((c) => {
+          c.classList.remove("drop-before", "drop-after");
+        });
+      }
+
+      // Reorder existing card DOM nodes without re-rendering
+      function reorderDOM() {
+        const grid = $("page-grid");
+        pageOrder.forEach((n) => grid.appendChild(cardMap.get(n)));
+      }
+
+      function updateBadges() {
+        let moved = 0;
+        pageOrder.forEach((origPage, i) => {
+          const card  = cardMap.get(origPage);
+          const badge = card.querySelector("[data-badge]");
+          const pos   = i + 1;
+          badge.textContent = pos;
+          const hasMoved = origPage !== pos;
+          if (hasMoved) moved++;
+          card.classList.toggle("moved", hasMoved);
+        });
+
+        const hint = moved > 0
+          ? `${moved} σελίδ${moved === 1 ? "α" : "ες"} σε νέα θέση`
+          : "Σύρετε τις σελίδες για να αλλάξετε σειρά";
+        $("action-hint").textContent = hint;
+        $("move-info").textContent   = moved > 0 ? hint : "";
+      }
+
+      // ── Toolbar ───────────────────────────────────────────────────
+      $("btn-reverse").addEventListener("click", () => {
+        pageOrder.reverse();
+        reorderDOM();
+        updateBadges();
+      });
+
+      $("btn-reset").addEventListener("click", () => {
+        pageOrder = Array.from({ length: pageCount }, (_, i) => i + 1);
+        reorderDOM();
+        updateBadges();
+      });
+
+      // ── Download ──────────────────────────────────────────────────
+      $("btn-download").addEventListener("click", async () => {
+        const btn = $("btn-download");
+        btn.disabled    = true;
+        btn.textContent = "Επεξεργασία…";
+        try {
+          const { PDFDocument } = PDFLib;
+          const src     = await PDFDocument.load(pdfBytes);
+          const out     = await PDFDocument.create();
+          const indices = pageOrder.map((n) => n - 1);
+          const pages   = await out.copyPages(src, indices);
+          pages.forEach((p) => out.addPage(p));
+
+          const bytes = await out.save();
+          const url   = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          Object.assign(document.createElement("a"), { href: url, download: `${baseName}_rearranged.pdf` }).click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } finally {
+          btn.disabled    = false;
+          btn.textContent = "Λήψη PDF";
+        }
+      });
+    </script>
+  </body>
+</html>
