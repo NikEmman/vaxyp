@@ -170,8 +170,8 @@
       <button id="btn-remove" disabled style="background:var(--error-red)">Διαγραφή επιλεγμένων</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="../libs/pdf.min.js"></script>
+    <script src="../libs/pdf-lib.min.js"></script>
     <script>
       // ── Theme ────────────────────────────────────────────────────
       const getTheme = () =>
@@ -190,7 +190,7 @@
       });
 
       pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        "../libs/pdf.worker.min.js";
 
       // ── State ─────────────────────────────────────────────────────
       let pdfBytes  = null;
