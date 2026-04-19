@@ -1016,3 +1016,15 @@ hr {
   background: rgba(44, 67, 100, 0.25);
   border-color: rgba(18, 24, 34, 0.5);
 }
+@media (max-width: 480px) {
+  body {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+  .navButtons {
+    gap: 8px;
+  }
+  footer {
+    margin: 0;
+  }
+}
