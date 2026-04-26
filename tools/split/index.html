@@ -240,9 +240,9 @@
       <button id="btn-split"   disabled>Αποθήκευση ανά σελίδα → ZIP</button>
     </div>
 
-    <script src="../libs/pdf.min.js"></script>
-    <script src="../libs/pdf-lib.min.js"></script>
-    <script src="../libs/jszip.min.js"></script>
+    <script src="../../libs/pdf.min.js"></script>
+    <script src="../../libs/pdf-lib.min.js"></script>
+    <script src="../../libs/jszip.min.js"></script>
     <script>
       // ── Theme ────────────────────────────────────────────────────
       const getTheme = () =>
@@ -262,7 +262,7 @@
 
       // ── pdf.js worker ─────────────────────────────────────────────
       pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "../libs/pdf.worker.min.js";
+        "../../libs/pdf.worker.min.js";
 
       // ── State ─────────────────────────────────────────────────────
       let pdfBytes  = null;
