@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link
+      rel="shortcut icon"
+      href="../../images/logo.png"
+      type="image/x-icon"
+    />
+    <title>OCR – Ανάγνωση Κειμένου</title>
+    <style>
+      body {
+        position: static;
+      }
+
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        background: var(--background-white);
+        padding: 3.5em 2em;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          padding 0.3s;
+        margin-bottom: 1.2em;
+      }
+      .upload-zone.compact {
+        padding: 1.2em 2em;
+      }
+      .upload-zone.compact svg,
+      .upload-zone.compact p {
+        display: none;
+      }
+      .upload-zone.compact h2 {
+        font-size: 0.95em;
+        margin: 0;
+      }
+      .upload-zone.drag-over {
+        border-color: var(--secondary-blue);
+        background: var(--light-blue);
+      }
+      .upload-zone svg {
+        width: 52px;
+        height: 52px;
+        stroke: var(--secondary-blue);
+        fill: none;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        display: block;
+        margin: 0 auto 0.6em;
+      }
+      .upload-zone h2 {
+        font-size: 1.15em;
+        color: var(--primary-blue);
+        margin-bottom: 0.3em;
+      }
+      .upload-zone p {
+        font-size: 0.9em;
+        color: var(--text-dark);
+        opacity: 0.6;
+      }
+      #file-input {
+        display: none;
+      }
+
+      /* ── Options bar ─────────────────────────────────────────── */
+      .options-panel {
+        display: flex;
+        align-items: center;
+        gap: 1.2em;
+        flex-wrap: wrap;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .option-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+      .option-group label {
+        font-size: 0.85em;
+        font-weight: 600;
+        color: var(--label-color);
+        white-space: nowrap;
+      }
+      .toggle-group {
+        display: flex;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+      .toggle-btn {
+        padding: 0.35em 0.9em;
+        background: var(--background-white);
+        color: var(--text-dark);
+        border: none;
+        border-radius: 0;
+        font-size: 0.85em;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .toggle-btn:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      .toggle-btn.active {
+        background: var(--secondary-blue);
+        color: #fff;
+      }
+      .toggle-btn:hover:not(.active) {
+        background: var(--light-blue);
+      }
+
+      /* ── File list ───────────────────────────────────────────── */
+      .list-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        margin-bottom: 0.6em;
+      }
+      .list-header .summary {
+        flex: 1;
+        font-size: 0.9em;
+        color: var(--text-dark);
+        opacity: 0.65;
+      }
+
+      #file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+      }
+      .file-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.6em 0.9em;
+      }
+      .file-item .file-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        background: var(--light-blue);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .file-item .file-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary-blue);
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .file-item .file-name {
+        flex: 1;
+        font-size: 0.9em;
+        font-weight: 600;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-item .file-pages {
+        font-size: 0.78em;
+        color: var(--text-dark);
+        opacity: 0.5;
+        flex-shrink: 0;
+      }
+      .btn-remove {
+        background: transparent;
+        color: var(--error-red);
+        border: 1px solid var(--error-red);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75em;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .btn-remove:hover {
+        background: var(--error-red);
+        color: #fff;
+      }
+
+      /* ── Progress ────────────────────────────────────────────── */
+      .progress-section {
+        margin-bottom: 1.2em;
+      }
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85em;
+        color: var(--text-dark);
+        margin-bottom: 0.4em;
+      }
+      .progress-label .pct {
+        font-weight: 700;
+        color: var(--secondary-blue);
+      }
+      .progress-bar-track {
+        height: 6px;
+        background: var(--border-color);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--secondary-blue);
+        border-radius: 99px;
+        transition: width 0.25s;
+        width: 0%;
+      }
+
+      /* ── Output textarea ─────────────────────────────────────── */
+      .output-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        margin-bottom: 0.5em;
+      }
+      .output-header h3 {
+        flex: 1;
+        font-size: 1em;
+        color: var(--primary-blue);
+        margin: 0;
+      }
+      #output-text {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 320px;
+        max-height: 65vh;
+        resize: vertical;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        font-size: 0.92em;
+        line-height: 1.7;
+        color: var(--text-dark);
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1em;
+        margin-bottom: 8em;
+        transition: border-color 0.2s;
+      }
+      #output-text:focus {
+        outline: none;
+        border-color: var(--secondary-blue);
+      }
+
+      /* ── Action bar ──────────────────────────────────────────── */
+      .action-bar {
+        position: sticky;
+        bottom: -2em;
+        margin: 0 -2em -2em;
+        background: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85em 2em;
+        display: flex;
+        gap: 0.8em;
+        align-items: center;
+        box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08);
+        z-index: 100;
+      }
+      .action-bar .hint {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15em;
+      }
+      .action-bar .hint-main {
+        font-size: 0.88em;
+        color: var(--text-dark);
+        opacity: 0.55;
+      }
+      .action-bar .hint-tip {
+        font-size: 0.78em;
+        color: var(--text-dark);
+        opacity: 0.38;
+      }
+
+      /* ── Hidden canvas ───────────────────────────────────────── */
+      #render-canvas {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        title="Αλλαγή θέματος"
+      ></button>
+    </header>
+
+    <main>
+      <div class="upload-zone" id="upload-zone">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+          />
+          <polyline points="14 2 14 8 20 8" />
+          <path d="M10 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0" />
+          <path d="M7 18s.5-2 5-2 5 2 5 2" />
+        </svg>
+        <h2>Προσθέστε αρχεία για OCR</h2>
+        <p>
+          PDF ή εικόνες (PNG, JPEG, WebP) · Σύρετε &amp; αφήστε ή κάντε κλικ
+        </p>
+      </div>
+      <input
+        type="file"
+        id="file-input"
+        accept=".pdf,image/png,image/jpeg,image/webp,image/gif,image/bmp"
+        multiple
+      />
+
+      <div class="options-panel hidden" id="options-panel">
+        <div class="option-group">
+          <label>Γλώσσα</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" data-lang="ell">Ελληνικά</button>
+            <button class="toggle-btn" data-lang="ell+eng">Ελλ + Αγγλ</button>
+          </div>
+        </div>
+        <div class="option-group">
+          <label>Βελτίωση εικόνας</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" data-enhance="on">Ενεργό</button>
+            <button class="toggle-btn" data-enhance="off">Ανενεργό</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="list-section" class="hidden">
+        <div class="list-header">
+          <span class="summary" id="summary"></span>
+          <button id="btn-clear" style="background: var(--error-red)">
+            Καθαρισμός
+          </button>
+        </div>
+        <ul id="file-list"></ul>
+      </div>
+
+      <div class="progress-section hidden" id="progress-section">
+        <div class="progress-label">
+          <span id="progress-msg">Αναμονή…</span>
+          <span class="pct" id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+      </div>
+
+      <div id="output-section" class="hidden">
+        <div class="output-header">
+          <h3>Εξαγόμενο κείμενο</h3>
+          <button
+            id="btn-copy"
+            style="min-width: unset; padding: 0.4em 1em; font-size: 0.85em"
+          >
+            Αντιγραφή
+          </button>
+        </div>
+        <textarea
+          id="output-text"
+          readonly
+          placeholder="Το κείμενο θα εμφανιστεί εδώ…"
+        ></textarea>
+      </div>
+    </main>
+
+    <div class="action-bar">
+      <div class="hint">
+        <span class="hint-tip"
+          >Προσθέστε τουλάχιστον 1 αρχείο για να ξεκινήσετε.</span
+        >
+        <span id="action-hint"
+          >&#128161; Για καλύτερα αποτελέσματα, σαρώστε στη μέγιστη δυνατή
+          ανάλυση.</span
+        >
+      </div>
+      <button id="btn-run" disabled>Εξαγωγή κειμένου</button>
+    </div>
+
+    <canvas id="render-canvas"></canvas>
+
+    <script src="../../libs/pdf.min.js"></script>
+    <script src="../../libs/tesseract5/tesseract.min.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light");
+      const applyTheme = (t) =>
+        t === "dark"
+          ? document.body.classList.add("dark")
+          : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", (e) => {
+          if (!localStorage.getItem("vaxyp-theme"))
+            applyTheme(e.matches ? "dark" : "light");
+        });
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "../../libs/pdf.worker.min.js";
+
+      // ── State ────────────────────────────────────────────────────
+      let files = []; // { id, name, type, file, pageCount }
+      let nextId = 0;
+      let optLang = "ell";
+      let optEnhance = true;
+      let running = false;
+
+      const $ = (id) => document.getElementById(id);
+
+      // ── Options ──────────────────────────────────────────────────
+      document.querySelectorAll("[data-lang]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll("[data-lang]")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          optLang = btn.dataset.lang;
+        }),
+      );
+
+      document.querySelectorAll("[data-enhance]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll("[data-enhance]")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          optEnhance = btn.dataset.enhance === "on";
+        }),
+      );
+
+      // ── Upload ───────────────────────────────────────────────────
+      const uploadZone = $("upload-zone");
+      const fileInput = $("file-input");
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag-over");
+      });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () =>
+          uploadZone.classList.remove("drag-over"),
+        ),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        addFiles(Array.from(e.dataTransfer.files));
+      });
+      fileInput.addEventListener("change", () => {
+        addFiles(Array.from(fileInput.files));
+        fileInput.value = "";
+      });
+
+      $("btn-clear").addEventListener("click", () => {
+        files = [];
+        $("file-list").innerHTML = "";
+        $("output-text").value = "";
+        $("output-section").classList.add("hidden");
+        $("progress-section").classList.add("hidden");
+        updateUI();
+      });
+
+      async function addFiles(incoming) {
+        for (const file of incoming) {
+          const isPdf =
+            file.type === "application/pdf" ||
+            file.name.toLowerCase().endsWith(".pdf");
+          const isImg = file.type.startsWith("image/");
+          if (!isPdf && !isImg) continue;
+
+          let pageCount = 1;
+          if (isPdf) {
+            try {
+              const buf = await file.arrayBuffer();
+              const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+              pageCount = doc.numPages;
+            } catch {
+              pageCount = 1;
+            }
+          }
+
+          files.push({
+            id: nextId++,
+            name: file.name,
+            type: isPdf ? "pdf" : "img",
+            file,
+            pageCount,
+          });
+        }
+        rebuildFileList();
+        updateUI();
+      }
+
+      function rebuildFileList() {
+        const ul = $("file-list");
+        ul.innerHTML = "";
+        files.forEach(({ id, name, type, pageCount }) => {
+          const li = document.createElement("li");
+          li.className = "file-item";
+          li.dataset.id = id;
+          const pagesLabel =
+            type === "pdf"
+              ? `${pageCount} σελ${pageCount !== 1 ? "." : "."}`
+              : "εικόνα";
+          li.innerHTML = `
+            <div class="file-icon">
+              ${
+                type === "pdf"
+                  ? `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+                  : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+              }
+            </div>
+            <span class="file-name" title="${name}">${name}</span>
+            <span class="file-pages">${pagesLabel}</span>
+            <button class="btn-remove" data-id="${id}" title="Αφαίρεση">✕</button>
+          `;
+          li.querySelector(".btn-remove").addEventListener("click", () =>
+            removeFile(id),
+          );
+          ul.appendChild(li);
+        });
+      }
+
+      function removeFile(id) {
+        files = files.filter((f) => f.id !== id);
+        rebuildFileList();
+        updateUI();
+      }
+
+      function updateUI() {
+        const n = files.length;
+        $("list-section").classList.toggle("hidden", n === 0);
+        $("options-panel").classList.toggle("hidden", n === 0);
+        uploadZone.classList.toggle("compact", n > 0);
+
+        const total = files.reduce((s, f) => s + f.pageCount, 0);
+        $("summary").textContent =
+          n > 0
+            ? `${n} αρχεί${n === 1 ? "ο" : "α"}, ${total} σελίδ${total === 1 ? "α" : "ες"} / εικόνες`
+            : "";
+
+        $("btn-run").disabled = n === 0 || running;
+        $("action-hint").textContent =
+          n > 0
+            ? `${total} σελίδ${total === 1 ? "α" : "ες"} προς ανάγνωση`
+            : "Προσθέστε τουλάχιστον 1 αρχείο για να ξεκινήσετε";
+      }
+
+      // ── Image enhancement (grayscale + threshold) ─────────────────
+      function enhanceCanvas(canvas) {
+        const ctx = canvas.getContext("2d");
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = img.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          const val = gray > 140 ? 255 : 0;
+          d[i] = d[i + 1] = d[i + 2] = val;
+        }
+        ctx.putImageData(img, 0, 0);
+      }
+
+      // ── Render a PDF page to the shared canvas ────────────────────
+      async function renderPdfPage(pdfDoc, pageNum) {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.5 });
+        const canvas = $("render-canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        return canvas;
+      }
+
+      // ── Render an image file to the shared canvas ─────────────────
+      async function renderImage(file) {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        await new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = rej;
+          img.src = url;
+        });
+        URL.revokeObjectURL(url);
+        const canvas = $("render-canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        return canvas;
+      }
+
+      // ── Progress helpers ──────────────────────────────────────────
+      function setProgress(msg, pct) {
+        $("progress-msg").textContent = msg;
+        $("progress-pct").textContent = Math.round(pct) + "%";
+        $("progress-bar").style.width = pct + "%";
+      }
+
+      // ── Main OCR run ──────────────────────────────────────────────
+      $("btn-run").addEventListener("click", runOcr);
+
+      async function runOcr() {
+        if (running || files.length === 0) return;
+        running = true;
+        $("btn-run").disabled = true;
+        $("output-section").classList.add("hidden");
+        $("progress-section").classList.remove("hidden");
+        setProgress("Φόρτωση μηχανής OCR…", 0);
+
+        const worker = await Tesseract.createWorker(optLang, 1, {
+          workerPath: "../../libs/tesseract5/worker.min.js",
+          langPath: "../../libs/tessdata-4.0.0_best",
+          corePath: "../../libs/tesseract5/tesseract-core-simd.wasm.js",
+          logger: () => {},
+        });
+
+        const outputParts = [];
+        const total = files.reduce((s, f) => s + f.pageCount, 0);
+        let done = 0;
+
+        try {
+          for (const entry of files) {
+            if (entry.type === "pdf") {
+              const buf = await entry.file.arrayBuffer();
+              const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+
+              for (let p = 1; p <= pdfDoc.numPages; p++) {
+                const label = `${entry.name} – σελ. ${p}/${pdfDoc.numPages}`;
+                setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
+
+                const canvas = await renderPdfPage(pdfDoc, p);
+                if (optEnhance) enhanceCanvas(canvas);
+
+                const {
+                  data: { text },
+                } = await worker.recognize(canvas);
+                const trimmed = text.trim();
+                if (trimmed) {
+                  outputParts.push(`── ${label} ──\n${trimmed}`);
+                }
+                done++;
+                setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
+              }
+            } else {
+              const label = entry.name;
+              setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
+
+              const canvas = await renderImage(entry.file);
+              if (optEnhance) enhanceCanvas(canvas);
+
+              const {
+                data: { text },
+              } = await worker.recognize(canvas);
+              const trimmed = text.trim();
+              if (trimmed) {
+                outputParts.push(`── ${label} ──\n${trimmed}`);
+              }
+              done++;
+              setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
+            }
+          }
+        } finally {
+          await worker.terminate();
+          running = false;
+          updateUI();
+        }
+
+        setProgress("Ολοκληρώθηκε", 100);
+        $("output-text").value = outputParts.join("\n\n");
+        $("output-section").classList.remove("hidden");
+      }
+
+      // ── Copy to clipboard ─────────────────────────────────────────
+      $("btn-copy").addEventListener("click", async () => {
+        const text = $("output-text").value;
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          const btn = $("btn-copy");
+          btn.textContent = "Αντιγράφηκε!";
+          setTimeout(() => {
+            btn.textContent = "Αντιγραφή";
+          }, 2000);
+        } catch {
+          $("output-text").select();
+          document.execCommand("copy");
+        }
+      });
+    </script>
+  </body>
+</html>
