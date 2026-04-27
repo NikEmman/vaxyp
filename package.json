@@ -1,0 +1,41 @@
+{
+  "name": "vaxyp",
+  "version": "1.0.0",
+  "description": "Βοηθητική εφαρμογή ΑΞ.ΥΠ",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win dir && node scripts/zip-dist.js"
+  },
+  "build": {
+    "appId": "com.vaxyp.app",
+    "productName": "Vaxyp",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false,
+    "files": [
+      "index.html",
+      "style.css",
+      "src/**/*",
+      "libs/**/*",
+      "images/**/*",
+      "tools/**/*",
+      "form/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "images/logo.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}
