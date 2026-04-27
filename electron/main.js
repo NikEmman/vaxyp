@@ -1,6 +1,7 @@
 const { app, BrowserWindow, protocol, net } = require("electron");
 const path = require("path");
 const url = require("url");
+const fs = require("fs");
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -29,8 +30,13 @@ function createWindow() {
 
 app.whenReady().then(() => {
   protocol.handle("app", (request) => {
-    const filePath = request.url.slice("app://./".length).split("?")[0];
-    const fullPath = path.join(__dirname, "..", filePath);
+    let filePath = request.url.slice("app://./".length).split("?")[0];
+    let fullPath = path.join(__dirname, "..", filePath);
+
+    if (!fs.existsSync(fullPath) || fs.statSync(fullPath).isDirectory()) {
+      fullPath = path.join(fullPath, "index.html");
+    }
+
     return net.fetch(url.pathToFileURL(fullPath).toString());
   });
 
