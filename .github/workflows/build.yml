@@ -2,7 +2,8 @@ name: Build Portable Windows App
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 env:
@@ -25,9 +26,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: Vaxyp-portable
-          path: dist/Vaxyp-portable.zip
-          retention-days: 30
+          files: dist/Vaxyp-portable.zip
+          generate_release_notes: true
