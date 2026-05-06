@@ -656,10 +656,11 @@
         $("progress-section").classList.remove("hidden");
         setProgress("Φόρτωση μηχανής OCR…", 0);
 
+        const abs = (rel) => new URL(rel, location.href).href;
         const worker = await Tesseract.createWorker(optLang, 1, {
-          workerPath: "../../libs/tesseract5/worker.min.js",
-          langPath: "../../libs/tessdata-4.0.0_best",
-          corePath: "../../libs/tesseract5/tesseract-core-simd.wasm.js",
+          workerPath: abs("../../libs/tesseract5/worker.min.js"),
+          langPath: abs("../../libs/tessdata-4.0.0_best"),
+          corePath: abs("../../libs/tesseract5/tesseract-core-simd.wasm.js"),
           logger: () => {},
         });
 
