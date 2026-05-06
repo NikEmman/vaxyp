@@ -25,6 +25,13 @@ function createWindow() {
     },
   });
 
+  if (app.isPackaged) {
+    win.setMenu(null);
+    win.webContents.on("devtools-opened", () => win.webContents.closeDevTools());
+  } else {
+    win.webContents.openDevTools();
+  }
+
   win.loadURL("app://./index.html");
 }
 
