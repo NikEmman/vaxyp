@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, Menu, MenuItem, session } = require("electron");
+const { app, BrowserWindow, protocol, net, Menu, MenuItem, session, dialog, shell } = require("electron");
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
@@ -13,6 +13,43 @@ protocol.registerSchemesAsPrivileged([
     },
   },
 ]);
+
+function isNewer(latest, current) {
+  const a = latest.replace(/^v/, "").split(".").map(Number);
+  const b = current.replace(/^v/, "").split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((a[i] || 0) > (b[i] || 0)) return true;
+    if ((a[i] || 0) < (b[i] || 0)) return false;
+  }
+  return false;
+}
+
+async function checkForUpdates(win) {
+  try {
+    const res = await net.fetch(
+      "https://api.github.com/repos/NikEmman/vaxyp/releases/latest",
+      { headers: { "User-Agent": "vaxyp-app" } }
+    );
+    if (!res.ok) return;
+    const { tag_name } = await res.json();
+    if (!isNewer(tag_name, app.getVersion())) return;
+
+    const { response } = await dialog.showMessageBox(win, {
+      type: "info",
+      title: "Νέα έκδοση διαθέσιμη",
+      message: `Η έκδοση ${tag_name} είναι διαθέσιμη.`,
+      detail: "Η τρέχουσα έκδοση είναι v" + app.getVersion() + ".\nΘέλετε να μεταβείτε στη σελίδα λήψης;",
+      buttons: ["Λήψη", "Αργότερα"],
+      defaultId: 0,
+    });
+
+    if (response === 0) {
+      shell.openExternal("https://github.com/NikEmman/vaxyp/releases/latest");
+    }
+  } catch {
+    // network blocked or unavailable — fail silently
+  }
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -101,6 +138,7 @@ function createWindow() {
   });
 
   win.loadURL("app://./index.html");
+  win.webContents.once("did-finish-load", () => checkForUpdates(win));
 }
 
 app.whenReady().then(() => {
