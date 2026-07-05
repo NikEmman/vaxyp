@@ -233,6 +233,7 @@ footer a {
 .donate-dialog-content .closeModal {
   align-self: flex-end;
   position: static;
+  padding: 0;
 }
 .donate-dialog-content h3 {
   margin: 0;

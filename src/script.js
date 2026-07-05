@@ -758,18 +758,6 @@ keywordsClose.addEventListener("click", () => {
   docxDialog.showModal();
 });
 
-// donate dialog
-const donateDialog = document.getElementById("donate-dialog");
-const donateOpen = document.getElementById("donate-open");
-const donateClose = document.getElementById("donate-close");
-
-donateOpen.addEventListener("click", () => {
-  donateDialog.showModal();
-});
-donateClose.addEventListener("click", () => {
-  donateDialog.close();
-});
-
 document
   .getElementById("download-martyra-sample")
   .addEventListener("click", () => {
