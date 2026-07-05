@@ -287,8 +287,8 @@ footer a {
     height: 38px;
   }
   .donate-fab svg {
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
   }
 }
 /* File Uploader Section */
@@ -745,26 +745,51 @@ dialog h3 {
 
 .closeModal {
   border: none;
-  background-color: var(--error-red);
+  background: linear-gradient(145deg, #f6564a, var(--error-red));
   color: #ffffff;
   align-self: flex-end;
-  width: 1.5em;
-  height: 1.5em;
+  flex-shrink: 0;
+  width: 1.6em;
+  height: 1.6em;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: x-large;
+  line-height: 1;
   position: sticky;
-  top: 0;
+  top: 10px;
   right: 0;
   cursor: pointer;
   border-radius: 50%;
   z-index: 10;
   margin-right: 15px;
+  box-shadow:
+    0 2px 6px rgba(244, 67, 54, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .closeModal:hover {
-  background-color: #d32f2f;
+  background: linear-gradient(145deg, #ff6b5e, #d32f2f);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow:
+    0 4px 10px rgba(244, 67, 54, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.closeModal:active {
+  transform: scale(0.95) rotate(90deg);
+  box-shadow:
+    0 1px 3px rgba(244, 67, 54, 0.4),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.closeModal:focus-visible {
+  outline: 2px solid var(--error-red);
+  outline-offset: 2px;
 }
 
 /* Lists */
