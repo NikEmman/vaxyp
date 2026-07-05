@@ -178,6 +178,114 @@ footer a {
   padding-right: 3px;
   border-radius: 3px;
 }
+.donate-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin: 1em 0 0 auto;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--secondary-blue);
+  color: var(--text-light);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+.donate-fab:hover {
+  background-color: var(--accent-blue);
+  transform: scale(1.08);
+}
+.donate-fab svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Donate dialog: slides in from the right */
+.donate-dialog {
+  top: 0;
+  left: auto;
+  right: 0;
+  width: min(340px, 88vw);
+  height: 100%;
+  margin: 0;
+  padding: 1.8em;
+  border-radius: 0;
+  animation: donateSlideIn 0.28s ease-out;
+}
+.donate-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+.donate-dialog-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1em;
+}
+.donate-dialog-content .closeModal {
+  align-self: flex-end;
+  position: static;
+}
+.donate-dialog-content h3 {
+  margin: 0;
+  color: var(--primary-blue);
+}
+.donate-dialog-content form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+.donate-dialog-content .donate-or {
+  text-align: center;
+  opacity: 0.7;
+  margin: 0;
+}
+.donate-dialog-content .donate-qr-label {
+  text-align: center;
+  opacity: 0.85;
+  margin: 0;
+  font-size: 0.9em;
+}
+.donate-dialog-content .donate-qr {
+  align-self: center;
+  width: 100%;
+  max-width: 200px;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 0.5em;
+}
+.donate-dialog-content .donate-thanks {
+  margin: auto 0 0;
+  text-align: center;
+  font-weight: 700;
+}
+@keyframes donateSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (max-width: 480px) {
+  .donate-fab {
+    width: 38px;
+    height: 38px;
+  }
+  .donate-fab svg {
+    width: 19px;
+    height: 19px;
+  }
+}
 /* File Uploader Section */
 .fileUploader {
   margin: 2em 0;
