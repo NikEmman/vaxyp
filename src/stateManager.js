@@ -7,7 +7,7 @@ import {
 
 export const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
-  return localStorageData ? localStorageData : defaultData;
+  return localStorageData ? { ...defaultData, ...localStorageData } : defaultData;
 };
 export function getAnakritikoiSelection() {
   const localStorageData = JSON.parse(localStorage.getItem("anakr"));
