@@ -34,17 +34,21 @@ async function checkForUpdates(win) {
     const { tag_name } = await res.json();
     if (!isNewer(tag_name, app.getVersion())) return;
 
+    const releasesUrl = "https://github.com/NikEmman/vaxyp/releases/latest";
+
     const { response } = await dialog.showMessageBox(win, {
       type: "info",
       title: "Νέα έκδοση διαθέσιμη",
       message: `Η έκδοση ${tag_name} είναι διαθέσιμη.`,
-      detail: "Η τρέχουσα έκδοση είναι v" + app.getVersion() + ".\nΘέλετε να μεταβείτε στη σελίδα λήψης;",
-      buttons: ["Λήψη", "Αργότερα"],
+      detail:
+        "Η τρέχουσα έκδοση είναι v" + app.getVersion() + ".\nΘέλετε να μεταβείτε στη σελίδα λήψης;\n\n" +
+        releasesUrl,
+      buttons: ["Μετάβαση", "Αργότερα"],
       defaultId: 0,
     });
 
     if (response === 0) {
-      shell.openExternal("https://github.com/NikEmman/vaxyp/releases/latest");
+      shell.openExternal(releasesUrl);
     }
   } catch {
     // network blocked or unavailable — fail silently
