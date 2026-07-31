@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="libs/driver/driver.css" />
     <link rel="shortcut icon" href="./images/logo.png" type="image/x-icon" />
     <script defer type="module" src="src/script.js"></script>
     <script src="libs/jszip.min.js"></script>
+    <script src="libs/driver/driver.js.iife.js"></script>
     <script
       data-goatcounter="https://nikemman.goatcounter.com/count"
       async
@@ -18,6 +20,16 @@
   <body>
     <header>
       <div class="navButtons">
+        <button class="helpBtn large tourBtn" id="tour-help" title="Περιήγηση">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <polygon
+              points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"
+            ></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+          </svg>
+          <span>Περιήγηση</span>
+        </button>
         <p class="helpBtn large" id="genikes-help">Οδηγίες χρήσης</p>
         <p class="helpBtn large" id="patch-help">Τι νέο υπάρχει;</p>
         <a class="helpBtn large" href="tools/">Εργαλεία PDF</a>
@@ -56,16 +68,16 @@
     <hr />
 
     <div class="tabs">
-      <div class="clicked">
+      <div class="clicked" data-tour-tab="persons">
         <h2>Μετατροπέας ατόμων</h2>
       </div>
-      <div class="tab">
+      <div class="tab" data-tour-tab="vehicles">
         <h2>Μετατροπέας οχημάτων</h2>
       </div>
-      <div class="tab">
+      <div class="tab" data-tour-tab="reports">
         <h2>Εκθέσεις</h2>
       </div>
-      <div class="tab">
+      <div class="tab" data-tour-tab="ids">
         <h2>Ταυτότητες / Απώλειες</h2>
       </div>
     </div>
@@ -990,6 +1002,32 @@
             σωστά στοιχεία / δημιουργήστε νέο data.json. Εάν υπάρχουν παλαιότερα
             στοιχεία, είτε στο browser είτε στο data.json που ανεβάσατε, η φορμα
             θα προ-συμπληρωθεί με αυτά
+          </li>
+        </ul>
+      </div>
+    </dialog>
+    <dialog id="tour-dialog">
+      <div class="container">
+        <p class="closeModal" id="tour-close">&times;</p>
+        <h3>Περιήγηση</h3>
+        <ul class="tour-list">
+          <li class="tour-item">
+            <span>Ξεκινήστε εδώ</span>
+            <button class="tour-play" data-tour="getStarted">
+              ▶ Έναρξη
+            </button>
+          </li>
+          <li class="tour-item">
+            <span>Πώς να εισάγετε παλιά δεδομένα</span>
+            <button class="tour-play" data-tour="importOldData">
+              ▶ Έναρξη
+            </button>
+          </li>
+          <li class="tour-item">
+            <span>Φτιάξτε την πρώτη σας έκθεση</span>
+            <button class="tour-play" data-tour="firstReport">
+              ▶ Έναρξη
+            </button>
           </li>
         </ul>
       </div>

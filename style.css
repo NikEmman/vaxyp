@@ -792,6 +792,111 @@ dialog h3 {
   outline-offset: 2px;
 }
 
+/* Tour guide button */
+.tourBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.tourBtn svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* Tour guide modal */
+.tour-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  padding: 0;
+  margin: 0;
+}
+
+.tour-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.8em 1em;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.tour-play {
+  flex-shrink: 0;
+}
+
+/* Driver.js popover: the library uses semantic <header>/<footer> tags for
+   its title/footer, which collide with this app's global header/footer
+   element selectors. Reset the properties those selectors leak in. */
+.driver-popover-title {
+  background-color: transparent;
+  padding: 0;
+  box-shadow: none;
+  color: inherit;
+}
+
+.driver-popover-footer {
+  flex-direction: row;
+  background-color: transparent;
+  margin: 15px 0 0;
+  padding: 0;
+  box-shadow: none;
+  min-height: 0;
+  color: inherit;
+}
+
+/* Driver.js popover theming (dark mode) */
+.dark .driver-popover {
+  background-color: var(--background-white);
+  color: var(--text-dark);
+}
+
+.dark .driver-popover-title,
+.dark .driver-popover-description,
+.dark .driver-popover-progress-text {
+  color: var(--text-dark);
+}
+
+.dark .driver-popover-close-btn {
+  color: var(--border-color);
+}
+
+.dark .driver-popover-close-btn:hover,
+.dark .driver-popover-close-btn:focus {
+  color: var(--text-dark);
+}
+
+.dark .driver-popover-footer-btn {
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  border-color: var(--accent-blue);
+}
+
+.dark .driver-popover-footer-btn:hover,
+.dark .driver-popover-footer-btn:focus {
+  background-color: var(--btn-hover);
+}
+
+.dark .driver-popover-arrow-side-left {
+  border-left-color: var(--background-white);
+}
+.dark .driver-popover-arrow-side-right {
+  border-right-color: var(--background-white);
+}
+.dark .driver-popover-arrow-side-top {
+  border-top-color: var(--background-white);
+}
+.dark .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--background-white);
+}
+
 /* Lists */
 ol,
 ul {

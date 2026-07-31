@@ -29,6 +29,7 @@ import {
   getTheme,
   saveTheme,
 } from "./stateManager.js";
+import { initTourGuide } from "./tourGuide.js";
 
 let today = new Date();
 
@@ -723,6 +724,8 @@ genikesHelp.addEventListener("click", () => {
 genikesClose.addEventListener("click", () => {
   genikesDialog.close();
 });
+// tour guide button / modal
+initTourGuide();
 //patch note button
 const patchDialog = document.getElementById("patch-dialog");
 const patchHelp = document.getElementById("patch-help");
