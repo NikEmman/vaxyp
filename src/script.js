@@ -1,5 +1,5 @@
 import ektheseis from "./ektheseis.js";
-import { dikografies, defaultAstynomikos } from "./defaultData.js";
+import { dikografies, defaultAstynomikos, defaultData } from "./defaultData.js";
 import { applyAllGrammar } from "./grammar.js";
 import {
   generateWord,
@@ -250,7 +250,7 @@ document
           localStorage.setItem("dataObject", JSON.stringify(result));
 
           // Update global variables
-          data = result;
+          data = { ...defaultData, ...result };
           state = getState(data, today);
 
           // Refresh UI
