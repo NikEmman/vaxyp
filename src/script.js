@@ -192,6 +192,7 @@ function constructInitialText() {
 
   const arthroAnakrA = sexA === "Γυναίκα" ? "της" : "του";
   const arthroAnakrB = sexB === "Γυναίκα" ? "της" : "του";
+  const paristameniB = sexB === "Γυναίκα" ? "παρισταμένης" : "παρισταμένου";
 
   return `${arthro} ${state.merosSyntaksisEkthesis} σήμερα την ${
     state.day
@@ -202,7 +203,7 @@ function constructInitialText() {
     state.timePassed,
   )} ενώπιον εμού, ${arthroAnakrA} ${anakritikosSelect.value} του ${
     data.ypiresia
-  }, παρισταμένου και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
+  }, ${paristameniB} και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
 }
 
 //  file uploader validation
@@ -1017,6 +1018,7 @@ thymaEndooik.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
+  state.autoforoTimeStart = state.timeStart;
   state.endoStartTime = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
@@ -1055,6 +1057,7 @@ const panicYes = document.getElementById("panicYes");
 panicYes.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
+  state.panicButton = "";
   state.timeStart = formatTime(today, state.timePassed);
   applyAllGrammar(state);
 
@@ -1065,6 +1068,7 @@ panicNo.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
+  state.panicButton = "δεν";
   applyAllGrammar(state);
 
   generateWord(ektheseis.panicButtonNo, state, state.victimData);
