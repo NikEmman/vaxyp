@@ -827,7 +827,9 @@ dialog h3 {
   flex-direction: column;
   gap: 0.8em;
   padding: 0;
+
   margin: 0;
+  margin-top: 0.5em;
 }
 
 .tour-item {
@@ -842,6 +844,10 @@ dialog h3 {
 
 .tour-play {
   flex-shrink: 0;
+}
+
+.tour-menu-popover.driver-popover {
+  max-width: 420px;
 }
 
 /* Driver.js popover: the library uses semantic <header>/<footer> tags for
