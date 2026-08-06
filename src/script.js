@@ -58,7 +58,7 @@ async function handleDocxUpload(event) {
     dataSource === "victimData" ? state.victimData : state.ypoptosData;
 
   if (!personData.surname) {
-    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. &cross;`;
+    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. ✗`;
     displayNotification(notificationText, true);
     return;
   }
@@ -93,12 +93,12 @@ async function handleDocxUpload(event) {
 
       state.timePassed += data.xronosPeratosis * 2;
 
-      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx &check;`;
+      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx ✓`;
       displayNotification(notificationText);
     } catch (error) {
       console.error("Error processing document:", error);
       displayNotification(
-        `Σφάλμα στο ${file.name}: ${error.message} &cross;`,
+        `Σφάλμα στο ${file.name}: ${error.message} ✗`,
         true,
       );
     }

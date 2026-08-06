@@ -322,21 +322,31 @@ footer a {
 /* Notifications styles */
 #notifications {
   position: fixed;
-  left: 40%;
+  left: 50%;
   top: 5%;
+  transform: translateX(-50%);
   z-index: 2112121;
 }
 .notification {
-  border-radius: 5px;
-  padding: 1em 0.5em;
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  border-radius: 8px;
+  padding: 0.75em 1em;
   width: 100%;
-  text-align: center;
-  background-color: var(--notification-bg);
-  color: var(--notification-color);
+  text-align: left;
+  background-color: #00d390;
+  color: #000000;
 }
-.alert {
-  background-color: var(--alert-bg);
-  color: var(--alert-color);
+.notification svg {
+  width: 1.5em;
+  height: 1.5em;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+.notification.alert {
+  background-color: #ff627d;
+  color: #000000;
 }
 .error {
   border: 1px dashed var(--error-color);

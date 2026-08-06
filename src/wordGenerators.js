@@ -1,6 +1,6 @@
 export async function generateWord(ekthesi, replacements, person) {
   if (!person.surname) {
-    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη. &cross;`;
+    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη. ✗`;
     displayNotification(notificationText, true);
     return;
   }
@@ -23,7 +23,7 @@ export async function generateWord(ekthesi, replacements, person) {
     a.href = url;
 
     const docTitle = `${ekthesi.title}-${person.surname}`;
-    const notificationText = `Κατέβηκε επιτυχώς η ${docTitle} &check;`;
+    const notificationText = `Κατέβηκε επιτυχώς η ${docTitle} ✓`;
     a.download = `${docTitle}.docx`;
     document.body.appendChild(a);
     a.click();
@@ -32,7 +32,10 @@ export async function generateWord(ekthesi, replacements, person) {
     displayNotification(notificationText);
   } catch (error) {
     console.error("Error generating Word document:", error);
-    alert("Error generating Word document: " + error.message);
+    displayNotification(
+      "Error generating Word document: " + error.message,
+      true,
+    );
   }
 }
 export async function processDocument(arrayBuffer, replacements) {
@@ -85,17 +88,33 @@ export function base64ToArrayBuffer(base64) {
 }
 
 //notifications display
+const SUCCESS_ICON_PATH = "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z";
+const ALERT_ICON_PATH = "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z";
+
 export function displayNotification(text, alert = false) {
   const notifications = document.getElementById("notifications");
   const newNotification = document.createElement("div");
   newNotification.classList.add("notification");
+  newNotification.setAttribute("role", "alert");
   if (alert) {
     newNotification.classList.add("alert");
   }
 
-  newNotification.innerHTML = text;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute("d", alert ? ALERT_ICON_PATH : SUCCESS_ICON_PATH);
+  svg.appendChild(path);
 
-  newNotification.innerHTML = text;
+  const textSpan = document.createElement("span");
+  textSpan.textContent = text;
+
+  newNotification.appendChild(svg);
+  newNotification.appendChild(textSpan);
 
   notifications.innerHTML = "";
   notifications.appendChild(newNotification);
