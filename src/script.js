@@ -56,12 +56,8 @@ async function handleDocxUpload(event) {
   const dataSource = document.getElementById("docx-replacement-source").value;
   const personData =
     dataSource === "victimData" ? state.victimData : state.ypoptosData;
-
-  if (!personData.surname) {
-    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. ✗`;
-    displayNotification(notificationText, true);
-    return;
-  }
+  const missingPerson = !personData.surname;
+  const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
   applyAllGrammar(state);
 
@@ -85,7 +81,7 @@ async function handleDocxUpload(event) {
       const a = document.createElement("a");
       a.href = url;
       const originalName = file.name.replace(".docx", "");
-      a.download = `${originalName}-${personData.surname}.docx`;
+      a.download = `${originalName}${surnameSuffix}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -93,15 +89,22 @@ async function handleDocxUpload(event) {
 
       state.timePassed += data.xronosPeratosis * 2;
 
-      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx ✓`;
+      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}${surnameSuffix}.docx`;
       displayNotification(notificationText);
     } catch (error) {
       console.error("Error processing document:", error);
       displayNotification(
-        `Σφάλμα στο ${file.name}: ${error.message} ✗`,
-        true,
+        `Σφάλμα στο ${file.name}: ${error.message}`,
+        "error",
       );
     }
+  }
+
+  if (missingPerson) {
+    const docText =
+      sortedFiles.length === 1 ? "Το έγγραφο κατέβηκε" : "Τα έγγραφα κατέβηκαν";
+    const notificationText = `Προσοχή: ${docText} χωρίς στοιχεία ${dataSource === "victimData" ? "παθόντα" : "δράστη"}.`;
+    displayNotification(notificationText, "warning");
   }
 
   event.target.value = "";
@@ -555,7 +558,7 @@ deleteBtn.addEventListener("click", () => {
 
     displayNotification("Ο αστυνομικός διαγράφηκε.");
   } else {
-    displayNotification("Παρακαλώ επιλέξτε έναν αστυνομικό πρώτα.", true);
+    displayNotification("Παρακαλώ επιλέξτε έναν αστυνομικό πρώτα.", "error");
   }
 });
 
@@ -659,7 +662,7 @@ suspectDelBtn.addEventListener("click", () => {
 
     displayNotification("Ο δράστης διαγράφηκε.");
   } else {
-    displayNotification("Παρακαλώ επιλέξτε έναν δράστη πρώτα.", true);
+    displayNotification("Παρακαλώ επιλέξτε έναν δράστη πρώτα.", "error");
   }
 });
 

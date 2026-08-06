@@ -344,9 +344,11 @@ footer a {
   flex-shrink: 0;
   stroke: currentColor;
 }
-.notification.alert {
+.notification.notification-error {
   background-color: #ff627d;
-  color: #000000;
+}
+.notification.notification-warning {
+  background-color: #fcb700;
 }
 .error {
   border: 1px dashed var(--error-color);
