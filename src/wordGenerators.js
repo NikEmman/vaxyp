@@ -1,7 +1,7 @@
 export async function generateWord(ekthesi, replacements, person) {
   if (!person.surname) {
-    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη. &cross;`;
-    displayNotification(notificationText, true);
+    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη.`;
+    displayNotification(notificationText, "error");
     return;
   }
 
@@ -23,7 +23,7 @@ export async function generateWord(ekthesi, replacements, person) {
     a.href = url;
 
     const docTitle = `${ekthesi.title}-${person.surname}`;
-    const notificationText = `Κατέβηκε επιτυχώς η ${docTitle} &check;`;
+    const notificationText = `Κατέβηκε επιτυχώς η ${docTitle}`;
     a.download = `${docTitle}.docx`;
     document.body.appendChild(a);
     a.click();
@@ -32,7 +32,10 @@ export async function generateWord(ekthesi, replacements, person) {
     displayNotification(notificationText);
   } catch (error) {
     console.error("Error generating Word document:", error);
-    alert("Error generating Word document: " + error.message);
+    displayNotification(
+      "Error generating Word document: " + error.message,
+      "error",
+    );
   }
 }
 export async function processDocument(arrayBuffer, replacements) {
@@ -85,17 +88,41 @@ export function base64ToArrayBuffer(base64) {
 }
 
 //notifications display
-export function displayNotification(text, alert = false) {
+const NOTIFICATION_ICON_PATHS = {
+  success: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+  error:
+    "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z",
+  warning:
+    "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
+};
+
+export function displayNotification(text, type = "success") {
   const notifications = document.getElementById("notifications");
   const newNotification = document.createElement("div");
   newNotification.classList.add("notification");
-  if (alert) {
-    newNotification.classList.add("alert");
+  newNotification.setAttribute("role", "alert");
+  if (type !== "success") {
+    newNotification.classList.add(`notification-${type}`);
   }
 
-  newNotification.innerHTML = text;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute(
+    "d",
+    NOTIFICATION_ICON_PATHS[type] || NOTIFICATION_ICON_PATHS.success,
+  );
+  svg.appendChild(path);
 
-  newNotification.innerHTML = text;
+  const textSpan = document.createElement("span");
+  textSpan.textContent = text;
+
+  newNotification.appendChild(svg);
+  newNotification.appendChild(textSpan);
 
   notifications.innerHTML = "";
   notifications.appendChild(newNotification);

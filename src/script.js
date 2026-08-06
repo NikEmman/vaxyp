@@ -1,5 +1,5 @@
 import ektheseis from "./ektheseis.js";
-import { dikografies, defaultAstynomikos } from "./defaultData.js";
+import { dikografies, defaultAstynomikos, defaultData } from "./defaultData.js";
 import { applyAllGrammar } from "./grammar.js";
 import {
   generateWord,
@@ -57,12 +57,8 @@ async function handleDocxUpload(event) {
   const dataSource = document.getElementById("docx-replacement-source").value;
   const personData =
     dataSource === "victimData" ? state.victimData : state.ypoptosData;
-
-  if (!personData.surname) {
-    const notificationText = `Σφάλμα: Ελέγξτε το πεδίο ${dataSource === "victimData" ? "παθόντα" : "δράστη"}. &cross;`;
-    displayNotification(notificationText, true);
-    return;
-  }
+  const missingPerson = !personData.surname;
+  const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
   applyAllGrammar(state);
 
@@ -86,7 +82,7 @@ async function handleDocxUpload(event) {
       const a = document.createElement("a");
       a.href = url;
       const originalName = file.name.replace(".docx", "");
-      a.download = `${originalName}-${personData.surname}.docx`;
+      a.download = `${originalName}${surnameSuffix}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -94,15 +90,22 @@ async function handleDocxUpload(event) {
 
       state.timePassed += data.xronosPeratosis * 2;
 
-      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}-${personData.surname}.docx &check;`;
+      const notificationText = `Κατέβηκε επιτυχώς το ${originalName}${surnameSuffix}.docx`;
       displayNotification(notificationText);
     } catch (error) {
       console.error("Error processing document:", error);
       displayNotification(
-        `Σφάλμα στο ${file.name}: ${error.message} &cross;`,
-        true,
+        `Σφάλμα στο ${file.name}: ${error.message}`,
+        "error",
       );
     }
+  }
+
+  if (missingPerson) {
+    const docText =
+      sortedFiles.length === 1 ? "Το έγγραφο κατέβηκε" : "Τα έγγραφα κατέβηκαν";
+    const notificationText = `Προσοχή: ${docText} χωρίς στοιχεία ${dataSource === "victimData" ? "παθόντα" : "δράστη"}.`;
+    displayNotification(notificationText, "warning");
   }
 
   event.target.value = "";
@@ -193,6 +196,7 @@ function constructInitialText() {
 
   const arthroAnakrA = sexA === "Γυναίκα" ? "της" : "του";
   const arthroAnakrB = sexB === "Γυναίκα" ? "της" : "του";
+  const paristameniB = sexB === "Γυναίκα" ? "παρισταμένης" : "παρισταμένου";
 
   return `${arthro} ${state.merosSyntaksisEkthesis} σήμερα την ${
     state.day
@@ -203,7 +207,7 @@ function constructInitialText() {
     state.timePassed,
   )} ενώπιον εμού, ${arthroAnakrA} ${anakritikosSelect.value} του ${
     data.ypiresia
-  }, παρισταμένου και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
+  }, ${paristameniB} και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
 }
 
 //  file uploader validation
@@ -251,7 +255,7 @@ document
           localStorage.setItem("dataObject", JSON.stringify(result));
 
           // Update global variables
-          data = result;
+          data = { ...defaultData, ...result };
           state = getState(data, today);
 
           // Refresh UI
@@ -555,7 +559,7 @@ deleteBtn.addEventListener("click", () => {
 
     displayNotification("Ο αστυνομικός διαγράφηκε.");
   } else {
-    displayNotification("Παρακαλώ επιλέξτε έναν αστυνομικό πρώτα.", true);
+    displayNotification("Παρακαλώ επιλέξτε έναν αστυνομικό πρώτα.", "error");
   }
 });
 
@@ -659,7 +663,7 @@ suspectDelBtn.addEventListener("click", () => {
 
     displayNotification("Ο δράστης διαγράφηκε.");
   } else {
-    displayNotification("Παρακαλώ επιλέξτε έναν δράστη πρώτα.", true);
+    displayNotification("Παρακαλώ επιλέξτε έναν δράστη πρώτα.", "error");
   }
 });
 
@@ -1020,6 +1024,7 @@ thymaEndooik.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
+  state.autoforoTimeStart = state.timeStart;
   state.endoStartTime = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
@@ -1058,6 +1063,7 @@ const panicYes = document.getElementById("panicYes");
 panicYes.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
+  state.panicButton = "";
   state.timeStart = formatTime(today, state.timePassed);
   applyAllGrammar(state);
 
@@ -1068,6 +1074,7 @@ panicNo.addEventListener("click", () => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
+  state.panicButton = "δεν";
   applyAllGrammar(state);
 
   generateWord(ektheseis.panicButtonNo, state, state.victimData);
