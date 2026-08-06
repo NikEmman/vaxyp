@@ -67,3 +67,13 @@ export const getTheme = () => {
 export const saveTheme = (theme) => {
   localStorage.setItem("vaxyp-theme", theme);
 };
+
+export function getPendingTour() {
+  return sessionStorage.getItem("vaxyp-pending-tour");
+}
+export function setPendingTour(key) {
+  sessionStorage.setItem("vaxyp-pending-tour", key);
+}
+export function clearPendingTour() {
+  sessionStorage.removeItem("vaxyp-pending-tour");
+}

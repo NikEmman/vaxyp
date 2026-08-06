@@ -1,3 +1,5 @@
+import { setPendingTour, clearPendingTour } from "./stateManager.js";
+
 const { driver } = window.driver.js;
 
 function activateTab(name) {
@@ -12,35 +14,41 @@ const guides = {
     label: "Ξεκινήστε εδώ",
     steps: [
       {
-        element: ".fileUploader",
+        element: ".fileUploader a",
         popover: {
-          title: "Στοιχεία χρήστη",
+          title: "Καταχώρηση στοιχείων υπηρεσίας",
           description:
-            "Αν έχετε ήδη δημιουργήσει το αρχείο data.json παλαιότερα, ανεβάστε το εδώ. Αλλιώς πατήστε στο 'Φόρμα' για να καταχωρήσετε τα στοιχεία σας για πρώτη φορά.",
+            "Πατήστε στο επισημασμένο «Φόρμα» για να καταχωρήσετε τα στοιχεία της υπηρεσίας σας.",
+          showButtons: ["close"],
         },
       },
       {
-        element: ".top .anakritikoi",
+        page: "form",
+        element: "#anakritikoiSection",
         popover: {
-          title: "Ανακριτικοί υπάλληλοι",
+          title: "Ανακριτικοί Υπάλληλοι",
           description:
-            "Επιλέξτε τον Α' και Β' Ανακριτικό Υπάλληλο που θα εμφανίζονται στις Εκθέσεις σας.",
+            "Προσθέστε εδώ τα στοιχεία των ανακριτικών σας υπαλλήλων, στη γενική και στην ονομαστική, όπως φαίνεται στα υποδείγματα των πεδίων. Προσθέστε ή αφαιρέστε ανακριτικούς με τα αντίστοιχα κουμπιά.",
+          side: "right",
+          align: "start",
         },
       },
       {
-        element: ".tabs",
+        page: "form",
+        element: ".fields",
         popover: {
-          title: "Καρτέλες",
+          title: "Στοιχεία Υπηρεσίας",
           description:
-            "Από εδώ πλοηγηθείτε στις καρτέλες: Μετατροπέας ατόμων, Μετατροπέας οχημάτων, Εκθέσεις και Ταυτότητες / Απώλειες.",
+            "Συμπληρώστε τα στοιχεία της υπηρεσίας σας. Όταν ολοκληρώσετε, πατήστε «Αποθήκευση» για να αποθηκευτούν τα δεδομένα σας τοπικά. Θα κατέβει επίσης ένα αρχείο «data.json», φυλάξτε το ως αντίγραφο ασφαλείας.",
         },
       },
       {
-        element: "#taytotita",
+        page: "form",
+        element: "header a",
         popover: {
-          title: "Επικόλληση στοιχείων",
+          title: "Ολοκληρώθηκε!",
           description:
-            "Αντιγράψτε το κείμενο του Δελτίου Ταυτότητας από την εφαρμογή POL και επικολλήστε το εδώ.",
+            "Έτοιμοι! Επιστρέψτε στην αρχική σελίδα για να δημιουργήσετε την πρώτη σας Έκθεση.",
         },
       },
     ],
@@ -116,17 +124,44 @@ const guides = {
   },
 };
 
-function startGuide(key) {
+export function startGuide(key, page = "index") {
   const guide = guides[key];
   if (!guide) return;
 
-  driver({
+  const pages = [...new Set(guide.steps.map((s) => s.page || "index"))];
+  const isMultiPage = pages.length > 1;
+  const isLastPage = pages[pages.length - 1] === page;
+
+  const pageSteps = guide.steps.filter((s) => (s.page || "index") === page);
+  if (!pageSteps.length) return;
+
+  const steps = isMultiPage
+    ? pageSteps.map((step) => ({
+        ...step,
+        popover: {
+          ...step.popover,
+          progressText: `${guide.steps.indexOf(step) + 1} από ${guide.steps.length}`,
+        },
+      }))
+    : pageSteps;
+
+  if (isMultiPage) {
+    if (!isLastPage) setPendingTour(key);
+    else clearPendingTour();
+  }
+
+  const tourDriver = driver({
     showProgress: true,
     nextBtnText: "Επόμενο",
     prevBtnText: "Προηγούμενο",
     doneBtnText: "Τέλος",
-    steps: guide.steps,
-  }).drive();
+    steps,
+    onDestroyStarted: () => {
+      if (isMultiPage && !isLastPage) clearPendingTour();
+      tourDriver.destroy();
+    },
+  });
+  tourDriver.drive();
 }
 
 function startMasterMenu() {

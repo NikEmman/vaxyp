@@ -1,3 +1,6 @@
+import { startGuide } from "./tourGuide.js";
+import { getPendingTour, clearPendingTour } from "./stateManager.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const getTheme = () => {
     const stored = localStorage.getItem("vaxyp-theme");
@@ -46,6 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   initTheme();
+
+  const pendingTour = getPendingTour();
+  if (pendingTour) {
+    clearPendingTour();
+    startGuide(pendingTour, "form");
+  }
 
   // Check if localStorage dataObject exists and populate form fields
   const savedData = localStorage.getItem("dataObject");

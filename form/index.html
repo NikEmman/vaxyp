@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="../style.css" />
-    <script defer src="../src/userDataScript.js"></script>
+    <link rel="stylesheet" href="../libs/driver/driver.css" />
+    <script src="../libs/driver/driver.js.iife.js"></script>
+    <script defer type="module" src="../src/userDataScript.js"></script>
     <title>Στοιχεία χρήστη</title>
   </head>
   <body>
@@ -19,7 +21,7 @@
     </header>
     <h2>Συμπληρώστε τη φόρμα με τα τοπικά σας δεδομένα</h2>
     <form id="dataForm" class="dataForm">
-      <div>
+      <div id="anakritikoiSection">
         <div id="anakritikoiList">
           <div class="anakritikoi-row" data-index="0">
             <span class="row-label">Ανακριτικός #1</span>
