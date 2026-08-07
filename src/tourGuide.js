@@ -9,9 +9,22 @@ function activateTab(name) {
   }
 }
 
+function openPersonHelp() {
+  const dialog = document.getElementById("person-dialog");
+  // Use show() instead of the app's own showModal() click handler: a
+  // modal dialog is promoted to the browser's top layer, which always
+  // paints above driver.js's overlay/popover no matter their z-index.
+  if (dialog && !dialog.open) dialog.show();
+}
+
+function closePersonHelp() {
+  const dialog = document.getElementById("person-dialog");
+  if (dialog && dialog.open) dialog.close();
+}
+
 const guides = {
   getStarted: {
-    label: "Ξεκινήστε εδώ",
+    label: "Ξεκινώντας",
     steps: [
       {
         element: ".fileUploader a",
@@ -53,6 +66,87 @@ const guides = {
       },
     ],
   },
+  firstReport: {
+    label: "Φτιάξτε την πρώτη σας έκθεση",
+    steps: [
+      {
+        element: ".top",
+        popover: {
+          title: "1. Ανακριτικοί Υπάλληλοι",
+          description:
+            "Επιλέξτε τον Α' και τον Β' ανακριτικό υπάλληλο. Αν δεν έχετε προσθέσει ακόμα ανακριτικούς, δείτε πρώτα τον οδηγό 'Ξεκινώντας'.",
+        },
+      },
+      {
+        element: '[data-tour-tab="persons"]',
+        popover: {
+          title: "2. Μετατροπέας ατόμων",
+          description:
+            "Έπειτα μεταβείτε στην καρτέλα 'Μετατροπέας ατόμων' για να μορφοποιήσετε τα στοιχεία του παθόντα ή του δράστη.",
+        },
+        onHighlightStarted: () => activateTab("persons"),
+      },
+      {
+        element: "#person-dialog img",
+        popover: {
+          title: "3. Αντιγραφή στοιχείων από POL",
+          description:
+            "Aντιγράψτε τα στοιχεία του ατόμου από την εφαρμογή Ταυτότητες του POL, όπως δείχνει η εικόνα.",
+        },
+        onHighlightStarted: () => openPersonHelp(),
+      },
+      {
+        element: "#taytotita",
+        popover: {
+          title: "4. Επικόλληση στοιχείων",
+          description:
+            "Eπικολλήστε (Ctrl+V) τα στοιχεία που αντιγράψατε σε αυτό το πεδίο για παθόντα, ή πιο στο πιο κάτω αντιστοιχο πεδίο για δράστη/κατηγορούμενο.",
+        },
+        onHighlightStarted: () => closePersonHelp(),
+      },
+      {
+        element: ".clipboard-id.output",
+        popover: {
+          title: "5. Μορφοποιημένο αποτέλεσμα",
+          description:
+            "Τα στοιχεία του ατόμου θα μορφοποιηθούν αυτόματα σε μορφή κατάλληλη για τις Εκθέσεις.",
+        },
+      },
+      {
+        element: ".clipboard-id.output",
+        popover: {
+          title: "6. Επεξεργάσιμο κείμενο",
+          description:
+            "Μπορείτε να επεξεργαστείτε ελεύθερα το κείμενο εξόδου. Η τελική, επεξεργασμένη έκδοση είναι αυτή που θα περάσει στις αντίστοιχες Εκθέσεις.",
+        },
+      },
+      {
+        element: ".personsTab .anakritikoi",
+        popover: {
+          title: "7. Άτομο εκτός POL",
+          description:
+            "Αν το άτομο δεν βρίσκεται στο POL (π.χ. αλλοδαπός υπήκοος), αλλάξτε την επιλογή σε 'Όχι' για να καταχωρήσετε τα στοιχεία του χειροκίνητα.",
+        },
+      },
+      {
+        element: '[data-tour-tab="reports"]',
+        popover: {
+          title: "8. Καρτέλα Εκθέσεις",
+          description:
+            "Στη συνέχεια μεταβείτε στην καρτέλα 'Εκθέσεις' για να δημιουργήσετε τα έγγραφα της υπόθεσής σας.",
+        },
+      },
+      {
+        element: ".ektheseisTab .buttons p.helpBtn:first-child",
+        popover: {
+          title: "9. Λήψη Έκθεσης",
+          description:
+            "Πατήστε σε ένα κουμπί για να κατεβάσετε την αντίστοιχη Έκθεση. Η ώρα έναρξης και λήξης της επόμενης Έκθεσης θα προχωράει αυτόματα μετά από κάθε λήψη.",
+        },
+        onHighlightStarted: () => activateTab("reports"),
+      },
+    ],
+  },
   importOldData: {
     label: "Πώς να εισάγετε παλιά δεδομένα",
     steps: [
@@ -79,46 +173,6 @@ const guides = {
           description:
             "Αν δεν έχετε πλέον το data.json, πατήστε 'Φόρμα' για να καταχωρήσετε τα στοιχεία σας ξανά και να δημιουργηθεί νέο.",
         },
-      },
-    ],
-  },
-  firstReport: {
-    label: "Φτιάξτε την πρώτη σας έκθεση",
-    steps: [
-      {
-        element: '[data-tour-tab="persons"]',
-        popover: {
-          title: "1. Μορφοποιήστε τα στοιχεία",
-          description:
-            "Πρώτα μεταβείτε στην καρτέλα 'Μετατροπέας ατόμων' και μορφοποιήστε τα στοιχεία του παθόντα ή του δράστη.",
-        },
-        onHighlightStarted: () => activateTab("persons"),
-      },
-      {
-        element: '[data-tour-tab="reports"]',
-        popover: {
-          title: "2. Καρτέλα Εκθέσεις",
-          description: "Έπειτα πηγαίνετε στην καρτέλα 'Εκθέσεις'.",
-        },
-        onHighlightStarted: () => activateTab("reports"),
-      },
-      {
-        element: "#dikografies",
-        popover: {
-          title: "3. Επιλέξτε δικογραφία",
-          description:
-            "Επιλέξτε τον τύπο δικογραφίας που αφορά την υπόθεσή σας.",
-        },
-        onHighlightStarted: () => activateTab("reports"),
-      },
-      {
-        element: ".ektheseisTab .buttons",
-        popover: {
-          title: "4. Κατεβάστε την Έκθεση",
-          description:
-            "Ανάλογα με την επιλογή σας, θα εμφανιστούν κουμπιά για λήψη των αντίστοιχων Εκθέσεων / Εγγράφων, προ-συμπληρωμένων με τα στοιχεία σας.",
-        },
-        onHighlightStarted: () => activateTab("reports"),
       },
     ],
   },
