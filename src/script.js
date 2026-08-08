@@ -45,6 +45,14 @@ function readFileAsArrayBuffer(file) {
   });
 }
 
+function isArrestDocument(fileName) {
+  const normalized = fileName
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // strip combining diacritics (e.g. tonos)
+  return normalized.includes("συλληψ");
+}
+
 async function handleDocxUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
@@ -57,6 +65,7 @@ async function handleDocxUpload(event) {
   const dataSource = document.getElementById("docx-replacement-source").value;
   const personData =
     dataSource === "victimData" ? state.victimData : state.ypoptosData;
+  Object.assign(state, { ...personData });
   const missingPerson = !personData.surname;
   const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
@@ -70,6 +79,9 @@ async function handleDocxUpload(event) {
         today,
         data.xronosPeratosis + state.timePassed,
       );
+      if (isArrestDocument(file.name)) {
+        state.arrestTime = formatTime(today, state.timePassed - 5);
+      }
 
       const arrayBuffer = await readFileAsArrayBuffer(file);
 
