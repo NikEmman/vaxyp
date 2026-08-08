@@ -22,9 +22,29 @@ function closePersonHelp() {
   if (dialog && dialog.open) dialog.close();
 }
 
+function openDocxHelp() {
+  const dialog = document.getElementById("docx-dialog");
+  if (dialog && !dialog.open) dialog.show();
+}
+
+function closeDocxHelp() {
+  const dialog = document.getElementById("docx-dialog");
+  if (dialog && dialog.open) dialog.close();
+}
+
+function openKeywordsHelp() {
+  const dialog = document.getElementById("keywords-dialog");
+  if (dialog && !dialog.open) dialog.show();
+}
+
+function closeKeywordsHelp() {
+  const dialog = document.getElementById("keywords-dialog");
+  if (dialog && dialog.open) dialog.close();
+}
+
 const guides = {
   getStarted: {
-    label: "Ξεκινώντας",
+    label: "Αρχική καταχώρηση στοιχείων",
     steps: [
       {
         element: ".fileUploader a",
@@ -148,7 +168,7 @@ const guides = {
     ],
   },
   importOldData: {
-    label: "Πώς να εισάγετε παλιά δεδομένα",
+    label: "Πώς να εισάγετε παλιά στοιχεία",
     steps: [
       {
         element: ".fileUploader",
@@ -172,6 +192,168 @@ const guides = {
           title: "Δεν έχετε το αρχείο;",
           description:
             "Αν δεν έχετε πλέον το data.json, πατήστε 'Φόρμα' για να καταχωρήσετε τα στοιχεία σας ξανά και να δημιουργηθεί νέο.",
+        },
+      },
+    ],
+  },
+  addOfficer: {
+    label: "Πώς να προσθέσετε αστυνομικό",
+    steps: [
+      {
+        element: '[data-tour-tab="persons"]',
+        popover: {
+          title: "1. Μετατροπέας ατόμων",
+          description:
+            "Μεταβείτε στην καρτέλα 'Μετατροπέας ατόμων', εκεί θα βρείτε την ενότητα 'Αστυνομικός'.",
+        },
+        onHighlightStarted: () => activateTab("persons"),
+      },
+      {
+        element: "#astynomikoi",
+        popover: {
+          title: "2. Νέος Αστυνομικός",
+          description:
+            "Από το μενού επιλέξτε 'Νέος Αστυνομικός' για να καταχωρίσετε έναν καινούργιο.",
+        },
+      },
+      {
+        element: ".clipboard-id-astynomikos",
+        popover: {
+          title: "3. Στοιχεία αστυνομικού",
+          description:
+            "Επεξεργαστείτε το κείμενο ή κάντε επικόλληση το δικό σας.",
+        },
+      },
+      {
+        element: ".clipboard-id-astynomikos",
+        popover: {
+          title: "4. Προσοχή στη σειρά",
+          description:
+            "<strong>ΠΡΟΣΟΧΗ:</strong> Η πρώτη λέξη πρέπει να είναι ο βαθμός, η δεύτερη το επίθετο, η τρίτη το όνομα, και μετά ό,τι άλλο θέλετε.",
+        },
+      },
+      {
+        element: ".clipboard-id-astynomikos",
+        popover: {
+          title: "5. Πού χρησιμοποιείται",
+          description:
+            "Το κείμενο αυτό θα περάσει, με λίγες τροποποιήσεις ανάλογα το έγγραφο, στις μαρτυρικές αστυνομικών, στις εκθέσεις σύλληψης, και παράδοσης/κατάσχεσης.",
+        },
+      },
+      {
+        element: ".save-astynomikos",
+        popover: {
+          title: "6. Αποθήκευση",
+          description:
+            "Πατήστε 'Προσθήκη' αν θέλετε να κρατήσετε τα στοιχεία των αστυνομικών στο browser για μελλοντική χρήση.",
+        },
+      },
+      {
+        element: ".fileUploader a",
+        popover: {
+          title: "7. Backup",
+          description:
+            "Για να κρατήσετε τους αστυνομικούς σας στο backup αρχείο data.json πλοηγηθήτε στη Φόρμα και πατήστε 'Αποθήκευση'.",
+        },
+      },
+      {
+        element: "#astynomikoi",
+        popover: {
+          title: "8. Αποθηκευμένοι αστυνομικοί",
+          description:
+            "Από το μενού μπορείτε να επιλέξετε έναν από τους ήδη αποθηκευμένους αστυνομικούς.",
+        },
+      },
+      {
+        element: "#astynomikos-delete",
+        popover: {
+          title: "9. Διαγραφή",
+          description:
+            "Εάν θέλετε να διαγράψετε κάποιον, επιλέξτε τον από το μενού και πατήστε 'Διαγραφή'.",
+        },
+      },
+    ],
+  },
+  customTemplates: {
+    label: "Χρήση δικών σας templates (.docx)",
+    steps: [
+      {
+        element: '[data-tour-tab="reports"]',
+        popover: {
+          title: "1. Καρτέλα Εκθέσεις",
+          description:
+            "Μεταβείτε στην καρτέλα 'Εκθέσεις'. Στο κάτω μέρος θα βρείτε την ενότητα 'Με templates χρήστη'.",
+        },
+        onHighlightStarted: () => activateTab("reports"),
+      },
+      {
+        element: "#docx-replacement-source",
+        popover: {
+          title: "2. Παθών ή Δράστης",
+          description:
+            "Επιλέξτε Παθών ή Δράστης: καθορίζει ποιανού τα στοιχεία (επώνυμο, όνομα, κ.λπ.) θα χρησιμοποιηθούν στις λέξεις κλειδιά, καθώς και το όνομα που θα μπει στον τίτλο του αρχείου.",
+        },
+      },
+      {
+        element: "#docx-file-input",
+        popover: {
+          title: "3. Λέξεις κλειδιά",
+          description:
+            "Σε κάθε αρχείο το πρόγραμμα θα αντικαταστήσει λέξεις κλειδιά μέσα σε αγκύλες {}, π.χ. {victim} με το πλήρες μορφοποιημένο κείμενο, ή {surname} με το επώνυμο του επιλεγμένου παραπάνω ατόμου. <strong>ΠΡΟΣΟΧΗ:</strong> Κάθε λέξη κλειδί, μαζί με τις αγκύλες, πρέπει να είναι γραμμένη στα Αγγλικά, αλλιώς δεν θα αντικατασταθεί.",
+        },
+      },
+      {
+        element: "#keywords-dialog table",
+        popover: {
+          title: "4. Λίστα λέξεων κλειδιών",
+          description:
+            "Εδώ θα βρείτε όλες τις διαθέσιμες λέξεις κλειδιά, όπως {victim}, {suspect}, {timeStart}, {timeEnd} κ.ά. Ανοίξτε ξανά αυτή τη λίστα όποτε χρειαστεί από το εικονίδιο (?) δίπλα στα αρχεία .docx.",
+        },
+        onHighlightStarted: () => openKeywordsHelp(),
+      },
+      {
+        element: "#download-martyra-sample",
+        popover: {
+          title: "5. Δείγματα προτύπων",
+          description:
+            "Κατεβάστε τα δύο δείγματα (templates) για να δείτε τι πρέπει να αλλάξετε ώστε να φτιάξετε τα δικά σας.",
+        },
+        onHighlightStarted: () => {
+          closeKeywordsHelp();
+          openDocxHelp();
+        },
+      },
+      {
+        element: "#docx-file-input",
+        popover: {
+          title: "6. Ονομασία & επιλογή αρχείων",
+          description:
+            "Ονομάστε τα αρχεία σας με αριθμούς για σωστή σειρά επεξεργασίας (π.χ. 1-Μάρτυρας, 2-Σύλληψη ...κτλ), και επιλέξτε εδώ τα .docx αρχεία που θέλετε να επεξεργαστείτε.",
+        },
+        onHighlightStarted: () => closeDocxHelp(),
+      },
+      {
+        element: "#docx-file-input",
+        popover: {
+          title: "7. Αυτόματη συμπλήρωση & αθροιστικός χρόνος",
+          description:
+            "Τα αρχεία θα συμπληρωθούν αυτόματα με τα στοιχεία και τους χρόνους, και θα κατέβουν στον υπολογιστή σας. Οι χρόνοι υπολογίζονται αθροιστικά· κάθε έγγραφο προσθέτει στην ώρα έναρξης/λήξης του επόμενου το διπλάσιο του «Χρόνου Περάτωσης» που έχετε ορίσει στη Φόρμα (προεπιλογή 10 λεπτά, δηλαδή +20 λεπτά).",
+        },
+      },
+      {
+        element: "#docx-file-input",
+        popover: {
+          title: "8. Ώρα σύλληψης",
+          description:
+            "Αν κάποιο αρχείο έχει 'Σύλληψη' στο όνομά του, υπολογίζεται αυτόματα η {arrestTime}, 5 λεπτά πριν την ώρα έναρξης εκείνου του αρχείου, και είναι διαθέσιμη και στα επόμενα έγγραφα της ίδιας επεξεργασίας.",
+        },
+      },
+      {
+        element: "#docx-file-input",
+        popover: {
+          title: "9. Λείπουν στοιχεία;",
+          description:
+            "Αν δεν έχετε ακόμα καταχωρήσει τον παθόντα ή τον δράστη, το αρχείο θα κατέβει κανονικά, με μια προειδοποίηση ότι λείπουν τα στοιχεία — δεν μπλοκάρεται πλέον η λήψη.",
         },
       },
     ],
