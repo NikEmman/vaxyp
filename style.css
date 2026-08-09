@@ -427,6 +427,10 @@ select {
   display: flex;
   gap: 20px;
 }
+.docx-samples {
+  display: flex;
+  gap: 10px;
+}
 /* Data Containers */
 .flex {
   display: flex;
