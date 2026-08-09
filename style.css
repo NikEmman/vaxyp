@@ -173,14 +173,6 @@ footer {
 footer span {
   font-weight: 800;
 }
-footer a {
-  text-decoration: none;
-  background-color: var(--secondary-blue);
-  color: var(--text-light);
-  padding-left: 3px;
-  padding-right: 3px;
-  border-radius: 3px;
-}
 .donate-fab {
   display: flex;
   align-items: center;
@@ -289,6 +281,16 @@ footer a {
   .donate-fab svg {
     width: 20px;
     height: 20px;
+  }
+  body {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+  .navButtons {
+    gap: 8px;
+  }
+  footer {
+    margin: 0;
   }
 }
 /* File Uploader Section */
@@ -1282,15 +1284,8 @@ hr {
   background: rgba(44, 67, 100, 0.25);
   border-color: rgba(18, 24, 34, 0.5);
 }
-@media (max-width: 480px) {
-  body {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-  }
+@media (max-width: 680px) {
   .navButtons {
-    gap: 8px;
-  }
-  footer {
-    margin: 0;
+    flex-wrap: wrap;
   }
 }

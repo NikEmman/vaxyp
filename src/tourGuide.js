@@ -373,7 +373,7 @@ const guides = {
         },
       },
       {
-        element: "footer",
+        element: '.navButtons a[href="https://astynomoi.github.io/astynomika/"]',
         popover: {
           title: "3. Νομοθεσία για αστυνομικούς",
           description:
@@ -381,7 +381,7 @@ const guides = {
         },
       },
       {
-        element: "footer",
+        element: '.navButtons a[href="https://astynomoi.github.io/astynomika/"]',
         popover: {
           title: "4. Ευρετήριο αναζήτησης",
           description:
