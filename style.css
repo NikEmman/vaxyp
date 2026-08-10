@@ -311,16 +311,6 @@ footer span {
   margin-top: 0.5em;
   color: var(--label-color);
 }
-
-.fileUploader a {
-  color: var(--primary-blue);
-  text-decoration: none;
-  font-weight: 900;
-}
-
-.fileUploader a:hover {
-  text-decoration: underline;
-}
 /* Notifications styles */
 #notifications {
   position: fixed;

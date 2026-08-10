@@ -56,29 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
     startGuide(pendingTour, "form");
   }
 
-  // Check if localStorage dataObject exists and populate form fields
-  const savedData = localStorage.getItem("dataObject");
-  if (savedData) {
-    const data = JSON.parse(savedData);
-
-    // Populate inputs with stored data
+  // Populate form fields from a data object, replacing any existing rows
+  function populateForm(data) {
+    document.getElementById("anakritikoiList").innerHTML = "";
     data.anakritikoi.forEach((value, index) => {
       const sexValue =
         data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
-
-      if (index === 0) {
-        document.querySelector("input[name='anakritikoi[]']").value =
-          data.anakritikoi[0] || "";
-        document.querySelector("input[name='anakritikoiEnikos[]']").value =
-          data.anakritikoiEnikos[0] || "";
-        document.querySelector("select[name='anakrSex[]']").value = sexValue;
-      } else {
-        addAnakritikoi(
-          value,
-          data.anakritikoiEnikos[index],
-          sexValue,
-        );
-      }
+      addAnakritikoi(value, data.anakritikoiEnikos[index], sexValue);
     });
 
     document.getElementById("ypiresia").value = data.ypiresia || "";
@@ -99,6 +83,51 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("email").value = data.email || "";
     document.getElementById("amy").value = data.amy || "";
   }
+
+  // Check if localStorage dataObject exists and populate form fields
+  const savedData = localStorage.getItem("dataObject");
+  if (savedData) {
+    populateForm(JSON.parse(savedData));
+  }
+
+  // Upload an existing data.json backup to populate the form
+  document.getElementById("localData").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== "application/json") {
+      alert("Επιτρέπονται μόνο αρχεία JSON!");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = JSON.parse(e.target.result);
+
+        const hasOfficers =
+          result.anakritikoi &&
+          Array.isArray(result.anakritikoi) &&
+          result.anakritikoi.length > 0;
+        const hasService = !!result.ypiresia;
+
+        if (!hasOfficers || !hasService) {
+          alert(
+            "Σφάλμα: Το αρχείο JSON δεν περιέχει τα απαραίτητα δεδομένα (π.χ. Ανακριτικοί υπάλληλοι).",
+          );
+          return;
+        }
+
+        localStorage.setItem("dataObject", JSON.stringify(result));
+        populateForm(result);
+      } catch (error) {
+        console.error("Parsing Error:", error);
+        alert("Το αρχείο δεν είναι έγκυρο JSON.");
+      }
+    };
+    reader.readAsText(file);
+  });
 
   function updateRowLabels() {
     const rows = document.querySelectorAll(".anakritikoi-row");

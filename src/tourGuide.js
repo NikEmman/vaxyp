@@ -43,7 +43,7 @@ function closeKeywordsHelp() {
 }
 
 function clickFormLink() {
-  document.querySelector(".fileUploader a")?.click();
+  document.querySelector('.navButtons a[href="form/"]')?.click();
 }
 
 const guides = {
@@ -51,7 +51,7 @@ const guides = {
     label: "Αρχική καταχώρηση στοιχείων",
     steps: [
       {
-        element: ".fileUploader a",
+        element: '.navButtons a[href="form/"]',
         popover: {
           title: "Καταχώρηση στοιχείων υπηρεσίας",
           description:
@@ -177,27 +177,32 @@ const guides = {
     label: "Πώς να εισάγετε παλιά στοιχεία",
     steps: [
       {
-        element: ".fileUploader",
+        element: '.navButtons a[href="form/"]',
         popover: {
           title: "Ανέβασμα παλιών δεδομένων",
           description:
-            "Αν έχετε ξαναχρησιμοποιήσει την εφαρμογή και έχετε αποθηκευμένο το αρχείο data.json, ανεβάστε το εδώ για να φορτωθούν αυτόματα τα στοιχεία σας.",
+            "Αν έχετε ξαναχρησιμοποιήσει την εφαρμογή και έχετε αποθηκευμένο το αρχείο data.json, μπορείτε να το ανεβάσετε στη Φόρμα. Πατήστε «Επόμενο» για να μεταβείτε εκεί.",
+          showButtons: ["next", "close"],
+          nextBtnText: "Επόμενο",
+          onNextClick: clickFormLink,
         },
       },
       {
+        page: "form",
+        element: ".fileUploader",
+        popover: {
+          title: "Ανέβασμα αρχείου",
+          description:
+            "Εδώ μπορείτε να ανεβάσετε το αρχείο data.json που δημιουργήσατε παλαιότερα, ώστε να φορτωθούν αυτόματα τα στοιχεία σας στη φόρμα.",
+        },
+      },
+      {
+        page: "form",
         element: "#localData",
         popover: {
           title: "Επιλογή αρχείου",
           description:
             "Πατήστε εδώ και επιλέξτε το αρχείο data.json από τον υπολογιστή σας.",
-        },
-      },
-      {
-        element: ".fileUploader a",
-        popover: {
-          title: "Δεν έχετε το αρχείο;",
-          description:
-            "Αν δεν έχετε πλέον το data.json, πατήστε 'Φόρμα' για να καταχωρήσετε τα στοιχεία σας ξανά και να δημιουργηθεί νέο.",
         },
       },
     ],
@@ -255,7 +260,7 @@ const guides = {
         },
       },
       {
-        element: ".fileUploader a",
+        element: '.navButtons a[href="form/"]',
         popover: {
           title: "7. Backup",
           description:

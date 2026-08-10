@@ -222,69 +222,6 @@ function constructInitialText() {
   }, ${paristameniB} και ${arthroAnakrB} ${bAnakritikosSelect.value} `;
 }
 
-//  file uploader validation
-document
-  .querySelector('input[type="file"]')
-  .addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file && file.type !== "application/json") {
-      alert("Επιτρέπονται μόνο αρχεία JSON!");
-      event.target.value = "";
-    }
-  });
-
-//file uploader function
-document
-  .querySelector('input[type="file"]')
-  .addEventListener("change", function (event) {
-    const file = event.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-
-      reader.onload = function (e) {
-        try {
-          const result = JSON.parse(e.target.result);
-
-          // 1. Strict Validation Check
-          // We check: Is it an object? Does it have 'anakritikoi'? Is that an array?
-          const hasOfficers =
-            result.anakritikoi &&
-            Array.isArray(result.anakritikoi) &&
-            result.anakritikoi.length > 0;
-          const hasService = !!result.ypiresia; // Ensures ypiresia is not empty or undefined
-
-          if (!hasOfficers || !hasService) {
-            // If validation fails, we stop IMMEDIATELY
-            alert(
-              "Σφάλμα: Το αρχείο JSON δεν περιέχει τα απαραίτητα δεδομένα (π.χ. Ανακριτικοί υπάλληλοι).",
-            );
-            return;
-          }
-
-          // 2. Only proceed if the code reaches this point
-          localStorage.clear();
-          localStorage.setItem("dataObject", JSON.stringify(result));
-
-          // Update global variables
-          data = { ...defaultData, ...result };
-          state = getState(data, today);
-
-          // Refresh UI
-          paintSelectMenus();
-          paintAstynomikosSelect();
-          initial.textContent = constructInitialText();
-
-          console.log("Success: Data loaded.");
-        } catch (error) {
-          console.error("Parsing Error:", error);
-          alert("Το αρχείο δεν είναι έγκυρο JSON.");
-        }
-      };
-
-      reader.readAsText(file);
-    }
-  });
 // tabs and content
 const tabContainer = document.querySelector(".tabs");
 const tabs = Array.from(tabContainer.children);
