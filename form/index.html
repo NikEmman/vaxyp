@@ -11,16 +11,7 @@
     <title>Στοιχεία χρήστη</title>
   </head>
   <body>
-    <script>
-      (function () {
-        const theme =
-          localStorage.getItem("vaxyp-theme") ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
-        if (theme === "dark") document.body.classList.add("dark");
-      })();
-    </script>
+    <script src="../src/themeInit.js"></script>
     <header>
       <a href="../"> Επιστροφή στην αρχική σελίδα</a>
       <button

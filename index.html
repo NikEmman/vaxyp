@@ -13,16 +13,7 @@
   </head>
 
   <body>
-    <script>
-      (function () {
-        const theme =
-          localStorage.getItem("vaxyp-theme") ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
-        if (theme === "dark") document.body.classList.add("dark");
-      })();
-    </script>
+    <script src="src/themeInit.js"></script>
     <header>
       <div class="navButtons">
         <button class="helpBtn large tourBtn" id="tour-help" title="Περιήγηση">
@@ -1475,7 +1466,6 @@
         <p><em>Παράδειγμα: {oS} = "ο" για άνδρα δράστη, {touV} = "της" για γυναίκα παθόντα, {oYA1} = "Ο" για υπογραφή άντρα Ά ανακριτικού</em></p>
       </div>
     </dialog>
-    <footer></footer>
     <script src="src/donateWidget.js"></script>
   </body>
 </html>

@@ -1,53 +1,11 @@
 import { startGuide } from "./tourGuide.js";
-import { getPendingTour, clearPendingTour } from "./stateManager.js";
+import {
+  getPendingTour,
+  clearPendingTour,
+  initTheme,
+} from "./stateManager.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const getTheme = () => {
-    const stored = localStorage.getItem("vaxyp-theme");
-    if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
-
-  const saveTheme = (theme) => {
-    localStorage.setItem("vaxyp-theme", theme);
-  };
-
-  const applyTheme = (theme) => {
-    if (theme === "dark") {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
-    const toggleBtn = document.getElementById("theme-toggle");
-  };
-
-  const initTheme = () => {
-    const theme = getTheme();
-    applyTheme(theme);
-
-    const toggleBtn = document.getElementById("theme-toggle");
-    if (toggleBtn) {
-      toggleBtn.addEventListener("click", () => {
-        const currentTheme = document.body.classList.contains("dark")
-          ? "dark"
-          : "light";
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        saveTheme(newTheme);
-        applyTheme(newTheme);
-      });
-    }
-
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (e) => {
-        if (!localStorage.getItem("vaxyp-theme")) {
-          applyTheme(e.matches ? "dark" : "light");
-        }
-      });
-  };
-
   initTheme();
 
   const pendingTour = getPendingTour();
@@ -62,7 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
     data.anakritikoi.forEach((value, index) => {
       const sexValue =
         data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
-      addAnakritikoi(value, data.anakritikoiEnikos[index], sexValue);
+      const enikosValue =
+        data.anakritikoiEnikos && data.anakritikoiEnikos[index]
+          ? data.anakritikoiEnikos[index]
+          : "";
+      addAnakritikoi(value, enikosValue, sexValue);
     });
 
     document.getElementById("ypiresia").value = data.ypiresia || "";
@@ -119,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        localStorage.removeItem("anakr");
         localStorage.setItem("dataObject", JSON.stringify(result));
         populateForm(result);
       } catch (error) {

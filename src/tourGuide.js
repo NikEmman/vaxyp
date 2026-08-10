@@ -57,7 +57,6 @@ const guides = {
           description:
             "Πατήστε «Επόμενο» για να μεταβείτε στη Φόρμα και να καταχωρήσετε τα στοιχεία της υπηρεσίας σας.",
           showButtons: ["next", "close"],
-          nextBtnText: "Επόμενο",
           onNextClick: clickFormLink,
         },
       },
@@ -183,7 +182,6 @@ const guides = {
           description:
             "Αν έχετε ξαναχρησιμοποιήσει την εφαρμογή και έχετε αποθηκευμένο το αρχείο data.json, μπορείτε να το ανεβάσετε στη Φόρμα. Πατήστε «Επόμενο» για να μεταβείτε εκεί.",
           showButtons: ["next", "close"],
-          nextBtnText: "Επόμενο",
           onNextClick: clickFormLink,
         },
       },
