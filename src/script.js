@@ -105,10 +105,7 @@ async function handleDocxUpload(event) {
       displayNotification(notificationText);
     } catch (error) {
       console.error("Error processing document:", error);
-      displayNotification(
-        `Σφάλμα στο ${file.name}: ${error.message}`,
-        "error",
-      );
+      displayNotification(`Σφάλμα στο ${file.name}: ${error.message}`, "error");
     }
   }
 
@@ -730,6 +727,17 @@ martyra.addEventListener("click", () => {
   applyAllGrammar(state);
   generateWord(ektheseis.martyra, state, state.victimData);
 });
+//martyra astyn button
+const martyraAstynomikos = document.getElementById("martyra-astynomikos");
+martyraAstynomikos.addEventListener("click", () => {
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  applyAllGrammar(state);
+
+  const astynomikosData = { surname: getOfficerSurname(state.astynomikos) };
+  generateWord(ektheseis.astynomikos, state, astynomikosData);
+});
 
 // martyraXorisOrko button
 const martyraXoris = document.getElementById("martyraXoris");
@@ -919,7 +927,7 @@ feromenou.addEventListener("click", () => {
 
 /// ENDOOIKOGENIAKI
 
-//martyra astyn button
+//martyra astyn endo button
 const martyraEndooik = document.getElementById("martyra-endooik");
 martyraEndooik.addEventListener("click", () => {
   state.initial = constructInitialText();
