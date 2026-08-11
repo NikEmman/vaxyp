@@ -133,10 +133,15 @@ const paintSelectMenus = () => {
   const selectB = getAnakritikoiSelection().bAnakr;
 
   state.anakritikoi.forEach((anakritikos, index) => {
+    const genitiveSurname = anakritikos.split(" ")[1];
+    const enikos = convertAnakritikosToEnikos(anakritikos, state);
+    // fallback to genitive surname for older saved data without anakritikoiEnikos
+    const optionText = enikos ? enikos.split(" ")[1] : genitiveSurname;
+
     // Populate a anakr select
     const anakr = document.createElement("option");
     anakr.value = anakritikos;
-    anakr.textContent = anakritikos.split(" ")[1];
+    anakr.textContent = optionText;
     //set data value for sex
     const sex = state.anakrSex ? state.anakrSex[index] : "Άντρας";
     anakr.setAttribute("data-sex", sex);
@@ -148,7 +153,7 @@ const paintSelectMenus = () => {
     // Populate b anakr select
     const bAnakr = document.createElement("option");
     bAnakr.value = anakritikos;
-    bAnakr.textContent = anakritikos.split(" ")[1];
+    bAnakr.textContent = optionText;
     bAnakr.setAttribute("data-sex", sex);
 
     if (index === selectB) {

@@ -132,7 +132,9 @@ header a:hover {
   height: 2px;
   border-radius: 2px;
   background-color: var(--text-light);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .nav-toggle.open span:nth-child(1) {
@@ -325,6 +327,7 @@ header a:hover {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2em;
+  margin-top: 2em;
 }
 
 #initial {
