@@ -1,4 +1,9 @@
-import { setPendingTour, clearPendingTour } from "./stateManager.js";
+import {
+  setPendingTour,
+  clearPendingTour,
+  openNavMenu,
+  closeNavMenu,
+} from "./stateManager.js";
 
 const { driver } = window.driver.js;
 
@@ -59,6 +64,7 @@ const guides = {
           showButtons: ["next", "close"],
           onNextClick: clickFormLink,
         },
+        onHighlightStarted: () => openNavMenu(),
       },
       {
         page: "form",
@@ -184,6 +190,7 @@ const guides = {
           showButtons: ["next", "close"],
           onNextClick: clickFormLink,
         },
+        onHighlightStarted: () => openNavMenu(),
       },
       {
         page: "form",
@@ -264,6 +271,7 @@ const guides = {
           description:
             "Για να κρατήσετε τους αστυνομικούς σας στο backup αρχείο data.json πλοηγηθήτε στη Φόρμα και πατήστε 'Αποθήκευση'.",
         },
+        onHighlightStarted: () => openNavMenu(),
       },
       {
         element: "#astynomikoi",
@@ -272,6 +280,7 @@ const guides = {
           description:
             "Από το μενού μπορείτε να επιλέξετε έναν από τους ήδη αποθηκευμένους αστυνομικούς.",
         },
+        onHighlightStarted: () => closeNavMenu(),
       },
       {
         element: "#astynomikos-delete",
@@ -376,6 +385,7 @@ const guides = {
           description:
             "Για να σας βοηθήσει στη δουλειά σας, ο Βοηθός Αξ.Υπ. προσφέρει εργαλεία επεξεργασίας PDF, καθώς και εργαλείο μετατροπής εικόνας σε κείμενο (OCR).",
         },
+        onHighlightStarted: () => openNavMenu(),
       },
       {
         element: '.navButtons a[href="tools/"]',
@@ -410,6 +420,7 @@ const guides = {
           description:
             "Όχι, αλλά αν βρίσκετε τη δουλειά μου έστω και λίγο χρήσιμη, θα εκτιμούσα πολύ μια μικρή δωρεά, που θα με βοηθήσει να συνεχίσω να δουλεύω και να βελτιώνω αυτό το εργαλείο.",
         },
+        onHighlightStarted: () => closeNavMenu(),
       },
     ],
   },

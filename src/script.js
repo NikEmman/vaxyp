@@ -27,6 +27,7 @@ import {
   getAnakritikoiSelection,
   saveData,
   initTheme,
+  initNavMenu,
 } from "./stateManager.js";
 import { initTourGuide } from "./tourGuide.js";
 
@@ -120,6 +121,7 @@ async function handleDocxUpload(event) {
 }
 
 initTheme();
+initNavMenu();
 
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");

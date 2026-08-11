@@ -15,7 +15,18 @@
   <body>
     <script src="src/themeInit.js"></script>
     <header>
-      <div class="navButtons">
+      <button
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="navButtons"
+        aria-label="Μενού"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="navButtons" id="navButtons">
         <button class="helpBtn large tourBtn" id="tour-help" title="Περιήγηση">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
             <polygon

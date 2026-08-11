@@ -100,6 +100,57 @@ export const initTheme = () => {
     });
 };
 
+export function openNavMenu() {
+  const toggleBtn = document.getElementById("nav-toggle");
+  const navButtons = document.getElementById("navButtons");
+  if (!toggleBtn || !navButtons) return;
+  toggleBtn.classList.add("open");
+  navButtons.classList.add("open");
+  toggleBtn.setAttribute("aria-expanded", "true");
+}
+
+export function closeNavMenu() {
+  const toggleBtn = document.getElementById("nav-toggle");
+  const navButtons = document.getElementById("navButtons");
+  if (!toggleBtn || !navButtons) return;
+  toggleBtn.classList.remove("open");
+  navButtons.classList.remove("open");
+  toggleBtn.setAttribute("aria-expanded", "false");
+}
+
+export function initNavMenu() {
+  const toggleBtn = document.getElementById("nav-toggle");
+  const navButtons = document.getElementById("navButtons");
+  if (!toggleBtn || !navButtons) return;
+
+  toggleBtn.addEventListener("click", () => {
+    if (navButtons.classList.contains("open")) {
+      closeNavMenu();
+    } else {
+      openNavMenu();
+    }
+  });
+
+  navButtons.addEventListener("click", (e) => {
+    if (e.target.closest("a, button, p")) closeNavMenu();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!navButtons.classList.contains("open")) return;
+    // Tour popover/nav buttons live outside navButtons, so their clicks
+    // would otherwise register as "outside clicks" and close the menu
+    // mid-tour. Let tourGuide.js manage open/close during an active tour.
+    if (document.body.classList.contains("driver-active")) return;
+    if (e.target === toggleBtn || toggleBtn.contains(e.target)) return;
+    if (navButtons.contains(e.target)) return;
+    closeNavMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeNavMenu();
+  });
+}
+
 export function getPendingTour() {
   return sessionStorage.getItem("vaxyp-pending-tour");
 }

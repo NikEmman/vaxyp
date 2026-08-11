@@ -105,6 +105,102 @@ header a:hover {
   display: flex;
   gap: 20px;
 }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--text-light);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@keyframes navDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 850px) {
+  header:has(.nav-toggle) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto;
+  }
+
+  header:has(.nav-toggle) .nav-toggle {
+    display: flex;
+  }
+
+  header:has(.nav-toggle) .navButtons {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    order: 3;
+    gap: 0;
+  }
+
+  header:has(.nav-toggle) .navButtons.open {
+    display: flex;
+    animation: navDropdown 0.18s ease-out;
+  }
+
+  header:has(.nav-toggle) .navButtons a,
+  header:has(.nav-toggle) .navButtons .helpBtn {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    justify-content: flex-start;
+    text-align: left;
+    background: transparent;
+    color: var(--text-light);
+    border-radius: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.9em 0.25em;
+  }
+
+  header:has(.nav-toggle) .navButtons a:hover,
+  header:has(.nav-toggle) .navButtons .helpBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+  }
+}
 /* ── Patch-glow animation ───────────────────────────────────── */
 @keyframes badge-pop {
   0% {
