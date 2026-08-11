@@ -459,6 +459,7 @@ export function startGuide(key, page = "index") {
     steps,
     onDestroyStarted: () => {
       if (isMultiPage && !isLastPage) clearPendingTour();
+      closeNavMenu();
       tourDriver.destroy();
     },
   });
