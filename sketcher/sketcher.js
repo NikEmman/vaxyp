@@ -340,6 +340,72 @@
     a.click();
   });
 
+  // PDF export crops to the drawn content (plus a small margin) rather than
+  // the whole mostly-empty working canvas, and fits it onto a landscape A4
+  // page — closer to something you'd actually staple into a report.
+  document.getElementById("btn-export-pdf").addEventListener("click", async () => {
+    const objects = canvas.getObjects();
+    if (objects.length === 0) {
+      alert("Δεν υπάρχει σκαρίφημα για εξαγωγή.");
+      return;
+    }
+
+    canvas.discardActiveObject();
+
+    const bounds = objects.reduce(
+      (acc, o) => {
+        const r = o.getBoundingRect();
+        return {
+          left: Math.min(acc.left, r.left),
+          top: Math.min(acc.top, r.top),
+          right: Math.max(acc.right, r.left + r.width),
+          bottom: Math.max(acc.bottom, r.top + r.height),
+        };
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity }
+    );
+
+    const pad = 30;
+    const cropLeft = Math.max(0, bounds.left - pad);
+    const cropTop = Math.max(0, bounds.top - pad);
+    const cropWidth = Math.min(CANVAS_W, bounds.right + pad) - cropLeft;
+    const cropHeight = Math.min(CANVAS_H, bounds.bottom + pad) - cropTop;
+
+    const pngDataUrl = canvas.toDataURL({
+      format: "png",
+      multiplier: 2,
+      left: cropLeft,
+      top: cropTop,
+      width: cropWidth,
+      height: cropHeight,
+    });
+    const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) => c.charCodeAt(0));
+
+    const { PDFDocument } = PDFLib;
+    const doc = await PDFDocument.create();
+    const embedded = await doc.embedPng(pngBytes);
+
+    const PAGE = { w: 841.89, h: 595.28 }; // A4 landscape, in points
+    const margin = 30;
+    const avail = { w: PAGE.w - 2 * margin, h: PAGE.h - 2 * margin };
+    const scale = Math.min(avail.w / embedded.width, avail.h / embedded.height);
+    const dw = embedded.width * scale;
+    const dh = embedded.height * scale;
+
+    const page = doc.addPage([PAGE.w, PAGE.h]);
+    page.drawImage(embedded, {
+      x: (PAGE.w - dw) / 2,
+      y: (PAGE.h - dh) / 2,
+      width: dw,
+      height: dh,
+    });
+
+    const bytes = await doc.save();
+    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+    Object.assign(document.createElement("a"), { href: url, download: "skarifima.pdf" }).click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
     canvas.clear();
