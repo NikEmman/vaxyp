@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon" />
+    <title>Σκαρίφημα Τροχαίου</title>
+    <style>
+      body { position: static; padding: 0; }
+      header { margin: 0; }
+
+      .sketcher-layout {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        height: calc(100vh - 68px);
+      }
+
+      /* ── Palette (left sidebar) ─────────────────────────────── */
+      .palette {
+        width: 220px;
+        flex-shrink: 0;
+        background-color: var(--background-white);
+        border-right: 1px solid var(--border-color);
+        padding: 1em;
+        overflow-y: auto;
+      }
+      .palette h3 {
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-dark);
+        opacity: 0.6;
+        margin: 1em 0 0.5em;
+      }
+      .palette h3:first-child { margin-top: 0; }
+      .palette-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        padding: 0.6em 0.7em;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 0.5em;
+        cursor: grab;
+        background-color: var(--background-light);
+        font-size: 0.9em;
+        user-select: none;
+      }
+      .palette-item:active { cursor: grabbing; }
+      .palette-item:hover { border-color: var(--secondary-blue); }
+      .palette-item svg {
+        width: 22px; height: 22px; flex-shrink: 0;
+        stroke: var(--primary-blue); fill: none;
+        stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+      }
+
+      /* ── Canvas area ────────────────────────────────────────── */
+      .canvas-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        padding: 0.6em 1em;
+        background-color: var(--background-white);
+        border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap;
+      }
+      .toolbar button {
+        padding: 0.5em 0.9em;
+        font-size: 0.85em;
+      }
+      .toolbar .sep {
+        width: 1px;
+        align-self: stretch;
+        background-color: var(--border-color);
+        margin: 0 0.3em;
+      }
+      .toolbar button.active {
+        background-color: var(--primary-blue);
+      }
+      .toolbar label {
+        font-size: 0.85em;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+      }
+      .toolbar input[type="number"] {
+        width: 4.5em;
+        padding: 0.3em 0.4em;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--background-light);
+        color: var(--text-dark);
+      }
+
+      .canvas-scroll {
+        flex: 1;
+        overflow: auto;
+        background-color: #dfe4ea;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .dark .canvas-scroll { background-color: #10151f; }
+
+      /* ── Properties (right sidebar) ────────────────────────── */
+      .properties {
+        width: 220px;
+        flex-shrink: 0;
+        background-color: var(--background-white);
+        border-left: 1px solid var(--border-color);
+        padding: 1em;
+        overflow-y: auto;
+      }
+      .properties h3 {
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-dark);
+        opacity: 0.6;
+        margin: 0 0 0.8em;
+      }
+      .properties .empty {
+        font-size: 0.85em;
+        color: var(--text-dark);
+        opacity: 0.5;
+      }
+      .prop-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5em;
+        margin-bottom: 0.7em;
+        font-size: 0.85em;
+      }
+      .prop-row input {
+        width: 5.5em;
+        padding: 0.3em 0.4em;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--background-light);
+        color: var(--text-dark);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Πίσω στην εφαρμογή</a>
+      </div>
+      <h2 style="margin:0;font-size:1.05em;">Σκαρίφημα Τροχαίου</h2>
+      <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
+    </header>
+
+    <div class="sketcher-layout">
+      <!-- Left: element palette -->
+      <aside class="palette" id="palette">
+        <h3>Δρόμος</h3>
+        <div class="palette-item" draggable="true" data-shape="road2">
+          <svg viewBox="0 0 24 24"><path d="M4 2v20M20 2v20M12 2v20" stroke-dasharray="2 2"/></svg>
+          Οδόστρωμα 2 λωρίδων
+        </div>
+        <div class="palette-item" draggable="true" data-shape="road3">
+          <svg viewBox="0 0 24 24"><path d="M2 2v20M22 2v20M9 2v20M15 2v20" stroke-dasharray="2 2"/></svg>
+          Οδόστρωμα 3 λωρίδων
+        </div>
+        <div class="palette-item" draggable="true" data-shape="turn">
+          <svg viewBox="0 0 24 24"><path d="M4 20V10a8 8 0 0 1 8-8h10"/></svg>
+          Στροφή
+        </div>
+        <div class="palette-item" draggable="true" data-shape="intersection">
+          <svg viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg>
+          Διασταύρωση
+        </div>
+        <div class="palette-item" draggable="true" data-shape="crosswalk">
+          <svg viewBox="0 0 24 24"><path d="M6 3v18M10 3v18M14 3v18M18 3v18"/></svg>
+          Διάβαση πεζών
+        </div>
+
+        <h3>Οχήματα</h3>
+        <div class="palette-item" draggable="true" data-shape="car">
+          <svg viewBox="0 0 24 24"><path d="M3 16l1.5-5A2 2 0 0 1 6.4 9.5h11.2a2 2 0 0 1 1.9 1.5L21 16v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3z"/></svg>
+          Επιβατικό
+        </div>
+        <div class="palette-item" draggable="true" data-shape="truck">
+          <svg viewBox="0 0 24 24"><path d="M2 7h11v10H2zM13 11h5l3 3v3h-8z"/></svg>
+          Φορτηγό
+        </div>
+
+        <h3>Άλλα</h3>
+        <div class="palette-item" draggable="true" data-shape="text">
+          <svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14"/></svg>
+          Κείμενο
+        </div>
+      </aside>
+
+      <!-- Center: toolbar + canvas -->
+      <div class="canvas-wrap">
+        <div class="toolbar">
+          <button id="btn-rotate-left" title="Περιστροφή -15°">⟲ 15°</button>
+          <button id="btn-rotate-right" title="Περιστροφή +15°">⟳ 15°</button>
+          <button id="btn-delete" title="Διαγραφή επιλογής">Διαγραφή</button>
+          <div class="sep"></div>
+          <button id="btn-measure" title="Μέτρηση απόστασης">Μέτρο (m)</button>
+          <button id="btn-grid" class="active" title="Εμφάνιση κανάβου">Κάναβος</button>
+          <div class="sep"></div>
+          <label>Κλίμακα
+            <input type="number" id="scale-input" value="40" min="5" step="1" />
+            px/m
+          </label>
+          <div class="sep"></div>
+          <button id="btn-export">Εξαγωγή PNG</button>
+          <button id="btn-clear">Καθαρισμός</button>
+        </div>
+
+        <div class="canvas-scroll" id="canvas-scroll">
+          <canvas id="sketch-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Right: properties of selected object -->
+      <aside class="properties" id="properties">
+        <h3>Ιδιότητες</h3>
+        <div class="empty" id="properties-empty">Επιλέξτε ένα αντικείμενο</div>
+        <div id="properties-body" style="display:none;">
+          <div class="prop-row">
+            <span>Γωνία (°)</span>
+            <input type="number" id="prop-angle" step="1" />
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <script src="../libs/fabric.min.js"></script>
+    <script src="shapes.js"></script>
+    <script src="sketcher.js"></script>
+    <script>
+      // ── Theme ────────────────────────────────────────────────────
+      const getTheme = () =>
+        localStorage.getItem("vaxyp-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const applyTheme = (t) =>
+        t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
+      applyTheme(getTheme());
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const t = document.body.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("vaxyp-theme", t);
+        applyTheme(t);
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("vaxyp-theme")) applyTheme(e.matches ? "dark" : "light");
+      });
+    </script>
+  </body>
+</html>
