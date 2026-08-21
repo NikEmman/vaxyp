@@ -4,13 +4,24 @@
 // on its own origin so Fabric's default rotate handle spins it in place.
 // Real-world dimensions are approximate but plausible for a Greek traffic
 // report (car ~4.4x1.8m, lane ~3m wide, etc).
+//
+// Style is deliberately monochrome — plain fill, outline, no color — matching
+// how accident scenes are actually hand-sketched on paper. The two colors
+// below are `let`, not `const`: sketcher.js flips them between a light and
+// a dark palette to match the app theme, and every factory reads them at
+// call time (not at load time), so newly-added shapes always pick up
+// whichever palette is currently active.
+let SHAPE_FILL = "#ffffff";
+let LINE_COLOR = "#1b1f24";
 
-const ROAD_COLOR = "#4a4f57";
-const MARKING_COLOR = "#f2f2f2";
+function setShapePalette(fill, line) {
+  SHAPE_FILL = fill;
+  LINE_COLOR = line;
+}
 
 function laneMarking(x1, y1, x2, y2, dashed) {
   return new fabric.Line([x1, y1, x2, y2], {
-    stroke: MARKING_COLOR,
+    stroke: LINE_COLOR,
     strokeWidth: 2,
     strokeDashArray: dashed ? [10, 8] : null,
     selectable: false,
@@ -27,7 +38,9 @@ function roadSegment(ppm, lanes) {
   const base = new fabric.Rect({
     width: w,
     height: h,
-    fill: ROAD_COLOR,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
     originX: "center",
     originY: "center",
     selectable: false,
@@ -39,9 +52,6 @@ function roadSegment(ppm, lanes) {
     const x = -w / 2 + i * laneWidth * ppm;
     parts.push(laneMarking(x, -h / 2, x, h / 2, true));
   }
-  // solid edge lines
-  parts.push(laneMarking(-w / 2, -h / 2, -w / 2, h / 2, false));
-  parts.push(laneMarking(w / 2, -h / 2, w / 2, h / 2, false));
 
   return new fabric.Group(parts, {
     originX: "center",
@@ -65,7 +75,9 @@ function createIntersection(ppm) {
   const base = new fabric.Rect({
     width: s,
     height: s,
-    fill: ROAD_COLOR,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
     originX: "center",
     originY: "center",
     selectable: false,
@@ -103,14 +115,16 @@ function createTurn(ppm) {
   ].join(" ");
 
   const path = new fabric.Path(d, {
-    fill: ROAD_COLOR,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
     selectable: false,
     evented: false,
   });
 
   const centerline = new fabric.Path(
     `M ${midR - c} ${-c} A ${midR} ${midR} 0 0 1 ${-c} ${midR - c}`,
-    { fill: "", stroke: MARKING_COLOR, strokeWidth: 2, strokeDashArray: [10, 8], selectable: false, evented: false }
+    { fill: "", stroke: LINE_COLOR, strokeWidth: 2, strokeDashArray: [10, 8], selectable: false, evented: false }
   );
 
   return new fabric.Group([path, centerline], {
@@ -136,7 +150,7 @@ function createCrosswalk(ppm) {
         top: -h / 2,
         width: stripeW,
         height: h,
-        fill: MARKING_COLOR,
+        fill: LINE_COLOR,
         selectable: false,
         evented: false,
       })
@@ -146,7 +160,7 @@ function createCrosswalk(ppm) {
   return new fabric.Group(parts, { originX: "center", originY: "center", subTargetCheck: false });
 }
 
-function vehicle(ppm, lengthM, widthM, fill) {
+function vehicle(ppm, lengthM, widthM) {
   const w = widthM * ppm;
   const h = lengthM * ppm;
 
@@ -155,9 +169,9 @@ function vehicle(ppm, lengthM, widthM, fill) {
     height: h,
     rx: w * 0.18,
     ry: w * 0.18,
-    fill,
-    stroke: "#1b1f24",
-    strokeWidth: 1,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
     originX: "center",
     originY: "center",
     selectable: false,
@@ -168,8 +182,9 @@ function vehicle(ppm, lengthM, widthM, fill) {
     top: -h * 0.32,
     width: w * 0.64,
     height: h * 0.22,
-    fill: "#1b1f24",
-    opacity: 0.55,
+    fill: "",
+    stroke: LINE_COLOR,
+    strokeWidth: 1,
     originX: "left",
     originY: "top",
     selectable: false,
@@ -184,17 +199,17 @@ function vehicle(ppm, lengthM, widthM, fill) {
 }
 
 function createCar(ppm) {
-  return vehicle(ppm, 4.4, 1.8, "#2196f3");
+  return vehicle(ppm, 4.4, 1.8);
 }
 
 function createTruck(ppm) {
-  return vehicle(ppm, 7, 2.5, "#e07070");
+  return vehicle(ppm, 7, 2.5);
 }
 
 function createText() {
   return new fabric.Textbox("Κείμενο", {
     fontSize: 18,
-    fill: "#1b1f24",
+    fill: LINE_COLOR,
     editable: true,
   });
 }

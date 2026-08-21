@@ -33,6 +33,53 @@
   canvas.selectionBorderColor = "#e05a00";
   canvas.selectionLineWidth = 2;
 
+  // ── Theme (light/dark canvas palette) ─────────────────────────────
+  // On screen the canvas follows the app's light/dark theme. Exports must
+  // always come out black-on-white regardless — see captureInLightPalette
+  // further down, used by both the PNG and PDF export handlers.
+  const PALETTES = {
+    light: { bg: "#ffffff", ink: "#1b1f24" },
+    dark: { bg: "#161c27", ink: "#c8d3e0" },
+  };
+  let isDarkTheme = false;
+  let currentPalette = PALETTES.light;
+
+  // Swap every object's colors from whichever palette they're currently in
+  // to `palette` — matched by value so it works starting from either theme,
+  // recursing into group children (roads/vehicles/measurements are groups).
+  function restyleObjects(palette) {
+    function walk(objects) {
+      objects.forEach((o) => {
+        if (o.fill === PALETTES.light.bg || o.fill === PALETTES.dark.bg) o.set("fill", palette.bg);
+        else if (o.fill === PALETTES.light.ink || o.fill === PALETTES.dark.ink) o.set("fill", palette.ink);
+        if (o.stroke === PALETTES.light.ink || o.stroke === PALETTES.dark.ink) o.set("stroke", palette.ink);
+        if (o._objects) walk(o._objects);
+      });
+    }
+    walk(canvas.getObjects());
+  }
+
+  function setTheme(dark) {
+    isDarkTheme = dark;
+    currentPalette = dark ? PALETTES.dark : PALETTES.light;
+    setShapePalette(currentPalette.bg, currentPalette.ink); // new shapes from here on
+    restyleObjects(currentPalette); // shapes already on the canvas
+    applyGrid();
+    canvas.requestRenderAll();
+  }
+  window.applySketcherTheme = setTheme;
+
+  // Runs `captureFn` (expected to read canvas pixels, e.g. toDataURL) with
+  // the canvas forced to the light palette, then restores the current
+  // theme. Both steps are synchronous, so there's no visible flash.
+  function captureInLightPalette(captureFn) {
+    const wasDark = isDarkTheme;
+    if (wasDark) setTheme(false);
+    const result = captureFn();
+    if (wasDark) setTheme(true);
+    return result;
+  }
+
   // ── Grid background (drawn as a repeating pattern, not real objects,
   //    so it never shows up in the object list or gets selected/exported
   //    as clutter — export still includes it since it's the bg fill) ──
@@ -41,9 +88,9 @@
     tile.width = spacingPx;
     tile.height = spacingPx;
     const ctx = tile.getContext("2d");
-    ctx.fillStyle = "#c9cdd3";
+    ctx.fillStyle = currentPalette.bg;
     ctx.fillRect(0, 0, spacingPx, spacingPx);
-    ctx.strokeStyle = "rgba(0,0,0,0.12)";
+    ctx.strokeStyle = isDarkTheme ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0.5, 0);
@@ -54,7 +101,7 @@
     return new fabric.Pattern({ source: tile, repeat: "repeat" });
   }
   function applyGrid() {
-    canvas.backgroundColor = gridVisible ? makeGridPattern(ppm) : "#c9cdd3";
+    canvas.backgroundColor = gridVisible ? makeGridPattern(ppm) : currentPalette.bg;
     canvas.requestRenderAll();
   }
   applyGrid();
@@ -212,20 +259,20 @@
       // Give the start tick a vertical default so it reads as a "|" mark
       // right away, before the line has a direction to derive it from.
       previewLine = new fabric.Line([p.x, p.y, p.x, p.y], {
-        stroke: "#e05a5a",
+        stroke: LINE_COLOR,
         strokeWidth: 2,
         strokeDashArray: [6, 4],
         selectable: false,
         evented: false,
       });
       previewTick1 = new fabric.Line(tickEndpoints(p, 0, 1), {
-        stroke: "#e05a5a",
+        stroke: LINE_COLOR,
         strokeWidth: 2,
         selectable: false,
         evented: false,
       });
       previewTick2 = new fabric.Line(tickEndpoints(p, 0, 1), {
-        stroke: "#e05a5a",
+        stroke: LINE_COLOR,
         strokeWidth: 2,
         selectable: false,
         evented: false,
@@ -234,7 +281,7 @@
         left: p.x,
         top: p.y - 16,
         fontSize: 14,
-        fill: "#e05a5a",
+        fill: LINE_COLOR,
         selectable: false,
         evented: false,
       });
@@ -249,19 +296,19 @@
     clearMeasurePreview();
 
     const line = new fabric.Line([p1.x, p1.y, p.x, p.y], {
-      stroke: "#e05a5a",
+      stroke: LINE_COLOR,
       strokeWidth: 2,
       selectable: false,
       evented: false,
     });
     const tick1 = new fabric.Line(tickEndpoints(p1, nx, ny), {
-      stroke: "#e05a5a",
+      stroke: LINE_COLOR,
       strokeWidth: 2,
       selectable: false,
       evented: false,
     });
     const tick2 = new fabric.Line(tickEndpoints(p, nx, ny), {
-      stroke: "#e05a5a",
+      stroke: LINE_COLOR,
       strokeWidth: 2,
       selectable: false,
       evented: false,
@@ -270,7 +317,7 @@
       left: (p1.x + p.x) / 2,
       top: (p1.y + p.y) / 2 - 16,
       fontSize: 14,
-      fill: "#e05a5a",
+      fill: LINE_COLOR,
       selectable: false,
       evented: false,
     });
@@ -304,6 +351,8 @@
   gridBtn.addEventListener("click", () => {
     gridVisible = !gridVisible;
     gridBtn.classList.toggle("active", gridVisible);
+    gridBtn.setAttribute("aria-checked", String(gridVisible));
+    gridBtn.title = gridVisible ? "Απόκρυψη κανάβου" : "Εμφάνιση κανάβου";
     applyGrid();
   });
 
@@ -333,7 +382,11 @@
 
   // ── Export / clear ───────────────────────────────────────────────
   document.getElementById("btn-export").addEventListener("click", () => {
-    const dataUrl = canvas.toDataURL({ format: "png", multiplier: 2 });
+    if (canvas.getObjects().length === 0) {
+      window.displayNotification("Δεν υπάρχει σκαρίφημα για εξαγωγή.", "warning");
+      return;
+    }
+    const dataUrl = captureInLightPalette(() => canvas.toDataURL({ format: "png", multiplier: 2 }));
     const a = document.createElement("a");
     a.href = dataUrl;
     a.download = "skarifima.png";
@@ -346,7 +399,7 @@
   document.getElementById("btn-export-pdf").addEventListener("click", async () => {
     const objects = canvas.getObjects();
     if (objects.length === 0) {
-      alert("Δεν υπάρχει σκαρίφημα για εξαγωγή.");
+      window.displayNotification("Δεν υπάρχει σκαρίφημα για εξαγωγή.", "warning");
       return;
     }
 
@@ -371,14 +424,16 @@
     const cropWidth = Math.min(CANVAS_W, bounds.right + pad) - cropLeft;
     const cropHeight = Math.min(CANVAS_H, bounds.bottom + pad) - cropTop;
 
-    const pngDataUrl = canvas.toDataURL({
-      format: "png",
-      multiplier: 2,
-      left: cropLeft,
-      top: cropTop,
-      width: cropWidth,
-      height: cropHeight,
-    });
+    const pngDataUrl = captureInLightPalette(() =>
+      canvas.toDataURL({
+        format: "png",
+        multiplier: 2,
+        left: cropLeft,
+        top: cropTop,
+        width: cropWidth,
+        height: cropHeight,
+      })
+    );
     const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) => c.charCodeAt(0));
 
     const { PDFDocument } = PDFLib;

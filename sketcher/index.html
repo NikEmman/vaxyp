@@ -85,6 +85,49 @@
       .toolbar button.active {
         background-color: var(--primary-blue);
       }
+
+      /* Grid toggle rendered as a switch (track + sliding knob) instead of
+         a plain pressed-state button, since it's an on/off setting. */
+      #btn-grid {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
+        background-color: transparent;
+        color: var(--text-dark);
+        padding: 0.35em 0.7em 0.35em 0.5em;
+      }
+      #btn-grid:hover {
+        background-color: var(--light-blue);
+      }
+      #btn-grid.active {
+        background-color: transparent;
+      }
+      #btn-grid .switch-track {
+        position: relative;
+        width: 34px;
+        height: 20px;
+        border-radius: 999px;
+        background-color: var(--border-color);
+        flex-shrink: 0;
+        transition: background-color 0.2s ease;
+      }
+      #btn-grid .switch-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      #btn-grid.active .switch-track {
+        background-color: var(--secondary-blue);
+      }
+      #btn-grid.active .switch-knob {
+        transform: translateX(14px);
+      }
       .toolbar label {
         font-size: 0.85em;
         color: var(--text-dark);
@@ -160,6 +203,8 @@
       <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
     </header>
 
+    <div id="notifications"></div>
+
     <div class="sketcher-layout">
       <!-- Left: element palette -->
       <aside class="palette" id="palette">
@@ -210,7 +255,10 @@
           <button id="btn-delete" title="Διαγραφή επιλογής">Διαγραφή</button>
           <div class="sep"></div>
           <button id="btn-measure" title="Μέτρηση απόστασης">Μέτρο (m)</button>
-          <button id="btn-grid" class="active" title="Εμφάνιση κανάβου">Κάναβος</button>
+          <button id="btn-grid" class="switch active" role="switch" aria-checked="true" title="Απόκρυψη κανάβου">
+            <span class="switch-track"><span class="switch-knob"></span></span>
+            <span class="switch-text">Κάναβος</span>
+          </button>
           <div class="sep"></div>
           <label>Κλίμακα
             <input type="number" id="scale-input" value="40" min="5" step="1" />
@@ -244,13 +292,22 @@
     <script src="../libs/pdf-lib.min.js"></script>
     <script src="shapes.js"></script>
     <script src="sketcher.js"></script>
+    <script type="module">
+      // sketcher.js is a classic script (it shares top-level scope with
+      // shapes.js), so it can't `import` directly — expose the app's
+      // existing notification helper as a global instead of duplicating it.
+      import { displayNotification } from "../src/wordGenerators.js";
+      window.displayNotification = displayNotification;
+    </script>
     <script>
       // ── Theme ────────────────────────────────────────────────────
       const getTheme = () =>
         localStorage.getItem("vaxyp-theme") ||
         (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      const applyTheme = (t) =>
+      const applyTheme = (t) => {
         t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
+        if (window.applySketcherTheme) window.applySketcherTheme(t === "dark");
+      };
       applyTheme(getTheme());
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const t = document.body.classList.contains("dark") ? "light" : "dark";
