@@ -56,9 +56,12 @@
   function restyleObjects(palette) {
     function walk(objects) {
       objects.forEach((o) => {
-        if (o.fill === PALETTES.light.bg || o.fill === PALETTES.dark.bg) o.set("fill", palette.bg);
-        else if (o.fill === PALETTES.light.ink || o.fill === PALETTES.dark.ink) o.set("fill", palette.ink);
-        if (o.stroke === PALETTES.light.ink || o.stroke === PALETTES.dark.ink) o.set("stroke", palette.ink);
+        if (o.fill === PALETTES.light.bg || o.fill === PALETTES.dark.bg)
+          o.set("fill", palette.bg);
+        else if (o.fill === PALETTES.light.ink || o.fill === PALETTES.dark.ink)
+          o.set("fill", palette.ink);
+        if (o.stroke === PALETTES.light.ink || o.stroke === PALETTES.dark.ink)
+          o.set("stroke", palette.ink);
         if (o._objects) walk(o._objects);
       });
     }
@@ -82,7 +85,8 @@
     const wasDark = isDarkTheme;
     const wasGridVisible = gridVisible;
     gridVisible = false;
-    if (wasDark) setTheme(false); // setTheme() re-applies the grid itself
+    if (wasDark)
+      setTheme(false); // setTheme() re-applies the grid itself
     else applyGrid();
 
     const result = captureFn();
@@ -103,7 +107,9 @@
     const ctx = tile.getContext("2d");
     ctx.fillStyle = currentPalette.bg;
     ctx.fillRect(0, 0, spacingPx, spacingPx);
-    ctx.strokeStyle = isDarkTheme ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+    ctx.strokeStyle = isDarkTheme
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(0,0,0,0.08)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0.5, 0);
@@ -114,7 +120,9 @@
     return new fabric.Pattern({ source: tile, repeat: "repeat" });
   }
   function applyGrid() {
-    canvas.backgroundColor = gridVisible ? makeGridPattern(ppm) : currentPalette.bg;
+    canvas.backgroundColor = gridVisible
+      ? makeGridPattern(ppm)
+      : currentPalette.bg;
     canvas.requestRenderAll();
   }
   applyGrid();
@@ -213,7 +221,7 @@
         const words = paletteSearchWords.get(item);
         visible = terms.every(
           (term) =>
-            text.includes(term) || words.some((w) => sharesStem(term, w))
+            text.includes(term) || words.some((w) => sharesStem(term, w)),
         );
       } else {
         const categories = item.dataset.categories
@@ -242,6 +250,136 @@
     const rect = canvas.upperCanvasEl.getBoundingClientRect();
     addShape(shapeKey, e.clientX - rect.left, e.clientY - rect.top);
   });
+
+  // ── Magnetic road connections ──────────────────────────────────────
+  // Road pieces (roadSegment/oneWayRoad/turn/intersection, in shapes.js)
+  // each carry `roadConnections`: local points + outward unit normal for
+  // every open edge. While dragging one, look for another piece's
+  // connection point that's close by and roughly facing it, then snap
+  // position AND rotation so the two meet exactly — open edge to open
+  // edge, no gap or seam.
+  const SNAP_DISTANCE = 18; // px
+  const SNAP_ANGLE = 20; // ° of normal-facing tolerance to trigger a snap
+  const T_JUNCTION_OVERLAP = 1; // px a perpendicular branch sinks into the through-road, to hide its edge line
+
+  // Local connection points, transformed into canvas coordinates by the
+  // object's current center/rotation (scale too, in case the "px/m" scale
+  // control has resized it since it was added).
+  function connectionsWorld(obj) {
+    if (!obj.roadConnections) return [];
+    const rad = fabric.util.degreesToRadians(obj.angle || 0);
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const center = obj.getCenterPoint();
+    const scaleX = obj.scaleX || 1;
+    const scaleY = obj.scaleY || 1;
+    return obj.roadConnections.map((c) => {
+      const lx = c.x * scaleX;
+      const ly = c.y * scaleY;
+      return {
+        x: center.x + (lx * cos - ly * sin),
+        y: center.y + (lx * sin + ly * cos),
+        nx: c.nx * cos - c.ny * sin,
+        ny: c.nx * sin + c.ny * cos,
+        side: !!c.side,
+      };
+    });
+  }
+
+  let snapIndicator = null;
+  function clearSnapIndicator() {
+    if (snapIndicator) {
+      canvas.remove(snapIndicator);
+      snapIndicator = null;
+    }
+  }
+  function showSnapIndicator(point) {
+    clearSnapIndicator();
+    snapIndicator = new fabric.Circle({
+      left: point.x,
+      top: point.y,
+      radius: 7,
+      originX: "center",
+      originY: "center",
+      fill: "rgba(224,90,0,0.3)",
+      stroke: "#e05a00",
+      strokeWidth: 2,
+      selectable: false,
+      evented: false,
+    });
+    canvas.add(snapIndicator);
+    canvas.bringObjectToFront(snapIndicator);
+  }
+
+  function trySnapRoadConnection(target) {
+    if (!target.roadConnections || target.roadConnections.length === 0) {
+      clearSnapIndicator();
+      return;
+    }
+
+    const mineConns = connectionsWorld(target);
+    let best = null;
+    canvas.getObjects().forEach((other) => {
+      if (
+        other === target ||
+        !other.roadConnections ||
+        other.roadConnections.length === 0
+      )
+        return;
+      const otherConns = connectionsWorld(other);
+      mineConns.forEach((mine, mineIndex) => {
+        otherConns.forEach((theirs) => {
+          const dist = Math.hypot(theirs.x - mine.x, theirs.y - mine.y);
+          if (dist > SNAP_DISTANCE) return;
+          // Outward normals should point at each other (~180° apart).
+          const dot = mine.nx * theirs.nx + mine.ny * theirs.ny;
+          const facingAngle =
+            Math.acos(Math.max(-1, Math.min(1, dot))) * (180 / Math.PI);
+          if (Math.abs(180 - facingAngle) > SNAP_ANGLE) return;
+          if (!best || dist < best.dist)
+            best = { dist, mineIndex, mine, theirs };
+        });
+      });
+    });
+
+    if (!best) {
+      clearSnapIndicator();
+      return;
+    }
+
+    // Rotate first, around the object's own center (which doesn't move) —
+    // the connection point's position after rotating is what the
+    // translation step below aligns. Doing both from the pre-rotation
+    // position would leave the two pieces slightly offset.
+    const currentNormalAngle = Math.atan2(best.mine.ny, best.mine.nx);
+    const desiredNormalAngle = Math.atan2(-best.theirs.ny, -best.theirs.nx);
+    let deltaRad = desiredNormalAngle - currentNormalAngle;
+    deltaRad = Math.atan2(Math.sin(deltaRad), Math.cos(deltaRad)); // normalize to [-PI, PI]
+    target.angle =
+      ((target.angle || 0) + deltaRad * (180 / Math.PI) + 360) % 360;
+
+    // A T-junction (either point tagged `side`) is nudged a couple px past
+    // the target point, into the through-road along its inward direction,
+    // so the branch's fill overlaps and hides the through-road's edge line
+    // instead of leaving it visibly crossing the opening. An end-to-end
+    // join (both plain end points) stays flush at zero offset.
+    const isTJunction = best.mine.side || best.theirs.side;
+    const overlap = isTJunction ? T_JUNCTION_OVERLAP : 0;
+    const destX = best.theirs.x - best.theirs.nx * overlap;
+    const destY = best.theirs.y - best.theirs.ny * overlap;
+
+    const mineAfterRotation = connectionsWorld(target)[best.mineIndex];
+    target.left += destX - mineAfterRotation.x;
+    target.top += destY - mineAfterRotation.y;
+    if (isTJunction) canvas.bringObjectToFront(target);
+    target.setCoords();
+
+    showSnapIndicator(best.theirs);
+  }
+
+  canvas.on("object:moving", (e) => trySnapRoadConnection(e.target));
+  canvas.on("object:modified", clearSnapIndicator);
+  canvas.on("mouse:up", clearSnapIndicator);
 
   // ── Tool mode: grab-to-pan (default) vs select ────────────────────
   // The canvas is much bigger than its viewport, so plain click-drag on
@@ -354,7 +492,12 @@
     return { nx: -uy, ny: ux };
   }
   function tickEndpoints(p, nx, ny) {
-    return [p.x - nx * TICK_HALF, p.y - ny * TICK_HALF, p.x + nx * TICK_HALF, p.y + ny * TICK_HALF];
+    return [
+      p.x - nx * TICK_HALF,
+      p.y - ny * TICK_HALF,
+      p.x + nx * TICK_HALF,
+      p.y + ny * TICK_HALF,
+    ];
   }
 
   let previewLine = null;
@@ -363,7 +506,9 @@
   let previewLabel = null;
 
   function clearMeasurePreview() {
-    [previewLine, previewTick1, previewTick2, previewLabel].forEach((o) => o && canvas.remove(o));
+    [previewLine, previewTick1, previewTick2, previewLabel].forEach(
+      (o) => o && canvas.remove(o),
+    );
     previewLine = previewTick1 = previewTick2 = previewLabel = null;
   }
 
@@ -464,7 +609,9 @@
       selectable: false,
       evented: false,
     });
-    canvas.add(new fabric.Group([line, tick1, tick2, label], { subTargetCheck: false }));
+    canvas.add(
+      new fabric.Group([line, tick1, tick2, label], { subTargetCheck: false }),
+    );
 
     stopMeasuring();
   });
@@ -526,10 +673,15 @@
   // ── Export / clear ───────────────────────────────────────────────
   document.getElementById("btn-export").addEventListener("click", () => {
     if (canvas.getObjects().length === 0) {
-      window.displayNotification("Δεν υπάρχει σκαρίφημα για εξαγωγή.", "warning");
+      window.displayNotification(
+        "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
+        "warning",
+      );
       return;
     }
-    const dataUrl = captureInLightPalette(() => canvas.toDataURL({ format: "png", multiplier: 2 }));
+    const dataUrl = captureInLightPalette(() =>
+      canvas.toDataURL({ format: "png", multiplier: 2 }),
+    );
     const a = document.createElement("a");
     a.href = dataUrl;
     a.download = "skarifima.png";
@@ -539,70 +691,85 @@
   // PDF export crops to the drawn content (plus a small margin) rather than
   // the whole mostly-empty working canvas, and fits it onto a landscape A4
   // page — closer to something you'd actually staple into a report.
-  document.getElementById("btn-export-pdf").addEventListener("click", async () => {
-    const objects = canvas.getObjects();
-    if (objects.length === 0) {
-      window.displayNotification("Δεν υπάρχει σκαρίφημα για εξαγωγή.", "warning");
-      return;
-    }
+  document
+    .getElementById("btn-export-pdf")
+    .addEventListener("click", async () => {
+      const objects = canvas.getObjects();
+      if (objects.length === 0) {
+        window.displayNotification(
+          "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
+          "warning",
+        );
+        return;
+      }
 
-    canvas.discardActiveObject();
+      canvas.discardActiveObject();
 
-    const bounds = objects.reduce(
-      (acc, o) => {
-        const r = o.getBoundingRect();
-        return {
-          left: Math.min(acc.left, r.left),
-          top: Math.min(acc.top, r.top),
-          right: Math.max(acc.right, r.left + r.width),
-          bottom: Math.max(acc.bottom, r.top + r.height),
-        };
-      },
-      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity }
-    );
+      const bounds = objects.reduce(
+        (acc, o) => {
+          const r = o.getBoundingRect();
+          return {
+            left: Math.min(acc.left, r.left),
+            top: Math.min(acc.top, r.top),
+            right: Math.max(acc.right, r.left + r.width),
+            bottom: Math.max(acc.bottom, r.top + r.height),
+          };
+        },
+        { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+      );
 
-    const pad = 30;
-    const cropLeft = Math.max(0, bounds.left - pad);
-    const cropTop = Math.max(0, bounds.top - pad);
-    const cropWidth = Math.min(CANVAS_W, bounds.right + pad) - cropLeft;
-    const cropHeight = Math.min(CANVAS_H, bounds.bottom + pad) - cropTop;
+      const pad = 30;
+      const cropLeft = Math.max(0, bounds.left - pad);
+      const cropTop = Math.max(0, bounds.top - pad);
+      const cropWidth = Math.min(CANVAS_W, bounds.right + pad) - cropLeft;
+      const cropHeight = Math.min(CANVAS_H, bounds.bottom + pad) - cropTop;
 
-    const pngDataUrl = captureInLightPalette(() =>
-      canvas.toDataURL({
-        format: "png",
-        multiplier: 2,
-        left: cropLeft,
-        top: cropTop,
-        width: cropWidth,
-        height: cropHeight,
-      })
-    );
-    const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) => c.charCodeAt(0));
+      const pngDataUrl = captureInLightPalette(() =>
+        canvas.toDataURL({
+          format: "png",
+          multiplier: 2,
+          left: cropLeft,
+          top: cropTop,
+          width: cropWidth,
+          height: cropHeight,
+        }),
+      );
+      const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) =>
+        c.charCodeAt(0),
+      );
 
-    const { PDFDocument } = PDFLib;
-    const doc = await PDFDocument.create();
-    const embedded = await doc.embedPng(pngBytes);
+      const { PDFDocument } = PDFLib;
+      const doc = await PDFDocument.create();
+      const embedded = await doc.embedPng(pngBytes);
 
-    const PAGE = { w: 841.89, h: 595.28 }; // A4 landscape, in points
-    const margin = 30;
-    const avail = { w: PAGE.w - 2 * margin, h: PAGE.h - 2 * margin };
-    const scale = Math.min(avail.w / embedded.width, avail.h / embedded.height);
-    const dw = embedded.width * scale;
-    const dh = embedded.height * scale;
+      const PAGE = { w: 841.89, h: 595.28 }; // A4 landscape, in points
+      const margin = 30;
+      const avail = { w: PAGE.w - 2 * margin, h: PAGE.h - 2 * margin };
+      const scale = Math.min(
+        avail.w / embedded.width,
+        avail.h / embedded.height,
+      );
+      const dw = embedded.width * scale;
+      const dh = embedded.height * scale;
 
-    const page = doc.addPage([PAGE.w, PAGE.h]);
-    page.drawImage(embedded, {
-      x: (PAGE.w - dw) / 2,
-      y: (PAGE.h - dh) / 2,
-      width: dw,
-      height: dh,
+      const page = doc.addPage([PAGE.w, PAGE.h]);
+      page.drawImage(embedded, {
+        x: (PAGE.w - dw) / 2,
+        y: (PAGE.h - dh) / 2,
+        width: dw,
+        height: dh,
+      });
+
+      const bytes = await doc.save();
+      const url = URL.createObjectURL(
+        new Blob([bytes], { type: "application/pdf" }),
+      );
+      Object.assign(document.createElement("a"), {
+        href: url,
+        download: "skarifima.pdf",
+      }).click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     });
-
-    const bytes = await doc.save();
-    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-    Object.assign(document.createElement("a"), { href: url, download: "skarifima.pdf" }).click();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-  });
 
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
