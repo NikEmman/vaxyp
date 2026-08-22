@@ -228,10 +228,11 @@
     const obj = canvas.getActiveObject();
     if (!obj) return;
     obj.rotate(((obj.angle || 0) + deltaDeg + 360) % 360);
+    obj.setCoords(); // recalc the selection border/handles — rotate() alone leaves them stale
     canvas.requestRenderAll();
   }
-  rotateLeftBtn.addEventListener("click", () => rotateSelected(-15));
-  rotateRightBtn.addEventListener("click", () => rotateSelected(15));
+  rotateLeftBtn.addEventListener("click", () => rotateSelected(-45));
+  rotateRightBtn.addEventListener("click", () => rotateSelected(45));
 
   // ── Delete ───────────────────────────────────────────────────────
   function deleteSelected() {
