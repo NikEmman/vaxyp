@@ -11,7 +11,7 @@
   const canvas = new fabric.Canvas("sketch-canvas", {
     width: CANVAS_W,
     height: CANVAS_H,
-    selection: true,
+    selection: false, // default tool mode is pan, not select — see applyToolMode()
   });
 
   // Default selection styling is a pale blue that barely shows up against
@@ -41,8 +41,14 @@
     light: { bg: "#ffffff", ink: "#1b1f24" },
     dark: { bg: "#161c27", ink: "#c8d3e0" },
   };
-  let isDarkTheme = false;
-  let currentPalette = PALETTES.light;
+  // themeInit.js (loaded first, at the very top of <body>) already applied
+  // the "dark" class to <body> before any of this ran, so read it straight
+  // off instead of defaulting to light and waiting to be corrected —
+  // otherwise the canvas itself would still flash light-then-dark even
+  // once the page chrome no longer does.
+  let isDarkTheme = document.body.classList.contains("dark");
+  let currentPalette = isDarkTheme ? PALETTES.dark : PALETTES.light;
+  setShapePalette(currentPalette.bg, currentPalette.ink);
 
   // Swap every object's colors from whichever palette they're currently in
   // to `palette` — matched by value so it works starting from either theme,
@@ -70,13 +76,20 @@
   window.applySketcherTheme = setTheme;
 
   // Runs `captureFn` (expected to read canvas pixels, e.g. toDataURL) with
-  // the canvas forced to the light palette, then restores the current
-  // theme. Both steps are synchronous, so there's no visible flash.
+  // the canvas forced to the light palette and the grid hidden, then
+  // restores both. All steps are synchronous, so there's no visible flash.
   function captureInLightPalette(captureFn) {
     const wasDark = isDarkTheme;
-    if (wasDark) setTheme(false);
+    const wasGridVisible = gridVisible;
+    gridVisible = false;
+    if (wasDark) setTheme(false); // setTheme() re-applies the grid itself
+    else applyGrid();
+
     const result = captureFn();
+
+    gridVisible = wasGridVisible;
     if (wasDark) setTheme(true);
+    else applyGrid();
     return result;
   }
 
@@ -141,16 +154,84 @@
     addShape(shapeKey, e.clientX - rect.left, e.clientY - rect.top);
   });
 
+  // ── Tool mode: grab-to-pan (default) vs select ────────────────────
+  // The canvas is much bigger than its viewport, so plain click-drag on
+  // EMPTY canvas pans it (dragging the surrounding .canvas-scroll div).
+  // Objects themselves are always individually clickable/draggable in
+  // either mode — panning only kicks in when there's nothing under the
+  // cursor. The select tool additionally enables rubber-band multi-select
+  // by dragging over empty space, instead of that panning the canvas.
+  const selectToolBtn = document.getElementById("btn-select-tool");
+  let selectMode = false;
+  let isPanning = false;
+  let panStart = { x: 0, y: 0 };
+  let panScrollStart = { left: 0, top: 0 };
+
+  function applyToolMode() {
+    canvas.selection = selectMode;
+    canvas.defaultCursor = selectMode ? "default" : "grab"; // cursor over empty canvas
+    canvas.hoverCursor = "default"; // plain arrow over an object, either mode
+    if (!selectMode) canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    selectToolBtn.classList.toggle("active", selectMode);
+    selectToolBtn.setAttribute("aria-pressed", String(selectMode));
+  }
+  applyToolMode();
+
+  selectToolBtn.addEventListener("click", () => {
+    selectMode = !selectMode;
+    applyToolMode();
+  });
+
+  canvas.on("mouse:down", (opt) => {
+    if (selectMode || measuring || opt.target) return; // let object selection / rubber-band handle it
+    isPanning = true;
+    panStart = { x: opt.e.clientX, y: opt.e.clientY };
+    panScrollStart = { left: scrollWrap.scrollLeft, top: scrollWrap.scrollTop };
+    canvas.setCursor("grabbing");
+  });
+  canvas.on("mouse:move", (opt) => {
+    if (!isPanning) return;
+    scrollWrap.scrollLeft = panScrollStart.left - (opt.e.clientX - panStart.x);
+    scrollWrap.scrollTop = panScrollStart.top - (opt.e.clientY - panStart.y);
+    canvas.setCursor("grabbing"); // Fabric resets the cursor on its own each move otherwise
+  });
+  canvas.on("mouse:up", () => {
+    if (!isPanning) return;
+    isPanning = false;
+    canvas.setCursor(selectMode ? "default" : "grab");
+  });
+  // Safety net: stop panning even if the button is released outside the
+  // canvas (e.g. dragged over the sidebar), where Fabric's own mouse:up
+  // on the canvas element would never fire.
+  window.addEventListener("mouseup", () => {
+    isPanning = false;
+  });
+
+  // ── Enable rotate/delete only while something is selected ─────────
+  const rotateLeftBtn = document.getElementById("btn-rotate-left");
+  const rotateRightBtn = document.getElementById("btn-rotate-right");
+  const deleteBtn = document.getElementById("btn-delete");
+  function updateSelectionButtons() {
+    const hasSelection = !!canvas.getActiveObject();
+    rotateLeftBtn.disabled = !hasSelection;
+    rotateRightBtn.disabled = !hasSelection;
+    deleteBtn.disabled = !hasSelection;
+  }
+  canvas.on("selection:created", updateSelectionButtons);
+  canvas.on("selection:updated", updateSelectionButtons);
+  canvas.on("selection:cleared", updateSelectionButtons);
+  updateSelectionButtons();
+
   // ── Rotation ─────────────────────────────────────────────────────
   function rotateSelected(deltaDeg) {
     const obj = canvas.getActiveObject();
     if (!obj) return;
     obj.rotate(((obj.angle || 0) + deltaDeg + 360) % 360);
     canvas.requestRenderAll();
-    syncProperties();
   }
-  document.getElementById("btn-rotate-left").addEventListener("click", () => rotateSelected(-15));
-  document.getElementById("btn-rotate-right").addEventListener("click", () => rotateSelected(15));
+  rotateLeftBtn.addEventListener("click", () => rotateSelected(-15));
+  rotateRightBtn.addEventListener("click", () => rotateSelected(15));
 
   // ── Delete ───────────────────────────────────────────────────────
   function deleteSelected() {
@@ -158,41 +239,13 @@
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   }
-  document.getElementById("btn-delete").addEventListener("click", deleteSelected);
+  deleteBtn.addEventListener("click", deleteSelected);
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Delete" && e.key !== "Backspace") return;
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     const obj = canvas.getActiveObject();
     if (obj && obj.isEditing) return; // don't eat backspace while typing in a Textbox
     deleteSelected();
-  });
-
-  // ── Properties panel ─────────────────────────────────────────────
-  const propsEmpty = document.getElementById("properties-empty");
-  const propsBody = document.getElementById("properties-body");
-  const angleInput = document.getElementById("prop-angle");
-
-  function syncProperties() {
-    const obj = canvas.getActiveObject();
-    if (!obj) {
-      propsEmpty.style.display = "";
-      propsBody.style.display = "none";
-      return;
-    }
-    propsEmpty.style.display = "none";
-    propsBody.style.display = "";
-    angleInput.value = Math.round(obj.angle || 0);
-  }
-  canvas.on("selection:created", syncProperties);
-  canvas.on("selection:updated", syncProperties);
-  canvas.on("selection:cleared", syncProperties);
-  canvas.on("object:rotating", syncProperties);
-
-  angleInput.addEventListener("input", (e) => {
-    const obj = canvas.getActiveObject();
-    if (!obj) return;
-    obj.rotate(parseFloat(e.target.value) || 0);
-    canvas.requestRenderAll();
   });
 
   // ── Measurement tool ─────────────────────────────────────────────
@@ -229,8 +282,8 @@
     measurePoints = [];
     clearMeasurePreview();
     measureBtn.classList.remove("active");
-    canvas.selection = true;
-    canvas.defaultCursor = "default";
+    canvas.selection = selectMode;
+    canvas.defaultCursor = selectMode ? "default" : "grab";
     canvas.requestRenderAll();
   }
 
