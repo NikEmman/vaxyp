@@ -79,8 +79,10 @@
   window.applySketcherTheme = setTheme;
 
   // Runs `captureFn` (expected to read canvas pixels, e.g. toDataURL) with
-  // the canvas forced to the light palette and the grid hidden, then
-  // restores both. All steps are synchronous, so there's no visible flash.
+  // the canvas forced to the light palette, the grid hidden, and the
+  // connector availability markers (added further down) removed, then
+  // restores all three. All steps are synchronous, so there's no visible
+  // flash.
   function captureInLightPalette(captureFn) {
     const wasDark = isDarkTheme;
     const wasGridVisible = gridVisible;
@@ -88,12 +90,14 @@
     if (wasDark)
       setTheme(false); // setTheme() re-applies the grid itself
     else applyGrid();
+    clearConnectorMarkers();
 
     const result = captureFn();
 
     gridVisible = wasGridVisible;
     if (wasDark) setTheme(true);
     else applyGrid();
+    refreshConnectorMarkers();
     return result;
   }
 
@@ -128,13 +132,33 @@
   applyGrid();
 
   // ── Adding shapes ────────────────────────────────────────────────
+  // Fabric has no CSS-style z-index — stacking is just each object's
+  // position in the render list. Ground markings (isGroundMarking, set in
+  // shapes.js) always go to the very front and road pieces (roadConnections
+  // set) always go to the very back, on every add — so a marking placed
+  // first still ends up above a road added afterward, and vice versa.
+  // Straight road pieces (road2/road3/oneway) take an optional length in
+  // meters as their second factory argument, defaulting to 20m if omitted;
+  // every other factory just ignores the extra argument. Changing this
+  // input only affects pieces added from here on — it doesn't resize
+  // anything already on the canvas.
+  const segmentLengthInput = document.getElementById("segment-length-input");
+  const segmentLengthValue = document.getElementById("segment-length-value");
+  segmentLengthInput.addEventListener("input", () => {
+    segmentLengthValue.textContent = segmentLengthInput.value;
+  });
+
   function addShape(key, x, y) {
     const factory = SHAPE_FACTORIES[key];
     if (!factory) return;
-    const obj = factory(ppm);
+    const lengthM = parseFloat(segmentLengthInput.value) || undefined;
+    const obj = factory(ppm, lengthM);
     obj.set({ left: x, top: y });
     canvas.add(obj);
+    if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
+    else if (obj.roadConnections) canvas.sendObjectToBack(obj);
     canvas.setActiveObject(obj);
+    refreshConnectorMarkers();
     canvas.requestRenderAll();
   }
 
@@ -252,8 +276,8 @@
   });
 
   // ── Magnetic road connections ──────────────────────────────────────
-  // Road pieces (roadSegment/oneWayRoad/turn/intersection, in shapes.js)
-  // each carry `roadConnections`: local points + outward unit normal for
+  // Road pieces (roadSegment/oneWayRoad/turn, in shapes.js) each carry
+  // `roadConnections`: local points + outward unit normal for
   // every open edge. While dragging one, look for another piece's
   // connection point that's close by and roughly facing it, then snap
   // position AND rotation so the two meet exactly — open edge to open
@@ -318,6 +342,15 @@
     }
 
     const mineConns = connectionsWorld(target);
+    // Drag the piece's own connector markers along with it in real time —
+    // cheap (just the handful of connectors on this one object), unlike a
+    // full refreshConnectorMarkers() rebuild which also has to recheck
+    // every OTHER piece's occupancy and isn't worth doing every tick.
+    mineConns.forEach((c, i) => {
+      const m = target.roadConnections[i] && target.roadConnections[i].marker;
+      if (m) m.set({ left: c.x, top: c.y });
+    });
+
     let best = null;
     canvas.getObjects().forEach((other) => {
       if (
@@ -378,8 +411,72 @@
   }
 
   canvas.on("object:moving", (e) => trySnapRoadConnection(e.target));
-  canvas.on("object:modified", clearSnapIndicator);
+  canvas.on("object:modified", () => {
+    clearSnapIndicator();
+    refreshConnectorMarkers();
+  });
   canvas.on("mouse:up", clearSnapIndicator);
+
+  // ── Connector availability markers ──────────────────────────────────
+  // A small teal ring at every unoccupied road-piece connector — a
+  // lightweight "you can plug in here" hint. Kept as a separate,
+  // non-interactive canvas layer (not baked into each piece's own group,
+  // to avoid any risk of perturbing the precise connector-position math
+  // above) and simply rebuilt from scratch whenever the canvas "settles" —
+  // after adding a piece, after a drag ends, after a delete — rather than
+  // tracked incrementally, which is simpler and plenty cheap at the scale
+  // of a hand-drawn diagram.
+  const CONNECTOR_OCCUPIED_DIST = 5; // px — a real snap lands exactly here or T_JUNCTION_OVERLAP px away
+  const CONNECTOR_OCCUPIED_ANGLE = 10; // ° of normal-facing tolerance to count as "joined"
+  let connectorMarkers = [];
+
+  function clearConnectorMarkers() {
+    connectorMarkers.forEach((m) => canvas.remove(m));
+    connectorMarkers = [];
+  }
+
+  function refreshConnectorMarkers() {
+    clearConnectorMarkers();
+    const withWorld = canvas
+      .getObjects()
+      .filter((o) => o.roadConnections && o.roadConnections.length)
+      .map((obj) => ({ obj, conns: connectionsWorld(obj) }));
+
+    withWorld.forEach(({ obj, conns }) => {
+      conns.forEach((c, i) => {
+        const occupied = withWorld.some(({ obj: other, conns: otherConns }) => {
+          if (other === obj) return false;
+          return otherConns.some((oc) => {
+            const dist = Math.hypot(oc.x - c.x, oc.y - c.y);
+            if (dist > CONNECTOR_OCCUPIED_DIST) return false;
+            const dot = c.nx * oc.nx + c.ny * oc.ny;
+            const angle = Math.acos(Math.max(-1, Math.min(1, dot))) * (180 / Math.PI);
+            return Math.abs(180 - angle) <= CONNECTOR_OCCUPIED_ANGLE;
+          });
+        });
+        if (occupied) return;
+
+        const marker = new fabric.Circle({
+          left: c.x,
+          top: c.y,
+          radius: 5,
+          originX: "center",
+          originY: "center",
+          fill: "rgba(14,165,165,0.25)",
+          stroke: "#0ea5a5",
+          strokeWidth: 1.5,
+          selectable: false,
+          evented: false,
+        });
+        marker.isConnectorIndicator = true;
+        canvas.add(marker);
+        canvas.bringObjectToFront(marker);
+        connectorMarkers.push(marker);
+        obj.roadConnections[i].marker = marker; // lets a live drag reposition it directly, see trySnapRoadConnection
+      });
+    });
+    canvas.requestRenderAll();
+  }
 
   // ── Tool mode: grab-to-pan (default) vs select ────────────────────
   // The canvas is much bigger than its viewport, so plain click-drag on
@@ -465,6 +562,7 @@
   function deleteSelected() {
     canvas.getActiveObjects().forEach((o) => canvas.remove(o));
     canvas.discardActiveObject();
+    refreshConnectorMarkers(); // a neighbor's connector may now be free again
     canvas.requestRenderAll();
   }
   deleteBtn.addEventListener("click", deleteSelected);
@@ -694,7 +792,10 @@
   document
     .getElementById("btn-export-pdf")
     .addEventListener("click", async () => {
-      const objects = canvas.getObjects();
+      // Excludes the connector availability markers — they're a transient
+      // editing aid, not part of the drawing, and being centered right on
+      // a piece's own boundary they'd otherwise pad the crop by a few px.
+      const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
       if (objects.length === 0) {
         window.displayNotification(
           "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
@@ -774,6 +875,7 @@
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
     canvas.clear();
+    connectorMarkers = []; // canvas.clear() already removed them from the canvas
     applyGrid();
   });
 })();
