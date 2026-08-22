@@ -31,13 +31,23 @@ function laneMarking(x1, y1, x2, y2, dashed) {
 
 const ROAD_LANE_WIDTH = 3; // meters
 const ROAD_LENGTH_M = 20;
+const DOUBLE_LINE_GAP_M = 0.15; // gap between the two lines of a double/passing-zone divider
 
 // Shared by roadSegment() and oneWayRoad(): the fill slab plus the
-// dashed dividers between lanes (n lanes need n-1 dividers either way).
+// dividers between lanes (n lanes need n-1 dividers either way).
 // Deliberately open-ended: only the left/right edges are stroked, not the
 // top/bottom — so two segments butted end-to-end read as one continuous
 // road instead of two boxes with a seam between them.
-function roadBase(ppm, lanes, lengthM = ROAD_LENGTH_M) {
+//
+// `dividerStyle` controls how each interior divider is drawn:
+//   "dashed"       — the default: ordinary lane line, passing allowed.
+//   "double-solid" — two solid lines: no passing from either lane.
+//   "passing-zone" — one solid + one dashed line, straddling the nominal
+//                    divider position (same gap as "double-solid"). By
+//                    convention the solid line sits on the lower-x side —
+//                    that lane can't cross to pass, while the lane on the
+//                    dashed line's side can.
+function roadBase(ppm, lanes, lengthM = ROAD_LENGTH_M, dividerStyle = "dashed") {
   const w = lanes * ROAD_LANE_WIDTH * ppm;
   const h = lengthM * ppm;
 
@@ -54,9 +64,18 @@ function roadBase(ppm, lanes, lengthM = ROAD_LENGTH_M) {
   const rightEdge = laneMarking(w / 2, -h / 2, w / 2, h / 2, false);
 
   const parts = [fill, leftEdge, rightEdge];
+  const gap = (DOUBLE_LINE_GAP_M * ppm) / 2;
   for (let i = 1; i < lanes; i++) {
     const x = -w / 2 + i * ROAD_LANE_WIDTH * ppm;
-    parts.push(laneMarking(x, -h / 2, x, h / 2, true));
+    if (dividerStyle === "double-solid") {
+      parts.push(laneMarking(x - gap, -h / 2, x - gap, h / 2, false));
+      parts.push(laneMarking(x + gap, -h / 2, x + gap, h / 2, false));
+    } else if (dividerStyle === "passing-zone") {
+      parts.push(laneMarking(x - gap, -h / 2, x - gap, h / 2, false));
+      parts.push(laneMarking(x + gap, -h / 2, x + gap, h / 2, true));
+    } else {
+      parts.push(laneMarking(x, -h / 2, x, h / 2, true));
+    }
   }
 
   return { parts, w, h };
@@ -119,8 +138,8 @@ function roadSideConnections(w) {
   ];
 }
 
-function roadSegment(ppm, lanes, lengthM) {
-  const { parts, w, h } = roadBase(ppm, lanes, lengthM);
+function roadSegment(ppm, lanes, lengthM, dividerStyle) {
+  const { parts, w, h } = roadBase(ppm, lanes, lengthM, dividerStyle);
   const group = new fabric.Group(parts, {
     originX: "center",
     originY: "center",
@@ -131,6 +150,19 @@ function roadSegment(ppm, lanes, lengthM) {
 
 function createRoad2(ppm, lengthM) {
   return roadSegment(ppm, 2, lengthM);
+}
+
+// Same 2-lane road, but with no passing from either lane: a solid double
+// line instead of the ordinary dashed divider.
+function createRoad2DoubleLine(ppm, lengthM) {
+  return roadSegment(ppm, 2, lengthM, "double-solid");
+}
+
+// Same 2-lane road, but passing is only allowed from one side: a solid
+// line (can't cross) paired with a dashed line (can) instead of a single
+// dashed divider. See roadBase()'s dividerStyle doc for which lane is which.
+function createRoad2PassingZone(ppm, lengthM) {
+  return roadSegment(ppm, 2, lengthM, "passing-zone");
 }
 
 function createRoad3(ppm, lengthM) {
@@ -149,6 +181,61 @@ function createOneWay(ppm, lengthM) {
     subTargetCheck: false,
   });
   return setRoadConnections(group, [...roadEndConnections(w, h), ...roadSideConnections(w)]);
+}
+
+// Median strip: a non-drivable divider, same shape/length convention as a
+// road piece (adjustable length, open-ended top/bottom) so it slots
+// in-line between two straight segments — but no roadSideConnections,
+// since (unlike a real road) plugging something into its side isn't a
+// thing. Hatched instead of plain-filled to read as "not pavement".
+const MEDIAN_WIDTH_M = 1;
+const MEDIAN_HATCH_SPACING_M = 1.2;
+
+function createMedianStrip(ppm, lengthM) {
+  const w = MEDIAN_WIDTH_M * ppm;
+  const h = (lengthM || ROAD_LENGTH_M) * ppm;
+
+  const fill = new fabric.Rect({
+    width: w,
+    height: h,
+    fill: SHAPE_FILL,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const leftEdge = laneMarking(-w / 2, -h / 2, -w / 2, h / 2, false);
+  const rightEdge = laneMarking(w / 2, -h / 2, w / 2, h / 2, false);
+
+  // 45° hatch lines (y - x = c, direction (1,1)), each clipped exactly to
+  // the strip's own rectangle by solving for where it enters/exits —
+  // NOT drawn oversized with a clipPath: a clipPath only crops what's
+  // rendered, not the line's own bounding box, so the group (and its
+  // selection outline) would end up sized to the oversized lines instead
+  // of the visible strip.
+  const spacing = MEDIAN_HATCH_SPACING_M * ppm;
+  const diagExtent = h / 2 + w / 2;
+  const hatchLines = [];
+  for (let c = -diagExtent; c <= diagExtent; c += spacing) {
+    const tMin = Math.max(-w / 2, -h / 2 - c);
+    const tMax = Math.min(w / 2, h / 2 - c);
+    if (tMin >= tMax) continue; // grazes only a corner point — nothing to draw
+    hatchLines.push(
+      new fabric.Line([tMin, tMin + c, tMax, tMax + c], {
+        stroke: LINE_COLOR,
+        strokeWidth: 1,
+        selectable: false,
+        evented: false,
+      })
+    );
+  }
+
+  const group = new fabric.Group([fill, ...hatchLines, leftEdge, rightEdge], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+  return setRoadConnections(group, roadEndConnections(w, h));
 }
 
 // Acceleration/merge lane: one lane wide, running parallel to a through-
@@ -219,29 +306,75 @@ function createSpeedingLaneMirrored(ppm) {
   return speedingLane(ppm, true);
 }
 
-function createTurn(ppm) {
-  // Quarter-annulus: a road that bends 90°, built from an SVG arc path.
+// Bounding-box center of a circular sector — radius rInner..rOuter,
+// sweeping angle 0..bendDeg around a circle centered at the local origin.
+// Needed to re-center turn()'s arc path for ANY bend angle: unlike a
+// rectangle, an arc's true extent isn't just its two endpoints — a sweep
+// that crosses a cardinal angle (90°, 180°, ...) bulges further out than
+// either one (a 135° turn's outer arc reaches its lowest point exactly at
+// the 90° mark partway through the sweep, well past where either the entry
+// or exit cap sits).
+function sectorBBoxCenter(bendDeg, rInner, rOuter) {
+  const angles = [0, bendDeg];
+  [90, 180, 270].forEach((a) => {
+    if (a > 0 && a < bendDeg) angles.push(a);
+  });
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  angles.forEach((a) => {
+    const rad = (a * Math.PI) / 180;
+    [rInner, rOuter].forEach((r) => {
+      const x = r * Math.cos(rad);
+      const y = r * Math.sin(rad);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    });
+  });
+  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+}
+
+// A road that bends `bendDeg` degrees over `lanes` lanes — an annulus
+// sector built from an SVG arc path swept around a circle centered at the
+// local origin, then shifted onto its own true bounding-box center (see
+// sectorBBoxCenter above) so it rotates in place like every other shape
+// factory here. `doubleLine` swaps each dashed lane divider for a pair of
+// solid lines with a small gap — a real "no passing" double-line marking.
+function turn(ppm, bendDeg, lanes = 2, doubleLine = false) {
   const laneWidth = 3;
-  const lanes = 2;
   const innerR = 4 * ppm;
   const outerR = innerR + lanes * laneWidth * ppm;
-  const midR = (innerR + outerR) / 2;
-  // Draw the arc in a corner (0,0)-(outerR,outerR), then shift every point by
-  // -outerR/2 so the path's own bounding box — and the group Fabric derives
-  // from it — is centered on the origin, same as the other shape factories.
-  const c = outerR / 2;
+  const midR = (innerR + outerR) / 2; // where a connecting road's centerline meets it — not necessarily a lane divider once lanes != 2
+
+  const rad = (bendDeg * Math.PI) / 180;
+  const off = sectorBBoxCenter(bendDeg, innerR, outerR);
+  const pt = (r, a) => ({ x: r * Math.cos(a) - off.x, y: r * Math.sin(a) - off.y });
+  // A standalone arc stroke at radius r, sweeping entry (angle 0) to exit
+  // (angle rad) — used as-is for the outer/inner walls and lane dividers.
+  const arcPath = (r) => {
+    const start = pt(r, 0);
+    const end = pt(r, rad);
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 0 1 ${end.x} ${end.y}`;
+  };
+
+  const innerEntry = pt(innerR, 0);
+  const outerEntry = pt(outerR, 0);
+  const outerExit = pt(outerR, rad);
+  const innerExit = pt(innerR, rad);
+  const midEntry = pt(midR, 0);
+  const midExit = pt(midR, rad);
 
   const d = [
-    `M ${innerR - c} ${-c}`,
-    `L ${outerR - c} ${-c}`,
-    `A ${outerR} ${outerR} 0 0 1 ${-c} ${outerR - c}`,
-    `L ${-c} ${innerR - c}`,
-    `A ${innerR} ${innerR} 0 0 0 ${innerR - c} ${-c}`,
+    `M ${innerEntry.x} ${innerEntry.y}`,
+    `L ${outerEntry.x} ${outerEntry.y}`,
+    `A ${outerR} ${outerR} 0 0 1 ${outerExit.x} ${outerExit.y}`,
+    `L ${innerExit.x} ${innerExit.y}`,
+    `A ${innerR} ${innerR} 0 0 0 ${innerEntry.x} ${innerEntry.y}`,
     "Z",
   ].join(" ");
 
   // Fill only, no stroke: the outline is drawn separately below so the two
-  // straight ends (top and left) — the faces that connect to a straight
+  // straight ends (entry and exit) — the faces that connect to a straight
   // road segment — stay open instead of capped.
   const fill = new fabric.Path(d, {
     fill: SHAPE_FILL,
@@ -249,31 +382,111 @@ function createTurn(ppm) {
     evented: false,
   });
 
-  const outerArc = new fabric.Path(
-    `M ${outerR - c} ${-c} A ${outerR} ${outerR} 0 0 1 ${-c} ${outerR - c}`,
-    { fill: "", stroke: LINE_COLOR, strokeWidth: 2, selectable: false, evented: false }
-  );
-  const innerArc = new fabric.Path(
-    `M ${innerR - c} ${-c} A ${innerR} ${innerR} 0 0 1 ${-c} ${innerR - c}`,
-    { fill: "", stroke: LINE_COLOR, strokeWidth: 2, selectable: false, evented: false }
-  );
+  const outerArc = new fabric.Path(arcPath(outerR), {
+    fill: "",
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    selectable: false,
+    evented: false,
+  });
+  const innerArc = new fabric.Path(arcPath(innerR), {
+    fill: "",
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    selectable: false,
+    evented: false,
+  });
 
-  const centerline = new fabric.Path(
-    `M ${midR - c} ${-c} A ${midR} ${midR} 0 0 1 ${-c} ${midR - c}`,
-    { fill: "", stroke: LINE_COLOR, strokeWidth: 2, strokeDashArray: [10, 8], selectable: false, evented: false }
-  );
+  const parts = [fill, outerArc, innerArc];
+  for (let i = 1; i < lanes; i++) {
+    const dividerR = innerR + i * laneWidth * ppm;
+    if (doubleLine) {
+      const gap = (DOUBLE_LINE_GAP_M * ppm) / 2;
+      [dividerR - gap, dividerR + gap].forEach((r) => {
+        parts.push(
+          new fabric.Path(arcPath(r), {
+            fill: "",
+            stroke: LINE_COLOR,
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+          })
+        );
+      });
+    } else {
+      parts.push(
+        new fabric.Path(arcPath(dividerR), {
+          fill: "",
+          stroke: LINE_COLOR,
+          strokeWidth: 2,
+          strokeDashArray: [10, 8],
+          selectable: false,
+          evented: false,
+        })
+      );
+    }
+  }
 
-  const group = new fabric.Group([fill, outerArc, innerArc, centerline], {
+  const group = new fabric.Group(parts, {
     originX: "center",
     originY: "center",
     subTargetCheck: false,
   });
-  // The two straight caps: "north" (continues up, toward a road that feeds
-  // into the turn) and "west" (continues left, where the turn exits).
+  // Entry normal points backward (away from the piece — where an incoming
+  // road attaches, continuing in the direction it was already headed);
+  // exit normal points forward, continuing on in the bent direction.
   return setRoadConnections(group, [
-    { x: midR - c, y: -c, nx: 0, ny: -1 },
-    { x: -c, y: midR - c, nx: -1, ny: 0 },
+    { x: midEntry.x, y: midEntry.y, nx: 0, ny: -1 },
+    { x: midExit.x, y: midExit.y, nx: -Math.sin(rad), ny: Math.cos(rad) },
   ]);
+}
+
+function createTurn(ppm) {
+  return turn(ppm, 90);
+}
+
+function createTurn45(ppm) {
+  return turn(ppm, 45);
+}
+
+function createTurn135(ppm) {
+  return turn(ppm, 135);
+}
+
+function createTurn45_3(ppm) {
+  return turn(ppm, 45, 3);
+}
+
+function createTurn90_3(ppm) {
+  return turn(ppm, 90, 3);
+}
+
+function createTurn135_3(ppm) {
+  return turn(ppm, 135, 3);
+}
+
+function createTurn45_1(ppm) {
+  return turn(ppm, 45, 1);
+}
+
+function createTurn90_1(ppm) {
+  return turn(ppm, 90, 1);
+}
+
+function createTurn135_1(ppm) {
+  return turn(ppm, 135, 1);
+}
+
+function createTurn45_2Double(ppm) {
+  return turn(ppm, 45, 2, true);
+}
+
+function createTurn90_2Double(ppm) {
+  return turn(ppm, 90, 2, true);
+}
+
+function createTurn135_2Double(ppm) {
+  return turn(ppm, 135, 2, true);
 }
 
 // Roundabout: a ring of `lanes` lanes around a solid central island, with
@@ -686,11 +899,25 @@ function createText() {
 
 const SHAPE_FACTORIES = {
   road2: createRoad2,
+  road2doubleline: createRoad2DoubleLine,
+  road2passingzone: createRoad2PassingZone,
   road3: createRoad3,
   oneway: createOneWay,
+  medianstrip: createMedianStrip,
   speedlane: createSpeedingLane,
   speedlanemirror: createSpeedingLaneMirrored,
   turn: createTurn,
+  turn45: createTurn45,
+  turn135: createTurn135,
+  turn45_3: createTurn45_3,
+  turn90_3: createTurn90_3,
+  turn135_3: createTurn135_3,
+  turn45_1: createTurn45_1,
+  turn90_1: createTurn90_1,
+  turn135_1: createTurn135_1,
+  turn45_2double: createTurn45_2Double,
+  turn90_2double: createTurn90_2Double,
+  turn135_2double: createTurn135_2Double,
   roundabout1: createRoundabout1,
   roundabout2: createRoundabout2,
   roundabout3: createRoundabout3,

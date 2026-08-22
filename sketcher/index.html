@@ -267,6 +267,7 @@
           <option value="roads">Ευθείες</option>
           <option value="turns">Στροφές</option>
           <option value="special">Ειδικά Τμήματα Δρόμου</option>
+          <option value="medians">Νησίδες</option>
           <option value="markings">Διαγραμμίσεις</option>
           <option value="signs">Πινακίδες</option>
           <option value="vehicles">Οχήματα</option>
@@ -283,6 +284,33 @@
               <path d="M4 2v20M20 2v20M12 2v20" stroke-dasharray="2 2" />
             </svg>
             Οδόστρωμα 2 λωρίδων
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="road2doubleline"
+            data-categories="roads"
+            title="Διπλή συνεχής γραμμή: απαγορευμένο το προσπέρασμα και από τις δύο λωρίδες"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 2v20M20 2v20" />
+              <path d="M11 2v20M13 2v20" />
+            </svg>
+            Οδόστρωμα 2 λωρίδων (Διπλή Γραμμή)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="road2passingzone"
+            data-categories="roads"
+            title="Ζώνη προσπέρασης: η λωρίδα δίπλα στη διακεκομμένη γραμμή επιτρέπεται να προσπεράσει, η άλλη όχι"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 2v20M20 2v20" />
+              <path d="M11 2v20" />
+              <path d="M13 2v20" stroke-dasharray="2 2" />
+            </svg>
+            Οδόστρωμα 2 λωρίδων (Ζώνη Προσπέρασης)
           </div>
           <div
             class="palette-item"
@@ -394,13 +422,147 @@
           <div
             class="palette-item"
             draggable="true"
+            data-shape="medianstrip"
+            data-categories="medians"
+            title="Μη διαβατή νησίδα διαχωρισμού — τοποθετείται ανάμεσα σε ευθεία τμήματα δρόμου"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M8 2v20M16 2v20" />
+              <path d="M8 6l8-4M8 12l8-4M8 18l8-4M9 22l7-3.5" />
+            </svg>
+            Νησίδα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
             data-shape="turn"
             data-categories="turns"
           >
             <svg viewBox="0 0 24 24">
               <path d="M4 20V10a8 8 0 0 1 8-8h10" />
             </svg>
-            Στροφή
+            Στροφή 90° (2 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn45"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12l9-9" />
+            </svg>
+            Στροφή 45° (2 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn135"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12a8 8 0 0 1 8-8l7 7" />
+            </svg>
+            Στροφή 135° (2 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn45_3"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12l9-9" />
+            </svg>
+            Στροφή 45° (3 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn90_3"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10a8 8 0 0 1 8-8h10" />
+            </svg>
+            Στροφή 90° (3 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn135_3"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12a8 8 0 0 1 8-8l7 7" />
+            </svg>
+            Στροφή 135° (3 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn45_1"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12l9-9" />
+            </svg>
+            Στροφή 45° (1 Λωρίδας)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn90_1"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10a8 8 0 0 1 8-8h10" />
+            </svg>
+            Στροφή 90° (1 Λωρίδας)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn135_1"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12a8 8 0 0 1 8-8l7 7" />
+            </svg>
+            Στροφή 135° (1 Λωρίδας)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn45_2double"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12l9-9" />
+            </svg>
+            Στροφή 45° (2 Λωρίδων, Διπλή Γραμμή)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn90_2double"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10a8 8 0 0 1 8-8h10" />
+            </svg>
+            Στροφή 90° (2 Λωρίδων, Διπλή Γραμμή)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn135_2double"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12a8 8 0 0 1 8-8l7 7" />
+            </svg>
+            Στροφή 135° (2 Λωρίδων, Διπλή Γραμμή)
           </div>
           <div
             class="palette-item"
@@ -661,7 +823,9 @@
             class="segment-length-control"
             title="Μήκος των νέων ευθειών τμημάτων δρόμου που θα προστεθούν στο σκαρίφημα"
           >
-            <label for="segment-length-input">Μήκος τμήματος ευθείας: </label>
+            <label for="segment-length-input"
+              >Μήκος τμήματος ευθείας ή νησίδας:
+            </label>
             <input
               type="range"
               id="segment-length-input"

@@ -243,10 +243,17 @@
       if (searching) {
         const text = paletteSearchText.get(item);
         const words = paletteSearchWords.get(item);
-        visible = terms.every(
-          (term) =>
-            text.includes(term) || words.some((w) => sharesStem(term, w)),
-        );
+        visible = terms.every((term) => {
+          // A bare number ("3", meaning "3 lanes") must match as a whole
+          // number, not a raw substring — otherwise it also matches inside
+          // "135°" (which contains "3"), surfacing an unrelated turn purely
+          // because its angle happens to contain that digit. `words` still
+          // has punctuation attached ("(3", "λωριδων)"), so a word-boundary
+          // regex is what actually isolates the digit run, not exact
+          // equality against those words.
+          if (/^\d+$/.test(term)) return new RegExp(`\\b${term}\\b`).test(text);
+          return text.includes(term) || words.some((w) => sharesStem(term, w));
+        });
       } else {
         const categories = item.dataset.categories
           ? item.dataset.categories.split(/\s+/)
