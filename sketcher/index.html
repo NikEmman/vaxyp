@@ -31,18 +31,40 @@
         background-color: var(--background-white);
         border-right: 1px solid var(--border-color);
         padding: 1em;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .palette-search {
+        width: 100%;
+        margin-bottom: 0.6em;
+        flex-shrink: 0;
+        padding: 0.5em;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--background-white);
+        color: var(--text-dark);
+        box-sizing: border-box;
+      }
+      .palette-category-select {
+        width: 100%;
+        margin-bottom: 0.8em;
+        flex-shrink: 0;
+      }
+      .palette-category-select:disabled {
+        opacity: 0.5;
+      }
+      .palette-items {
+        flex: 1;
+        min-height: 0;
         overflow-y: auto;
       }
-      .palette h3 {
+      .palette-empty {
         font-size: 0.85em;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
         color: var(--text-dark);
         opacity: 0.6;
-        margin: 1em 0 0.5em;
-      }
-      .palette h3:first-child {
-        margin-top: 0;
+        padding: 0.5em 0.2em;
+        display: none;
       }
       .palette-item {
         display: flex;
@@ -217,54 +239,116 @@
     <div class="sketcher-layout">
       <!-- Left: element palette -->
       <aside class="palette" id="palette">
-        <h3>Δρόμος</h3>
-        <div class="palette-item" draggable="true" data-shape="road2">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 2v20M20 2v20M12 2v20" stroke-dasharray="2 2" />
-          </svg>
-          Οδόστρωμα 2 λωρίδων
-        </div>
-        <div class="palette-item" draggable="true" data-shape="road3">
-          <svg viewBox="0 0 24 24">
-            <path d="M2 2v20M22 2v20M9 2v20M15 2v20" stroke-dasharray="2 2" />
-          </svg>
-          Οδόστρωμα 3 λωρίδων
-        </div>
-        <div class="palette-item" draggable="true" data-shape="turn">
-          <svg viewBox="0 0 24 24"><path d="M4 20V10a8 8 0 0 1 8-8h10" /></svg>
-          Στροφή
-        </div>
-        <div class="palette-item" draggable="true" data-shape="intersection">
-          <svg viewBox="0 0 24 24"><path d="M2 12h20M12 2v20" /></svg>
-          Διασταύρωση
-        </div>
-        <div class="palette-item" draggable="true" data-shape="crosswalk">
-          <svg viewBox="0 0 24 24">
-            <path d="M6 3v18M10 3v18M14 3v18M18 3v18" />
-          </svg>
-          Διάβαση πεζών
-        </div>
-
-        <h3>Οχήματα</h3>
-        <div class="palette-item" draggable="true" data-shape="car">
-          <svg viewBox="0 0 24 24">
-            <path
-              d="M3 16l1.5-5A2 2 0 0 1 6.4 9.5h11.2a2 2 0 0 1 1.9 1.5L21 16v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3z"
-            />
-          </svg>
-          Επιβατικό
-        </div>
-        <div class="palette-item" draggable="true" data-shape="truck">
-          <svg viewBox="0 0 24 24">
-            <path d="M2 7h11v10H2zM13 11h5l3 3v3h-8z" />
-          </svg>
-          Φορτηγό
-        </div>
-
-        <h3>Άλλα</h3>
-        <div class="palette-item" draggable="true" data-shape="text">
-          <svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14" /></svg>
-          Κείμενο
+        <input
+          type="search"
+          class="palette-search"
+          id="palette-search"
+          placeholder="Αναζήτηση…"
+          autocomplete="off"
+        />
+        <select class="palette-category-select" id="palette-category">
+          <option value="all">Όλα τα στοιχεία</option>
+          <option value="roads">Ευθείες</option>
+          <option value="turns">Στροφές</option>
+          <option value="intersections">Διασταυρώσεις</option>
+          <option value="markings">Διαγραμμίσεις</option>
+          <option value="signs">Πινακίδες</option>
+          <option value="vehicles">Οχήματα</option>
+          <option value="other">Άλλα</option>
+        </select>
+        <div class="palette-items" id="palette-items">
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="road2"
+            data-categories="roads"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 2v20M20 2v20M12 2v20" stroke-dasharray="2 2" />
+            </svg>
+            Οδόστρωμα 2 λωρίδων
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="road3"
+            data-categories="roads"
+          >
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M2 2v20M22 2v20M9 2v20M15 2v20"
+                stroke-dasharray="2 2"
+              />
+            </svg>
+            Οδόστρωμα 3 λωρίδων
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn"
+            data-categories="turns"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10a8 8 0 0 1 8-8h10" />
+            </svg>
+            Στροφή
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="intersection"
+            data-categories="intersections"
+          >
+            <svg viewBox="0 0 24 24"><path d="M2 12h20M12 2v20" /></svg>
+            Διασταύρωση
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="crosswalk"
+            data-categories="markings"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M6 3v18M10 3v18M14 3v18M18 3v18" />
+            </svg>
+            Διάβαση πεζών
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="car"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M3 16l1.5-5A2 2 0 0 1 6.4 9.5h11.2a2 2 0 0 1 1.9 1.5L21 16v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3z"
+              />
+            </svg>
+            Επιβατικό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="truck"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M2 7h11v10H2zM13 11h5l3 3v3h-8z" />
+            </svg>
+            Φορτηγό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="text"
+            data-categories="other"
+          >
+            <svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14" /></svg>
+            Κείμενο
+          </div>
+          <div class="palette-empty" id="palette-empty">
+            Δεν υπάρχουν ακόμα στοιχεία σε αυτή την κατηγορία.
+          </div>
         </div>
       </aside>
 

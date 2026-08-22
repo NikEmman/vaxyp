@@ -130,7 +130,8 @@
     canvas.requestRenderAll();
   }
 
-  document.querySelectorAll(".palette-item").forEach((item) => {
+  const paletteItems = document.querySelectorAll(".palette-item");
+  paletteItems.forEach((item) => {
     // Drag from the sidebar onto the canvas.
     item.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", item.dataset.shape);
@@ -143,6 +144,94 @@
       addShape(item.dataset.shape, x, y);
     });
   });
+
+  // ── Palette category filter + search ───────────────────────────────
+  // Every palette item lists its category(-ies) in data-categories
+  // (space-separated — an item may belong to more than one). Picking a
+  // category from the select just toggles which items are visible; the
+  // drag/click listeners above stay attached to every item regardless.
+  // Typing in the search box takes priority over the category select —
+  // it matches across every item so you don't have to know which
+  // category something lives in before you can find it.
+  const categorySelect = document.getElementById("palette-category");
+  const searchInput = document.getElementById("palette-search");
+  const paletteEmpty = document.getElementById("palette-empty");
+
+  // Strip Greek tonos/diaeresis marks and normalize final sigma, so
+  // "στροφη" matches "Στροφή" and "οδος"/"οδός" are treated the same.
+  function normalizeGreek(str) {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/ς/g, "σ");
+  }
+
+  // Greek words decline by suffix ("λωρίδων" vs a search for "λωρίδες"),
+  // so a plain substring test misses reasonable queries. As a fallback,
+  // treat a query term as matching a word if they share a long-enough
+  // common prefix — cheap stand-in for stemming.
+  function sharesStem(term, word) {
+    const len = Math.min(term.length, word.length);
+    let lcp = 0;
+    while (lcp < len && term[lcp] === word[lcp]) lcp++;
+    return lcp >= 3 && lcp / term.length >= 0.6;
+  }
+
+  // A category's own label ("Ευθείες") should also find its items, not
+  // just each item's own label — build id → label from the select options.
+  const categoryLabels = {};
+  categorySelect.querySelectorAll("option").forEach((opt) => {
+    if (opt.value !== "all") categoryLabels[opt.value] = opt.textContent.trim();
+  });
+
+  const paletteSearchText = new Map();
+  const paletteSearchWords = new Map();
+  paletteItems.forEach((item) => {
+    const categories = item.dataset.categories
+      ? item.dataset.categories.split(/\s+/)
+      : [];
+    const labels = categories.map((c) => categoryLabels[c] || "").join(" ");
+    const text = normalizeGreek(`${item.textContent.trim()} ${labels}`.trim());
+    paletteSearchText.set(item, text);
+    paletteSearchWords.set(item, text.split(/\s+/));
+  });
+
+  function applyPaletteFilters() {
+    const query = normalizeGreek(searchInput.value.trim());
+    const searching = query.length > 0;
+    categorySelect.disabled = searching;
+
+    const terms = searching ? query.split(/\s+/) : [];
+    const category = categorySelect.value;
+    let visibleCount = 0;
+
+    paletteItems.forEach((item) => {
+      let visible;
+      if (searching) {
+        const text = paletteSearchText.get(item);
+        const words = paletteSearchWords.get(item);
+        visible = terms.every(
+          (term) =>
+            text.includes(term) || words.some((w) => sharesStem(term, w))
+        );
+      } else {
+        const categories = item.dataset.categories
+          ? item.dataset.categories.split(/\s+/)
+          : [];
+        visible = category === "all" || categories.includes(category);
+      }
+      item.style.display = visible ? "" : "none";
+      if (visible) visibleCount++;
+    });
+    paletteEmpty.style.display = visibleCount === 0 ? "" : "none";
+    paletteEmpty.textContent = searching
+      ? "Δεν βρέθηκαν στοιχεία."
+      : "Δεν υπάρχουν ακόμα στοιχεία σε αυτή την κατηγορία.";
+  }
+  categorySelect.addEventListener("change", applyPaletteFilters);
+  searchInput.addEventListener("input", applyPaletteFilters);
+  applyPaletteFilters();
 
   const scrollWrap = document.getElementById("canvas-scroll");
   scrollWrap.addEventListener("dragover", (e) => e.preventDefault());
