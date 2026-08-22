@@ -148,18 +148,24 @@
     segmentLengthValue.textContent = segmentLengthInput.value;
   });
 
+  // Shape factories are normally synchronous, but the traffic-sign
+  // factories (shapes.js) load a raster image via fabric.Image.fromURL and
+  // return a Promise instead — Promise.resolve() passes a plain object
+  // through unchanged (resolving on the next microtask) so both kinds work
+  // here without telling them apart.
   function addShape(key, x, y) {
     const factory = SHAPE_FACTORIES[key];
     if (!factory) return;
     const lengthM = parseFloat(segmentLengthInput.value) || undefined;
-    const obj = factory(ppm, lengthM);
-    obj.set({ left: x, top: y });
-    canvas.add(obj);
-    if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
-    else if (obj.roadConnections) canvas.sendObjectToBack(obj);
-    canvas.setActiveObject(obj);
-    refreshConnectorMarkers();
-    canvas.requestRenderAll();
+    Promise.resolve(factory(ppm, lengthM)).then((obj) => {
+      obj.set({ left: x, top: y });
+      canvas.add(obj);
+      if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
+      else if (obj.roadConnections) canvas.sendObjectToBack(obj);
+      canvas.setActiveObject(obj);
+      refreshConnectorMarkers();
+      canvas.requestRenderAll();
+    });
   }
 
   const paletteItems = document.querySelectorAll(".palette-item");

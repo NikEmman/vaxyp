@@ -95,6 +95,12 @@
         stroke-linecap: round;
         stroke-linejoin: round;
       }
+      .palette-item img {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        object-fit: contain;
+      }
 
       /* ── Canvas area ────────────────────────────────────────── */
       .canvas-wrap {
@@ -435,6 +441,32 @@
           <div
             class="palette-item"
             draggable="true"
+            data-shape="trafficislandrect"
+            data-categories="medians"
+            title="Ορθογώνια νησίδα — αυτόνομη, τοποθετείται ελεύθερα σε διασταυρώσεις"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="6" width="18" height="12" />
+              <path d="M6 18L18 6M6 12l6-6M12 18l6-6" />
+            </svg>
+            Ορθογώνια Νησίδα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="trafficislandtriangle"
+            data-categories="medians"
+            title="Τριγωνική νησίδα — αυτόνομη, τοποθετείται ελεύθερα σε διασταυρώσεις"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3L21 20H3Z" />
+              <path d="M9 20l3-11M15 20l-3-11" />
+            </svg>
+            Τριγωνική Νησίδα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
             data-shape="turn"
             data-categories="turns"
           >
@@ -567,13 +599,35 @@
           <div
             class="palette-item"
             draggable="true"
-            data-shape="crosswalk"
+            data-shape="crosswalk1"
+            data-categories="markings"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M9 3v18M13 3v18M17 3v18" />
+            </svg>
+            Διάβαση Πεζών (1 Λωρίδας)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="crosswalk2"
             data-categories="markings"
           >
             <svg viewBox="0 0 24 24">
               <path d="M6 3v18M10 3v18M14 3v18M18 3v18" />
             </svg>
-            Διάβαση πεζών
+            Διάβαση Πεζών (2 Λωρίδων)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="crosswalk3"
+            data-categories="markings"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 3v18M8 3v18M12 3v18M16 3v18M20 3v18" />
+            </svg>
+            Διάβαση Πεζών (3 Λωρίδων)
           </div>
           <div
             class="palette-item"
