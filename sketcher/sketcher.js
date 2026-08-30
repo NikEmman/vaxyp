@@ -9,6 +9,9 @@
   let gridVisible = true;
   let measuring = false;
   let measurePoints = [];
+  let erasing = false;
+  const undoStack = [];
+  const UNDO_LIMIT = 50;
 
   const canvas = new fabric.Canvas("sketch-canvas", {
     width: CANVAS_W,
@@ -148,6 +151,11 @@
       if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
       else if (obj.roadConnections) canvas.sendObjectToBack(obj);
       canvas.setActiveObject(obj);
+      pushUndo(() => {
+        canvas.remove(obj);
+        refreshConnectorMarkers();
+        canvas.requestRenderAll();
+      });
       refreshConnectorMarkers();
       canvas.requestRenderAll();
     });
@@ -395,10 +403,40 @@
     showSnapIndicator(best.theirs);
   }
 
+  // Snapshot a single object's transform right as a drag/scale/rotate
+  // gesture starts, so object:modified (fired when it ends) can push an
+  // undo step. Skipped for ActiveSelection (multi-object drag): it's a
+  // temporary Fabric object that may not outlive the selection, too
+  // fragile to hold a reference to for later undo.
+  let transformStart = null;
+  canvas.on("mouse:down", (opt) => {
+    const t = opt.target;
+    transformStart =
+      t && t.type !== "activeSelection"
+        ? { obj: t, left: t.left, top: t.top, angle: t.angle, scaleX: t.scaleX, scaleY: t.scaleY }
+        : null;
+  });
+
   canvas.on("object:moving", (e) => trySnapRoadConnection(e.target));
-  canvas.on("object:modified", () => {
+  canvas.on("object:modified", (opt) => {
     clearSnapIndicator();
     refreshConnectorMarkers();
+    if (transformStart && transformStart.obj === opt.target) {
+      const prev = transformStart;
+      pushUndo(() => {
+        prev.obj.set({
+          left: prev.left,
+          top: prev.top,
+          angle: prev.angle,
+          scaleX: prev.scaleX,
+          scaleY: prev.scaleY,
+        });
+        prev.obj.setCoords();
+        refreshConnectorMarkers();
+        canvas.requestRenderAll();
+      });
+    }
+    transformStart = null;
   });
   canvas.on("mouse:up", clearSnapIndicator);
 
@@ -486,7 +524,7 @@
   });
 
   canvas.on("mouse:down", (opt) => {
-    if (selectMode || measuring || opt.target) return; // let object selection / rubber-band handle it
+    if (selectMode || measuring || erasing || opt.target) return; // let object selection / rubber-band / erasing handle it
     isPanning = true;
     panStart = { x: opt.e.clientX, y: opt.e.clientY };
     panScrollStart = { left: scrollWrap.scrollLeft, top: scrollWrap.scrollTop };
@@ -529,19 +567,36 @@
   function rotateSelected(deltaDeg) {
     const obj = canvas.getActiveObject();
     if (!obj) return;
-    obj.rotate(((obj.angle || 0) + deltaDeg + 360) % 360);
+    const prevAngle = obj.angle || 0;
+    obj.rotate((prevAngle + deltaDeg + 360) % 360);
     obj.setCoords(); // recalc the selection border/handles — rotate() alone leaves them stale
     canvas.requestRenderAll();
+    pushUndo(() => {
+      obj.rotate(prevAngle);
+      obj.setCoords();
+      canvas.requestRenderAll();
+    });
   }
   rotateLeftBtn.addEventListener("click", () => rotateSelected(-45));
   rotateRightBtn.addEventListener("click", () => rotateSelected(45));
 
   // ── Delete ───────────────────────────────────────────────────────
   function deleteSelected() {
-    canvas.getActiveObjects().forEach((o) => canvas.remove(o));
+    const objs = canvas.getActiveObjects();
+    if (objs.length === 0) return;
     canvas.discardActiveObject();
+    objs.forEach((o) => canvas.remove(o));
     refreshConnectorMarkers(); // a neighbor's connector may now be free again
     canvas.requestRenderAll();
+    pushUndo(() => {
+      objs.forEach((o) => {
+        canvas.add(o);
+        if (o.isGroundMarking) canvas.bringObjectToFront(o);
+        else if (o.roadConnections) canvas.sendObjectToBack(o);
+      });
+      refreshConnectorMarkers();
+      canvas.requestRenderAll();
+    });
   }
   deleteBtn.addEventListener("click", deleteSelected);
   document.addEventListener("keydown", (e) => {
@@ -603,6 +658,7 @@
       stopMeasuring();
       return;
     }
+    stopErasing();
     measuring = true;
     measurePoints = [];
     measureBtn.classList.add("active");
@@ -612,6 +668,7 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && measuring) stopMeasuring();
+    if (e.key === "Escape" && erasing) stopErasing();
   });
 
   canvas.on("mouse:down", (opt) => {
@@ -710,6 +767,127 @@
       text: `${distM} m`,
     });
     canvas.requestRenderAll();
+  });
+
+  // ── Undo ─────────────────────────────────────────────────────────
+  // One flat stack of reverse-actions, pushed by whatever just mutated the
+  // canvas (add/delete/rotate/drag/erase) — each entry knows how to put
+  // things back exactly as they were, so this file doesn't need a single
+  // shared notion of "canvas state" to snapshot.
+  const undoBtn = document.getElementById("btn-undo");
+  function updateUndoButton() {
+    undoBtn.disabled = undoStack.length === 0;
+  }
+  function pushUndo(fn) {
+    undoStack.push(fn);
+    if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+    updateUndoButton();
+  }
+  undoBtn.addEventListener("click", () => {
+    const fn = undoStack.pop();
+    if (!fn) return;
+    fn();
+    updateUndoButton();
+  });
+  updateUndoButton();
+
+  // ── Eraser ───────────────────────────────────────────────────────
+  // Reuses Fabric's own free-drawing brush to track the drag into a Path,
+  // then discards that path and reapplies its shape as an inverted,
+  // absolutely-positioned clipPath on every piece it overlaps — punching a
+  // permanent hole rather than deleting the object. Multiple erases on the
+  // same piece accumulate into a new clipPath group each time (rather than
+  // mutating the existing one in place), so undo is just restoring
+  // whichever clipPath (or none) was there right before this stroke.
+  const eraseBtn = document.getElementById("btn-erase");
+  const ERASER_WIDTH_PX = 24;
+
+  function applyEraseStroke(erasePath) {
+    const strokeData = erasePath.toObject();
+    const strokeBounds = erasePath.getBoundingRect();
+    const changes = [];
+
+    canvas.getObjects().forEach((obj) => {
+      if (obj.isConnectorIndicator) return;
+      const b = obj.getBoundingRect();
+      const overlaps =
+        strokeBounds.left < b.left + b.width &&
+        strokeBounds.left + strokeBounds.width > b.left &&
+        strokeBounds.top < b.top + b.height &&
+        strokeBounds.top + strokeBounds.height > b.top;
+      if (!overlaps) return;
+
+      // Rebuilt from raw stroke data every time, never by reusing a prior
+      // clip's actual Path objects: adding an object to a new Group
+      // reparents it, which would silently hollow out that prior group —
+      // corrupting it for anyone (e.g. undo) still holding a reference.
+      const prevClipPath = obj.clipPath;
+      const prevStrokes = prevClipPath && prevClipPath.isEraserClip ? prevClipPath.eraserStrokes : [];
+      const strokes = [...prevStrokes, strokeData];
+      const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
+      const newClipPath = new fabric.Group(cuts, {
+        inverted: true,
+        absolutePositioned: true,
+      });
+      newClipPath.isEraserClip = true;
+      newClipPath.eraserStrokes = strokes;
+
+      changes.push({ obj, prevClipPath });
+      obj.clipPath = newClipPath;
+      obj.dirty = true;
+    });
+
+    if (changes.length > 0) {
+      pushUndo(() => {
+        changes.forEach(({ obj, prevClipPath }) => {
+          obj.clipPath = prevClipPath;
+          obj.dirty = true;
+        });
+        canvas.requestRenderAll();
+      });
+    }
+    canvas.requestRenderAll();
+  }
+
+  function stopErasing() {
+    erasing = false;
+    canvas.isDrawingMode = false;
+    // If this cancels a stroke mid-drag (e.g. Escape while the mouse is
+    // still held down), Fabric's own mouseup handler for drawing mode never
+    // runs — it only fires when isDrawingMode is still true — so its
+    // internal "currently drawing" flag would otherwise stay stuck on,
+    // making the very next mousemove after re-entering eraser mode resume
+    // drawing without a new mousedown. Reset it by hand along with the
+    // live brush preview (drawn to contextTop, not a real object), which
+    // likewise never gets to clean itself up the way a completed stroke's
+    // own path:created flow does.
+    canvas._isCurrentlyDrawing = false;
+    canvas.clearContext(canvas.contextTop);
+    eraseBtn.classList.remove("active");
+    canvas.selection = selectMode;
+    canvas.defaultCursor = selectMode ? "default" : "grab";
+  }
+
+  eraseBtn.addEventListener("click", () => {
+    if (erasing) {
+      stopErasing();
+      return;
+    }
+    stopMeasuring();
+    erasing = true;
+    eraseBtn.classList.add("active");
+    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    canvas.freeDrawingBrush.width = ERASER_WIDTH_PX;
+    canvas.freeDrawingBrush.color = "rgba(0,0,0,1)";
+    canvas.isDrawingMode = true;
+    canvas.selection = false;
+    canvas.defaultCursor = "crosshair";
+  });
+
+  canvas.on("path:created", (e) => {
+    if (!erasing) return;
+    canvas.remove(e.path);
+    applyEraseStroke(e.path);
   });
 
   // ── Grid toggle ──────────────────────────────────────────────────
@@ -851,8 +1029,19 @@
 
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
+    const objs = canvas.getObjects().slice();
     canvas.clear();
     connectorMarkers = []; // canvas.clear() already removed them from the canvas
     applyGrid();
+    pushUndo(() => {
+      objs.forEach((o) => {
+        canvas.add(o);
+        if (o.isGroundMarking) canvas.bringObjectToFront(o);
+        else if (o.roadConnections) canvas.sendObjectToBack(o);
+      });
+      refreshConnectorMarkers();
+      applyGrid();
+      canvas.requestRenderAll();
+    });
   });
 })();
