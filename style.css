@@ -255,6 +255,13 @@ header a:hover {
     badge-fade 15s linear forwards;
   pointer-events: none;
 }
+
+/* Same glow treatment, "BETA" text instead of "NEO" — permanent, so only
+   the pop-in plays, not the 15s fade-out. */
+.glow-new.glow-beta::after {
+  content: "BETA";
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
 @media (max-width: 480px) {
   body {
     padding-left: 0.5em;

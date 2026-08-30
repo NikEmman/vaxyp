@@ -1247,3 +1247,10 @@ if (dateMatch) {
     }, 15000);
   }
 }
+
+// Sketcher badge: same glow treatment as patch notes ("BETA" instead of
+// "ΝΕΟ"), but permanent — never removed, unlike the patch-notes glow.
+const sketcherLink = document.getElementById("sketcher-link");
+if (sketcherLink) {
+  sketcherLink.classList.add("glow-new", "glow-beta");
+}
