@@ -138,6 +138,32 @@ function createRoad3(ppm, lengthM) {
   return roadSegment(ppm, 3, lengthM);
 }
 
+// Real standard-gauge track (1.435m) drawn to scale, with sleepers at
+// realistic spacing — no fill, so it reads as an overlay when dropped
+// across a road for a level crossing.
+const TRAIN_GAUGE_M = 1.435;
+const TRAIN_SLEEPER_OVERHANG_M = 0.35;
+const TRAIN_SLEEPER_SPACING_M = 0.6;
+
+function createTrainTracks(ppm, lengthM = ROAD_LENGTH_M) {
+  const h = lengthM * ppm;
+  const railX = (TRAIN_GAUGE_M * ppm) / 2;
+  const sleeperHalfW = railX + TRAIN_SLEEPER_OVERHANG_M * ppm;
+  const sleeperSpacing = TRAIN_SLEEPER_SPACING_M * ppm;
+
+  const parts = [laneMarking(-railX, -h / 2, -railX, h / 2, false), laneMarking(railX, -h / 2, railX, h / 2, false)];
+  for (let y = -h / 2; y <= h / 2; y += sleeperSpacing) {
+    parts.push(laneMarking(-sleeperHalfW, y, sleeperHalfW, y, false));
+  }
+
+  const group = new fabric.Group(parts, {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+  return markAsGroundMarking(group);
+}
+
 // One lane, no direction drawn on the piece itself — pair with a "Βέλος
 // Κατεύθυνσης" ground marking to show which way traffic flows.
 function createOneWay(ppm, lengthM) {
@@ -1183,6 +1209,7 @@ const SHAPE_FACTORIES = {
   road2doubleline: createRoad2DoubleLine,
   road2passingzone: createRoad2PassingZone,
   road3: createRoad3,
+  traintracks: createTrainTracks,
   oneway: createOneWay,
   medianstrip: createMedianStrip,
   trafficislandrect: createTrafficIslandRect,
