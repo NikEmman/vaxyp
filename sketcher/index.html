@@ -51,9 +51,6 @@
         margin-bottom: 0.8em;
         flex-shrink: 0;
       }
-      .palette-category-select:disabled {
-        opacity: 0.5;
-      }
       .palette-items {
         flex: 1;
         min-height: 0;
@@ -599,6 +596,42 @@
           <div
             class="palette-item"
             draggable="true"
+            data-shape="turn45_2passingzone"
+            data-categories="turns"
+            title="Ζώνη προσπέρασης: η λωρίδα δίπλα στη διακεκομμένη γραμμή επιτρέπεται να προσπεράσει, η άλλη όχι"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12l9-9" />
+            </svg>
+            Στροφή 45° (2 Λωρίδων, Ζώνη Προσπέρασης)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn90_2passingzone"
+            data-categories="turns"
+            title="Ζώνη προσπέρασης: η λωρίδα δίπλα στη διακεκομμένη γραμμή επιτρέπεται να προσπεράσει, η άλλη όχι"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10a8 8 0 0 1 8-8h10" />
+            </svg>
+            Στροφή 90° (2 Λωρίδων, Ζώνη Προσπέρασης)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="turn135_2passingzone"
+            data-categories="turns"
+            title="Ζώνη προσπέρασης: η λωρίδα δίπλα στη διακεκομμένη γραμμή επιτρέπεται να προσπεράσει, η άλλη όχι"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V12a8 8 0 0 1 8-8l7 7" />
+            </svg>
+            Στροφή 135° (2 Λωρίδων, Ζώνη Προσπέρασης)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
             data-shape="crosswalk1"
             data-categories="markings"
           >
@@ -739,6 +772,87 @@
               <path d="M2 7h11v10H2zM13 11h5l3 3v3h-8z" />
             </svg>
             Φορτηγό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="trafficlight"
+            data-categories="other"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="7" y="4" width="10" height="16" rx="2.5" />
+              <circle cx="12" cy="8" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="16" r="2" />
+            </svg>
+            Φωτεινός Σηματοδότης
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="tree"
+            data-categories="other"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="5" />
+              <path d="M11 7L10 3" />
+              <path d="M17 12L21 11" />
+              <path d="M12 17L11 21" />
+              <path d="M7 11L3 10" />
+            </svg>
+            Δέντρο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="obstacle1"
+            data-categories="other"
+            title="Γενικό εμπόδιο (κύκλος) — για οτιδήποτε άλλο σταθερό αντικείμενο υπήρχε στη σκηνή"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M6 9l4-4M6 15l10-10M9 18l10-10M15 18l4-4" />
+            </svg>
+            Εμπόδιο 1
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="obstacle2"
+            data-categories="other"
+            title="Γενικό εμπόδιο (οβάλ) — για οτιδήποτε άλλο σταθερό αντικείμενο υπήρχε στη σκηνή"
+          >
+            <svg viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="6" />
+              <path d="M6 10l4-4M5 14l10-10M8 17l10-9M13 17l6-6" />
+            </svg>
+            Εμπόδιο 2
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="obstacle3"
+            data-categories="other"
+            title="Γενικό εμπόδιο (τετράγωνο) — για οτιδήποτε άλλο σταθερό αντικείμενο υπήρχε στη σκηνή"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="4" y="4" width="16" height="16" />
+              <path d="M4 12l8-8M4 18l14-14M10 20l10-10M16 20l4-4" />
+            </svg>
+            Εμπόδιο 3
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="obstacle4"
+            data-categories="other"
+            title="Γενικό εμπόδιο (ορθογώνιο) — για οτιδήποτε άλλο σταθερό αντικείμενο υπήρχε στη σκηνή"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="7" width="20" height="10" />
+              <path d="M2 13l6-6M2 17l10-10M8 17l10-10M14 17l8-8" />
+            </svg>
+            Εμπόδιο 4
           </div>
           <div
             class="palette-item"

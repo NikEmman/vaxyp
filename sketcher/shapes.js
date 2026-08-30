@@ -230,6 +230,41 @@ function hatchGroup(points, spacing) {
   return lines;
 }
 
+// Same diagonal hatch family (lines of slope 1, y - x = c) as
+// hatchLinesForPolygon above, but solved directly against an ellipse's
+// equation instead of walked edge-by-edge — a circle or oval has no
+// straight edges to walk. cMax is the standard tangent-line offset for a
+// slope-1 line touching an axis-aligned ellipse (c^2 = rx^2 + ry^2).
+function hatchLinesForEllipse(rx, ry, spacing) {
+  const cMax = Math.sqrt(rx * rx + ry * ry);
+  const A = 1 / (rx * rx) + 1 / (ry * ry);
+
+  const segments = [];
+  for (let c = -cMax; c <= cMax; c += spacing) {
+    const B = (2 * c) / (ry * ry);
+    const C = (c * c) / (ry * ry) - 1;
+    const disc = B * B - 4 * A * C;
+    if (disc <= 0) continue; // tangent or entirely outside — no real chord
+    const sqrtDisc = Math.sqrt(disc);
+    const x1 = (-B - sqrtDisc) / (2 * A);
+    const x2 = (-B + sqrtDisc) / (2 * A);
+    segments.push([x1, x1 + c, x2, x2 + c]);
+  }
+  return segments;
+}
+
+function hatchGroupEllipse(rx, ry, spacing) {
+  return hatchLinesForEllipse(rx, ry, spacing).map(
+    (seg) =>
+      new fabric.Line(seg, {
+        stroke: LINE_COLOR,
+        strokeWidth: 1,
+        selectable: false,
+        evented: false,
+      })
+  );
+}
+
 // Median strip: a non-drivable divider, same shape/length convention as a
 // road piece (adjustable length, open-ended top/bottom) so it slots
 // in-line between two straight segments — but no roadSideConnections,
@@ -342,6 +377,120 @@ function createTrafficIslandTriangle(ppm) {
   });
 }
 
+// Generic obstacles: plain hatched shapes (circle, oval, square, rectangle)
+// standing in for whatever fixed object actually sat at the scene — a
+// pole, a bin, a planter, a boulder — that isn't worth its own dedicated
+// shape. Same hatched-solid look as the traffic islands above, just without
+// implying "raised road island" specifically.
+const OBSTACLE_HATCH_SPACING_M = 0.5;
+const OBSTACLE_CIRCLE_R_M = 0.75;
+const OBSTACLE_OVAL_RX_M = 1;
+const OBSTACLE_OVAL_RY_M = 0.6;
+const OBSTACLE_SQUARE_SIDE_M = 1.5;
+const OBSTACLE_RECT_W_M = 2.5;
+const OBSTACLE_RECT_H_M = 1.2;
+
+function createObstacleCircle(ppm) {
+  const r = OBSTACLE_CIRCLE_R_M * ppm;
+  const fill = new fabric.Circle({
+    radius: r,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const hatch = hatchGroupEllipse(r, r, OBSTACLE_HATCH_SPACING_M * ppm);
+
+  return new fabric.Group([fill, ...hatch], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
+function createObstacleOval(ppm) {
+  const rx = OBSTACLE_OVAL_RX_M * ppm;
+  const ry = OBSTACLE_OVAL_RY_M * ppm;
+  const fill = new fabric.Ellipse({
+    rx,
+    ry,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const hatch = hatchGroupEllipse(rx, ry, OBSTACLE_HATCH_SPACING_M * ppm);
+
+  return new fabric.Group([fill, ...hatch], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
+function createObstacleSquare(ppm) {
+  const s = OBSTACLE_SQUARE_SIDE_M * ppm;
+  const fill = new fabric.Rect({
+    width: s,
+    height: s,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const points = [
+    { x: -s / 2, y: -s / 2 },
+    { x: s / 2, y: -s / 2 },
+    { x: s / 2, y: s / 2 },
+    { x: -s / 2, y: s / 2 },
+  ];
+  const hatch = hatchGroup(points, OBSTACLE_HATCH_SPACING_M * ppm);
+
+  return new fabric.Group([fill, ...hatch], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
+function createObstacleRect(ppm) {
+  const w = OBSTACLE_RECT_W_M * ppm;
+  const h = OBSTACLE_RECT_H_M * ppm;
+  const fill = new fabric.Rect({
+    width: w,
+    height: h,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const points = [
+    { x: -w / 2, y: -h / 2 },
+    { x: w / 2, y: -h / 2 },
+    { x: w / 2, y: h / 2 },
+    { x: -w / 2, y: h / 2 },
+  ];
+  const hatch = hatchGroup(points, OBSTACLE_HATCH_SPACING_M * ppm);
+
+  return new fabric.Group([fill, ...hatch], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
 // Acceleration/merge lane: one lane wide, running parallel to a through-
 // road for a stretch (RUN_M) then tapering to a point over TAPER_M — like
 // a highway on-ramp lane disappearing into the mainline. The taper's outer
@@ -442,9 +591,12 @@ function sectorBBoxCenter(bendDeg, rInner, rOuter) {
 // sector built from an SVG arc path swept around a circle centered at the
 // local origin, then shifted onto its own true bounding-box center (see
 // sectorBBoxCenter above) so it rotates in place like every other shape
-// factory here. `doubleLine` swaps each dashed lane divider for a pair of
-// solid lines with a small gap — a real "no passing" double-line marking.
-function turn(ppm, bendDeg, lanes = 2, doubleLine = false) {
+// factory here. `dividerStyle` mirrors roadBase()'s: "dashed" (default,
+// passing allowed both ways), "double-solid" (no passing either way), or
+// "passing-zone" (solid + dashed straddling the nominal divider radius —
+// by convention the solid arc sits on the inner-radius side, so that lane
+// can't cross to pass while the outer-radius lane's dashed side can).
+function turn(ppm, bendDeg, lanes = 2, dividerStyle = "dashed") {
   const laneWidth = 3;
   const innerR = 4 * ppm;
   const outerR = innerR + lanes * laneWidth * ppm;
@@ -486,48 +638,31 @@ function turn(ppm, bendDeg, lanes = 2, doubleLine = false) {
     evented: false,
   });
 
-  const outerArc = new fabric.Path(arcPath(outerR), {
-    fill: "",
-    stroke: LINE_COLOR,
-    strokeWidth: 2,
-    selectable: false,
-    evented: false,
-  });
-  const innerArc = new fabric.Path(arcPath(innerR), {
-    fill: "",
-    stroke: LINE_COLOR,
-    strokeWidth: 2,
-    selectable: false,
-    evented: false,
-  });
+  const arcLine = (r, dashed) =>
+    new fabric.Path(arcPath(r), {
+      fill: "",
+      stroke: LINE_COLOR,
+      strokeWidth: 2,
+      strokeDashArray: dashed ? [10, 8] : null,
+      selectable: false,
+      evented: false,
+    });
+
+  const outerArc = arcLine(outerR, false);
+  const innerArc = arcLine(innerR, false);
 
   const parts = [fill, outerArc, innerArc];
+  const gap = (DOUBLE_LINE_GAP_M * ppm) / 2;
   for (let i = 1; i < lanes; i++) {
     const dividerR = innerR + i * laneWidth * ppm;
-    if (doubleLine) {
-      const gap = (DOUBLE_LINE_GAP_M * ppm) / 2;
-      [dividerR - gap, dividerR + gap].forEach((r) => {
-        parts.push(
-          new fabric.Path(arcPath(r), {
-            fill: "",
-            stroke: LINE_COLOR,
-            strokeWidth: 2,
-            selectable: false,
-            evented: false,
-          })
-        );
-      });
+    if (dividerStyle === "double-solid") {
+      parts.push(arcLine(dividerR - gap, false));
+      parts.push(arcLine(dividerR + gap, false));
+    } else if (dividerStyle === "passing-zone") {
+      parts.push(arcLine(dividerR - gap, false));
+      parts.push(arcLine(dividerR + gap, true));
     } else {
-      parts.push(
-        new fabric.Path(arcPath(dividerR), {
-          fill: "",
-          stroke: LINE_COLOR,
-          strokeWidth: 2,
-          strokeDashArray: [10, 8],
-          selectable: false,
-          evented: false,
-        })
-      );
+      parts.push(arcLine(dividerR, true));
     }
   }
 
@@ -582,15 +717,27 @@ function createTurn135_1(ppm) {
 }
 
 function createTurn45_2Double(ppm) {
-  return turn(ppm, 45, 2, true);
+  return turn(ppm, 45, 2, "double-solid");
 }
 
 function createTurn90_2Double(ppm) {
-  return turn(ppm, 90, 2, true);
+  return turn(ppm, 90, 2, "double-solid");
 }
 
 function createTurn135_2Double(ppm) {
-  return turn(ppm, 135, 2, true);
+  return turn(ppm, 135, 2, "double-solid");
+}
+
+function createTurn45_2PassingZone(ppm) {
+  return turn(ppm, 45, 2, "passing-zone");
+}
+
+function createTurn90_2PassingZone(ppm) {
+  return turn(ppm, 90, 2, "passing-zone");
+}
+
+function createTurn135_2PassingZone(ppm) {
+  return turn(ppm, 135, 2, "passing-zone");
 }
 
 // Roundabout: a ring of `lanes` lanes around a solid central island, with
@@ -1011,11 +1158,121 @@ function createTruck(ppm) {
   return vehicle(ppm, 7, 2.5);
 }
 
+// Traffic signal head (Φωτεινός σηματοδότης) — vector-drawn like the
+// vehicles above, not a photo crop like the signs below, since there's no
+// single "traffic light" catalog photo the way there is for a fixed sign.
+// Just the housing, not the pole it mounts on — the pole added nothing a
+// sketch needs and only made the piece harder to place.
+function createTrafficLight(ppm) {
+  const headW = 0.45;
+  const headH = 1.1;
+
+  const headTop = (-headH / 2) * ppm;
+  const headHpx = headH * ppm;
+  const headWpx = headW * ppm;
+
+  const housing = new fabric.Rect({
+    left: 0,
+    top: headTop,
+    width: headWpx,
+    height: headHpx,
+    rx: headWpx * 0.18,
+    ry: headWpx * 0.18,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "top",
+    selectable: false,
+    evented: false,
+  });
+
+  const cellH = headHpx / 3;
+  const dividers = [1, 2].map((i) =>
+    laneMarking(-headWpx / 2, headTop + cellH * i, headWpx / 2, headTop + cellH * i, false)
+  );
+
+  const lampR = Math.min(cellH, headWpx) * 0.32;
+  const lamps = [0, 1, 2].map(
+    (i) =>
+      new fabric.Circle({
+        left: 0,
+        top: headTop + cellH * (i + 0.5),
+        radius: lampR,
+        fill: "",
+        stroke: LINE_COLOR,
+        strokeWidth: 1.5,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+      })
+  );
+
+  return new fabric.Group([housing, ...dividers, ...lamps], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
 function createText() {
   return new fabric.Textbox("Κείμενο", {
     fontSize: 18,
     fill: LINE_COLOR,
     editable: true,
+  });
+}
+
+// A tree, seen from above — a cut trunk cross-section with a few buttress
+// roots flaring out from it, matching the top-down convention every other
+// piece in this file uses (roads, vehicles), unlike the signs and traffic
+// light which are pictorial icons instead. Root angles/lengths are hand-
+// picked and irregular on purpose: a perfectly even ring of roots reads as
+// a compass rose, not a tree.
+function createTree(ppm) {
+  const trunkR = 0.35; // meters
+  const trunkRpx = trunkR * ppm;
+
+  const roots = [
+    { angleDeg: -100, lengthM: 0.4, halfWidthM: 0.16 },
+    { angleDeg: -5, lengthM: 0.5, halfWidthM: 0.13 },
+    { angleDeg: 95, lengthM: 0.35, halfWidthM: 0.15 },
+    { angleDeg: 190, lengthM: 0.45, halfWidthM: 0.14 },
+  ].map(({ angleDeg, lengthM, halfWidthM }) => {
+    const theta = (angleDeg * Math.PI) / 180;
+    const dx = Math.cos(theta);
+    const dy = Math.sin(theta);
+    const px = -dy; // perpendicular to the root's direction
+    const py = dx;
+    const baseR = trunkRpx * 0.85; // starts inside the trunk circle, so the join is hidden under it
+    const tipR = trunkRpx + lengthM * ppm;
+    const baseHalfWidthPx = halfWidthM * ppm;
+    return new fabric.Polygon(
+      [
+        { x: baseR * dx + baseHalfWidthPx * px, y: baseR * dy + baseHalfWidthPx * py },
+        { x: tipR * dx, y: tipR * dy },
+        { x: baseR * dx - baseHalfWidthPx * px, y: baseR * dy - baseHalfWidthPx * py },
+      ],
+      { fill: SHAPE_FILL, stroke: LINE_COLOR, strokeWidth: 2, selectable: false, evented: false }
+    );
+  });
+
+  const trunk = new fabric.Circle({
+    radius: trunkRpx,
+    fill: SHAPE_FILL,
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+
+  return new fabric.Group([...roots, trunk], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
   });
 }
 
@@ -1028,6 +1285,10 @@ const SHAPE_FACTORIES = {
   medianstrip: createMedianStrip,
   trafficislandrect: createTrafficIslandRect,
   trafficislandtriangle: createTrafficIslandTriangle,
+  obstacle1: createObstacleCircle,
+  obstacle2: createObstacleOval,
+  obstacle3: createObstacleSquare,
+  obstacle4: createObstacleRect,
   speedlane: createSpeedingLane,
   speedlanemirror: createSpeedingLaneMirrored,
   turn: createTurn,
@@ -1042,6 +1303,9 @@ const SHAPE_FACTORIES = {
   turn45_2double: createTurn45_2Double,
   turn90_2double: createTurn90_2Double,
   turn135_2double: createTurn135_2Double,
+  turn45_2passingzone: createTurn45_2PassingZone,
+  turn90_2passingzone: createTurn90_2PassingZone,
+  turn135_2passingzone: createTurn135_2PassingZone,
   roundabout1: createRoundabout1,
   roundabout2: createRoundabout2,
   roundabout3: createRoundabout3,
@@ -1059,6 +1323,8 @@ const SHAPE_FACTORIES = {
   yieldmarking: createYieldMarking,
   car: createCar,
   truck: createTruck,
+  trafficlight: createTrafficLight,
+  tree: createTree,
   text: () => createText(),
 };
 

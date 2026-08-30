@@ -1,7 +1,11 @@
 // ── Accident-scene sketcher: canvas setup + tool wiring ──────────
 (function () {
-  const CANVAS_W = 2000; // px; at 40px/m that's a 50m-wide working area
-  const CANVAS_H = 1400;
+  // A few screens big on purpose, so there's room to lay out a whole
+  // intersection without running out of space — panning (dragging empty
+  // canvas, or scrolling) covers the rest. See the scrollWrap centering
+  // below, which opens the view in the middle of this instead of at (0,0).
+  const CANVAS_W = 6000; // px; at 40px/m that's a 150m-wide working area
+  const CANVAS_H = 4200;
 
   let ppm = 40; // pixels per meter — the active scale
   let gridVisible = true;
@@ -188,9 +192,9 @@
   // (space-separated — an item may belong to more than one). Picking a
   // category from the select just toggles which items are visible; the
   // drag/click listeners above stay attached to every item regardless.
-  // Typing in the search box takes priority over the category select —
-  // it matches across every item so you don't have to know which
-  // category something lives in before you can find it.
+  // The category select and the search box both apply at once (AND, not
+  // either/or) — picking "Στροφές" then typing "2" narrows straight to the
+  // 2-lane turns instead of also surfacing every other "2" match.
   const categorySelect = document.getElementById("palette-category");
   const searchInput = document.getElementById("palette-search");
   const paletteEmpty = document.getElementById("palette-empty");
@@ -238,18 +242,21 @@
   function applyPaletteFilters() {
     const query = normalizeGreek(searchInput.value.trim());
     const searching = query.length > 0;
-    categorySelect.disabled = searching;
-
     const terms = searching ? query.split(/\s+/) : [];
     const category = categorySelect.value;
     let visibleCount = 0;
 
     paletteItems.forEach((item) => {
-      let visible;
+      const categories = item.dataset.categories
+        ? item.dataset.categories.split(/\s+/)
+        : [];
+      const matchesCategory = category === "all" || categories.includes(category);
+
+      let matchesSearch = true;
       if (searching) {
         const text = paletteSearchText.get(item);
         const words = paletteSearchWords.get(item);
-        visible = terms.every((term) => {
+        matchesSearch = terms.every((term) => {
           // A bare number ("3", meaning "3 lanes") must match as a whole
           // number, not a raw substring — otherwise it also matches inside
           // "135°" (which contains "3"), surfacing an unrelated turn purely
@@ -260,12 +267,9 @@
           if (/^\d+$/.test(term)) return new RegExp(`\\b${term}\\b`).test(text);
           return text.includes(term) || words.some((w) => sharesStem(term, w));
         });
-      } else {
-        const categories = item.dataset.categories
-          ? item.dataset.categories.split(/\s+/)
-          : [];
-        visible = category === "all" || categories.includes(category);
       }
+
+      const visible = matchesCategory && matchesSearch;
       item.style.display = visible ? "" : "none";
       if (visible) visibleCount++;
     });
@@ -279,6 +283,11 @@
   applyPaletteFilters();
 
   const scrollWrap = document.getElementById("canvas-scroll");
+  // Open centered on the working area instead of the top-left corner —
+  // now that the canvas is several screens big, (0,0) would otherwise just
+  // show empty grid with nowhere obvious to start sketching.
+  scrollWrap.scrollLeft = Math.max(0, (CANVAS_W - scrollWrap.clientWidth) / 2);
+  scrollWrap.scrollTop = Math.max(0, (CANVAS_H - scrollWrap.clientHeight) / 2);
   scrollWrap.addEventListener("dragover", (e) => e.preventDefault());
   scrollWrap.addEventListener("drop", (e) => {
     e.preventDefault();
@@ -782,8 +791,43 @@
   });
 
   // ── Export / clear ───────────────────────────────────────────────
+  // Shared by both export buttons below: the bounding box of everything
+  // actually drawn, padded and clamped to the canvas. Both exports crop to
+  // this instead of the whole working area — which matters now that the
+  // canvas is several screens big, since an uncropped export would
+  // otherwise be mostly blank grid.
+  // Excludes the connector availability markers — they're a transient
+  // editing aid, not part of the drawing, and being centered right on a
+  // piece's own boundary they'd otherwise pad the crop by a few px.
+  function getExportCropBounds(pad) {
+    const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
+    if (objects.length === 0) return null;
+
+    canvas.discardActiveObject();
+
+    const bounds = objects.reduce(
+      (acc, o) => {
+        const r = o.getBoundingRect();
+        return {
+          left: Math.min(acc.left, r.left),
+          top: Math.min(acc.top, r.top),
+          right: Math.max(acc.right, r.left + r.width),
+          bottom: Math.max(acc.bottom, r.top + r.height),
+        };
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+    );
+
+    const left = Math.max(0, bounds.left - pad);
+    const top = Math.max(0, bounds.top - pad);
+    const width = Math.min(CANVAS_W, bounds.right + pad) - left;
+    const height = Math.min(CANVAS_H, bounds.bottom + pad) - top;
+    return { left, top, width, height };
+  }
+
   document.getElementById("btn-export").addEventListener("click", () => {
-    if (canvas.getObjects().length === 0) {
+    const crop = getExportCropBounds(30);
+    if (!crop) {
       window.displayNotification(
         "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
         "warning",
@@ -791,7 +835,7 @@
       return;
     }
     const dataUrl = captureInLightPalette(() =>
-      canvas.toDataURL({ format: "png", multiplier: 2 }),
+      canvas.toDataURL({ format: "png", multiplier: 2, ...crop }),
     );
     const a = document.createElement("a");
     a.href = dataUrl;
@@ -799,17 +843,13 @@
     a.click();
   });
 
-  // PDF export crops to the drawn content (plus a small margin) rather than
-  // the whole mostly-empty working canvas, and fits it onto a landscape A4
-  // page — closer to something you'd actually staple into a report.
+  // PDF export fits the same content-cropped PNG onto a landscape A4 page —
+  // closer to something you'd actually staple into a report.
   document
     .getElementById("btn-export-pdf")
     .addEventListener("click", async () => {
-      // Excludes the connector availability markers — they're a transient
-      // editing aid, not part of the drawing, and being centered right on
-      // a piece's own boundary they'd otherwise pad the crop by a few px.
-      const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
-      if (objects.length === 0) {
+      const crop = getExportCropBounds(30);
+      if (!crop) {
         window.displayNotification(
           "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
           "warning",
@@ -817,36 +857,8 @@
         return;
       }
 
-      canvas.discardActiveObject();
-
-      const bounds = objects.reduce(
-        (acc, o) => {
-          const r = o.getBoundingRect();
-          return {
-            left: Math.min(acc.left, r.left),
-            top: Math.min(acc.top, r.top),
-            right: Math.max(acc.right, r.left + r.width),
-            bottom: Math.max(acc.bottom, r.top + r.height),
-          };
-        },
-        { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
-      );
-
-      const pad = 30;
-      const cropLeft = Math.max(0, bounds.left - pad);
-      const cropTop = Math.max(0, bounds.top - pad);
-      const cropWidth = Math.min(CANVAS_W, bounds.right + pad) - cropLeft;
-      const cropHeight = Math.min(CANVAS_H, bounds.bottom + pad) - cropTop;
-
       const pngDataUrl = captureInLightPalette(() =>
-        canvas.toDataURL({
-          format: "png",
-          multiplier: 2,
-          left: cropLeft,
-          top: cropTop,
-          width: cropWidth,
-          height: cropHeight,
-        }),
+        canvas.toDataURL({ format: "png", multiplier: 2, ...crop }),
       );
       const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) =>
         c.charCodeAt(0),
