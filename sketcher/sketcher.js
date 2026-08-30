@@ -1,9 +1,7 @@
 // ── Accident-scene sketcher: canvas setup + tool wiring ──────────
 (function () {
-  // A few screens big on purpose, so there's room to lay out a whole
-  // intersection without running out of space — panning (dragging empty
-  // canvas, or scrolling) covers the rest. See the scrollWrap centering
-  // below, which opens the view in the middle of this instead of at (0,0).
+  // A few screens big, so a whole intersection fits without running out
+  // of space; panning covers the rest. See scrollWrap centering below.
   const CANVAS_W = 6000; // px; at 40px/m that's a 150m-wide working area
   const CANVAS_H = 4200;
 
@@ -18,12 +16,9 @@
     selection: false, // default tool mode is pan, not select — see applyToolMode()
   });
 
-  // Default selection styling is a pale blue that barely shows up against
-  // the gray grid background — swap in a darker, higher-contrast look.
-  // Fabric v6 copies its defaults onto each instance at construction time
-  // instead of reading them off the prototype, so setting
-  // fabric.Object.prototype.* here has no effect on new objects — the
-  // style has to be applied per-object as each one is added instead.
+  // Default selection styling is a pale blue, low-contrast against the
+  // grid. Fabric v6 copies defaults onto each instance at construction
+  // time, so fabric.Object.prototype.* has no effect — apply per-object.
   const SELECTION_STYLE = {
     borderColor: "#e05a00",
     cornerColor: "#e05a00",
@@ -45,18 +40,14 @@
     light: { bg: "#ffffff", ink: "#1b1f24" },
     dark: { bg: "#161c27", ink: "#c8d3e0" },
   };
-  // themeInit.js (loaded first, at the very top of <body>) already applied
-  // the "dark" class to <body> before any of this ran, so read it straight
-  // off instead of defaulting to light and waiting to be corrected —
-  // otherwise the canvas itself would still flash light-then-dark even
-  // once the page chrome no longer does.
+  // themeInit.js already applied the "dark" class before this ran; read it
+  // directly instead of defaulting to light, or the canvas would flash.
   let isDarkTheme = document.body.classList.contains("dark");
   let currentPalette = isDarkTheme ? PALETTES.dark : PALETTES.light;
   setShapePalette(currentPalette.bg, currentPalette.ink);
 
-  // Swap every object's colors from whichever palette they're currently in
-  // to `palette` — matched by value so it works starting from either theme,
-  // recursing into group children (roads/vehicles/measurements are groups).
+  // Matched by value, so it works from either starting theme; recurses
+  // into group children (roads/vehicles/measurements are groups).
   function restyleObjects(palette) {
     function walk(objects) {
       objects.forEach((o) => {
@@ -82,11 +73,9 @@
   }
   window.applySketcherTheme = setTheme;
 
-  // Runs `captureFn` (expected to read canvas pixels, e.g. toDataURL) with
-  // the canvas forced to the light palette, the grid hidden, and the
-  // connector availability markers (added further down) removed, then
-  // restores all three. All steps are synchronous, so there's no visible
-  // flash.
+  // Runs `captureFn` with the canvas forced to light palette, grid hidden,
+  // and connector markers removed, then restores all three synchronously
+  // (no visible flash).
   function captureInLightPalette(captureFn) {
     const wasDark = isDarkTheme;
     const wasGridVisible = gridVisible;
@@ -105,9 +94,8 @@
     return result;
   }
 
-  // ── Grid background (drawn as a repeating pattern, not real objects,
-  //    so it never shows up in the object list or gets selected/exported
-  //    as clutter — export still includes it since it's the bg fill) ──
+  // ── Grid background: a repeating pattern (canvas.backgroundColor), not
+  //    real objects — never shows up in the object list or selection ──
   function makeGridPattern(spacingPx) {
     const tile = document.createElement("canvas");
     tile.width = spacingPx;
@@ -136,27 +124,20 @@
   applyGrid();
 
   // ── Adding shapes ────────────────────────────────────────────────
-  // Fabric has no CSS-style z-index — stacking is just each object's
-  // position in the render list. Ground markings (isGroundMarking, set in
-  // shapes.js) always go to the very front and road pieces (roadConnections
-  // set) always go to the very back, on every add — so a marking placed
-  // first still ends up above a road added afterward, and vice versa.
-  // Straight road pieces (road2/road3/oneway) take an optional length in
-  // meters as their second factory argument, defaulting to 20m if omitted;
-  // every other factory just ignores the extra argument. Changing this
-  // input only affects pieces added from here on — it doesn't resize
-  // anything already on the canvas.
+  // Fabric stacking is just render-list order: ground markings always go
+  // to front, road pieces (roadConnections set) always to back, on every
+  // add — so order-of-placement doesn't matter.
+  // Straight road pieces take an optional length in meters as their second
+  // factory argument (default 20m); other factories ignore it. Only
+  // affects pieces added from here on.
   const segmentLengthInput = document.getElementById("segment-length-input");
   const segmentLengthValue = document.getElementById("segment-length-value");
   segmentLengthInput.addEventListener("input", () => {
     segmentLengthValue.textContent = segmentLengthInput.value;
   });
 
-  // Shape factories are normally synchronous, but the traffic-sign
-  // factories (shapes.js) load a raster image via fabric.Image.fromURL and
-  // return a Promise instead — Promise.resolve() passes a plain object
-  // through unchanged (resolving on the next microtask) so both kinds work
-  // here without telling them apart.
+  // Traffic-sign factories return a Promise (async image load); others
+  // are synchronous. Promise.resolve() handles both uniformly.
   function addShape(key, x, y) {
     const factory = SHAPE_FACTORIES[key];
     if (!factory) return;
@@ -188,13 +169,9 @@
   });
 
   // ── Palette category filter + search ───────────────────────────────
-  // Every palette item lists its category(-ies) in data-categories
-  // (space-separated — an item may belong to more than one). Picking a
-  // category from the select just toggles which items are visible; the
-  // drag/click listeners above stay attached to every item regardless.
-  // The category select and the search box both apply at once (AND, not
-  // either/or) — picking "Στροφές" then typing "2" narrows straight to the
-  // 2-lane turns instead of also surfacing every other "2" match.
+  // Each item lists its category(-ies) in data-categories (space-separated).
+  // Category and search apply together (AND): picking "Στροφές" then
+  // typing "2" narrows straight to the 2-lane turns.
   const categorySelect = document.getElementById("palette-category");
   const searchInput = document.getElementById("palette-search");
   const paletteEmpty = document.getElementById("palette-empty");
@@ -257,13 +234,8 @@
         const text = paletteSearchText.get(item);
         const words = paletteSearchWords.get(item);
         matchesSearch = terms.every((term) => {
-          // A bare number ("3", meaning "3 lanes") must match as a whole
-          // number, not a raw substring — otherwise it also matches inside
-          // "135°" (which contains "3"), surfacing an unrelated turn purely
-          // because its angle happens to contain that digit. `words` still
-          // has punctuation attached ("(3", "λωριδων)"), so a word-boundary
-          // regex is what actually isolates the digit run, not exact
-          // equality against those words.
+          // A bare number ("3") must match as a whole word, not a
+          // substring — else "3" also matches inside "135°".
           if (/^\d+$/.test(term)) return new RegExp(`\\b${term}\\b`).test(text);
           return text.includes(term) || words.some((w) => sharesStem(term, w));
         });
@@ -283,9 +255,7 @@
   applyPaletteFilters();
 
   const scrollWrap = document.getElementById("canvas-scroll");
-  // Open centered on the working area instead of the top-left corner —
-  // now that the canvas is several screens big, (0,0) would otherwise just
-  // show empty grid with nowhere obvious to start sketching.
+  // Open centered on the working area, not the top-left corner.
   scrollWrap.scrollLeft = Math.max(0, (CANVAS_W - scrollWrap.clientWidth) / 2);
   scrollWrap.scrollTop = Math.max(0, (CANVAS_H - scrollWrap.clientHeight) / 2);
   scrollWrap.addEventListener("dragover", (e) => e.preventDefault());
@@ -298,12 +268,10 @@
   });
 
   // ── Magnetic road connections ──────────────────────────────────────
-  // Road pieces (roadSegment/oneWayRoad/turn, in shapes.js) each carry
-  // `roadConnections`: local points + outward unit normal for
-  // every open edge. While dragging one, look for another piece's
-  // connection point that's close by and roughly facing it, then snap
-  // position AND rotation so the two meet exactly — open edge to open
-  // edge, no gap or seam.
+  // Road pieces carry `roadConnections` (shapes.js): local points + outward
+  // normal per open edge. While dragging, find a nearby, roughly-facing
+  // connection point on another piece and snap position + rotation to meet
+  // exactly, no gap or seam.
   const SNAP_DISTANCE = 18; // px
   const SNAP_ANGLE = 20; // ° of normal-facing tolerance to trigger a snap
   const T_JUNCTION_OVERLAP = 1; // px a perpendicular branch sinks into the through-road, to hide its edge line
@@ -402,10 +370,8 @@
       return;
     }
 
-    // Rotate first, around the object's own center (which doesn't move) —
-    // the connection point's position after rotating is what the
-    // translation step below aligns. Doing both from the pre-rotation
-    // position would leave the two pieces slightly offset.
+    // Rotate first (around the object's own center); translation below
+    // aligns the connection point's post-rotation position.
     const currentNormalAngle = Math.atan2(best.mine.ny, best.mine.nx);
     const desiredNormalAngle = Math.atan2(-best.theirs.ny, -best.theirs.nx);
     let deltaRad = desiredNormalAngle - currentNormalAngle;
@@ -413,11 +379,8 @@
     target.angle =
       ((target.angle || 0) + deltaRad * (180 / Math.PI) + 360) % 360;
 
-    // A T-junction (either point tagged `side`) is nudged a couple px past
-    // the target point, into the through-road along its inward direction,
-    // so the branch's fill overlaps and hides the through-road's edge line
-    // instead of leaving it visibly crossing the opening. An end-to-end
-    // join (both plain end points) stays flush at zero offset.
+    // T-junction (either point `side`): nudge into the through-road so the
+    // branch's fill hides its edge line. End-to-end join stays flush.
     const isTJunction = best.mine.side || best.theirs.side;
     const overlap = isTJunction ? T_JUNCTION_OVERLAP : 0;
     const destX = best.theirs.x - best.theirs.nx * overlap;
@@ -440,14 +403,10 @@
   canvas.on("mouse:up", clearSnapIndicator);
 
   // ── Connector availability markers ──────────────────────────────────
-  // A small teal ring at every unoccupied road-piece connector — a
-  // lightweight "you can plug in here" hint. Kept as a separate,
-  // non-interactive canvas layer (not baked into each piece's own group,
-  // to avoid any risk of perturbing the precise connector-position math
-  // above) and simply rebuilt from scratch whenever the canvas "settles" —
-  // after adding a piece, after a drag ends, after a delete — rather than
-  // tracked incrementally, which is simpler and plenty cheap at the scale
-  // of a hand-drawn diagram.
+  // A small teal ring at every unoccupied road-piece connector. A separate,
+  // non-interactive layer (not baked into each piece's group), rebuilt from
+  // scratch whenever the canvas settles rather than tracked incrementally —
+  // simple, and cheap at this diagram's scale.
   const CONNECTOR_OCCUPIED_DIST = 5; // px — a real snap lands exactly here or T_JUNCTION_OVERLAP px away
   const CONNECTOR_OCCUPIED_ANGLE = 10; // ° of normal-facing tolerance to count as "joined"
   let connectorMarkers = [];
@@ -501,12 +460,9 @@
   }
 
   // ── Tool mode: grab-to-pan (default) vs select ────────────────────
-  // The canvas is much bigger than its viewport, so plain click-drag on
-  // EMPTY canvas pans it (dragging the surrounding .canvas-scroll div).
-  // Objects themselves are always individually clickable/draggable in
-  // either mode — panning only kicks in when there's nothing under the
-  // cursor. The select tool additionally enables rubber-band multi-select
-  // by dragging over empty space, instead of that panning the canvas.
+  // Click-drag on empty canvas pans it (scrolls .canvas-scroll); objects
+  // stay individually clickable/draggable in either mode. Select mode
+  // trades panning for rubber-band multi-select on empty space.
   const selectToolBtn = document.getElementById("btn-select-tool");
   let selectMode = false;
   let isPanning = false;
@@ -791,14 +747,10 @@
   });
 
   // ── Export / clear ───────────────────────────────────────────────
-  // Shared by both export buttons below: the bounding box of everything
-  // actually drawn, padded and clamped to the canvas. Both exports crop to
-  // this instead of the whole working area — which matters now that the
-  // canvas is several screens big, since an uncropped export would
-  // otherwise be mostly blank grid.
-  // Excludes the connector availability markers — they're a transient
-  // editing aid, not part of the drawing, and being centered right on a
-  // piece's own boundary they'd otherwise pad the crop by a few px.
+  // Shared by both export buttons: bounding box of everything drawn,
+  // padded and clamped to the canvas — crops out the mostly-blank working
+  // area. Excludes connector markers (transient editing aid, would pad
+  // the crop by a few px).
   function getExportCropBounds(pad) {
     const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
     if (objects.length === 0) return null;

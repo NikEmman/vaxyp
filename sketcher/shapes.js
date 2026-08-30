@@ -1,16 +1,13 @@
 // ── Shape factories ──────────────────────────────────────────────
-// Every factory takes `ppm` (pixels per meter, the current canvas scale)
-// and returns a Fabric object/group sized in real-world meters, centered
-// on its own origin so Fabric's default rotate handle spins it in place.
-// Real-world dimensions are approximate but plausible for a Greek traffic
-// report (car ~4.4x1.8m, lane ~3m wide, etc).
+// Every factory takes `ppm` (pixels per meter) and returns a Fabric
+// object/group sized in real-world meters, centered on its own origin so
+// Fabric's rotate handle spins it in place. Dimensions are approximate but
+// plausible (car ~4.4x1.8m, lane ~3m wide, etc).
 //
-// Style is deliberately monochrome — plain fill, outline, no color — matching
-// how accident scenes are actually hand-sketched on paper. The two colors
-// below are `let`, not `const`: sketcher.js flips them between a light and
-// a dark palette to match the app theme, and every factory reads them at
-// call time (not at load time), so newly-added shapes always pick up
-// whichever palette is currently active.
+// Style is deliberately monochrome, like a hand-sketched accident report.
+// SHAPE_FILL/LINE_COLOR are `let`: sketcher.js reassigns them for the
+// light/dark theme, and factories read them at call time so new shapes
+// always pick up the current palette.
 let SHAPE_FILL = "#ffffff";
 let LINE_COLOR = "#1b1f24";
 
@@ -33,20 +30,12 @@ const ROAD_LANE_WIDTH = 3; // meters
 const ROAD_LENGTH_M = 20;
 const DOUBLE_LINE_GAP_M = 0.15; // gap between the two lines of a double/passing-zone divider
 
-// Shared by roadSegment() and oneWayRoad(): the fill slab plus the
-// dividers between lanes (n lanes need n-1 dividers either way).
-// Deliberately open-ended: only the left/right edges are stroked, not the
-// top/bottom — so two segments butted end-to-end read as one continuous
-// road instead of two boxes with a seam between them.
+// Shared by roadSegment() and oneWayRoad(). Only the left/right edges are
+// stroked, not top/bottom, so butted segments read as one continuous road.
 //
-// `dividerStyle` controls how each interior divider is drawn:
-//   "dashed"       — the default: ordinary lane line, passing allowed.
-//   "double-solid" — two solid lines: no passing from either lane.
-//   "passing-zone" — one solid + one dashed line, straddling the nominal
-//                    divider position (same gap as "double-solid"). By
-//                    convention the solid line sits on the lower-x side —
-//                    that lane can't cross to pass, while the lane on the
-//                    dashed line's side can.
+// `dividerStyle`: "dashed" (default, passing allowed), "double-solid" (no
+// passing), or "passing-zone" (solid + dashed straddling the divider —
+// solid on the lower-x side, so that lane can't pass, the other can).
 function roadBase(ppm, lanes, lengthM = ROAD_LENGTH_M, dividerStyle = "dashed") {
   const w = lanes * ROAD_LANE_WIDTH * ppm;
   const h = lengthM * ppm;
@@ -81,33 +70,24 @@ function roadBase(ppm, lanes, lengthM = ROAD_LENGTH_M, dividerStyle = "dashed") 
   return { parts, w, h };
 }
 
-// Marks `group.roadConnections` with the local (pre-rotation, centered-
-// origin) points where other road pieces can magnetically snap to it: each
-// entry is a position plus the outward unit normal — the direction a piece
-// attaching there continues in. sketcher.js reads this during drag to find
-// and align matching connection points on other objects.
+// `points`: local (pre-rotation, centered-origin) snap points, each a
+// position plus the outward unit normal. sketcher.js reads this during
+// drag to align matching connection points between objects.
 function setRoadConnections(group, points) {
   group.roadConnections = points;
   return group;
 }
 
-// Marks an object as a ground marking (painted-on-the-road, not pavement
-// itself) — sketcher.js reads this on add to keep every marking layered
-// above every road piece, regardless of the order they were placed in.
+// sketcher.js reads isGroundMarking to keep markings layered above every
+// road piece regardless of placement order.
 function markAsGroundMarking(obj) {
   obj.isGroundMarking = true;
   return obj;
 }
 
-// Three snap points per end — centered, left-aligned, right-aligned —
-// instead of just one. A narrower road's own centered point still meets a
-// wider road's centered point for a symmetric funnel; but its centered
-// point can just as well land on the wider road's LEFT or RIGHT point,
-// which (since both sit at the same y with the same normal, just a
-// different x) makes the narrower road's edge flush with that side of the
-// wider one — e.g. a one-way lane spilling into a two-way road as its
-// right-hand lane instead of merging dead-center. Whichever pair the drag
-// ends up closest to is the one that wins; no special-casing needed.
+// Three snap points per end (center, left, right) instead of one: lets a
+// narrower road land flush against either side of a wider one (e.g. a
+// one-way lane merging as the right-hand lane) instead of only dead-center.
 function roadEndConnections(w, h) {
   const top = { y: -h / 2, nx: 0, ny: -1 };
   const bottom = { y: h / 2, nx: 0, ny: 1 };
@@ -121,16 +101,10 @@ function roadEndConnections(w, h) {
   ];
 }
 
-// One point at the midpoint of each long edge, facing sideways — where a
-// road can plug in perpendicular to form a T-junction (its own end-normal,
-// once rotated 90°, opposes this one). Since these sit at y=0 and the end
-// points sit at y=±h/2, they're always far enough apart that a drag can't
-// confuse a side snap for an end snap.
-// `side: true` marks these (vs. the plain end connections above) so
-// sketcher.js can tell a T-junction match from an end-to-end one: an
-// end-to-end join should land flush, but a perpendicular join is nudged a
-// couple px into the through-road so its fill hides the through-road's
-// edge line instead of leaving it visibly crossing the opening.
+// Midpoint of each long edge, for a perpendicular T-junction plug-in.
+// `side: true` distinguishes these from end connections: sketcher.js nudges
+// a side join a couple px into the through-road so its fill hides the
+// through-road's edge line, instead of landing flush like an end-to-end join.
 function roadSideConnections(w) {
   return [
     { x: -w / 2, y: 0, nx: -1, ny: 0, side: true },
@@ -152,15 +126,10 @@ function createRoad2(ppm, lengthM) {
   return roadSegment(ppm, 2, lengthM);
 }
 
-// Same 2-lane road, but with no passing from either lane: a solid double
-// line instead of the ordinary dashed divider.
 function createRoad2DoubleLine(ppm, lengthM) {
   return roadSegment(ppm, 2, lengthM, "double-solid");
 }
 
-// Same 2-lane road, but passing is only allowed from one side: a solid
-// line (can't cross) paired with a dashed line (can) instead of a single
-// dashed divider. See roadBase()'s dividerStyle doc for which lane is which.
 function createRoad2PassingZone(ppm, lengthM) {
   return roadSegment(ppm, 2, lengthM, "passing-zone");
 }
@@ -169,10 +138,8 @@ function createRoad3(ppm, lengthM) {
   return roadSegment(ppm, 3, lengthM);
 }
 
-// One-way road: same slab/dividers as roadSegment(), one lane wide — the
-// only lane count road2/road3 don't already cover. The direction itself
-// isn't drawn on the piece; drop a "Βέλος Κατεύθυνσης" ground marking on
-// it to show which way traffic flows.
+// One lane, no direction drawn on the piece itself — pair with a "Βέλος
+// Κατεύθυνσης" ground marking to show which way traffic flows.
 function createOneWay(ppm, lengthM) {
   const { parts, w, h } = roadBase(ppm, 1, lengthM);
   const group = new fabric.Group(parts, {
@@ -183,13 +150,10 @@ function createOneWay(ppm, lengthM) {
   return setRoadConnections(group, [...roadEndConnections(w, h), ...roadSideConnections(w)]);
 }
 
-// Clips a family of parallel 45° lines (y - x = c, direction (1,1),
-// stepping by `spacing` across the polygon's own diagonal extent) to a
-// CONVEX polygon's boundary, by intersecting each candidate line against
-// every edge and keeping the segment between the two boundary crossings.
-// General on purpose — every hatched shape below (the median strip's
-// rectangle, the two traffic islands' rectangle and triangle) shares this
-// one implementation rather than each hand-deriving its own clip formula.
+// Clips parallel 45° lines (y - x = c, stepping by `spacing`) to a CONVEX
+// polygon's boundary, by intersecting each line against every edge and
+// keeping the segment between the two crossings. Shared by every hatched
+// shape below (median strip, traffic islands, obstacles).
 function hatchLinesForPolygon(points, spacing) {
   const edges = points.map((p, i) => [p, points[(i + 1) % points.length]]);
   const cValues = points.map((p) => p.y - p.x);
@@ -230,11 +194,10 @@ function hatchGroup(points, spacing) {
   return lines;
 }
 
-// Same diagonal hatch family (lines of slope 1, y - x = c) as
-// hatchLinesForPolygon above, but solved directly against an ellipse's
-// equation instead of walked edge-by-edge — a circle or oval has no
-// straight edges to walk. cMax is the standard tangent-line offset for a
-// slope-1 line touching an axis-aligned ellipse (c^2 = rx^2 + ry^2).
+// Same hatch family as hatchLinesForPolygon, solved against an ellipse's
+// equation instead of walked edge-by-edge (no straight edges to walk).
+// cMax is the tangent-line offset for a slope-1 line on an axis-aligned
+// ellipse (c^2 = rx^2 + ry^2).
 function hatchLinesForEllipse(rx, ry, spacing) {
   const cMax = Math.sqrt(rx * rx + ry * ry);
   const A = 1 / (rx * rx) + 1 / (ry * ry);
@@ -265,11 +228,9 @@ function hatchGroupEllipse(rx, ry, spacing) {
   );
 }
 
-// Median strip: a non-drivable divider, same shape/length convention as a
-// road piece (adjustable length, open-ended top/bottom) so it slots
-// in-line between two straight segments — but no roadSideConnections,
-// since (unlike a real road) plugging something into its side isn't a
-// thing. Hatched instead of plain-filled to read as "not pavement".
+// Non-drivable divider: same open-ended shape as a road piece so it slots
+// in-line between segments, but no roadSideConnections (nothing plugs into
+// its side). Hatched, not plain-filled, to read as "not pavement".
 const MEDIAN_WIDTH_M = 1;
 const MEDIAN_HATCH_SPACING_M = 1.2;
 
@@ -304,12 +265,8 @@ function createMedianStrip(ppm, lengthM) {
   return setRoadConnections(group, roadEndConnections(w, h));
 }
 
-// Traffic islands: unlike the median strip, these are standalone raised
-// features — placed and rotated freely wherever they're needed (e.g. a
-// pedestrian refuge, or the splitter island of a channelized turn), not
-// inserted in-line into a road's length. No roadConnections at all, and
-// (unlike the median's open-ended top/bottom) every edge is a real, closed
-// boundary — there's no "connecting face" to leave open.
+// Traffic islands: standalone, placed and rotated freely (unlike the
+// median strip). No roadConnections; every edge is closed, none left open.
 const TRAFFIC_ISLAND_HATCH_SPACING_M = 0.8; // denser than the median's — these are much smaller shapes
 const TRAFFIC_ISLAND_RECT_W_M = 3;
 const TRAFFIC_ISLAND_RECT_H_M = 2;
@@ -377,11 +334,9 @@ function createTrafficIslandTriangle(ppm) {
   });
 }
 
-// Generic obstacles: plain hatched shapes (circle, oval, square, rectangle)
-// standing in for whatever fixed object actually sat at the scene — a
-// pole, a bin, a planter, a boulder — that isn't worth its own dedicated
-// shape. Same hatched-solid look as the traffic islands above, just without
-// implying "raised road island" specifically.
+// Generic obstacles (circle, oval, square, rectangle): stand-ins for a
+// pole, bin, planter, boulder, etc. — anything not worth its own shape.
+// Same hatched-solid look as the traffic islands above.
 const OBSTACLE_HATCH_SPACING_M = 0.5;
 const OBSTACLE_CIRCLE_R_M = 0.75;
 const OBSTACLE_OVAL_RX_M = 1;
@@ -491,22 +446,14 @@ function createObstacleRect(ppm) {
   });
 }
 
-// Acceleration/merge lane: one lane wide, running parallel to a through-
-// road for a stretch (RUN_M) then tapering to a point over TAPER_M — like
-// a highway on-ramp lane disappearing into the mainline. The taper's outer
-// edge is solid (real edge of pavement); the flush edge that runs the full
-// length is dashed, like an internal lane marking, since that's the edge
-// traffic actually crosses to merge. Its one `side`-tagged connection
-// point sits on that flush edge — snapping it against a through-road's own
-// side point (see roadSideConnections) automatically rotates it to lie
-// flush on whichever side the drag lands, same mechanism as a T-junction.
+// Acceleration/merge lane: parallel run (RUN_M) then tapers to a point
+// (TAPER_M), like a highway on-ramp merging into the mainline. The taper's
+// outer edge is solid (pavement edge); the flush edge is dashed (traffic
+// crosses it to merge) and carries the one `side` connection point.
 //
-// `mirrored` flips which side the flush edge is on. This can't be done by
-// just rotating the plain version at snap time — rotation preserves
-// handedness, so however you spin it, the flush edge stays on the same
-// side relative to the direction of travel (the driver's right, matching
-// right-hand traffic). A true mirror image is needed for the flush edge
-// to fall on the driver's left instead, for left-hand-traffic countries.
+// `mirrored` flips which side the flush edge is on — needs a true mirror,
+// not a rotation, since rotation preserves handedness and the flush edge
+// would stay on the same side relative to the direction of travel.
 function speedingLane(ppm, mirrored) {
   const s = mirrored ? -1 : 1;
   const w = ROAD_LANE_WIDTH * ppm;
@@ -559,14 +506,10 @@ function createSpeedingLaneMirrored(ppm) {
   return speedingLane(ppm, true);
 }
 
-// Bounding-box center of a circular sector — radius rInner..rOuter,
-// sweeping angle 0..bendDeg around a circle centered at the local origin.
-// Needed to re-center turn()'s arc path for ANY bend angle: unlike a
-// rectangle, an arc's true extent isn't just its two endpoints — a sweep
-// that crosses a cardinal angle (90°, 180°, ...) bulges further out than
-// either one (a 135° turn's outer arc reaches its lowest point exactly at
-// the 90° mark partway through the sweep, well past where either the entry
-// or exit cap sits).
+// Bounding-box center of a circular sector (radius rInner..rOuter, sweep
+// 0..bendDeg). A sweep crossing a cardinal angle (90°, 180°...) bulges
+// further out than its two endpoints alone, so those angles must be
+// checked too, not just entry/exit.
 function sectorBBoxCenter(bendDeg, rInner, rOuter) {
   const angles = [0, bendDeg];
   [90, 180, 270].forEach((a) => {
@@ -587,15 +530,9 @@ function sectorBBoxCenter(bendDeg, rInner, rOuter) {
   return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
 }
 
-// A road that bends `bendDeg` degrees over `lanes` lanes — an annulus
-// sector built from an SVG arc path swept around a circle centered at the
-// local origin, then shifted onto its own true bounding-box center (see
-// sectorBBoxCenter above) so it rotates in place like every other shape
-// factory here. `dividerStyle` mirrors roadBase()'s: "dashed" (default,
-// passing allowed both ways), "double-solid" (no passing either way), or
-// "passing-zone" (solid + dashed straddling the nominal divider radius —
-// by convention the solid arc sits on the inner-radius side, so that lane
-// can't cross to pass while the outer-radius lane's dashed side can).
+// A road that bends `bendDeg` degrees over `lanes` lanes: an annulus
+// sector, recentered via sectorBBoxCenter so it rotates in place.
+// `dividerStyle` mirrors roadBase()'s, with solid on the inner-radius side.
 function turn(ppm, bendDeg, lanes = 2, dividerStyle = "dashed") {
   const laneWidth = 3;
   const innerR = 4 * ppm;
@@ -605,8 +542,7 @@ function turn(ppm, bendDeg, lanes = 2, dividerStyle = "dashed") {
   const rad = (bendDeg * Math.PI) / 180;
   const off = sectorBBoxCenter(bendDeg, innerR, outerR);
   const pt = (r, a) => ({ x: r * Math.cos(a) - off.x, y: r * Math.sin(a) - off.y });
-  // A standalone arc stroke at radius r, sweeping entry (angle 0) to exit
-  // (angle rad) — used as-is for the outer/inner walls and lane dividers.
+  // Arc stroke at radius r, sweeping entry (0) to exit (rad).
   const arcPath = (r) => {
     const start = pt(r, 0);
     const end = pt(r, rad);
@@ -629,9 +565,7 @@ function turn(ppm, bendDeg, lanes = 2, dividerStyle = "dashed") {
     "Z",
   ].join(" ");
 
-  // Fill only, no stroke: the outline is drawn separately below so the two
-  // straight ends (entry and exit) — the faces that connect to a straight
-  // road segment — stay open instead of capped.
+  // Fill only — outline is separate below, so entry/exit stay uncapped.
   const fill = new fabric.Path(d, {
     fill: SHAPE_FILL,
     selectable: false,
@@ -671,9 +605,8 @@ function turn(ppm, bendDeg, lanes = 2, dividerStyle = "dashed") {
     originY: "center",
     subTargetCheck: false,
   });
-  // Entry normal points backward (away from the piece — where an incoming
-  // road attaches, continuing in the direction it was already headed);
-  // exit normal points forward, continuing on in the bent direction.
+  // Entry normal points backward (incoming road's direction); exit normal
+  // points forward, in the bent direction.
   return setRoadConnections(group, [
     { x: midEntry.x, y: midEntry.y, nx: 0, ny: -1 },
     { x: midExit.x, y: midExit.y, nx: -Math.sin(rad), ny: Math.cos(rad) },
@@ -740,19 +673,16 @@ function createTurn135_2PassingZone(ppm) {
   return turn(ppm, 135, 2, "passing-zone");
 }
 
-// Roundabout: a ring of `lanes` lanes around a solid central island, with
-// eight connectors — every 45° — for roads to plug in radially. The island
-// stays the same size across all five variants — only the ring around it
-// gets wider as lanes are added.
+// Ring of `lanes` lanes around a solid central island (fixed size across
+// all variants), with eight connectors every 45° for roads to plug in.
 const ROUNDABOUT_INNER_M = 5;
 
 function roundabout(ppm, lanes) {
   const innerR = ROUNDABOUT_INNER_M * ppm;
   const outerR = innerR + lanes * ROAD_LANE_WIDTH * ppm;
 
-  // Pavement disk, then the island painted on top to punch out the
-  // center — same trick as filledSegment() elsewhere: two opaque shapes
-  // overlapping exactly is pixel-identical to a true annulus, no seam.
+  // Pavement disk with the island painted on top to punch out the center —
+  // two opaque overlapping shapes render identically to a true annulus.
   const pavement = new fabric.Circle({
     radius: outerR,
     fill: SHAPE_FILL,
@@ -799,12 +729,9 @@ function roundabout(ppm, lanes) {
 
   const group = new fabric.Group(parts, { originX: "center", originY: "center", subTargetCheck: false });
 
-  // Eight ports at the ring's outer rim — a connecting road's own
-  // centerline meets it there, same one-point-one-match convention as
-  // every other piece. Tagged `side`, like a T-junction: the outer edge is
-  // one continuous stroked circle (not pre-notched the way a straight
-  // road's ends are open), so it's the overlap+bring-to-front treatment
-  // that actually hides the seam where a road plugs in, not the geometry.
+  // Eight ports at the ring's outer rim, tagged `side` like a T-junction:
+  // the outer edge is one continuous circle (no notch), so overlap +
+  // bring-to-front is what hides the seam, not the geometry.
   const connections = [];
   for (let k = 0; k < 8; k++) {
     const theta = (k * 45 * Math.PI) / 180;
@@ -836,10 +763,8 @@ function createRoundabout5(ppm) {
   return roundabout(ppm, 5);
 }
 
-// Crosswalk width scales with lane count (real stripe/gap size stays
-// fixed at ~0.5m each — STRIPE_PERIOD_M — so a wider crossing gets more
-// stripes rather than the same 6 stretched thinner or fatter). At 2 lanes
-// this reproduces the original fixed 6m/6-stripe crosswalk exactly.
+// Crosswalk width scales with lane count; stripe/gap period (STRIPE_PERIOD_M)
+// stays fixed, so a wider crossing gets more stripes, not fatter ones.
 const CROSSWALK_LENGTH_M = 3; // along the direction of travel
 const STRIPE_PERIOD_M = 1; // one stripe (0.5m) + one gap (0.5m)
 
@@ -883,28 +808,19 @@ function createCrosswalk3(ppm) {
 }
 
 // ── Ground markings ──────────────────────────────────────────────
-// Painted-on-the-road markings — arrows and the like — live as their own
-// pieces, separate from the road shapes themselves, so a road piece is
-// just pavement/geometry and any marking on it is a deliberate, separately
-// placed and positioned choice. None of these carry roadConnections:
-// they're decorative, dropped wherever needed, not part of the road
-// network's magnetic-snap graph.
-// Bold, solid-filled pavement paint — like a real lane-arrow stencil, not
-// a thin outline. All markings below share these proportions (meters), sized
-// to sit centered in a lane with room either side rather than edge-to-edge —
-// ARROW_MAX_WIDTH_M is the sideways footprint every variant is built to fit
-// within, straight arrows included.
+// Painted-on-road markings (arrows etc.), separate from road pieces. No
+// roadConnections — decorative, not part of the snap graph.
+// Bold, solid-filled paint (not a thin outline). ARROW_MAX_WIDTH_M is the
+// sideways footprint every arrow variant fits within.
 const ARROW_MAX_WIDTH_M = ROAD_LANE_WIDTH / 2;
 const ARROW_RIBBON_W = 0.35; // width of the painted stripe itself
 const ARROW_HEAD_W = 1.3; // width of the flared arrowhead
 const ARROW_HEAD_LEN = 1.0;
 
-// A rect stretched and rotated to span p1→p2 at the given width — a
-// "thick line segment". Used to build bent arrows out of a few overlapping
-// filled pieces instead of computing a single offset-polygon outline:
-// since every piece is the same opaque fill color, overlapping joints are
-// pixel-identical to a seamless union, so this is exact, not just a
-// close-enough approximation.
+// A rect stretched/rotated to span p1→p2 at the given width — a "thick
+// line segment". Bent arrows are built from a few of these overlapping
+// instead of one offset-polygon outline; same opaque fill makes the joints
+// seamless.
 function filledSegment(p1, p2, width) {
   const dx = p2.x - p1.x;
   const dy = p2.y - p1.y;
@@ -924,13 +840,12 @@ function filledSegment(p1, p2, width) {
   });
 }
 
-// An arrowhead triangle whose apex lands exactly on `tip`, facing the
-// direction implied by `angle` (0 = up, ±90 = sideways) — shared by every
-// marking below that ends in an arrowhead.
+// Arrowhead triangle with its apex at `tip`, facing `angleDeg` (0 = up,
+// ±90 = sideways). Shared by every marking that ends in an arrowhead.
 function arrowHead(tip, angleDeg, headW, headLen) {
   const rad = (angleDeg * Math.PI) / 180;
-  // Apex-to-center offset for an up-pointing triangle is (0, -headLen/2);
-  // rotate that by angleDeg to get where the center sits relative to tip.
+  // Apex-to-center offset for an up-pointing triangle is (0, -headLen/2),
+  // rotated by angleDeg.
   const dx = -(-headLen / 2) * Math.sin(rad);
   const dy = (-headLen / 2) * Math.cos(rad);
   return new fabric.Triangle({
@@ -964,22 +879,15 @@ function createArrowMarking(ppm) {
   );
 }
 
-// A bent lane-designation arrow — shaft, 45° bend, short horizontal reach,
-// flared arrowhead — for "this lane turns left/right" markings. `dir: -1`
-// bends left, `dir: 1` bends right; built from filledSegment() pieces
-// meeting at each joint, with the arrowhead rotated ±90° to face sideways.
+// "This lane turns left/right": shaft, 45° bend, short reach, flared
+// arrowhead rotated ±90°. `dir: -1` bends left, `dir: 1` right.
 function turnArrowMarking(ppm, dir) {
   const ribbonW = ARROW_RIBBON_W * ppm;
   const headW = ARROW_HEAD_W * ppm;
   const headLen = ARROW_HEAD_LEN * ppm;
   const shaftLen = 2.2 * ppm;
-  // The bend+tail+head reach sideways (the head is rotated 90° to point
-  // sideways, so its length adds to the sideways footprint here, unlike
-  // in the straight arrow) — but so does the base shaft's own ribbon
-  // thickness bleeding past center on the *opposite* side (ribbonW/2,
-  // verified against the actual rendered bounding box, not just the
-  // centerline). Split what's left of the width budget between the
-  // diagonal and the tail.
+  // Sideways footprint budget: the rotated head's length, plus the shaft's
+  // own ribbon thickness bleeding past center on the opposite side.
   const sidewaysBudget = ARROW_MAX_WIDTH_M * ppm - headLen - ribbonW / 2;
   const diagStep = sidewaysBudget * 0.6;
   const tailLen = sidewaysBudget * 0.4;
@@ -1012,11 +920,10 @@ function createArrowMarkingRight(ppm) {
   return turnArrowMarking(ppm, 1);
 }
 
-// A "this lane goes straight OR turns" marking: one shared base shaft that
-// forks into a straight branch and a bent branch, each with their own
-// (smaller, since two branches — and the straight one's head, sitting
-// dead center, eats into the width budget on its own — share the space)
-// arrowhead. `dir: -1` forks left, `dir: 1` forks right.
+// "This lane goes straight OR turns": one base shaft forking into a
+// straight branch and a bent branch, each with a smaller arrowhead than
+// the single-direction arrows (two branches share the width budget).
+// `dir: -1` forks left, `dir: 1` right.
 function forkArrowMarking(ppm, dir) {
   const ribbonW = ARROW_RIBBON_W * ppm;
   const headScale = 0.6; // smaller than the single-direction arrows' heads, to leave room for a visible bend within the same width budget
@@ -1158,11 +1065,8 @@ function createTruck(ppm) {
   return vehicle(ppm, 7, 2.5);
 }
 
-// Traffic signal head (Φωτεινός σηματοδότης) — vector-drawn like the
-// vehicles above, not a photo crop like the signs below, since there's no
-// single "traffic light" catalog photo the way there is for a fixed sign.
-// Just the housing, not the pole it mounts on — the pole added nothing a
-// sketch needs and only made the piece harder to place.
+// Traffic signal head (Φωτεινός σηματοδότης), vector-drawn — no catalog
+// photo exists for this one. Housing only, no pole.
 function createTrafficLight(ppm) {
   const headW = 0.45;
   const headH = 1.1;
@@ -1224,12 +1128,10 @@ function createText() {
   });
 }
 
-// A tree, seen from above — a cut trunk cross-section with a few buttress
-// roots flaring out from it, matching the top-down convention every other
-// piece in this file uses (roads, vehicles), unlike the signs and traffic
-// light which are pictorial icons instead. Root angles/lengths are hand-
-// picked and irregular on purpose: a perfectly even ring of roots reads as
-// a compass rose, not a tree.
+// A tree seen from above: trunk cross-section with buttress roots, top-down
+// like the roads/vehicles (unlike the pictorial signs/traffic light).
+// Root angles/lengths are irregular on purpose — an even ring reads as a
+// compass rose, not a tree.
 function createTree(ppm) {
   const trunkR = 0.35; // meters
   const trunkRpx = trunkR * ppm;
@@ -1329,24 +1231,16 @@ const SHAPE_FACTORIES = {
 };
 
 // ── Traffic signs (Πινακίδες) ────────────────────────────────────
-// Cropped from a Greek traffic-sign supplier's catalog sheet, one PNG per
-// sign under sketcher/signs/, named after its official code (e.g. "p-1.png"
-// for Ρ-1). Unlike every shape above, these are raster images rather than
-// vector-drawn — loaded on demand via fabric.Image.fromURL (async in Fabric
-// v6, hence each factory below returns a Promise; sketcher.js's addShape()
-// wraps every factory call in Promise.resolve().then(...) to support both
-// this and the synchronous factories above without special-casing either).
-// `sizeM` is the on-canvas size of a sign's longer side, in meters — every
-// sign spawns as a 1x1 grid square by default, matching how large the other
-// shape factories' real-world dimensions render at the current px/m scale.
-// The crop's own pixel aspect ratio is preserved exactly (scaled by its
-// longer side), never stretched to a uniform square, so a sign's proportions
-// still match the source photo.
+// Cropped from a Greek traffic-sign catalog, one PNG per sign under
+// sketcher/signs/, named by official code (e.g. "p-1.png" for Ρ-1). Raster,
+// not vector — loaded via fabric.Image.fromURL, async in Fabric v6, so each
+// factory returns a Promise (addShape() in sketcher.js wraps every factory
+// call in Promise.resolve().then() to handle both cases uniformly).
+// `sizeM`: on-canvas size of the sign's longer side, in meters; aspect
+// ratio is preserved, never stretched to a square.
 //
-// Exception: Ρ-32 and Ρ-37 (speed limit / end of speed limit) aren't listed
-// here — the catalog only had one photo of each, both showing 50 km/h, so
-// they're generated as vector signs instead, covering every limit Greece
-// actually posts. See SPEED_SIGN_DEFS further down.
+// Exception: Ρ-32/Ρ-37 (speed limit / end of limit) are vector-drawn
+// instead — see SPEED_SIGN_DEFS further down.
 const SIGN_DEFS = [
   { key: "sign_p_1", code: "Ρ-1", codeLatin: "P-1", file: "p-1.png", desc: "Παραχώρηση προτεραιότητας", sizeM: 1, category: "P" },
   { key: "sign_p_2", code: "Ρ-2", codeLatin: "P-2", file: "p-2.png", desc: "STOP - Υποχρεωτική στάση", sizeM: 1, category: "P" },
@@ -1379,9 +1273,7 @@ const SIGN_DEFS = [
   { key: "sign_p_29", code: "Ρ-29", codeLatin: "P-29", file: "p-29.png", desc: "Απαγόρευση αναστροφής (U-turn)", sizeM: 1, category: "P" },
   { key: "sign_p_30", code: "Ρ-30", codeLatin: "P-30", file: "p-30.png", desc: "Υποχρεωτική ελάχιστη απόσταση μεταξύ οχημάτων", sizeM: 1, category: "P" },
   { key: "sign_p_31", code: "Ρ-31", codeLatin: "P-31", file: "p-31.png", desc: "Υποχρεωτική απόσταση μεταξύ φορτηγών", sizeM: 1, category: "P" },
-  // Ρ-32 (speed limit) and Ρ-37 (end of speed limit) are handled below as
-  // vector-drawn signs instead of catalog photos — see SPEED_SIGN_VALUES —
-  // since the catalog only had one photo of each, both at 50 km/h.
+  // Ρ-32/Ρ-37: see SPEED_SIGN_DEFS below.
   { key: "sign_p_33", code: "Ρ-33", codeLatin: "P-33", file: "p-33.png", desc: "Απαγόρευση χρήσης κόρνας", sizeM: 1, category: "P" },
   { key: "sign_p_34", code: "Ρ-34", codeLatin: "P-34", file: "p-34.png", desc: "Τελωνείο", sizeM: 1, category: "P" },
   { key: "sign_p_35", code: "Ρ-35", codeLatin: "P-35", file: "p-35.png", desc: "Σταθμός διοδίων", sizeM: 1, category: "P" },
@@ -1494,17 +1386,12 @@ SIGN_DEFS.forEach((def) => {
   SHAPE_FACTORIES[def.key] = (ppm) => trafficSign(ppm, def);
 });
 
-// Injects one palette-item per sign into the existing "Πινακίδες" palette
-// section (index.html already declares its <option value="signs">). Runs
-// synchronously as shapes.js loads — before sketcher.js's own script runs,
-// since script tags execute in document order — so sketcher.js's palette
-// wiring (drag/click handlers, search indexing, category filtering) picks
-// up these items exactly like the static ones already in the HTML.
-// The label only shows the Greek code (Ρ-1) — printing its Latin
-// transliteration (P-1) alongside it would look like a bare repeat, since
-// Greek Ρ and Latin P are visually identical. The Latin form is still
-// searchable: it's a text node too, just tucked into a zero-size span, so
-// typing "P-1" still finds "Ρ-1" without showing "Ρ-1 (P-1)" to the eye.
+// Injects one palette-item per sign into the "Πινακίδες" section (index.html
+// declares <option value="signs">). Runs before sketcher.js's palette
+// wiring, since script tags execute in document order.
+// Label shows only the Greek code (Ρ-1 and Latin P-1 look identical, so
+// printing both would look like a repeat); the Latin form is still
+// searchable via a zero-size span.
 function buildSignPaletteItems() {
   const container = document.getElementById("palette-items");
   const emptyNotice = document.getElementById("palette-empty");
@@ -1531,22 +1418,17 @@ function buildSignPaletteItems() {
 buildSignPaletteItems();
 
 // ── Speed signs (Ρ-32 / Ρ-37) ────────────────────────────────────
-// Vector-drawn rather than photo crops, unlike every sign above — the
-// catalog only had one photo of each, both at 50 km/h, but both designs
-// are simple and fully specified: a red-ringed white circle with the
-// number (Ρ-32), or a white circle with the number and a single
-// cancelling diagonal bar (Ρ-37). Drawing them parametrically covers
-// every limit actually posted in Greece instead of being stuck at "50".
+// Vector-drawn, not photo crops: Ρ-32 is a red-ringed white circle with
+// the number, Ρ-37 the same with a diagonal cancel bar. Parametric so
+// every limit Greece posts (10-130) is covered, not just the one photo.
 const SPEED_SIGN_VALUES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130];
 const SPEED_SIGN_SIZE_M = 1; // matches sizeM used by the photo signs above
 const SPEED_SIGN_RED = "#cc0000";
 const SPEED_SIGN_INK = "#1b1f24";
 const SPEED_SIGN_STRIPE = "#6b6f76";
 
-// Fixed real-world colors, not SHAPE_FILL/LINE_COLOR — like the photo
-// signs, a speed sign's own colors don't follow the light/dark sketch
-// theme (restyleObjects() only swaps the two theme colors it knows about,
-// so these are simply left alone, same as every raster sign already is).
+// Fixed colors, not SHAPE_FILL/LINE_COLOR: like the photo signs, these
+// don't follow the light/dark theme.
 function speedSignNumber(value, r) {
   return new fabric.Text(String(value), {
     fontFamily: "Arial, sans-serif",
@@ -1641,10 +1523,8 @@ SPEED_SIGN_DEFS.forEach((def) => {
   SHAPE_FACTORIES[def.key] = def.factory;
 });
 
-// A small inline SVG built by hand instead of reusing buildSignPaletteItems'
-// <img> logic above (which is PNG-specific) — so these read like the actual
-// sign in the palette instead of falling back to the generic blue-line icon
-// style everything without its own <svg>/<img> would otherwise get.
+// Hand-built inline SVG, not buildSignPaletteItems()'s PNG-specific <img>
+// logic, so these read like the real sign in the palette.
 function buildSpeedSignThumbnail(def) {
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg");
@@ -1687,10 +1567,8 @@ function buildSpeedSignThumbnail(def) {
   return svg;
 }
 
-// Inserted right where the single photo entry used to sit (just before
-// Ρ-33 / Ρ-38) rather than appended at the end, so browsing the palette
-// still finds the whole 10–130 run in one place instead of scattered after
-// every other sign.
+// Inserted before Ρ-33/Ρ-38 (where the single photo entry used to sit),
+// not appended at the end, so the 10-130 run stays together.
 function buildSpeedSignPaletteItems() {
   const container = document.getElementById("palette-items");
   const emptyNotice = document.getElementById("palette-empty");
