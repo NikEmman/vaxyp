@@ -1342,6 +1342,11 @@ const SHAPE_FACTORIES = {
 // The crop's own pixel aspect ratio is preserved exactly (scaled by its
 // longer side), never stretched to a uniform square, so a sign's proportions
 // still match the source photo.
+//
+// Exception: Ρ-32 and Ρ-37 (speed limit / end of speed limit) aren't listed
+// here — the catalog only had one photo of each, both showing 50 km/h, so
+// they're generated as vector signs instead, covering every limit Greece
+// actually posts. See SPEED_SIGN_DEFS further down.
 const SIGN_DEFS = [
   { key: "sign_p_1", code: "Ρ-1", codeLatin: "P-1", file: "p-1.png", desc: "Παραχώρηση προτεραιότητας", sizeM: 1, category: "P" },
   { key: "sign_p_2", code: "Ρ-2", codeLatin: "P-2", file: "p-2.png", desc: "STOP - Υποχρεωτική στάση", sizeM: 1, category: "P" },
@@ -1374,12 +1379,13 @@ const SIGN_DEFS = [
   { key: "sign_p_29", code: "Ρ-29", codeLatin: "P-29", file: "p-29.png", desc: "Απαγόρευση αναστροφής (U-turn)", sizeM: 1, category: "P" },
   { key: "sign_p_30", code: "Ρ-30", codeLatin: "P-30", file: "p-30.png", desc: "Υποχρεωτική ελάχιστη απόσταση μεταξύ οχημάτων", sizeM: 1, category: "P" },
   { key: "sign_p_31", code: "Ρ-31", codeLatin: "P-31", file: "p-31.png", desc: "Υποχρεωτική απόσταση μεταξύ φορτηγών", sizeM: 1, category: "P" },
-  { key: "sign_p_32", code: "Ρ-32", codeLatin: "P-32", file: "p-32.png", desc: "Ανώτατο όριο ταχύτητας 50 χλμ/ώρα", sizeM: 1, category: "P" },
+  // Ρ-32 (speed limit) and Ρ-37 (end of speed limit) are handled below as
+  // vector-drawn signs instead of catalog photos — see SPEED_SIGN_VALUES —
+  // since the catalog only had one photo of each, both at 50 km/h.
   { key: "sign_p_33", code: "Ρ-33", codeLatin: "P-33", file: "p-33.png", desc: "Απαγόρευση χρήσης κόρνας", sizeM: 1, category: "P" },
   { key: "sign_p_34", code: "Ρ-34", codeLatin: "P-34", file: "p-34.png", desc: "Τελωνείο", sizeM: 1, category: "P" },
   { key: "sign_p_35", code: "Ρ-35", codeLatin: "P-35", file: "p-35.png", desc: "Σταθμός διοδίων", sizeM: 1, category: "P" },
   { key: "sign_p_36", code: "Ρ-36", codeLatin: "P-36", file: "p-36.png", desc: "Τέλος απαγόρευσης προσπέρασης", sizeM: 1, category: "P" },
-  { key: "sign_p_37", code: "Ρ-37", codeLatin: "P-37", file: "p-37.png", desc: "Τέλος ορίου ταχύτητας 50 χλμ/ώρα", sizeM: 1, category: "P" },
   { key: "sign_p_38", code: "Ρ-38", codeLatin: "P-38", file: "p-38.png", desc: "Τέλος απαγόρευσης προσπέρασης φορτηγών", sizeM: 1, category: "P" },
   { key: "sign_p_39", code: "Ρ-39", codeLatin: "P-39", file: "p-39.png", desc: "Απαγόρευση στάσης και στάθμευσης", sizeM: 1, category: "P" },
   { key: "sign_p_40", code: "Ρ-40", codeLatin: "P-40", file: "p-40.png", desc: "Απαγόρευση στάθμευσης", sizeM: 1, category: "P" },
@@ -1523,3 +1529,188 @@ function buildSignPaletteItems() {
   });
 }
 buildSignPaletteItems();
+
+// ── Speed signs (Ρ-32 / Ρ-37) ────────────────────────────────────
+// Vector-drawn rather than photo crops, unlike every sign above — the
+// catalog only had one photo of each, both at 50 km/h, but both designs
+// are simple and fully specified: a red-ringed white circle with the
+// number (Ρ-32), or a white circle with the number and a single
+// cancelling diagonal bar (Ρ-37). Drawing them parametrically covers
+// every limit actually posted in Greece instead of being stuck at "50".
+const SPEED_SIGN_VALUES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130];
+const SPEED_SIGN_SIZE_M = 1; // matches sizeM used by the photo signs above
+const SPEED_SIGN_RED = "#cc0000";
+const SPEED_SIGN_INK = "#1b1f24";
+const SPEED_SIGN_STRIPE = "#6b6f76";
+
+// Fixed real-world colors, not SHAPE_FILL/LINE_COLOR — like the photo
+// signs, a speed sign's own colors don't follow the light/dark sketch
+// theme (restyleObjects() only swaps the two theme colors it knows about,
+// so these are simply left alone, same as every raster sign already is).
+function speedSignNumber(value, r) {
+  return new fabric.Text(String(value), {
+    fontFamily: "Arial, sans-serif",
+    fontWeight: "bold",
+    fontSize: r * 0.85,
+    fill: SPEED_SIGN_INK,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+}
+
+function createSpeedLimitSign(ppm, value) {
+  const r = (SPEED_SIGN_SIZE_M * ppm) / 2;
+  const ringWidth = r * 0.22;
+
+  const white = new fabric.Circle({
+    radius: r,
+    fill: "#ffffff",
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const ring = new fabric.Circle({
+    radius: r - ringWidth / 2,
+    fill: "",
+    stroke: SPEED_SIGN_RED,
+    strokeWidth: ringWidth,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+
+  return new fabric.Group([white, ring, speedSignNumber(value, r)], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
+function createEndSpeedLimitSign(ppm, value) {
+  const r = (SPEED_SIGN_SIZE_M * ppm) / 2;
+  const k = r / Math.SQRT2; // corner-to-corner diagonal endpoints
+
+  const white = new fabric.Circle({
+    radius: r,
+    fill: "#ffffff",
+    stroke: SPEED_SIGN_INK,
+    strokeWidth: Math.max(1, r * 0.05),
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  const stripe = new fabric.Line([-k, -k, k, k], {
+    stroke: SPEED_SIGN_STRIPE,
+    strokeWidth: Math.max(2, r * 0.12),
+    selectable: false,
+    evented: false,
+  });
+
+  return new fabric.Group([white, stripe, speedSignNumber(value, r)], {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+}
+
+const SPEED_SIGN_DEFS = SPEED_SIGN_VALUES.flatMap((value) => [
+  {
+    key: `sign_p_32_${value}`,
+    code: "Ρ-32",
+    desc: `Ανώτατο όριο ταχύτητας ${value} χλμ/ώρα`,
+    kind: "limit",
+    value,
+    factory: (ppm) => createSpeedLimitSign(ppm, value),
+  },
+  {
+    key: `sign_p_37_${value}`,
+    code: "Ρ-37",
+    desc: `Τέλος ορίου ταχύτητας ${value} χλμ/ώρα`,
+    kind: "end",
+    value,
+    factory: (ppm) => createEndSpeedLimitSign(ppm, value),
+  },
+]);
+
+SPEED_SIGN_DEFS.forEach((def) => {
+  SHAPE_FACTORIES[def.key] = def.factory;
+});
+
+// A small inline SVG built by hand instead of reusing buildSignPaletteItems'
+// <img> logic above (which is PNG-specific) — so these read like the actual
+// sign in the palette instead of falling back to the generic blue-line icon
+// style everything without its own <svg>/<img> would otherwise get.
+function buildSpeedSignThumbnail(def) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+
+  const circle = document.createElementNS(NS, "circle");
+  circle.setAttribute("cx", "12");
+  circle.setAttribute("cy", "12");
+  circle.setAttribute("r", "10");
+  circle.setAttribute("fill", "#ffffff");
+  svg.appendChild(circle);
+
+  if (def.kind === "limit") {
+    circle.setAttribute("stroke", SPEED_SIGN_RED);
+    circle.setAttribute("stroke-width", "2.5");
+  } else {
+    circle.setAttribute("stroke", SPEED_SIGN_INK);
+    circle.setAttribute("stroke-width", "1");
+    const stripe = document.createElementNS(NS, "line");
+    stripe.setAttribute("x1", "5");
+    stripe.setAttribute("y1", "19");
+    stripe.setAttribute("x2", "19");
+    stripe.setAttribute("y2", "5");
+    stripe.setAttribute("stroke", SPEED_SIGN_STRIPE);
+    stripe.setAttribute("stroke-width", "2.5");
+    svg.appendChild(stripe);
+  }
+
+  const text = document.createElementNS(NS, "text");
+  text.setAttribute("x", "12");
+  text.setAttribute("y", "12.5");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("dominant-baseline", "middle");
+  text.setAttribute("font-size", def.value >= 100 ? "6" : "8");
+  text.setAttribute("font-weight", "bold");
+  text.setAttribute("fill", SPEED_SIGN_INK);
+  text.textContent = String(def.value);
+  svg.appendChild(text);
+
+  return svg;
+}
+
+// Inserted right where the single photo entry used to sit (just before
+// Ρ-33 / Ρ-38) rather than appended at the end, so browsing the palette
+// still finds the whole 10–130 run in one place instead of scattered after
+// every other sign.
+function buildSpeedSignPaletteItems() {
+  const container = document.getElementById("palette-items");
+  const emptyNotice = document.getElementById("palette-empty");
+  if (!container) return;
+
+  function insertBeforeShape(shapeKey, node) {
+    const anchor = container.querySelector(`[data-shape="${shapeKey}"]`) || emptyNotice;
+    container.insertBefore(node, anchor);
+  }
+
+  SPEED_SIGN_DEFS.forEach((def) => {
+    const item = document.createElement("div");
+    item.className = "palette-item";
+    item.draggable = true;
+    item.dataset.shape = def.key;
+    item.dataset.categories = "signs";
+    item.title = `${def.code} — ${def.desc}`;
+    item.appendChild(buildSpeedSignThumbnail(def));
+    item.appendChild(document.createTextNode(`${def.code} — ${def.desc}`));
+    insertBeforeShape(def.kind === "limit" ? "sign_p_33" : "sign_p_38", item);
+  });
+}
+buildSpeedSignPaletteItems();
