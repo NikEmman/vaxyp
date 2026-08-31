@@ -973,8 +973,20 @@
     a.click();
   });
 
-  // PDF export fits the same content-cropped PNG onto a landscape A4 page —
-  // closer to something you'd actually staple into a report.
+  // PDF export fits the same content-cropped PNG onto a landscape page —
+  // closer to something you'd actually staple into a report. Since the PNG
+  // is captured at multiplier:2, a fit-scale of 0.5 is the content's native
+  // resolution (1 canvas unit = 1 PDF point); below that, A4 would shrink
+  // it past its natural crispness, so we promote to A3 instead.
+  const PAGE_A4 = { w: 841.89, h: 595.28 }; // landscape, in points
+  const PAGE_A3 = { w: 1190.55, h: 841.89 }; // landscape, in points
+  const NATIVE_SCALE = 0.5;
+
+  function fitScale(page, margin, width, height) {
+    const avail = { w: page.w - 2 * margin, h: page.h - 2 * margin };
+    return Math.min(avail.w / width, avail.h / height);
+  }
+
   document
     .getElementById("btn-export-pdf")
     .addEventListener("click", async () => {
@@ -998,13 +1010,13 @@
       const doc = await PDFDocument.create();
       const embedded = await doc.embedPng(pngBytes);
 
-      const PAGE = { w: 841.89, h: 595.28 }; // A4 landscape, in points
       const margin = 30;
-      const avail = { w: PAGE.w - 2 * margin, h: PAGE.h - 2 * margin };
-      const scale = Math.min(
-        avail.w / embedded.width,
-        avail.h / embedded.height,
-      );
+      let PAGE = PAGE_A4;
+      let scale = fitScale(PAGE, margin, embedded.width, embedded.height);
+      if (scale < NATIVE_SCALE) {
+        PAGE = PAGE_A3;
+        scale = fitScale(PAGE, margin, embedded.width, embedded.height);
+      }
       const dw = embedded.width * scale;
       const dh = embedded.height * scale;
 
