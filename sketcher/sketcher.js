@@ -135,6 +135,11 @@
   // affects pieces added from here on.
   const segmentLengthInput = document.getElementById("segment-length-input");
   const segmentLengthValue = document.getElementById("segment-length-value");
+  // Browsers restore a range input's position on reload without firing
+  // "input" (and without moving it back to its HTML default), so force
+  // both the slider and its readout back to the authored default here.
+  segmentLengthInput.value = segmentLengthInput.defaultValue;
+  segmentLengthValue.textContent = segmentLengthInput.value;
   segmentLengthInput.addEventListener("input", () => {
     segmentLengthValue.textContent = segmentLengthInput.value;
   });
