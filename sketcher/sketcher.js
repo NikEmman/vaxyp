@@ -418,6 +418,7 @@
   });
 
   canvas.on("object:moving", (e) => trySnapRoadConnection(e.target));
+  canvas.on("object:rotating", (e) => trySnapRoadConnection(e.target));
   canvas.on("object:modified", (opt) => {
     clearSnapIndicator();
     refreshConnectorMarkers();
