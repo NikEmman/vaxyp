@@ -164,6 +164,51 @@ function createTrainTracks(ppm, lengthM = ROAD_LENGTH_M) {
   return markAsGroundMarking(group);
 }
 
+// A pair of tire skid marks: thick, slightly irregular streaks that fade in
+// and out like rubber laid down under hard braking, instead of crisp
+// straight lines. Sized by the same length slider as straight road pieces.
+const SKID_TRACK_WIDTH_M = 1.6; // typical distance between a car's tires
+const SKID_MARK_WIDTH_PX = 5;
+const SKID_SEGMENTS = 12;
+
+function skidMark(xOffset, h, seed) {
+  const parts = [];
+  for (let i = 0; i < SKID_SEGMENTS; i++) {
+    const t0 = i / SKID_SEGMENTS;
+    const t1 = (i + 1) / SKID_SEGMENTS;
+    const y0 = -h / 2 + h * t0;
+    const y1 = -h / 2 + h * t1;
+    const tMid = (t0 + t1) / 2;
+    // fades in quickly as the tire locks up, stays dark, fades out slower
+    // toward the stop
+    const fade = Math.min(1, tMid / 0.15, (1 - tMid) / 0.3);
+    const jitter = Math.sin(i * 2.3 + seed) * 1.5;
+    parts.push(
+      new fabric.Line([xOffset + jitter, y0, xOffset + jitter, y1], {
+        stroke: LINE_COLOR,
+        strokeWidth: SKID_MARK_WIDTH_PX,
+        strokeLineCap: "round",
+        opacity: Math.max(0.12, fade),
+        selectable: false,
+        evented: false,
+      }),
+    );
+  }
+  return parts;
+}
+
+function createSkidMarks(ppm, lengthM = ROAD_LENGTH_M) {
+  const h = lengthM * ppm;
+  const trackX = (SKID_TRACK_WIDTH_M * ppm) / 2;
+  const parts = [...skidMark(-trackX, h, 0), ...skidMark(trackX, h, 10)];
+  const group = new fabric.Group(parts, {
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+  });
+  return markAsGroundMarking(group);
+}
+
 // One lane, no direction drawn on the piece itself — pair with a "Βέλος
 // Κατεύθυνσης" ground marking to show which way traffic flows.
 function createOneWay(ppm, lengthM) {
@@ -1254,6 +1299,7 @@ const SHAPE_FACTORIES = {
   truck: createTruck,
   trafficlight: createTrafficLight,
   tree: createTree,
+  skidmarks: createSkidMarks,
   text: () => createText(),
 };
 
