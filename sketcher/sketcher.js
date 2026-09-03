@@ -909,16 +909,20 @@
   // ── Scale (px per meter) ─────────────────────────────────────────
   // Changing the scale re-scales everything already on the canvas too —
   // position and size are both multiplied by the same ratio, around the
-  // canvas origin, so the real-world (meter) layout stays consistent and
-  // only its pixel size changes, like zooming the whole scene.
-  document.getElementById("scale-input").addEventListener("change", (e) => {
+  // center of the current viewport (not the canvas origin), so whatever
+  // is on screen stays roughly centered instead of zooming away toward
+  // one corner of the much-bigger 6000x4200 canvas.
+  const scaleInput = document.getElementById("scale-input");
+  scaleInput.addEventListener("change", (e) => {
     const newPpm = parseFloat(e.target.value) || 40;
     if (newPpm !== ppm) {
       const ratio = newPpm / ppm;
+      const cx = scrollWrap.scrollLeft + scrollWrap.clientWidth / 2;
+      const cy = scrollWrap.scrollTop + scrollWrap.clientHeight / 2;
       canvas.getObjects().forEach((obj) => {
         obj.set({
-          left: obj.left * ratio,
-          top: obj.top * ratio,
+          left: cx + (obj.left - cx) * ratio,
+          top: cy + (obj.top - cy) * ratio,
           scaleX: obj.scaleX * ratio,
           scaleY: obj.scaleY * ratio,
         });
@@ -929,6 +933,20 @@
     applyGrid();
     canvas.requestRenderAll();
   });
+
+  const ZOOM_STEP = 5;
+  function stepZoom(delta) {
+    const min = parseFloat(scaleInput.min) || 5;
+    const next = Math.max(min, (parseFloat(scaleInput.value) || 40) + delta);
+    scaleInput.value = next;
+    scaleInput.dispatchEvent(new Event("change"));
+  }
+  document
+    .getElementById("btn-zoom-in")
+    .addEventListener("click", () => stepZoom(ZOOM_STEP));
+  document
+    .getElementById("btn-zoom-out")
+    .addEventListener("click", () => stepZoom(-ZOOM_STEP));
 
   // ── Export / clear ───────────────────────────────────────────────
   // Shared by both export buttons: bounding box of everything drawn,

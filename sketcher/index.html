@@ -220,6 +220,25 @@
         background-color: var(--background-light);
         color: var(--text-dark);
       }
+      .zoom-control {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+      }
+      .zoom-control .zoom-icon {
+        width: 18px;
+        height: 18px;
+        stroke: var(--text-dark);
+        flex-shrink: 0;
+      }
+      .zoom-control input[type="number"] {
+        width: 3.5em;
+        text-align: center;
+      }
+      .zoom-control button svg {
+        width: 18px;
+        height: 18px;
+      }
 
       .canvas-scroll {
         flex: 1;
@@ -1067,11 +1086,49 @@
             </svg>
           </button>
           <div class="sep"></div>
-          <label
-            >Κλίμακα
+          <div class="zoom-control" title="Κλίμακα σχεδίασης σε pixel ανά μέτρο — λειτουργεί σαν ζουμ όλου του σκαριφήματος">
+            <svg
+              class="zoom-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <label for="scale-input">Ζουμ</label>
+            <button id="btn-zoom-out" type="button" title="Σμίκρυνση" aria-label="Σμίκρυνση">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14"></path>
+              </svg>
+            </button>
             <input type="number" id="scale-input" value="40" min="5" step="1" />
-            px/m
-          </label>
+            <button id="btn-zoom-in" type="button" title="Μεγέθυνση" aria-label="Μεγέθυνση">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+            </button>
+          </div>
           <div class="sep"></div>
           <div
             class="segment-length-control"
