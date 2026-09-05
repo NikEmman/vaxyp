@@ -1080,4 +1080,201 @@
       canvas.requestRenderAll();
     });
   });
+
+  // ── Save / load sketches (localStorage) ─────────────────────────────
+  const SAVED_SKETCHES_KEY = "sketcher-saved-sketches";
+
+  function loadSavedSketches() {
+    try {
+      return JSON.parse(localStorage.getItem(SAVED_SKETCHES_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+  function persistSavedSketches(sketches) {
+    localStorage.setItem(SAVED_SKETCHES_KEY, JSON.stringify(sketches));
+  }
+
+  // Connector-indicator markers, and the live `.marker` reference each one
+  // leaves on its road piece's roadConnections entry (see
+  // refreshConnectorMarkers), are transient UI state, not sketch content —
+  // strip both before serializing. Left in, `.marker` points at a fabric
+  // object that references the canvas back, and JSON.stringify throws on
+  // the circular structure.
+  function serializeSketch() {
+    clearConnectorMarkers();
+    const json = canvas.toJSON(["isGroundMarking", "roadConnections"]);
+    refreshConnectorMarkers();
+    json.objects.forEach((o) => {
+      if (o.roadConnections) {
+        o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
+      }
+    });
+    return json;
+  }
+
+  const saveSketchPanel = document.getElementById("save-sketch-panel");
+  const saveSketchNameInput = document.getElementById("save-sketch-name");
+  const loadSketchPanel = document.getElementById("load-sketch-panel");
+  const sketchListEl = document.getElementById("sketch-list");
+
+  document.getElementById("btn-save-sketch").addEventListener("click", () => {
+    loadSketchPanel.hidden = true;
+    saveSketchPanel.hidden = !saveSketchPanel.hidden;
+    if (!saveSketchPanel.hidden) {
+      saveSketchNameInput.value = "";
+      saveSketchNameInput.focus();
+    }
+  });
+
+  function storeSketch() {
+    const name = saveSketchNameInput.value.trim();
+    if (!name) {
+      window.displayNotification("Δώστε ένα όνομα στο σκαρίφημα.", "warning");
+      return;
+    }
+    if (canvas.getObjects().filter((o) => !o.isConnectorIndicator).length === 0) {
+      window.displayNotification(
+        "Δεν υπάρχει σκαρίφημα για αποθήκευση.",
+        "warning",
+      );
+      return;
+    }
+    const sketches = loadSavedSketches();
+    if (
+      sketches[name] &&
+      !confirm(`Υπάρχει ήδη σκαρίφημα με το όνομα "${name}". Αντικατάσταση;`)
+    )
+      return;
+    sketches[name] = serializeSketch();
+    persistSavedSketches(sketches);
+    saveSketchPanel.hidden = true;
+    window.displayNotification("Το σκαρίφημα αποθηκεύτηκε.");
+  }
+  document
+    .getElementById("btn-store-sketch")
+    .addEventListener("click", storeSketch);
+  saveSketchNameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") storeSketch();
+  });
+
+  // Adds the saved sketch's pieces alongside whatever's already on the
+  // canvas (nothing is cleared) — this is how a recurring local layout
+  // (a known junction, a common set-up) gets reused across sketches.
+  function loadSketch(name) {
+    const sketches = loadSavedSketches();
+    const data = sketches[name];
+    if (!data) return;
+
+    fabric.util.enlivenObjects(data.objects || []).then((objects) => {
+      if (objects.length === 0) return;
+
+      // Saved coordinates are wherever the piece sat on the (much bigger)
+      // canvas when it was stored — recenter the group on the current
+      // viewport instead, or it usually lands off-screen or on top of
+      // whatever's already there.
+      const bounds = objects.reduce(
+        (acc, o) => {
+          const r = o.getBoundingRect();
+          return {
+            left: Math.min(acc.left, r.left),
+            top: Math.min(acc.top, r.top),
+            right: Math.max(acc.right, r.left + r.width),
+            bottom: Math.max(acc.bottom, r.top + r.height),
+          };
+        },
+        { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+      );
+      const dx =
+        scrollWrap.scrollLeft +
+        scrollWrap.clientWidth / 2 -
+        (bounds.left + bounds.right) / 2;
+      const dy =
+        scrollWrap.scrollTop +
+        scrollWrap.clientHeight / 2 -
+        (bounds.top + bounds.bottom) / 2;
+
+      canvas.discardActiveObject();
+      objects.forEach((obj) => {
+        obj.set({ left: obj.left + dx, top: obj.top + dy });
+        obj.setCoords();
+        canvas.add(obj);
+        if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
+        else if (obj.roadConnections) canvas.sendObjectToBack(obj);
+      });
+      pushUndo(() => {
+        objects.forEach((obj) => canvas.remove(obj));
+        refreshConnectorMarkers();
+        canvas.requestRenderAll();
+      });
+
+      // Select the whole loaded group so it can be dragged into place as
+      // one piece right away, same as a single freshly-added shape.
+      if (objects.length === 1) canvas.setActiveObject(objects[0]);
+      else
+        canvas.setActiveObject(
+          new fabric.ActiveSelection(objects, { canvas }),
+        );
+
+      refreshConnectorMarkers();
+      canvas.requestRenderAll();
+      loadSketchPanel.hidden = true;
+      window.displayNotification("Το σκαρίφημα προστέθηκε στον καμβά.");
+    });
+  }
+
+  function deleteSketch(name) {
+    if (!confirm(`Διαγραφή του σκαριφήματος "${name}";`)) return;
+    const sketches = loadSavedSketches();
+    delete sketches[name];
+    persistSavedSketches(sketches);
+    renderSketchList();
+    window.displayNotification("Το σκαρίφημα διαγράφηκε.");
+  }
+
+  // Native <select> can't hold a delete button per row, so the saved-sketch
+  // list is a plain button per entry (load) paired with its own delete
+  // button, rather than a <select>+one shared delete button.
+  function renderSketchList() {
+    const sketches = loadSavedSketches();
+    const names = Object.keys(sketches).sort((a, b) => a.localeCompare(b, "el"));
+    sketchListEl.innerHTML = "";
+    if (names.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "sketch-list-empty";
+      empty.textContent = "Δεν υπάρχουν αποθηκευμένα σκαριφήματα.";
+      sketchListEl.appendChild(empty);
+      return;
+    }
+    names.forEach((name) => {
+      const item = document.createElement("div");
+      item.className = "sketch-list-item";
+
+      const nameBtn = document.createElement("button");
+      nameBtn.type = "button";
+      nameBtn.className = "sketch-list-name";
+      nameBtn.textContent = name;
+      nameBtn.title = name;
+      nameBtn.addEventListener("click", () => loadSketch(name));
+      item.appendChild(nameBtn);
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "sketch-list-delete";
+      delBtn.title = `Διαγραφή του σκαριφήματος "${name}"`;
+      delBtn.setAttribute("aria-label", delBtn.title);
+      delBtn.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
+      delBtn.addEventListener("click", () => deleteSketch(name));
+      item.appendChild(delBtn);
+
+      sketchListEl.appendChild(item);
+    });
+  }
+
+  document.getElementById("btn-load-sketch").addEventListener("click", () => {
+    saveSketchPanel.hidden = true;
+    loadSketchPanel.hidden = !loadSketchPanel.hidden;
+    if (!loadSketchPanel.hidden) renderSketchList();
+  });
 })();
