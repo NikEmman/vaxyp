@@ -825,7 +825,11 @@
   })();
 
   function applyEraseStroke(erasePath) {
-    const strokeData = erasePath.toObject();
+    // The live drag-preview brush is translucent for UX (see the eraseBtn
+    // click handler), but the clip mask itself needs a fully opaque stroke
+    // — a translucent one only partially masks, rendering "erased" areas
+    // faded instead of actually removed.
+    const strokeData = { ...erasePath.toObject(), stroke: "rgba(0,0,0,1)", opacity: 1 };
     const strokeBounds = erasePath.getBoundingRect();
     const changes = [];
 
@@ -900,7 +904,7 @@
     eraseBtn.classList.add("active");
     canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
     canvas.freeDrawingBrush.width = ERASER_WIDTH_PX;
-    canvas.freeDrawingBrush.color = "rgba(0,0,0,1)";
+    canvas.freeDrawingBrush.color = "rgba(255,255,255,0.5)"; // live drag preview only — the real erase is an invisible clip, see path:created
     canvas.isDrawingMode = true;
     canvas.selection = false;
     canvas.freeDrawingCursor = ERASER_CURSOR;
