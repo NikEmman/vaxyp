@@ -1199,6 +1199,16 @@
       canvas.discardActiveObject();
       objects.forEach((obj) => {
         obj.set({ left: obj.left + dx, top: obj.top + dy });
+        // An eraser clipPath is absolutePositioned (canvas-space, not
+        // relative to the object), so it has to be shifted right along with
+        // the piece or the hole gets left behind at the old location.
+        if (obj.clipPath) {
+          obj.clipPath.set({
+            left: obj.clipPath.left + dx,
+            top: obj.clipPath.top + dy,
+          });
+          obj.clipPath.setCoords();
+        }
         obj.setCoords();
         canvas.add(obj);
         if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
