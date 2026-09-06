@@ -810,6 +810,20 @@
   const eraseBtn = document.getElementById("btn-erase");
   const ERASER_WIDTH_PX = 24;
 
+  // A ring cursor the same size as the brush, so it's obvious how wide a
+  // stroke will land before clicking. Fabric only honors freeDrawingCursor
+  // (not defaultCursor/hoverCursor) while isDrawingMode is on.
+  const ERASER_CURSOR = (() => {
+    const r = ERASER_WIDTH_PX / 2;
+    const size = ERASER_WIDTH_PX + 4; // pad so the stroke outline isn't clipped
+    const c = size / 2;
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
+      `<circle cx="${c}" cy="${c}" r="${r}" fill="rgba(255,255,255,0.35)" stroke="#333" stroke-width="2"/>` +
+      `</svg>`;
+    return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') ${c} ${c}, crosshair`;
+  })();
+
   function applyEraseStroke(erasePath) {
     const strokeData = erasePath.toObject();
     const strokeBounds = erasePath.getBoundingRect();
@@ -889,7 +903,7 @@
     canvas.freeDrawingBrush.color = "rgba(0,0,0,1)";
     canvas.isDrawingMode = true;
     canvas.selection = false;
-    canvas.defaultCursor = "crosshair";
+    canvas.freeDrawingCursor = ERASER_CURSOR;
   });
 
   canvas.on("path:created", (e) => {
