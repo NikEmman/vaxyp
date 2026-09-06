@@ -681,46 +681,48 @@
   });
 
   canvas.on("mouse:down", (opt) => {
-    if (!measuring) return;
+    if (!measuring || measurePoints.length > 0) return;
     const p = canvas.getPointer(opt.e);
 
-    if (measurePoints.length === 0) {
-      measurePoints.push(p);
-      // Give the start tick a vertical default so it reads as a "|" mark
-      // right away, before the line has a direction to derive it from.
-      previewLine = new fabric.Line([p.x, p.y, p.x, p.y], {
-        stroke: LINE_COLOR,
-        strokeWidth: 2,
-        strokeDashArray: [6, 4],
-        selectable: false,
-        evented: false,
-      });
-      previewTick1 = new fabric.Line(tickEndpoints(p, 0, 1), {
-        stroke: LINE_COLOR,
-        strokeWidth: 2,
-        selectable: false,
-        evented: false,
-      });
-      previewTick2 = new fabric.Line(tickEndpoints(p, 0, 1), {
-        stroke: LINE_COLOR,
-        strokeWidth: 2,
-        selectable: false,
-        evented: false,
-      });
-      previewLabel = new fabric.Text("0.00 m", {
-        left: p.x,
-        top: p.y - 16,
-        fontSize: 14,
-        fill: LINE_COLOR,
-        selectable: false,
-        evented: false,
-      });
-      canvas.add(previewLine, previewTick1, previewTick2, previewLabel);
-      canvas.requestRenderAll();
-      return;
-    }
+    measurePoints.push(p);
+    // Give the start tick a vertical default so it reads as a "|" mark
+    // right away, before the line has a direction to derive it from.
+    previewLine = new fabric.Line([p.x, p.y, p.x, p.y], {
+      stroke: LINE_COLOR,
+      strokeWidth: 2,
+      strokeDashArray: [6, 4],
+      selectable: false,
+      evented: false,
+    });
+    previewTick1 = new fabric.Line(tickEndpoints(p, 0, 1), {
+      stroke: LINE_COLOR,
+      strokeWidth: 2,
+      selectable: false,
+      evented: false,
+    });
+    previewTick2 = new fabric.Line(tickEndpoints(p, 0, 1), {
+      stroke: LINE_COLOR,
+      strokeWidth: 2,
+      selectable: false,
+      evented: false,
+    });
+    previewLabel = new fabric.Text("0.00 m", {
+      left: p.x,
+      top: p.y - 16,
+      fontSize: 14,
+      fill: LINE_COLOR,
+      selectable: false,
+      evented: false,
+    });
+    canvas.add(previewLine, previewTick1, previewTick2, previewLabel);
+    canvas.defaultCursor = "none"; // hide the cursor while dragging the measurement out
+    canvas.requestRenderAll();
+  });
 
+  canvas.on("mouse:up", (opt) => {
+    if (!measuring || measurePoints.length === 0) return;
     const p1 = measurePoints[0];
+    const p = canvas.getPointer(opt.e);
     const distM = (Math.hypot(p.x - p1.x, p.y - p1.y) / ppm).toFixed(2);
     const { nx, ny } = perpUnit(p1, p);
     clearMeasurePreview();
@@ -755,6 +757,8 @@
       new fabric.Group([line, tick1, tick2, label], { subTargetCheck: false }),
     );
 
+    // stopMeasuring() resets the cursor straight to default/grab, so it
+    // never flashes back to a crosshair before the tool deactivates.
     stopMeasuring();
   });
 
