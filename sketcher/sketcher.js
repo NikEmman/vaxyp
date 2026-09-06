@@ -576,10 +576,12 @@
     const prevAngle = obj.angle || 0;
     obj.rotate((prevAngle + deltaDeg + 360) % 360);
     obj.setCoords(); // recalc the selection border/handles — rotate() alone leaves them stale
+    refreshConnectorMarkers(); // toolbar rotate bypasses object:modified, so refresh markers directly
     canvas.requestRenderAll();
     pushUndo(() => {
       obj.rotate(prevAngle);
       obj.setCoords();
+      refreshConnectorMarkers();
       canvas.requestRenderAll();
     });
   }
