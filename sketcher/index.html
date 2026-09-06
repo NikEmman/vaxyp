@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../libs/driver/driver.css" />
     <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon" />
     <title>Σκαρίφημα Τροχαίου</title>
     <style>
@@ -139,6 +140,14 @@
         align-self: stretch;
         background-color: var(--border-color);
         margin: 0 0.3em;
+      }
+      /* Groups a handful of toolbar controls behind one element so the
+         tour guide can highlight them together. */
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        flex-wrap: wrap;
       }
       .toolbar button.active {
         background-color: var(--primary-blue);
@@ -1059,6 +1068,25 @@
       <!-- Center: toolbar + canvas -->
       <div class="canvas-wrap">
         <div class="toolbar">
+          <button id="tour-help" title="Περιήγηση" aria-label="Περιήγηση">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polygon
+                points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"
+              ></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+          </button>
+          <div class="sep"></div>
+          <div class="toolbar-group" id="toolbar-tools-group">
           <button
             id="btn-select-tool"
             aria-pressed="false"
@@ -1201,6 +1229,7 @@
               <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
           </button>
+          </div>
           <div class="sep"></div>
           <div class="zoom-control" title="Κλίμακα σχεδίασης σε pixel ανά μέτρο — λειτουργεί σαν ζουμ όλου του σκαριφήματος">
             <svg
@@ -1262,6 +1291,7 @@
             <div><span id="segment-length-value">20</span> μ</div>
           </div>
           <div class="sep"></div>
+          <div class="toolbar-group" id="toolbar-export-group">
           <button id="btn-export" title="Εξαγωγή PNG" aria-label="Εξαγωγή PNG">
             PNG
           </button>
@@ -1272,6 +1302,7 @@
           >
             PDF
           </button>
+          </div>
           <button id="btn-clear" title="Καθαρισμός" aria-label="Καθαρισμός">
             <svg
               viewBox="0 0 24 24"
@@ -1291,6 +1322,7 @@
             </svg>
           </button>
           <div class="sep" id="sketch-io-sep"></div>
+          <div class="toolbar-group" id="toolbar-sketch-io-group">
           <div class="sketch-io-dropdown">
             <button
               id="btn-save-sketch"
@@ -1342,6 +1374,7 @@
               <div class="sketch-list" id="sketch-list"></div>
             </div>
           </div>
+          </div>
         </div>
 
         <div class="canvas-scroll" id="canvas-scroll">
@@ -1352,8 +1385,10 @@
 
     <script src="../libs/fabric.min.js"></script>
     <script src="../libs/pdf-lib.min.js"></script>
+    <script src="../libs/driver/driver.js.iife.js"></script>
     <script src="shapes.js"></script>
     <script src="sketcher.js"></script>
+    <script src="tourGuide.js"></script>
     <script type="module">
       // sketcher.js is a classic script (it shares top-level scope with
       // shapes.js), so it can't `import` directly — expose the app's
