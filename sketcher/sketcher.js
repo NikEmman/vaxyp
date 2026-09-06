@@ -676,8 +676,14 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && measuring) stopMeasuring();
-    if (e.key === "Escape" && erasing) stopErasing();
+    if (e.key !== "Escape") return;
+    if (measuring) return stopMeasuring();
+    if (erasing) return stopErasing();
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (canvas.getActiveObject()) {
+      canvas.discardActiveObject();
+      canvas.requestRenderAll();
+    }
   });
 
   canvas.on("mouse:down", (opt) => {
@@ -803,6 +809,12 @@
     updateUndoButton();
   });
   updateUndoButton();
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() !== "z" || (!e.ctrlKey && !e.metaKey) || e.shiftKey) return;
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    e.preventDefault(); // stop the browser's own undo (e.g. in a contenteditable) from also firing
+    undoBtn.click();
+  });
 
   // ── Eraser ───────────────────────────────────────────────────────
   // Reuses Fabric's own free-drawing brush to track the drag into a Path,
@@ -927,11 +939,30 @@
     gridVisible = !gridVisible;
     gridBtn.classList.toggle("active", gridVisible);
     gridBtn.setAttribute("aria-checked", String(gridVisible));
-    gridBtn.title = gridVisible ? "Απόκρυψη κανάβου" : "Εμφάνιση κανάβου";
+    gridBtn.title = gridVisible ? "Απόκρυψη κανάβου (H)" : "Εμφάνιση κανάβου (H)";
     applyGrid();
     // Hide/show the connector markers along with the grid — purely visual, snapping doesn't depend on them being drawn.
     connectorMarkers.forEach((m) => m.set("visible", gridVisible));
     canvas.requestRenderAll();
+  });
+
+  // ── Tool keybindings ─────────────────────────────────────────────
+  // Letter shortcuts toggle the same tool buttons a click would, so all
+  // the mutual-exclusion/cleanup logic in their click handlers (stopping
+  // whichever other tool was active, etc.) is reused rather than duplicated.
+  const TOOL_KEY_BUTTONS = {
+    v: selectToolBtn, // pointer/select — "V" as in most design tools
+    m: measureBtn,
+    e: eraseBtn,
+    h: gridBtn, // "H" toggles the grid
+  };
+  document.addEventListener("keydown", (e) => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    const obj = canvas.getActiveObject();
+    if (obj && obj.isEditing) return; // don't hijack letters typed into a Textbox
+    const btn = TOOL_KEY_BUTTONS[e.key.toLowerCase()];
+    if (btn) btn.click();
   });
 
   // ── Scale (px per meter) ─────────────────────────────────────────
@@ -975,6 +1006,20 @@
   document
     .getElementById("btn-zoom-out")
     .addEventListener("click", () => stepZoom(-ZOOM_STEP));
+  document.addEventListener("keydown", (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    if (e.key === "=" || e.key === "+") {
+      e.preventDefault(); // stop the browser's own page-zoom
+      stepZoom(ZOOM_STEP);
+    } else if (e.key === "-") {
+      e.preventDefault();
+      stepZoom(-ZOOM_STEP);
+    } else if (e.key === "0") {
+      e.preventDefault();
+      scaleInput.value = 40; // the default scale — see its initial value in the markup
+      scaleInput.dispatchEvent(new Event("change"));
+    }
+  });
 
   // ── Export / clear ───────────────────────────────────────────────
   // Shared by both export buttons: bounding box of everything drawn,
@@ -1184,6 +1229,19 @@
     .addEventListener("click", storeSketch);
   saveSketchNameInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") storeSketch();
+  });
+
+  // Ctrl+S opens the save panel exactly like clicking "save sketch" does —
+  // reset to a blank name and focused, ready for Enter — rather than
+  // reusing whatever name is still sitting in the field from the last
+  // save, which would silently overwrite it with no chance to reconsider.
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() !== "s" || (!e.ctrlKey && !e.metaKey)) return;
+    e.preventDefault(); // stop the browser's own save-page dialog
+    loadSketchPanel.hidden = true;
+    saveSketchPanel.hidden = false;
+    saveSketchNameInput.value = "";
+    saveSketchNameInput.focus();
   });
 
   // Adds the saved sketch's pieces alongside whatever's already on the
