@@ -492,6 +492,7 @@
           strokeWidth: 1.5,
           selectable: false,
           evented: false,
+          visible: gridVisible, // grid toggle also hides these; snapping itself doesn't depend on the marker being drawn
         });
         marker.isConnectorIndicator = true;
         canvas.add(marker);
@@ -924,6 +925,9 @@
     gridBtn.setAttribute("aria-checked", String(gridVisible));
     gridBtn.title = gridVisible ? "Απόκρυψη κανάβου" : "Εμφάνιση κανάβου";
     applyGrid();
+    // Hide/show the connector markers along with the grid — purely visual, snapping doesn't depend on them being drawn.
+    connectorMarkers.forEach((m) => m.set("visible", gridVisible));
+    canvas.requestRenderAll();
   });
 
   // ── Scale (px per meter) ─────────────────────────────────────────
