@@ -317,6 +317,7 @@
         right: 0;
         margin-top: 6px;
         min-width: 12em;
+        max-width: 16em;
         max-height: 260px;
         overflow-y: auto;
         background-color: var(--background-white);
@@ -348,6 +349,14 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      /* Being nested inside .toolbar, this also matches ".toolbar button"
+         (display:inline-flex + justify-content:center, meant for the square
+         icon buttons) — which outranks the single-class rule above and both
+         centers the name and silently breaks the ellipsis (it needs a block
+         box, not a flex one). Scoped selector to win on specificity. */
+      .sketch-list-panel .sketch-list-name {
+        display: block;
       }
       .sketch-list-name:hover {
         background-color: var(--secondary-blue);
