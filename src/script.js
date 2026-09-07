@@ -734,6 +734,15 @@ martyra.addEventListener("click", () => {
   applyAllGrammar(state);
   generateWord(ektheseis.martyra, state, state.victimData);
 });
+//martyra me dierminea button
+const martyraDierm = document.getElementById("martyraDierm");
+martyraDierm.addEventListener("click", () => {
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  applyAllGrammar(state);
+  generateWord(ektheseis.martyraDierm, state, state.victimData);
+});
 //martyra astyn button
 const martyraAstynomikos = document.getElementById("martyra-astynomikos");
 martyraAstynomikos.addEventListener("click", () => {
@@ -790,6 +799,18 @@ katigoroumenou.addEventListener("click", () => {
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
   generateWord(ektheseis.katigoroumenou, state, state.ypoptosData);
+});
+
+// katigoroumenou me dierminea button
+const katigoroumenouDierm = document.getElementById("katigoroumenouDierm");
+katigoroumenouDierm.addEventListener("click", () => {
+  state.timePassed += data.xronosPeratosis * 2;
+  state.initial = constructInitialText();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  state.ypiresia = state.ypiresia?.toUpperCase();
+  applyAllGrammar(state);
+  generateWord(ektheseis.katigoroumenouDierm, state, state.ypoptosData);
 });
 
 //apodosi button
