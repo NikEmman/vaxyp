@@ -444,7 +444,7 @@ function astynomikosShort() {
 // Short forms used by the arrest/seizure templates and custom templates:
 // {astynomShort} nominative, {astynomShortAit} accusative or nominative fallback
 function applyAstynomikosShort() {
-  applyAstynomikosShort();
+  state.astynomShort = astynomikosShort();
   state.astynomShortAit = readAstynomikosFields().nameAit || state.astynomShort;
 }
 
