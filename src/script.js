@@ -17,8 +17,11 @@ import {
   formatIdInfo,
   formatFormData,
   extractPersonInfo,
-  getOfficerSurname,
-  shortenFormattedOfficer,
+  cleanSpaces,
+  joinRankName,
+  joinOfficerText,
+  splitOfficerText,
+  getAstynomikosParts,
   getSuspectSurname,
 } from "./formatters.js";
 import {
@@ -390,58 +393,127 @@ copyIdBtn.addEventListener("click", () => {
   copyToClipboard(state.victim);
 });
 
-// officer fields
+// officer fields: rank + name inputs and a details textarea, joined into the
+// single paragraph stored in astynomikoi and used by {astynomikos}
+const astynomikosRank = document.getElementById("astynomikos-rank");
+const astynomikosName = document.getElementById("astynomikos-name");
 const clipboardAstynomikos = document.querySelector(
   ".clipboard-id-astynomikos",
 );
-clipboardAstynomikos.value = state.astynomikos
-  ? state.astynomikos
-  : defaultAstynomikos;
+const astynomikosSelect = document.getElementById("astynomikoi");
+const defaultAstynomikosDetails = splitOfficerText(defaultAstynomikos).details;
 
-clipboardAstynomikos.addEventListener("change", (e) => {
-  state.astynomikos = e.target.value;
+function readAstynomikosFields() {
+  return {
+    rank: cleanSpaces(astynomikosRank.value),
+    name: cleanSpaces(astynomikosName.value),
+    details: cleanSpaces(clipboardAstynomikos.value),
+  };
+}
+
+function fillAstynomikosFields({ rank, name, details }) {
+  astynomikosRank.value = rank || "";
+  astynomikosName.value = name || "";
+  clipboardAstynomikos.value = details || "";
+  state.astynomikos = joinOfficerText(readAstynomikosFields());
+}
+
+function resetAstynomikosFields() {
+  fillAstynomikosFields({ details: defaultAstynomikosDetails });
+}
+
+// Short form for arrest/seizure documents, e.g. "Υ/Α ΠΑΠΑΣ Γεώργιος"
+function astynomikosShort() {
+  const { rank, name } = readAstynomikosFields();
+  return joinRankName(rank, name);
+}
+
+// Parts for every saved officer, normalising legacy text-only entries so the
+// two arrays stay aligned before they are modified
+function allAstynomikoiParts() {
+  return state.astynomikoi.map((_, i) => getAstynomikosParts(state, i));
+}
+
+resetAstynomikosFields();
+
+[astynomikosRank, astynomikosName, clipboardAstynomikos].forEach((field) =>
+  field.addEventListener("input", () => {
+    state.astynomikos = joinOfficerText(readAstynomikosFields());
+  }),
+);
+
+// Pasting a whole paragraph over the details, with rank and name still empty,
+// splits it into the three fields
+clipboardAstynomikos.addEventListener("paste", (e) => {
+  const pasted = e.clipboardData.getData("text");
+  const replacesAll =
+    clipboardAstynomikos.selectionStart === 0 &&
+    clipboardAstynomikos.selectionEnd === clipboardAstynomikos.value.length;
+  if (
+    astynomikosRank.value.trim() ||
+    astynomikosName.value.trim() ||
+    !replacesAll ||
+    !pasted.includes(",")
+  ) {
+    return;
+  }
+  e.preventDefault();
+  fillAstynomikosFields(splitOfficerText(pasted));
+  displayNotification(
+    "Το κείμενο χωρίστηκε σε βαθμό, ονοματεπώνυμο και στοιχεία. Ελέγξτε τα πεδία.",
+  );
 });
+
 //save officer button
 const storeOfficerBtn = document.querySelector(".save-astynomikos");
 storeOfficerBtn.addEventListener("click", () => {
-  if (state.astynomikos) {
-    const localStorageData = getData();
-    const selectedValue = astynomikosSelect.value;
-
-    if (selectedValue === "placeholder") {
-      // Add a new officer to the end of the list
-      state.astynomikoi.push(state.astynomikos);
-    } else {
-      // Replace the officer at the selected index
-      const index = parseInt(selectedValue);
-      state.astynomikoi[index] = state.astynomikos;
-    }
-
-    // Save the updated array to localStorage
-    const newItem = { astynomikoi: state.astynomikoi };
-    saveData(localStorageData, newItem);
-
-    // Re-draw the menu to reflect changes
-    paintAstynomikosSelect();
-
-    //Keep the selection
-    astynomikosSelect.value = selectedValue;
-  }
-});
-
-const astynomikosSelect = document.getElementById("astynomikoi");
-astynomikosSelect.addEventListener("change", (e) => {
-  const clipboardAstynomikos = document.querySelector(
-    ".clipboard-id-astynomikos",
-  );
-
-  if (e.target.value === "placeholder") {
-    clipboardAstynomikos.value = defaultAstynomikos;
+  const parts = readAstynomikosFields();
+  if (!parts.rank || !parts.name) {
+    displayNotification(
+      "Συμπληρώστε βαθμό και ονοματεπώνυμο αστυνομικού.",
+      "error",
+    );
     return;
   }
-  const index = parseInt(e.target.value);
-  clipboardAstynomikos.value = state.astynomikoi[index];
-  state.astynomikos = clipboardAstynomikos.value;
+  const localStorageData = getData();
+  const selectedValue = astynomikosSelect.value;
+  const astynomikoiParts = allAstynomikoiParts();
+  const text = joinOfficerText(parts);
+  state.astynomikos = text;
+
+  if (selectedValue === "placeholder") {
+    // Add a new officer to the end of the list
+    state.astynomikoi.push(text);
+    astynomikoiParts.push(parts);
+  } else {
+    // Replace the officer at the selected index
+    const index = parseInt(selectedValue);
+    state.astynomikoi[index] = text;
+    astynomikoiParts[index] = parts;
+  }
+  state.astynomikoiParts = astynomikoiParts;
+
+  saveData(localStorageData, {
+    astynomikoi: state.astynomikoi,
+    astynomikoiParts: astynomikoiParts,
+  });
+
+  // Re-draw the menu to reflect changes
+  paintAstynomikosSelect();
+
+  //Keep the selection (a new officer becomes the last entry)
+  astynomikosSelect.value =
+    selectedValue === "placeholder"
+      ? String(state.astynomikoi.length - 1)
+      : selectedValue;
+});
+
+astynomikosSelect.addEventListener("change", (e) => {
+  if (e.target.value === "placeholder") {
+    resetAstynomikosFields();
+    return;
+  }
+  fillAstynomikosFields(getAstynomikosParts(state, parseInt(e.target.value)));
 });
 function paintAstynomikosSelect() {
   // Clear all options but the first:
@@ -449,10 +521,11 @@ function paintAstynomikosSelect() {
   astynomikosSelect.innerHTML = "";
   astynomikosSelect.appendChild(firstOption);
   if (state.astynomikoi) {
-    state.astynomikoi.forEach((value, index) => {
+    state.astynomikoi.forEach((_, index) => {
+      const { rank, name } = getAstynomikosParts(state, index);
       const astynomikosOption = document.createElement("option");
       astynomikosOption.value = index;
-      astynomikosOption.innerText = getOfficerSurname(value);
+      astynomikosOption.innerText = joinRankName(rank, name);
       astynomikosSelect.appendChild(astynomikosOption);
     });
   }
@@ -463,22 +536,25 @@ paintAstynomikosSelect();
 const deleteBtn = document.querySelector("#astynomikos-delete");
 
 deleteBtn.addEventListener("click", () => {
-  const select = document.querySelector("#astynomikoi");
-  const index = select.value;
+  const index = astynomikosSelect.value;
 
   if (index !== "placeholder") {
-    // Remove from the local array
+    // Remove from the local arrays
+    const astynomikoiParts = allAstynomikoiParts();
     state.astynomikoi.splice(parseInt(index), 1);
+    astynomikoiParts.splice(parseInt(index), 1);
+    state.astynomikoiParts = astynomikoiParts;
 
     // Save the updated list back to localStorage
     const localStorageData = getData();
-    saveData(localStorageData, { astynomikoi: state.astynomikoi });
+    saveData(localStorageData, {
+      astynomikoi: state.astynomikoi,
+      astynomikoiParts: astynomikoiParts,
+    });
 
     // Re-draw the select menu so the name disappears
     paintAstynomikosSelect();
-    state.astynomikos = "";
-    document.querySelector(".clipboard-id-astynomikos").value =
-      defaultAstynomikos;
+    resetAstynomikosFields();
 
     displayNotification("Ο αστυνομικός διαγράφηκε.");
   } else {
@@ -759,7 +835,12 @@ martyraAstynomikos.addEventListener("click", () => {
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
 
-  const astynomikosData = { surname: getOfficerSurname(state.astynomikos) };
+  const officerName = readAstynomikosFields().name;
+  if (!officerName) {
+    displayNotification("Συμπληρώστε ονοματεπώνυμο αστυνομικού.", "error");
+    return;
+  }
+  const astynomikosData = { surname: officerName.split(" ")[0] };
   generateWord(ektheseis.astynomikos, state, astynomikosData);
 });
 
@@ -782,7 +863,7 @@ syllipsi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = astynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.syllipsi, state, state.ypoptosData);
@@ -828,7 +909,7 @@ apodosi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = astynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.apodosi, state, state.victimData);
@@ -840,7 +921,7 @@ katasxesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = astynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesi, state, state.victimData);
@@ -1031,7 +1112,7 @@ katasxesiEndo.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = astynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesiEndo, state, state.victimData);
@@ -1045,7 +1126,7 @@ syllipsiEndo.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  state.astynomShort = shortenFormattedOfficer(state.astynomikos);
+  state.astynomShort = astynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.syllipsiEndo, state, state.ypoptosData);

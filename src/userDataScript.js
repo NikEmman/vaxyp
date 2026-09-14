@@ -195,8 +195,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("submitForm").addEventListener("click", function () {
-    const astynomikoi =
-      JSON.parse(localStorage.getItem("dataObject"))?.astynomikoi || [];
+    const storedData = JSON.parse(localStorage.getItem("dataObject"));
+    const astynomikoi = storedData?.astynomikoi || [];
+    const astynomikoiParts = storedData?.astynomikoiParts || [];
     const formData = new FormData(document.getElementById("dataForm"));
     const rankGen = formData.getAll("rankGen[]");
     const nameGen = formData.getAll("nameGen[]");
@@ -213,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Joined strings kept for the initial text and older app versions
       anakritikoi: anakritikoiParts.map((p) => joinRankName(p.rankGen, p.nameGen)),
       astynomikoi: astynomikoi,
+      astynomikoiParts: astynomikoiParts,
       anakritikoiEnikos: anakritikoiParts.map((p) =>
         joinRankName(p.rankNom, p.nameNom),
       ),

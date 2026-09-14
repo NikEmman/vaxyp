@@ -321,18 +321,42 @@ export function formatFormData(data) {
   } τηλεφωνικής σύνδεσης, email: ${data.email}`;
 }
 
-export function shortenFormattedOfficer(officerString) {
-  const splitString = officerString.split(" ");
-  // gets the first 3 elements of the array, rank, surname, name
-  return `${splitString[0]} ${splitString[1]} ${splitString[2].replaceAll(",", "")}`;
+// Police officers (astynomikoi): stored as one paragraph "rank name, details",
+// which older app versions and the {astynomikos} placeholder read, with the
+// separate fields in astynomikoiParts.
+export function joinOfficerText({ rank, name, details }) {
+  const head = joinRankName(rank, name);
+  const rest = cleanSpaces(details).replace(/^,\s*/, "");
+  if (!head) return rest;
+  return rest ? `${head}, ${rest}` : head;
 }
-export function removeRank(officerString) {
-  const splitString = officerString.split(" ");
-  //remove the first element and join with gap
-  return splitString.shift().join(" ");
+
+// Best-effort split for officers saved as a single paragraph: rank and name
+// end at the first comma; without one, fall back to the old three-word rule.
+export function splitOfficerText(text) {
+  const cleaned = cleanSpaces(text);
+  const comma = cleaned.indexOf(",");
+  let head;
+  let details;
+  if (comma === -1) {
+    const words = cleaned.split(" ");
+    head = words.slice(0, 3).join(" ");
+    details = words.slice(3).join(" ");
+  } else {
+    head = cleaned.slice(0, comma);
+    details = cleaned.slice(comma + 1).trim();
+  }
+  const { rank, name } = splitRankName(head);
+  return { rank, name, details };
 }
-export function getOfficerSurname(officerString) {
-  return officerString.split(" ")[1];
+
+export function getAstynomikosParts(data, index) {
+  const text = data.astynomikoi?.[index] || "";
+  const stored = data.astynomikoiParts?.[index];
+  // Trust stored parts only if they still join to the saved paragraph, e.g.
+  // not after an older app version added or removed officers.
+  if (stored && joinOfficerText(stored) === cleanSpaces(text)) return stored;
+  return splitOfficerText(text);
 }
 export function getSuspectSurname(suspectString) {
   return suspectString.split(" ")[0];

@@ -431,6 +431,34 @@ select {
 }
 
 .input:focus,
+/* Police officer: rank + name inputs over the details textarea, together
+   taking the place of a single .output */
+.astynomikos-fields {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.astynomikos-fields .output {
+  width: 100%;
+}
+
+.astynomikos-name-row {
+  display: flex;
+  gap: 0.5em;
+}
+
+#astynomikos-rank {
+  flex: none;
+  width: 7rem;
+}
+
+#astynomikos-name {
+  flex: 1;
+  min-width: 0;
+}
+
 .output:focus {
   outline: none;
   border-color: var(--secondary-blue);
@@ -1212,9 +1240,13 @@ hr {
   }
 
   .input,
-  .output {
+  .output,
+  .astynomikos-fields {
     width: 100%;
     height: 20vh;
+  }
+  .astynomikos-fields {
+    height: auto;
   }
 
   .arrow {
