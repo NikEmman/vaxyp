@@ -72,6 +72,7 @@ async function handleDocxUpload(event) {
   const missingPerson = !personData.surname;
   const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   for (const file of sortedFiles) {
@@ -397,6 +398,8 @@ copyIdBtn.addEventListener("click", () => {
 // single paragraph stored in astynomikoi and used by {astynomikos}
 const astynomikosRank = document.getElementById("astynomikos-rank");
 const astynomikosName = document.getElementById("astynomikos-name");
+const astynomikosSex = document.getElementById("astynomikos-sex");
+const astynomikosAit = document.getElementById("astynomikos-ait");
 const clipboardAstynomikos = document.querySelector(
   ".clipboard-id-astynomikos",
 );
@@ -408,14 +411,24 @@ function readAstynomikosFields() {
     rank: cleanSpaces(astynomikosRank.value),
     name: cleanSpaces(astynomikosName.value),
     details: cleanSpaces(clipboardAstynomikos.value),
+    sex: astynomikosSex.value,
+    nameAit: cleanSpaces(astynomikosAit.value),
   };
 }
 
-function fillAstynomikosFields({ rank, name, details }) {
+function syncAstynomikosState() {
+  state.astynomikos = joinOfficerText(readAstynomikosFields());
+  state.astynomikosSex = astynomikosSex.value;
+}
+
+// sex defaults to male for officers saved before it existed
+function fillAstynomikosFields({ rank, name, details, sex, nameAit }) {
   astynomikosRank.value = rank || "";
   astynomikosName.value = name || "";
   clipboardAstynomikos.value = details || "";
-  state.astynomikos = joinOfficerText(readAstynomikosFields());
+  astynomikosSex.value = sex || "Άντρας";
+  astynomikosAit.value = nameAit || "";
+  syncAstynomikosState();
 }
 
 function resetAstynomikosFields() {
@@ -428,6 +441,13 @@ function astynomikosShort() {
   return joinRankName(rank, name);
 }
 
+// Short forms used by the arrest/seizure templates and custom templates:
+// {astynomShort} nominative, {astynomShortAit} accusative or nominative fallback
+function applyAstynomikosShort() {
+  applyAstynomikosShort();
+  state.astynomShortAit = readAstynomikosFields().nameAit || state.astynomShort;
+}
+
 // Parts for every saved officer, normalising legacy text-only entries so the
 // two arrays stay aligned before they are modified
 function allAstynomikoiParts() {
@@ -436,11 +456,10 @@ function allAstynomikoiParts() {
 
 resetAstynomikosFields();
 
-[astynomikosRank, astynomikosName, clipboardAstynomikos].forEach((field) =>
-  field.addEventListener("input", () => {
-    state.astynomikos = joinOfficerText(readAstynomikosFields());
-  }),
+[astynomikosRank, astynomikosName, clipboardAstynomikos, astynomikosAit].forEach(
+  (field) => field.addEventListener("input", syncAstynomikosState),
 );
+astynomikosSex.addEventListener("change", syncAstynomikosState);
 
 // Pasting a whole paragraph over the details, with rank and name still empty,
 // splits it into the three fields
@@ -458,7 +477,8 @@ clipboardAstynomikos.addEventListener("paste", (e) => {
     return;
   }
   e.preventDefault();
-  fillAstynomikosFields(splitOfficerText(pasted));
+  const { sex, nameAit } = readAstynomikosFields();
+  fillAstynomikosFields({ ...splitOfficerText(pasted), sex, nameAit });
   displayNotification(
     "Το κείμενο χωρίστηκε σε βαθμό, ονοματεπώνυμο και στοιχεία. Ελέγξτε τα πεδία.",
   );
@@ -863,7 +883,7 @@ syllipsi.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  state.astynomShort = astynomikosShort();
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.syllipsi, state, state.ypoptosData);
@@ -909,7 +929,7 @@ apodosi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = astynomikosShort();
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.apodosi, state, state.victimData);
@@ -921,7 +941,7 @@ katasxesi.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = astynomikosShort();
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesi, state, state.victimData);
@@ -1112,7 +1132,7 @@ katasxesiEndo.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.astynomShort = astynomikosShort();
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.katasxesiEndo, state, state.victimData);
@@ -1126,7 +1146,7 @@ syllipsiEndo.addEventListener("click", () => {
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.arrestTime = formatTime(today, state.timePassed - 5);
-  state.astynomShort = astynomikosShort();
+  applyAstynomikosShort();
   applyAllGrammar(state);
 
   generateWord(ektheseis.syllipsiEndo, state, state.ypoptosData);

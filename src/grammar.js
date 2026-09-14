@@ -137,6 +137,7 @@ export function applyAllGrammar(state) {
     { gender: state.victimData?.sex, suffix: "V" }, // Victim
     { gender: state.aAnakrSex, suffix: "A1" }, // Officer 1
     { gender: state.bAnakrSex, suffix: "A2" }, // Officer 2
+    { gender: state.astynomikosSex || "Άνδρας", suffix: "AS" }, // Police officer, male if unset
   ];
 
   const keys = ["o", "tou", "os", "ou", "ton", "on"];

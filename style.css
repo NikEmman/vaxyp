@@ -449,6 +449,7 @@ select {
   gap: 0.5em;
 }
 
+#astynomikos-sex,
 #astynomikos-rank {
   flex: none;
   width: 7rem;
