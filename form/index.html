@@ -32,27 +32,18 @@
     <h2>Συμπληρώστε τη φόρμα με τα τοπικά σας δεδομένα</h2>
     <form id="dataForm" class="dataForm">
       <div id="anakritikoiSection">
-        <div id="anakritikoiList">
-          <div class="anakritikoi-row" data-index="0">
-            <span class="row-label">Ανακριτικός #1</span>
-            <div class="row-fields">
-              <select name="anakrSex[]">
-                <option value="Άντρας">Άντρας</option>
-                <option value="Γυναίκα">Γυναίκα</option>
-              </select>
-              <input
-                type="text"
-                name="anakritikoi[]"
-                placeholder="Αρχ/κα ΠΑΠΠΑ Ανέστη"
-              />
-              <input
-                type="text"
-                name="anakritikoiEnikos[]"
-                placeholder="Αρχ/κας ΠΑΠΠΑΣ Ανέστης"
-              />
-            </div>
-          </div>
+        <p class="anakritikoi-hint">
+          Συμπληρώστε τους Ανακριτικούς υπαλλήλους: τον <strong>βαθμό</strong>
+          (π.χ. Υ/Α') και το <strong>ΕΠΩΝΥΜΟ και Όνομα</strong>, σε γενική και
+          σε ονομαστική πτώση.
+        </p>
+        <div class="anakritikoi-header" aria-hidden="true">
+          <span class="header-spacer"></span>
+          <span>Γενική</span>
+          <span>Ονομαστική</span>
         </div>
+        <!-- rows are built by userDataScript.js -->
+        <div id="anakritikoiList"></div>
         <div class="anakritikoiBtns">
           <button type="button" id="addAnakritikoi">
             Προσθήκη Ανακριτικού
@@ -70,7 +61,7 @@
             type="text"
             id="ypiresia"
             name="ypiresia"
-            placeholder="Τ.Δ.Ε.Ε. Κομοτηνής"
+            placeholder="π.χ. Τ.Δ.Ε.Ε. Κομοτηνής"
           />
         </div>
         <div>
@@ -79,16 +70,16 @@
             type="text"
             id="dAstynomias"
             name="dAstynomias"
-            placeholder="ΡΟΔΟΠΗΣ"
+            placeholder="π.χ. ΡΟΔΟΠΗΣ"
           />
         </div>
         <div>
           <label for="geniki">Γ.Α.Δ./ΓΕ.Π.Α.Δ.</label>
-          <input type="text" id="geniki" name="geniki" placeholder="Α.Μ.Θ." />
+          <input type="text" id="geniki" name="geniki" placeholder="π.χ. Α.Μ.Θ." />
         </div>
         <div>
           <label for="doy">ΔΟΥ:</label>
-          <input type="text" id="doy" name="doy" placeholder="Κομοτηνής" />
+          <input type="text" id="doy" name="doy" placeholder="π.χ. Κομοτηνής" />
         </div>
         <div>
           <label for="arthro">Άρθρο Τόπου Σύνταξης Έκθεσης:</label>
@@ -96,7 +87,7 @@
             type="text"
             id="arthro"
             name="arthro"
-            placeholder="στη / στην / στο / στον"
+            placeholder="π.χ. στη / στην / στο / στον"
           />
         </div>
         <div>
@@ -105,7 +96,7 @@
             type="text"
             id="merosSyntaksisEkthesis"
             name="merosSyntaksisEkthesis"
-            placeholder="Κομοτηνή"
+            placeholder="π.χ. Κομοτηνή"
           />
         </div>
         <div>
@@ -114,8 +105,8 @@
             type="number"
             id="xronosPeratosis"
             name="xronosPeratosis"
-            min="0"
-            placeholder="10"
+            min="1"
+            value="10"
           />
         </div>
         <div>
@@ -124,12 +115,12 @@
             type="text"
             id="eisaggeleiaProtodikon"
             name="eisaggeleiaProtodikon"
-            placeholder="Ροδόπης"
+            placeholder="π.χ. Ροδόπης"
           />
         </div>
         <div>
           <label for="iatro">Ιατροδικαστική Υπηρεσία:</label>
-          <input type="text" id="iatro" name="iatro" placeholder="ΡΟΔΟΠΗΣ" />
+          <input type="text" id="iatro" name="iatro" placeholder="π.χ. ΡΟΔΟΠΗΣ" />
         </div>
         <div>
           <label for="dieuthynsiYpiresias">Διεύθυνση Υπηρεσίας:</label>
@@ -137,7 +128,7 @@
             type="text"
             id="dieuthynsiYpiresias"
             name="dieuthynsiYpiresias"
-            placeholder="Λ Δημοκρατίας αρ. 3"
+            placeholder="π.χ. Λ Δημοκρατίας αρ. 3"
           />
         </div>
         <div>
@@ -146,7 +137,7 @@
             type="text"
             id="tilefono"
             name="tilefono"
-            placeholder="25314 40177"
+            placeholder="π.χ. 2531440177"
             minlength="10"
             maxlength="10"
           />
@@ -157,12 +148,12 @@
             type="email"
             id="email"
             name="email"
-            placeholder="tdee.komotinis@astynomia.gr"
+            placeholder="π.χ. tdee.komotinis@astynomia.gr"
           />
         </div>
         <div>
           <label for="amy">Αρ.Μητρώου.Υπηρ.:</label>
-          <input type="text" id="amy" name="amy" placeholder="4587" />
+          <input type="text" id="amy" name="amy" placeholder="π.χ. 4587" />
         </div>
         <button class="helpBtn large" type="button" id="submitForm">
           &#128190; Αποθήκευση

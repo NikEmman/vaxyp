@@ -45,9 +45,47 @@ export function capitalize(str) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
-// helper function to convert anakritikos to enikos
-export function convertAnakritikosToEnikos(value, state) {
-  return state.anakritikoiEnikos[state.anakritikoi.indexOf(value)];
+// Officer names: rank and name are stored separately in anakritikoiParts, and
+// also joined into the anakritikoi / anakritikoiEnikos strings, which older
+// app versions and the initial text read.
+export function cleanSpaces(str) {
+  return (str || "").trim().replace(/\s+/g, " ");
+}
+
+export function joinRankName(rank, name) {
+  return cleanSpaces(`${rank || ""} ${name || ""}`);
+}
+
+// Best-effort split for data saved before rank had its own field:
+// first word is the rank, everything after it is the name.
+export function splitRankName(full) {
+  const cleaned = cleanSpaces(full);
+  const gap = cleaned.indexOf(" ");
+  if (gap === -1) return { rank: "", name: cleaned };
+  return { rank: cleaned.slice(0, gap), name: cleaned.slice(gap + 1) };
+}
+
+export function getOfficerParts(data, index) {
+  const genitive = data.anakritikoi?.[index] || "";
+  const nominative = data.anakritikoiEnikos?.[index] || genitive;
+  const stored = data.anakritikoiParts?.[index];
+  // Trust stored parts only if they still match the joined strings, in case
+  // the strings were edited without them (hand-edited or old-version JSON).
+  if (
+    stored &&
+    joinRankName(stored.rankGen, stored.nameGen) === cleanSpaces(genitive) &&
+    joinRankName(stored.rankNom, stored.nameNom) === cleanSpaces(nominative)
+  ) {
+    return stored;
+  }
+  const gen = splitRankName(genitive);
+  const nom = splitRankName(nominative);
+  return {
+    rankGen: gen.rank,
+    nameGen: gen.name,
+    rankNom: nom.rank,
+    nameNom: nom.name,
+  };
 }
 
 // helper function to shorten victim's formatted text

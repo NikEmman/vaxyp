@@ -11,7 +11,7 @@ import {
   formatTime,
   getNextDay,
   capitalize,
-  convertAnakritikosToEnikos,
+  getOfficerParts,
   shortenFormattedPerson,
   formatVehicleInfo,
   formatIdInfo,
@@ -133,10 +133,7 @@ const paintSelectMenus = () => {
   const selectB = getAnakritikoiSelection().bAnakr;
 
   state.anakritikoi.forEach((anakritikos, index) => {
-    const genitiveSurname = anakritikos.split(" ")[1];
-    const enikos = convertAnakritikosToEnikos(anakritikos, state);
-    // fallback to genitive surname for older saved data without anakritikoiEnikos
-    const optionText = enikos ? enikos.split(" ")[1] : genitiveSurname;
+    const optionText = getOfficerParts(state, index).nameNom;
 
     // Populate a anakr select
     const anakr = document.createElement("option");
@@ -163,6 +160,17 @@ const paintSelectMenus = () => {
   });
 };
 paintSelectMenus();
+
+// Nominative rank/name of the selected A officer, for the document templates
+function applySelectedOfficer() {
+  const { rankNom, nameNom } = getOfficerParts(
+    state,
+    anakritikosSelect.selectedIndex,
+  );
+  state.rank = rankNom;
+  state.anakritikosName = nameNom;
+  state.anakritikos = `${rankNom} ${nameNom}`.trim();
+}
 
 const initialText = document.getElementById("initial");
 
@@ -328,7 +336,7 @@ initialText.textContent = constructInitialText();
 // Update text when anakritikos selections change
 anakritikosSelect.addEventListener("change", (e) => {
   initialText.textContent = constructInitialText();
-  state.anakritikos = convertAnakritikosToEnikos(e.target.value, state);
+  applySelectedOfficer();
   let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
   anakritikoiSelections.aAnakr = e.target.selectedIndex;
   state.aAnakrSex = e.target.selectedOptions[0].dataset.sex;
@@ -890,62 +898,38 @@ const ypiresiako = document.getElementById("ypiresiako");
 ypiresiako.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   state.ypiresia = state.ypiresia.toUpperCase();
   state.dAstynomias = state.dAstynomias.toUpperCase();
   state.geniki = state.geniki.toUpperCase();
   state.victim = shortenFormattedPerson(state.victim);
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.ypiresiako, state, state.victimData);
 });
 // ypefthini button
 const ypefthini = document.getElementById("ypefthini");
 ypefthini.addEventListener("click", () => {
   Object.assign(state, { ...state.victimData });
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   generateWord(ektheseis.ypefthini, state, state.victimData);
 });
 
 // deltio drasti button
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", () => {
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.deltioYpoptou, state, state.ypoptosData);
 });
 
 //deltio feromenou button
 const feromenou = document.getElementById("feromenou");
 feromenou.addEventListener("click", () => {
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
   state.timeStart = formatTime(today, state.timePassed);
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   state.man = " ";
   state.woman = " ";
   state.sex == "Γυναίκα" ? (state.woman = "X") : (state.man = "X");
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   state.isuYear = state.issueDate.split("-")[2];
   state.issuingAuthority = state.issuingAuthority.toUpperCase();
   state.merosSyntaksisEkthesis = state.merosSyntaksisEkthesis.toUpperCase();
@@ -995,14 +979,8 @@ iatrodikastiki.addEventListener("click", () => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   state.ypiresia = state.ypiresia.toUpperCase();
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   applyAllGrammar(state);
   generateWord(ektheseis.iatrodikastiki, state, state.ypoptosData);
 });
@@ -1076,14 +1054,8 @@ syllipsiEndo.addEventListener("click", () => {
 // deltio drasti Endo button
 const ypoptoyEndo = document.getElementById("ypoptoyEndo");
 ypoptoyEndo.addEventListener("click", () => {
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.deltioYpoptouEndo, state, state.ypoptosData);
 });
 //ypovlitiki button
@@ -1108,10 +1080,7 @@ ypovoliEndo.addEventListener("click", () => {
   state.ypotropos = document.querySelector(
     'input[name="ypotropos"]:checked',
   ).value;
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
   applyAllGrammar(state);
@@ -1140,10 +1109,7 @@ apostoliEndo.addEventListener("click", () => {
   state.ypotropos = document.querySelector(
     'input[name="ypotropos"]:checked',
   ).value;
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
   applyAllGrammar(state);
@@ -1154,14 +1120,8 @@ apostoliEndo.addEventListener("click", () => {
 // Γ.Ε.Ε. button
 const simansi = document.getElementById("simansi");
 simansi.addEventListener("click", () => {
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   applyAllGrammar(state);
   generateWord(ektheseis.simansi, state, state.ypoptosData);
 });
@@ -1191,15 +1151,9 @@ a130.addEventListener("click", () => {
   state.n = document.getElementById("n").value;
   state.newId = document.getElementById("newId").value;
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
-  state.anakritikos = convertAnakritikosToEnikos(
-    anakritikosSelect.value,
-    state,
-  );
+  applySelectedOfficer();
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.issuingAuthority = state.issuingAuthority?.toUpperCase();
-  state.anakritikosName =
-    state.anakritikos.split(" ")[1] + " " + state.anakritikos.split(" ")[2];
-  state.rank = state.anakritikos.split(" ")[0];
   generateWord(ektheseis.a130, state, state.victimData);
 });
 

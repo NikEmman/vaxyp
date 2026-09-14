@@ -4,6 +4,12 @@ import {
   clearPendingTour,
   initTheme,
 } from "./stateManager.js";
+import { defaultData } from "./defaultData.js";
+import {
+  cleanSpaces,
+  joinRankName,
+  getOfficerParts,
+} from "./formatters.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
@@ -20,11 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     data.anakritikoi.forEach((value, index) => {
       const sexValue =
         data.anakrSex && data.anakrSex[index] ? data.anakrSex[index] : "Άντρας";
-      const enikosValue =
-        data.anakritikoiEnikos && data.anakritikoiEnikos[index]
-          ? data.anakritikoiEnikos[index]
-          : "";
-      addAnakritikoi(value, enikosValue, sexValue);
+      addAnakritikoi(getOfficerParts(data, index), sexValue);
     });
 
     document.getElementById("ypiresia").value = data.ypiresia || "";
@@ -36,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("merosSyntaksisEkthesis").value =
       data.merosSyntaksisEkthesis || "";
     document.getElementById("xronosPeratosis").value =
-      data.xronosPeratosis || "";
+      Number(data.xronosPeratosis) || defaultData.xronosPeratosis;
     document.getElementById("eisaggeleiaProtodikon").value =
       data.eisaggeleiaProtodikon || "";
     document.getElementById("dieuthynsiYpiresias").value =
@@ -50,6 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedData = localStorage.getItem("dataObject");
   if (savedData) {
     populateForm(JSON.parse(savedData));
+  } else {
+    addAnakritikoi();
   }
 
   // Upload an existing data.json backup to populate the form
@@ -99,7 +103,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function addAnakritikoi(value = "", valueEnikos = "", sexValue = "Άντρας") {
+  function textInput(name, placeholder, value, className) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = name;
+    input.placeholder = placeholder;
+    input.value = value || "";
+    input.className = className;
+    return input;
+  }
+
+  // One case (genitive or nominative): rank input + name input side by side
+  function caseGroup(rankInput, nameInput) {
+    const group = document.createElement("div");
+    group.className = "case-group";
+    group.appendChild(rankInput);
+    group.appendChild(nameInput);
+    return group;
+  }
+
+  function addAnakritikoi(parts = {}, sexValue = "Άντρας") {
     const container = document.getElementById("anakritikoiList");
     const rowCount = container.querySelectorAll(".anakritikoi-row").length;
 
@@ -126,21 +149,29 @@ document.addEventListener("DOMContentLoaded", () => {
     select.appendChild(woman);
     select.value = sexValue;
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.name = "anakritikoi[]";
-    input.placeholder = "Αρχ/κα ΠΑΠΠΑ Ανέστη";
-    input.value = value;
-
-    const inputEnikos = document.createElement("input");
-    inputEnikos.type = "text";
-    inputEnikos.name = "anakritikoiEnikos[]";
-    inputEnikos.placeholder = "Αρχ/κας ΠΑΠΠΑΣ Ανέστης";
-    inputEnikos.value = valueEnikos;
-
     fieldsDiv.appendChild(select);
-    fieldsDiv.appendChild(input);
-    fieldsDiv.appendChild(inputEnikos);
+    fieldsDiv.appendChild(
+      caseGroup(
+        textInput("rankGen[]", "π.χ. Αρχ/κα", parts.rankGen, "rank-input"),
+        textInput(
+          "nameGen[]",
+          "π.χ. ΠΑΠΑΔΟΠΟΥΛΟΥ Νικολάου",
+          parts.nameGen,
+          "name-input",
+        ),
+      ),
+    );
+    fieldsDiv.appendChild(
+      caseGroup(
+        textInput("rankNom[]", "π.χ. Αρχ/κας", parts.rankNom, "rank-input"),
+        textInput(
+          "nameNom[]",
+          "π.χ. ΠΑΠΑΔΟΠΟΥΛΟΣ Νικόλαος",
+          parts.nameNom,
+          "name-input",
+        ),
+      ),
+    );
 
     row.appendChild(label);
     row.appendChild(fieldsDiv);
@@ -167,13 +198,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const astynomikoi =
       JSON.parse(localStorage.getItem("dataObject"))?.astynomikoi || [];
     const formData = new FormData(document.getElementById("dataForm"));
-    const anakritikoi = formData.getAll("anakritikoi[]");
-    const anakritikoiEnikos = formData.getAll("anakritikoiEnikos[]");
+    const rankGen = formData.getAll("rankGen[]");
+    const nameGen = formData.getAll("nameGen[]");
+    const rankNom = formData.getAll("rankNom[]");
+    const nameNom = formData.getAll("nameNom[]");
+    const anakritikoiParts = rankGen.map((_, i) => ({
+      rankGen: cleanSpaces(rankGen[i]),
+      nameGen: cleanSpaces(nameGen[i]),
+      rankNom: cleanSpaces(rankNom[i]),
+      nameNom: cleanSpaces(nameNom[i]),
+    }));
     const anakrSex = formData.getAll("anakrSex[]");
     const data = {
-      anakritikoi: anakritikoi,
+      // Joined strings kept for the initial text and older app versions
+      anakritikoi: anakritikoiParts.map((p) => joinRankName(p.rankGen, p.nameGen)),
       astynomikoi: astynomikoi,
-      anakritikoiEnikos: anakritikoiEnikos,
+      anakritikoiEnikos: anakritikoiParts.map((p) =>
+        joinRankName(p.rankNom, p.nameNom),
+      ),
+      anakritikoiParts: anakritikoiParts,
       anakrSex: anakrSex,
       ypiresia: formData.get("ypiresia").toUpperCase(),
       dAstynomias: formData.get("dAstynomias").toUpperCase(),
@@ -182,10 +225,11 @@ document.addEventListener("DOMContentLoaded", () => {
       doy: formData.get("doy"),
       arthro: formData.get("arthro"),
       merosSyntaksisEkthesis: formData.get("merosSyntaksisEkthesis"),
-      xronosPeratosis: Number(formData.get("xronosPeratosis")),
+      xronosPeratosis:
+        Number(formData.get("xronosPeratosis")) || defaultData.xronosPeratosis,
       eisaggeleiaProtodikon: formData.get("eisaggeleiaProtodikon"),
       dieuthynsiYpiresias: formData.get("dieuthynsiYpiresias"),
-      tilefono: formData.get("tilefono"),
+      tilefono: formData.get("tilefono").replace(/\s/g, ""),
       email: formData.get("email"),
       amy: formData.get("amy"),
     };

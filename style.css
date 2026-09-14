@@ -449,6 +449,12 @@ textarea {
   border-radius: 4px;
 }
 
+input::placeholder,
+textarea::placeholder {
+  font-style: italic;
+  opacity: 0.6;
+}
+
 input[type="text"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus,
@@ -944,22 +950,65 @@ ul li {
 }
 
 .anakritikoi-row .row-fields select {
-  width: 7em;
+  width: 7rem;
 }
 
-.anakritikoi-row .row-fields input {
+.anakritikoi-row .case-group {
+  display: flex;
+  gap: 0.5em;
   flex: 1;
-  min-width: 200px;
+  min-width: 280px;
+}
+
+.anakritikoi-row .case-group .rank-input {
+  flex: none;
+  width: 6rem;
+}
+
+.anakritikoi-row .case-group .name-input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.anakritikoi-hint {
+  margin-bottom: 1em;
+  color: var(--text-dark);
+}
+
+/* Column headers: mirror .anakritikoi-row padding/border and .row-fields
+   layout so each title sits over its input column */
+.anakritikoi-header {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  padding: 0 calc(1em + 1px);
+  margin-bottom: 0.4em;
+  font-weight: 600;
+  color: var(--label-color);
+}
+
+.anakritikoi-header .header-spacer {
+  width: 7rem;
+}
+
+.anakritikoi-header span:not(.header-spacer) {
+  flex: 1;
+  min-width: 280px;
 }
 
 @media (max-width: 600px) {
+  .anakritikoi-header {
+    display: none;
+  }
   .anakritikoi-row .row-fields {
     flex-direction: column;
     align-items: stretch;
   }
-  .anakritikoi-row .row-fields select,
-  .anakritikoi-row .row-fields input {
+  .anakritikoi-row .row-fields select {
     width: 100%;
+  }
+  .anakritikoi-row .case-group {
     min-width: unset;
   }
 }

@@ -7,7 +7,14 @@ import {
 
 export const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
-  return localStorageData ? { ...defaultData, ...localStorageData } : defaultData;
+  if (!localStorageData) return defaultData;
+  const merged = { ...defaultData, ...localStorageData };
+  // Stored value may be 0/null/""/string (empty form field, imported JSON);
+  // anything but a positive number breaks the time arithmetic.
+  const xronos = Number(merged.xronosPeratosis);
+  merged.xronosPeratosis =
+    Number.isFinite(xronos) && xronos > 0 ? xronos : defaultData.xronosPeratosis;
+  return merged;
 };
 export function getAnakritikoiSelection() {
   const localStorageData = JSON.parse(localStorage.getItem("anakr"));
