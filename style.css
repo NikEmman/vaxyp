@@ -696,6 +696,57 @@ button:disabled,
 .format button {
   min-width: 120px;
 }
+
+/* Who the documents on this tab are filled with, and the running time */
+.statusLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em 1.5em;
+  padding: 0.6em 1em;
+  margin-bottom: 1em;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background-light);
+  color: var(--label-color);
+}
+
+.statusLine strong {
+  color: var(--text-dark);
+}
+
+.statusLine strong.missing {
+  color: var(--alert-color);
+}
+
+/* Report whose person is missing: still clickable, to show the error */
+.needs-person {
+  opacity: 0.55;
+}
+
+/* Downloaded this session, with the start time used */
+[data-done] {
+  position: relative;
+}
+
+[data-done]::after {
+  content: attr(data-done);
+  position: absolute;
+  top: -9px;
+  right: -6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: #2e7d32;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+#time-offset {
+  color: var(--label-color);
+  font-weight: 600;
+}
 /* Dialog Styles */
 dialog {
   top: 10%;

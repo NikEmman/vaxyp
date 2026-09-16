@@ -72,7 +72,16 @@
       </div>
 
       <p id="initial"></p>
-      <button title="Ανανέωση" id="refresh-initial">&#10227;</button>
+      <span
+        id="time-offset"
+        title="Λεπτά που έχουν προστεθεί από τις εκθέσεις που κατέβηκαν"
+      ></span>
+      <button
+        id="refresh-initial"
+        title="Παίρνει την τρέχουσα ώρα και μηδενίζει τους χρόνους των εκθέσεων"
+      >
+        &#10227; Νέα ώρα
+      </button>
       <button id="copy-initial">Αντιγραφή</button>
     </div>
    
@@ -287,9 +296,9 @@
             </button>
             <button
               id="add-victim"
-              title="Προσθέτει τον παθόντα στην προσωρινή λίστα"
+              title="Κρατά τον παθόντα στη λίστα για όσο είναι ανοιχτή η σελίδα (χάνεται με ανανέωση)"
             >
-              Προσθήκη
+              Κράτα στη λίστα
             </button>
           </div>
         </div>
@@ -353,7 +362,7 @@
               class="save-astynomikos"
               title="Αποθηκεύει τον αστυνομικό στη λίστα για μελλοντική χρήση"
             >
-              Προσθήκη
+              Αποθήκευση
             </button>
           </div>
         </div>
@@ -556,9 +565,9 @@
             </button>
             <button
               id="add-suspect"
-              title="Προσθέτει τον δράστη στην προσωρινή λίστα"
+              title="Κρατά τον δράστη στη λίστα για όσο είναι ανοιχτή η σελίδα (χάνεται με ανανέωση)"
             >
-              Προσθήκη
+              Κράτα στη λίστα
             </button>
           </div>
         </div>
@@ -580,6 +589,12 @@
         </div>
       </div>
       <div class="ektheseisTab data hidden">
+        <div class="statusLine">
+          <span>Παθών: <strong data-status="victim"></strong></span>
+          <span>Δράστης: <strong data-status="suspect"></strong></span>
+          <span>Αστυνομικός: <strong data-status="officer"></strong></span>
+          <span>Ώρα εκθέσεων: <strong data-status="time"></strong></span>
+        </div>
         <div class="anakritikoi">
           <label class="selectLabel" for="dikografies"
             >Επιλέξτε δικογραφία:</label
@@ -593,55 +608,56 @@
         
         <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="martyra">
+          <p class="helpBtn large dikografiesHiddable" id="martyra" data-person="victim">
             Ένορκη Μάρτυρα
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="martyraDierm">
+          <p class="helpBtn large dikografiesHiddable" id="martyraDierm" data-person="victim">
             Ένορκη με Διερμ.
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="martyra-astynomikos">
+          <p class="helpBtn large dikografiesHiddable" id="martyra-astynomikos" data-person="officer">
             Ένορκη Αστυνομικού
           </p>
           <p class="helpBtn large dikografiesHiddable" id="martyraXoris">
             Μάρτυρα Χωρίς Όρκο
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="egxeirisis">
+          <p class="helpBtn large dikografiesHiddable" id="egxeirisis" data-person="victim">
             Έκθεση Εγχείρησης
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="katasxesi">
+          <p class="helpBtn large dikografiesHiddable" id="katasxesi" data-person="victim">
             Παράδ & Κατάσχ
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="apodosi">Απόδοσης</p>
+          <p class="helpBtn large dikografiesHiddable" id="apodosi" data-person="victim">Απόδοσης</p>
         </div>
         <hr />
         <p>Με χρήση του πεδίου Δράστης</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="syllipsi">
+          <p class="helpBtn large dikografiesHiddable" id="syllipsi" data-person="suspect">
             Σύλληψης
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="gnostopoiisi">
+          <p class="helpBtn large dikografiesHiddable" id="gnostopoiisi" data-person="suspect">
             Γνωστοποίηση Δικ.
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="katigoroumenou">
+          <p class="helpBtn large dikografiesHiddable" id="katigoroumenou" data-person="suspect">
             Απολογίας
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="katigoroumenouDierm">
+          <p class="helpBtn large dikografiesHiddable" id="katigoroumenouDierm" data-person="suspect">
             Απολογία με Διερμ.
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="anomoti">Ανωμοτί</p>
-          <p class="helpBtn large dikografiesHiddable" id="praktikoZygisis">
+          <p class="helpBtn large dikografiesHiddable" id="anomoti" data-person="suspect">Ανωμοτί</p>
+          <p class="helpBtn large dikografiesHiddable" id="praktikoZygisis" data-person="suspect">
             Πρακτικό Ζύγισης
           </p>
           <p
             class="helpBtn large dikografiesHiddable"
             id="gnostopoiisiNarkwtikwn"
+            data-person="suspect"
           >
             Γνωστοποίηση Ναρκ. Ουσιών
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="ypoptoy">
+          <p class="helpBtn large dikografiesHiddable" id="ypoptoy" data-person="suspect">
             Δελτίο Υπόπτου
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="feromenou">
+          <p class="helpBtn large dikografiesHiddable" id="feromenou" data-person="suspect">
             Δελτίο Φερομένου (Δακτυλικά)
           </p>
         </div>
@@ -649,43 +665,44 @@
         <hr />
         <p>Ενδοοικογενειακή</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="martyra-endooik">
+          <p class="helpBtn large dikografiesHiddable" id="martyra-endooik" data-person="victim">
             Ένορκη Αστυνομικού Ενδο.
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="thyma-endooik">
+          <p class="helpBtn large dikografiesHiddable" id="thyma-endooik" data-person="victim">
             Χωρίς Όρκο Θύμα
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="syllipsiEndo">
+          <p class="helpBtn large dikografiesHiddable" id="syllipsiEndo" data-person="suspect">
             Σύλληψης
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="drastis-endooik">
+          <p class="helpBtn large dikografiesHiddable" id="drastis-endooik" data-person="suspect">
             Απολογίας
           </p>
           <p
             class="helpBtn large dikografiesHiddable"
             id="iatrodikastiki-endooik"
+            data-person="suspect"
           >
             Ιατροδικαστική
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="panicYes">
+          <p class="helpBtn large dikografiesHiddable" id="panicYes" data-person="victim">
             Θέλω Panic Button
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="panicNo">
+          <p class="helpBtn large dikografiesHiddable" id="panicNo" data-person="victim">
             Δεν θέλω Panic Button
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="domi">Δομή</p>
-          <p class="helpBtn large dikografiesHiddable" id="afairesi">
+          <p class="helpBtn large dikografiesHiddable" id="domi" data-person="victim">Δομή</p>
+          <p class="helpBtn large dikografiesHiddable" id="afairesi" data-person="suspect">
             Έκθεση Αφαίρεσης
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="katasxesiEndo">
+          <p class="helpBtn large dikografiesHiddable" id="katasxesiEndo" data-person="victim">
             Παράδ & Κατάσχ
           </p>
 
-          <p class="helpBtn large dikografiesHiddable" id="ypoptoyEndo">
+          <p class="helpBtn large dikografiesHiddable" id="ypoptoyEndo" data-person="suspect">
             Δελτίο Στοιχείων
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="simansi">Γ.Ε.Ε.</p>
-          <p class="helpBtn large dikografiesHiddable" id="vasEndo">ΒΑΣ</p>
+          <p class="helpBtn large dikografiesHiddable" id="simansi" data-person="suspect">Γ.Ε.Ε.</p>
+          <p class="helpBtn large dikografiesHiddable" id="vasEndo" data-person="suspect">ΒΑΣ</p>
 
           <fieldset class="dikografiesHiddable" id="dioksiEndo">
             <legend>Επιθυμεί ποιν.δίωξη δράστη:</legend>
@@ -834,10 +851,10 @@
             <label for="protokoloEndo">1049/2/</label>
             <input type="text" id="protokoloEndo" />
           </div>
-          <p class="helpBtn large dikografiesHiddable" id="ypovoliEndo">
+          <p class="helpBtn large dikografiesHiddable" id="ypovoliEndo" data-person="victim">
             Υποβολή προανακριτικού
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="apostoliEndo">
+          <p class="helpBtn large dikografiesHiddable" id="apostoliEndo" data-person="victim">
             Αποστολή συνοδείας
           </p>
         </div>
@@ -872,8 +889,8 @@
               id="apolesthen"
               placeholder="Απωλεσθέντα"
             ></textarea>
-            <p class="helpBtn large" id="ypiresiako">Υπηρεσιακό Σημείωμα</p>
-            <p class="helpBtn large" id="ypefthini">Υπεύθυνη Δήλωση</p>
+            <p class="helpBtn large" id="ypiresiako" data-person="victim">Υπηρεσιακό Σημείωμα</p>
+            <p class="helpBtn large" id="ypefthini" data-person="victim">Υπεύθυνη Δήλωση</p>
           </div>
           <hr />
           <p>Έκδοση Ταυτότητας</p>
@@ -904,8 +921,8 @@
               <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
               <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
             </div>
-            <p class="helpBtn large" id="a130">Α 130-2</p>
-            <p class="helpBtn large" id="ypefthiniDAT">Υ/Δ Απώλειας ΔΑΤ</p>
+            <p class="helpBtn large" id="a130" data-person="victim">Α 130-2</p>
+            <p class="helpBtn large" id="ypefthiniDAT" data-person="victim">Υ/Δ Απώλειας ΔΑΤ</p>
           </div>
         </div>
       </div>
@@ -971,8 +988,9 @@
             παράδοσης/κατάσχεσης
           </li>
           <li>
-            Πατήστε "Προσθήκη" αν θέλετε να κρατήσετε τα στοιχεία στο
-            browser
+            Πατήστε "Αποθήκευση" αν θέλετε να κρατήσετε τα στοιχεία στο
+            browser. Αν έχετε επιλέξει ήδη αποθηκευμένο αστυνομικό, το κουμπί
+            γίνεται "Ενημέρωση" και αντικαθιστά τα στοιχεία του
           </li>
           <li>
             Αν θέλετε να τα κρατήσετε και σε backup, πλοηγηθείτε στη

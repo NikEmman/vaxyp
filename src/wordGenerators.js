@@ -2,7 +2,7 @@ export async function generateWord(ekthesi, replacements, person) {
   if (!person.surname) {
     const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη.`;
     displayNotification(notificationText, "error");
-    return;
+    return false;
   }
 
   let decodedArrayBuffer = base64ToArrayBuffer(ekthesi.string);
@@ -30,12 +30,14 @@ export async function generateWord(ekthesi, replacements, person) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     displayNotification(notificationText);
+    return true;
   } catch (error) {
     console.error("Error generating Word document:", error);
     displayNotification(
       "Error generating Word document: " + error.message,
       "error",
     );
+    return false;
   }
 }
 export async function processDocument(arrayBuffer, replacements) {

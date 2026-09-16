@@ -122,6 +122,8 @@ async function handleDocxUpload(event) {
   }
 
   event.target.value = "";
+  refreshInitialText();
+  renderStatus();
 }
 
 initTheme();
@@ -177,6 +179,14 @@ function applySelectedOfficer() {
 }
 
 const initialText = document.getElementById("initial");
+const timeOffset = document.getElementById("time-offset");
+
+// The top text shows the time of the latest report, so it has to follow every
+// download, not only investigator changes
+function refreshInitialText() {
+  initialText.textContent = constructInitialText();
+  timeOffset.textContent = state.timePassed > 0 ? `+${state.timePassed}′` : "";
+}
 
 function constructInitialText() {
   const arthro = state.arthro ? capitalize(state.arthro) : "Στην";
@@ -223,6 +233,7 @@ tabs.forEach((tab, index) => {
 
     // Show the corresponding content section
     tabContents[index].classList.remove("hidden");
+    renderStatus();
   });
 });
 
@@ -270,6 +281,7 @@ document.getElementById("submitForm").addEventListener("click", (event) => {
   const text = formatFormData(data);
   state.victim = text;
   document.querySelector(".clipboard-id").value = text;
+  document.getElementById("victims").value = "placeholder";
 });
 // submit-ypoptos button event
 document
@@ -281,6 +293,7 @@ document
     const text = formatFormData(data);
     state.suspect = text;
     document.querySelector(".clipboard-id-ypoptos").value = text;
+    document.getElementById("suspects").value = "placeholder";
   });
 
 //dilosi apoleias
@@ -335,11 +348,11 @@ apodexetaiRadioButtons.forEach((radio) => {
 updateVariables();
 
 // Initial setup
-initialText.textContent = constructInitialText();
+refreshInitialText();
 
 // Update text when anakritikos selections change
 anakritikosSelect.addEventListener("change", (e) => {
-  initialText.textContent = constructInitialText();
+  refreshInitialText();
   applySelectedOfficer();
   let anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
   anakritikoiSelections.aAnakr = e.target.selectedIndex;
@@ -349,7 +362,7 @@ anakritikosSelect.addEventListener("change", (e) => {
 });
 
 bAnakritikosSelect.addEventListener("change", (e) => {
-  initialText.textContent = constructInitialText();
+  refreshInitialText();
   const anakritikoiSelections = JSON.parse(localStorage.getItem("anakr")) || {};
   anakritikoiSelections.bAnakr = e.target.selectedIndex;
   state.bAnakrSex = e.target.selectedOptions[0].dataset.sex;
@@ -363,7 +376,11 @@ refreshInitialBtn.addEventListener("click", () => {
   today = new Date();
   //reset time passed
   state.timePassed = 0;
-  initialText.textContent = constructInitialText();
+  refreshInitialText();
+  document
+    .querySelectorAll("[data-done]")
+    .forEach((button) => delete button.dataset.done);
+  renderStatus();
 });
 
 const copyInitialBtn = document.getElementById("copy-initial");
@@ -386,6 +403,8 @@ if (taytotita.value) {
 taytotita.addEventListener("input", () => {
   clipboardId.value = formatIdInfo(taytotita.value, data, state);
   state.victim = clipboardId.value;
+  // a new paste is a new person, not the one picked from the list
+  document.getElementById("victims").value = "placeholder";
 });
 clipboardId.addEventListener("input", () => {
   state.victim = clipboardId.value;
@@ -486,6 +505,12 @@ clipboardAstynomikos.addEventListener("paste", (e) => {
 
 //save officer button
 const storeOfficerBtn = document.querySelector(".save-astynomikos");
+
+// Saving a selected officer overwrites it, so the button says so
+function updateOfficerSaveLabel() {
+  storeOfficerBtn.textContent =
+    astynomikosSelect.value === "placeholder" ? "Αποθήκευση" : "Ενημέρωση";
+}
 storeOfficerBtn.addEventListener("click", () => {
   const parts = readAstynomikosFields();
   if (!parts.rank || !parts.name) {
@@ -526,9 +551,11 @@ storeOfficerBtn.addEventListener("click", () => {
     selectedValue === "placeholder"
       ? String(state.astynomikoi.length - 1)
       : selectedValue;
+  updateOfficerSaveLabel();
 });
 
 astynomikosSelect.addEventListener("change", (e) => {
+  updateOfficerSaveLabel();
   if (e.target.value === "placeholder") {
     resetAstynomikosFields();
     return;
@@ -575,6 +602,7 @@ deleteBtn.addEventListener("click", () => {
     // Re-draw the select menu so the name disappears
     paintAstynomikosSelect();
     resetAstynomikosFields();
+    updateOfficerSaveLabel();
 
     displayNotification("Ο αστυνομικός διαγράφηκε.");
   } else {
@@ -602,6 +630,7 @@ taytotitaYpoptos.addEventListener("input", () => {
     true,
   );
   state.suspect = clipboardIdYpoptos.value;
+  document.getElementById("suspects").value = "placeholder";
 });
 
 clipboardIdYpoptos.addEventListener("input", () => {
@@ -638,13 +667,15 @@ function paintSuspectSelect() {
 }
 const addSuspect = document.getElementById("add-suspect");
 addSuspect.addEventListener("click", () => {
-  // adds the current suspect to the list
+  if (!state.suspect) {
+    displayNotification("Δεν υπάρχει δράστης για προσθήκη.", "error");
+    return;
+  }
   const suspect = { string: state.suspect, data: state.ypoptosData };
   state.suspects.push(suspect);
-  // clears the input fields
-  document.getElementById("person-ypoptos-clear").click();
-  // re-paints the suspect menu
   paintSuspectSelect();
+  // the added suspect stays active, selected in the menu
+  document.getElementById("suspects").value = String(state.suspects.length - 1);
 });
 
 // suspect select menu functionality
@@ -826,13 +857,15 @@ function paintVictimSelect() {
 }
 const addVictim = document.getElementById("add-victim");
 addVictim.addEventListener("click", () => {
-  // adds the current victim to the list
+  if (!state.victim) {
+    displayNotification("Δεν υπάρχει παθών για προσθήκη.", "error");
+    return;
+  }
   const victim = { string: state.victim, data: state.victimData };
   state.victims.push(victim);
-  // clears the input fields
-  document.getElementById("person-clear").click();
-  // re-paints the victim menu
   paintVictimSelect();
+  // the added victim stays active, selected in the menu
+  document.getElementById("victims").value = String(state.victims.length - 1);
 });
 
 // victim select menu functionality
@@ -889,29 +922,72 @@ a130SelectMenu.addEventListener("change", () => {
 });
 
 // ektheseis
-const initial = document.getElementById("initial");
+
+const personLabel = (person) =>
+  person?.surname ? `${person.surname} ${person.firstName || ""}`.trim() : "";
+
+// Status line on the reports and ID tabs: who the documents will be filled
+// with, and the time the next ones continue from. Buttons whose required
+// person is missing are muted, but still clickable to show the error.
+function renderStatus() {
+  const { rank, name } = readAstynomikosFields();
+  const values = {
+    victim: personLabel(state.victimData),
+    suspect: personLabel(state.ypoptosData),
+    officer: name ? joinRankName(rank, name) : "",
+    time: formatTime(today, state.timePassed),
+  };
+  document.querySelectorAll("[data-status]").forEach((el) => {
+    const value = values[el.dataset.status];
+    el.textContent = value || "—";
+    el.classList.toggle("missing", !value);
+  });
+  document.querySelectorAll("[data-person]").forEach((button) => {
+    button.classList.toggle("needs-person", !values[button.dataset.person]);
+  });
+}
+renderStatus();
+
+// Shared by the report buttons: after the download, the top text and status
+// follow the new time, and the button gets a "✓ time" mark until ⟳
+async function download(
+  button,
+  ekthesi,
+  person,
+  { timed = false, replacements = state } = {},
+) {
+  const time = state.timeStart;
+  const ok = await generateWord(ekthesi, replacements, person);
+  refreshInitialText();
+  renderStatus();
+  if (ok) button.dataset.done = timed ? `✓ ${time}` : "✓";
+}
 // martyras button
 const martyra = document.getElementById("martyra");
 
-martyra.addEventListener("click", () => {
+martyra.addEventListener("click", (e) => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.martyra, state, state.victimData);
+  download(e.currentTarget, ektheseis.martyra, state.victimData, {
+    timed: true,
+  });
 });
 //martyra me dierminea button
 const martyraDierm = document.getElementById("martyraDierm");
-martyraDierm.addEventListener("click", () => {
+martyraDierm.addEventListener("click", (e) => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.martyraDierm, state, state.victimData);
+  download(e.currentTarget, ektheseis.martyraDierm, state.victimData, {
+    timed: true,
+  });
 });
 //martyra astyn button
 const martyraAstynomikos = document.getElementById("martyra-astynomikos");
-martyraAstynomikos.addEventListener("click", () => {
+martyraAstynomikos.addEventListener("click", (e) => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -923,23 +999,27 @@ martyraAstynomikos.addEventListener("click", () => {
     return;
   }
   const astynomikosData = { surname: officerName.split(" ")[0] };
-  generateWord(ektheseis.astynomikos, state, astynomikosData);
+  download(e.currentTarget, ektheseis.astynomikos, astynomikosData, {
+    timed: true,
+  });
 });
 
 // martyraXorisOrko button
 const martyraXoris = document.getElementById("martyraXoris");
-martyraXoris.addEventListener("click", () => {
+martyraXoris.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.martyraXoris, state, state.victimData);
+  download(e.currentTarget, ektheseis.martyraXoris, state.victimData, {
+    timed: true,
+  });
 });
 
 //syllipsi button
 const syllipsi = document.getElementById("syllipsi");
-syllipsi.addEventListener("click", () => {
+syllipsi.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -948,45 +1028,53 @@ syllipsi.addEventListener("click", () => {
   applyAstynomikosShort();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.syllipsi, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.syllipsi, state.ypoptosData, {
+    timed: true,
+  });
 });
 // anomoti button
 const anomoti = document.getElementById("anomoti");
-anomoti.addEventListener("click", () => {
+anomoti.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.anomoti, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.anomoti, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 // katigoroumenou button
 const katigoroumenou = document.getElementById("katigoroumenou");
-katigoroumenou.addEventListener("click", () => {
+katigoroumenou.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.katigoroumenou, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.katigoroumenou, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 // katigoroumenou me dierminea button
 const katigoroumenouDierm = document.getElementById("katigoroumenouDierm");
-katigoroumenouDierm.addEventListener("click", () => {
+katigoroumenouDierm.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   state.ypiresia = state.ypiresia?.toUpperCase();
   applyAllGrammar(state);
-  generateWord(ektheseis.katigoroumenouDierm, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.katigoroumenouDierm, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 //apodosi button
 const apodosi = document.getElementById("apodosi");
-apodosi.addEventListener("click", () => {
+apodosi.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -994,11 +1082,13 @@ apodosi.addEventListener("click", () => {
   applyAstynomikosShort();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.apodosi, state, state.victimData);
+  download(e.currentTarget, ektheseis.apodosi, state.victimData, {
+    timed: true,
+  });
 });
 // katasxesi button
 const katasxesi = document.getElementById("katasxesi");
-katasxesi.addEventListener("click", () => {
+katasxesi.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1006,59 +1096,72 @@ katasxesi.addEventListener("click", () => {
   applyAstynomikosShort();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.katasxesi, state, state.victimData);
+  download(e.currentTarget, ektheseis.katasxesi, state.victimData, {
+    timed: true,
+  });
 });
 
 // gnostopoiisi button
 const gnostopoiisi = document.getElementById("gnostopoiisi");
-gnostopoiisi.addEventListener("click", () => {
+gnostopoiisi.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
 
-  generateWord(ektheseis.gnostopoiisi, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.gnostopoiisi, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 // egxeirisis button  printEgxeirisis(initial, person)
 const egxeirisis = document.getElementById("egxeirisis");
-egxeirisis.addEventListener("click", () => {
+egxeirisis.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.egxeirisis, state, state.victimData);
+  download(e.currentTarget, ektheseis.egxeirisis, state.victimData, {
+    timed: true,
+  });
 });
 
 // gnostopoiisiNarkwtikwn button
 const gnostopoiisiNarkwtikwn = document.getElementById(
   "gnostopoiisiNarkwtikwn",
 );
-gnostopoiisiNarkwtikwn.addEventListener("click", () => {
+gnostopoiisiNarkwtikwn.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
 
-  generateWord(ektheseis.gnostopoiisiNarkwtikwn, state, state.ypoptosData);
+  download(
+    e.currentTarget,
+    ektheseis.gnostopoiisiNarkwtikwn,
+    state.ypoptosData,
+    { timed: true },
+  );
 });
 
 // praktikoZygisis button
 const praktikoZygisis = document.getElementById("praktikoZygisis");
-praktikoZygisis.addEventListener("click", () => {
+praktikoZygisis.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.praktikoZygisis, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.praktikoZygisis, state.ypoptosData, {
+    timed: true,
+  });
 });
 // ypiresiako button
 const ypiresiako = document.getElementById("ypiresiako");
-ypiresiako.addEventListener("click", () => {
+ypiresiako.addEventListener("click", (e) => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   applySelectedOfficer();
@@ -1066,27 +1169,29 @@ ypiresiako.addEventListener("click", () => {
   state.dAstynomias = state.dAstynomias.toUpperCase();
   state.geniki = state.geniki.toUpperCase();
   state.victim = shortenFormattedPerson(state.victim);
-  generateWord(ektheseis.ypiresiako, state, state.victimData);
+  download(e.currentTarget, ektheseis.ypiresiako, state.victimData, {
+    timed: true,
+  });
 });
 // ypefthini button
 const ypefthini = document.getElementById("ypefthini");
-ypefthini.addEventListener("click", () => {
+ypefthini.addEventListener("click", (e) => {
   Object.assign(state, { ...state.victimData });
   applySelectedOfficer();
-  generateWord(ektheseis.ypefthini, state, state.victimData);
+  download(e.currentTarget, ektheseis.ypefthini, state.victimData);
 });
 
 // deltio drasti button
 const ypoptoy = document.getElementById("ypoptoy");
-ypoptoy.addEventListener("click", () => {
+ypoptoy.addEventListener("click", (e) => {
   applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
-  generateWord(ektheseis.deltioYpoptou, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.deltioYpoptou, state.ypoptosData);
 });
 
 //deltio feromenou button
 const feromenou = document.getElementById("feromenou");
-feromenou.addEventListener("click", () => {
+feromenou.addEventListener("click", (e) => {
   applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
   state.timeStart = formatTime(today, state.timePassed);
@@ -1097,24 +1202,28 @@ feromenou.addEventListener("click", () => {
   state.issuingAuthority = state.issuingAuthority.toUpperCase();
   state.merosSyntaksisEkthesis = state.merosSyntaksisEkthesis.toUpperCase();
   state.ypiresia = state.ypiresia.toUpperCase();
-  generateWord(ektheseis.feromenou, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.feromenou, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 /// ENDOOIKOGENIAKI
 
 //martyra astyn endo button
 const martyraEndooik = document.getElementById("martyra-endooik");
-martyraEndooik.addEventListener("click", () => {
+martyraEndooik.addEventListener("click", (e) => {
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.endoTimeStart = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.astynomikosEndooik, state, state.victimData);
+  download(e.currentTarget, ektheseis.astynomikosEndooik, state.victimData, {
+    timed: true,
+  });
 });
 // thyma endooik button
 const thymaEndooik = document.getElementById("thyma-endooik");
-thymaEndooik.addEventListener("click", () => {
+thymaEndooik.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1122,22 +1231,29 @@ thymaEndooik.addEventListener("click", () => {
   state.endoStartTime = state.timeStart;
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.martyraXorisEndooik, state, state.victimData);
+  download(e.currentTarget, ektheseis.martyraXorisEndooik, state.victimData, {
+    timed: true,
+  });
 });
 
 // drastis -apologia -katigoroumenos endooik button
 const drastisEndooik = document.getElementById("drastis-endooik");
-drastisEndooik.addEventListener("click", () => {
+drastisEndooik.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
-  generateWord(ektheseis.katigoroumenouEndooik, state, state.ypoptosData);
+  download(
+    e.currentTarget,
+    ektheseis.katigoroumenouEndooik,
+    state.ypoptosData,
+    { timed: true },
+  );
 });
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
-iatrodikastiki.addEventListener("click", () => {
+iatrodikastiki.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1145,39 +1261,45 @@ iatrodikastiki.addEventListener("click", () => {
   applySelectedOfficer();
   state.ypiresia = state.ypiresia.toUpperCase();
   applyAllGrammar(state);
-  generateWord(ektheseis.iatrodikastiki, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.iatrodikastiki, state.ypoptosData, {
+    timed: true,
+  });
 });
 const panicYes = document.getElementById("panicYes");
-panicYes.addEventListener("click", () => {
+panicYes.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.panicButton = "";
   state.timeStart = formatTime(today, state.timePassed);
   applyAllGrammar(state);
 
-  generateWord(ektheseis.panicButtonYes, state, state.victimData);
+  download(e.currentTarget, ektheseis.panicButtonYes, state.victimData, {
+    timed: true,
+  });
 });
 const panicNo = document.getElementById("panicNo");
-panicNo.addEventListener("click", () => {
+panicNo.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
   state.panicButton = "δεν";
   applyAllGrammar(state);
 
-  generateWord(ektheseis.panicButtonNo, state, state.victimData);
+  download(e.currentTarget, ektheseis.panicButtonNo, state.victimData, {
+    timed: true,
+  });
 });
 //domi button
 const domi = document.getElementById("domi");
-domi.addEventListener("click", () => {
+domi.addEventListener("click", (e) => {
   applyAllGrammar(state);
 
-  generateWord(ektheseis.domi, state, state.victimData);
+  download(e.currentTarget, ektheseis.domi, state.victimData);
 });
 
 //afairesi button
 const afairesi = document.getElementById("afairesi");
-afairesi.addEventListener("click", () => {
+afairesi.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1185,11 +1307,13 @@ afairesi.addEventListener("click", () => {
 
   applyAllGrammar(state);
 
-  generateWord(ektheseis.afairesi, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.afairesi, state.ypoptosData, {
+    timed: true,
+  });
 });
 // katasxesiEndo button
 const katasxesiEndo = document.getElementById("katasxesiEndo");
-katasxesiEndo.addEventListener("click", () => {
+katasxesiEndo.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1197,12 +1321,14 @@ katasxesiEndo.addEventListener("click", () => {
   applyAstynomikosShort();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.katasxesiEndo, state, state.victimData);
+  download(e.currentTarget, ektheseis.katasxesiEndo, state.victimData, {
+    timed: true,
+  });
 });
 
 //syllipsi button
 const syllipsiEndo = document.getElementById("syllipsiEndo");
-syllipsiEndo.addEventListener("click", () => {
+syllipsiEndo.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
@@ -1211,19 +1337,21 @@ syllipsiEndo.addEventListener("click", () => {
   applyAstynomikosShort();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.syllipsiEndo, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.syllipsiEndo, state.ypoptosData, {
+    timed: true,
+  });
 });
 
 // deltio drasti Endo button
 const ypoptoyEndo = document.getElementById("ypoptoyEndo");
-ypoptoyEndo.addEventListener("click", () => {
+ypoptoyEndo.addEventListener("click", (e) => {
   applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
-  generateWord(ektheseis.deltioYpoptouEndo, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.deltioYpoptouEndo, state.ypoptosData);
 });
 //ypovlitiki button
 const ypovoliEndo = document.getElementById("ypovoliEndo");
-ypovoliEndo.addEventListener("click", () => {
+ypovoliEndo.addEventListener("click", (e) => {
   Object.assign(state, { ...state.victimData });
   state.nextDay = getNextDay(state.formattedDate);
 
@@ -1248,11 +1376,11 @@ ypovoliEndo.addEventListener("click", () => {
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.ypovoliEndo, state, state.victimData);
+  download(e.currentTarget, ektheseis.ypovoliEndo, state.victimData);
 });
 //ypovlitiki button
 const apostoliEndo = document.getElementById("apostoliEndo");
-apostoliEndo.addEventListener("click", () => {
+apostoliEndo.addEventListener("click", (e) => {
   Object.assign(state, { ...state.victimData });
   state.nextDay = getNextDay(state.formattedDate);
 
@@ -1277,21 +1405,21 @@ apostoliEndo.addEventListener("click", () => {
   state.eisaggeleiaProtodikon = state.eisaggeleiaProtodikon.toUpperCase();
   applyAllGrammar(state);
 
-  generateWord(ektheseis.apostoliEndo, state, state.victimData);
+  download(e.currentTarget, ektheseis.apostoliEndo, state.victimData);
 });
 
 // Γ.Ε.Ε. button
 const simansi = document.getElementById("simansi");
-simansi.addEventListener("click", () => {
+simansi.addEventListener("click", (e) => {
   applySelectedOfficer();
   Object.assign(state, { ...state.ypoptosData });
   applyAllGrammar(state);
-  generateWord(ektheseis.simansi, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.simansi, state.ypoptosData);
 });
 
 // ΒΑΣ button
 const vasEndo = document.getElementById("vasEndo");
-vasEndo.addEventListener("click", () => {
+vasEndo.addEventListener("click", (e) => {
   state.nextDay = getNextDay(state.formattedDate);
 
   state.dioksi = document.querySelector('input[name="dioksi"]:checked').value;
@@ -1304,12 +1432,12 @@ vasEndo.addEventListener("click", () => {
   ).value;
   applyAllGrammar(state);
 
-  generateWord(ektheseis.vasEndo, state, state.ypoptosData);
+  download(e.currentTarget, ektheseis.vasEndo, state.ypoptosData);
 });
 
 // new IDs btn
 const a130 = document.getElementById("a130");
-a130.addEventListener("click", () => {
+a130.addEventListener("click", (e) => {
   Object.assign(state, { ...state.victimData });
   state.n = document.getElementById("n").value;
   state.newId = document.getElementById("newId").value;
@@ -1317,16 +1445,16 @@ a130.addEventListener("click", () => {
   applySelectedOfficer();
   state.ypiresia = state.ypiresia?.toUpperCase();
   state.issuingAuthority = state.issuingAuthority?.toUpperCase();
-  generateWord(ektheseis.a130, state, state.victimData);
+  download(e.currentTarget, ektheseis.a130, state.victimData);
 });
 
 // ypefthiniDAT button
 const ypefthiniDAT = document.getElementById("ypefthiniDAT");
 
-ypefthiniDAT.addEventListener("click", () => {
+ypefthiniDAT.addEventListener("click", (e) => {
   Object.assign(state, { ...state.victimData });
   state.idNumber1 = state.idNumber;
-  generateWord(ektheseis.ypefthiniDAT, state, state.victimData);
+  download(e.currentTarget, ektheseis.ypefthiniDAT, state.victimData);
 });
 
 //form validations
