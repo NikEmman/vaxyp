@@ -101,6 +101,10 @@
               <option selected value="yes">Ναι</option>
               <option value="no">Όχι</option>
             </select>
+            <label class="selectLabel" for="victims"> Επιλογή Παθόντα:</label>
+            <select name="victims" id="victims">
+              <option value="placeholder">Νέος Παθών</option>
+            </select>
           </div>
         </div>
         <div class="person flex">
@@ -265,6 +269,13 @@
             <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
             <p class="arrow">→</p>
             <button id="person-clear">Εκκαθάριση</button>
+            <button
+              class="deleteBtn"
+              id="remove-victim"
+              title="Αφαιρεί τον επιλεγμένο παθόντα από τη λίστα"
+            >
+              Διαγραφή
+            </button>
           </div>
           <textarea class="clipboard-id output"></textarea>
           <div class="format">
@@ -273,6 +284,12 @@
               title="Αντιγραφή του κειμένου στο 'Πρόχειρο'"
             >
               Αντιγραφή
+            </button>
+            <button
+              id="add-victim"
+              title="Προσθέτει τον παθόντα στην προσωρινή λίστα"
+            >
+              Προσθήκη
             </button>
           </div>
         </div>
@@ -1038,6 +1055,11 @@
           <li>Στον Αστυνομικό προστέθηκαν φύλο, για σωστά άρθρα στις εκθέσεις Σύλληψης, Κατάσχεσης και Απόδοσης (ο/η, τον/την), και προαιρετική αιτιατική για τις εκθέσεις Σύλληψης («από τον Υ/Α' ΠΑΠΑΔΟΠΟΥΛΟ Νικόλαο»)</li>
           <li>Νέες λέξεις κλειδιά για πρότυπα χρήστη: {astynomShort}, {astynomShortAit} και λέξεις φύλου αστυνομικού ({oAS}, {tonAS} κτλ)</li>
           <li><strong>Προσοχή:</strong> για ήδη αποθηκευμένους ανακριτικούς και αστυνομικούς, ελέγξτε μία φορά ότι ο βαθμός χωρίστηκε σωστά και αποθηκεύστε. Οι αποθηκευμένοι αστυνομικοί θεωρούνται άντρες μέχρι να οριστεί φύλο</li>
+        </ul>
+        <hr />
+        <ul>
+          <u>Αλλαγές 16-09-2026</u>
+          <li>Προστέθηκε δυνατότητα εισαγωγής και προσωρινής αποθήκευσης πολλαπλών παθόντων, όπως ήδη ίσχυε για τους δράστες</li>
         </ul>
         <hr />
         <ul>

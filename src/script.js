@@ -809,6 +809,68 @@ personClear.addEventListener("click", () => {
   document.getElementById("dataForm").reset();
 });
 
+function paintVictimSelect() {
+  const victimsSelectEl = document.getElementById("victims");
+  // Clear all options but the first:
+  const firstOption = victimsSelectEl.firstElementChild;
+  victimsSelectEl.innerHTML = "";
+  victimsSelectEl.appendChild(firstOption);
+  if (state.victims) {
+    state.victims.forEach((value, index) => {
+      const victimOption = document.createElement("option");
+      victimOption.value = index;
+      victimOption.innerText = getSuspectSurname(value.string);
+      victimsSelectEl.appendChild(victimOption);
+    });
+  }
+}
+const addVictim = document.getElementById("add-victim");
+addVictim.addEventListener("click", () => {
+  // adds the current victim to the list
+  const victim = { string: state.victim, data: state.victimData };
+  state.victims.push(victim);
+  // clears the input fields
+  document.getElementById("person-clear").click();
+  // re-paints the victim menu
+  paintVictimSelect();
+});
+
+// victim select menu functionality
+const victimSelectMenu = document.getElementById("victims");
+victimSelectMenu.addEventListener("change", (e) => {
+  if (e.target.value === "placeholder") {
+    // clear values
+    document.getElementById("person-clear").click();
+    return;
+  }
+  const index = parseInt(e.target.value);
+  clipboardId.value = state.victims[index].string;
+  state.victim = state.victims[index].string;
+  state.victimData = state.victims[index].data;
+});
+
+// delete victim btn
+const victimDelBtn = document.querySelector("#remove-victim");
+
+victimDelBtn.addEventListener("click", () => {
+  const select = document.getElementById("victims");
+  const index = select.value;
+
+  if (index !== "placeholder") {
+    // Remove from the local array
+    state.victims.splice(parseInt(index), 1);
+
+    // Re-draw the select menu so the name disappears
+    paintVictimSelect();
+    //clear values
+    document.getElementById("person-clear").click();
+
+    displayNotification("Ο παθών διαγράφηκε.");
+  } else {
+    displayNotification("Παρακαλώ επιλέξτε έναν παθόντα πρώτα.", "error");
+  }
+});
+
 const vehicleClear = document.getElementById("vehicle-clear");
 vehicleClear.addEventListener("click", () => {
   oxima.value = "";
