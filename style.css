@@ -1345,6 +1345,29 @@ legend {
   font-size: 0.95em;
 }
 
+/* Options that feed ΒΑΣ, Υποβολή and Αποστολή, grouped across the grid,
+   right above those three buttons */
+.endoOptions {
+  grid-column: 1 / -1;
+  align-items: stretch;
+  gap: 1em;
+  margin-bottom: 0;
+}
+
+.endoOptions fieldset {
+  margin-bottom: 0;
+}
+
+.endoOptions .protokolo-container {
+  margin-bottom: 0;
+}
+
+/* Panic Button choice sits in a button-sized grid cell */
+#panicEndo {
+  padding: 0 1em 0.3em;
+  margin-bottom: 0;
+}
+
 /* Aligning radio buttons and labels */
 fieldset div {
   display: flex;

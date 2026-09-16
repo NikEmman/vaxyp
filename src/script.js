@@ -1305,29 +1305,29 @@ iatrodikastiki.addEventListener("click", (e) => {
     timed: true,
   });
 });
-const panicYes = document.getElementById("panicYes");
-panicYes.addEventListener("click", (e) => {
+// Panic Button choice: picks its document, and ΒΑΣ reports it too
+function readPanicChoice() {
+  state.panicButton = document.querySelector(
+    'input[name="panic"]:checked',
+  ).value;
+}
+document
+  .querySelectorAll('input[name="panic"]')
+  .forEach((radio) => radio.addEventListener("change", readPanicChoice));
+readPanicChoice();
+
+const panicBtn = document.getElementById("panicBtn");
+panicBtn.addEventListener("click", (e) => {
   state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
-  state.panicButton = "";
   state.timeStart = formatTime(today, state.timePassed);
+  readPanicChoice();
   applyAllGrammar(state);
 
-  download(e.currentTarget, ektheseis.panicButtonYes, state.victimData, {
-    timed: true,
-  });
-});
-const panicNo = document.getElementById("panicNo");
-panicNo.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
-  state.ypiresia = state.ypiresia.toUpperCase();
-  state.timeStart = formatTime(today, state.timePassed);
-  state.panicButton = "δεν";
-  applyAllGrammar(state);
-
-  download(e.currentTarget, ektheseis.panicButtonNo, state.victimData, {
-    timed: true,
-  });
+  const ekthesi = state.panicButton
+    ? ektheseis.panicButtonNo
+    : ektheseis.panicButtonYes;
+  download(e.currentTarget, ekthesi, state.victimData, { timed: true });
 });
 //domi button
 const domi = document.getElementById("domi");

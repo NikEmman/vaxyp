@@ -615,7 +615,8 @@
           <span>Αστυνομικός: <strong data-status="officer"></strong></span>
           <span>Ώρα εκθέσεων: <strong data-status="time"></strong></span>
         </div>
-        <div class="anakritikoi">
+        <!-- case filter hidden until it covers more case types -->
+        <div class="anakritikoi hidden">
           <label class="selectLabel" for="dikografies"
             >Επιλέξτε δικογραφία:</label
           >
@@ -640,13 +641,13 @@
           <p class="helpBtn large dikografiesHiddable" id="martyraXoris">
             Μάρτυρα Χωρίς Όρκο
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="egxeirisis" data-person="victim">
-            Έκθεση Εγχείρησης
-          </p>
           <p class="helpBtn large dikografiesHiddable" id="katasxesi" data-person="victim">
             Παράδ & Κατάσχ
           </p>
           <p class="helpBtn large dikografiesHiddable" id="apodosi" data-person="victim">Απόδοσης</p>
+          <p class="helpBtn large dikografiesHiddable" id="egxeirisis" data-person="victim">
+            Έκθεση Εγχείρησης
+          </p>
         </div>
         <hr />
         <p>Με χρήση του πεδίου Δράστης</p>
@@ -691,12 +692,6 @@
           <p class="helpBtn large dikografiesHiddable" id="thyma-endooik" data-person="victim">
             Χωρίς Όρκο Θύμα
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="syllipsiEndo" data-person="suspect">
-            Σύλληψης
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="drastis-endooik" data-person="suspect">
-            Απολογίας
-          </p>
           <p
             class="helpBtn large dikografiesHiddable"
             id="iatrodikastiki-endooik"
@@ -704,173 +699,191 @@
           >
             Ιατροδικαστική
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="panicYes" data-person="victim">
-            Θέλω Panic Button
+          <p
+            class="helpBtn large dikografiesHiddable"
+            id="panicBtn"
+            data-person="victim"
+          >
+            Panic Button
           </p>
-          <p class="helpBtn large dikografiesHiddable" id="panicNo" data-person="victim">
-            Δεν θέλω Panic Button
-          </p>
+          <fieldset class="dikografiesHiddable" id="panicEndo">
+            <legend>Θέλει Panic Button:</legend>
+            <div>
+              <input type="radio" id="panicNai" name="panic" value="" checked />
+              <label for="panicNai">Ναι</label>
+            </div>
+            <div>
+              <input type="radio" id="panicOxi" name="panic" value="δεν" />
+              <label for="panicOxi">Όχι</label>
+            </div>
+          </fieldset>
           <p class="helpBtn large dikografiesHiddable" id="domi" data-person="victim">Δομή</p>
+          <p class="helpBtn large dikografiesHiddable" id="syllipsiEndo" data-person="suspect">
+            Σύλληψης
+          </p>
           <p class="helpBtn large dikografiesHiddable" id="afairesi" data-person="suspect">
             Έκθεση Αφαίρεσης
           </p>
           <p class="helpBtn large dikografiesHiddable" id="katasxesiEndo" data-person="victim">
             Παράδ & Κατάσχ
           </p>
-
+          <p class="helpBtn large dikografiesHiddable" id="drastis-endooik" data-person="suspect">
+            Απολογίας
+          </p>
           <p class="helpBtn large dikografiesHiddable" id="ypoptoyEndo" data-person="suspect">
             Δελτίο Στοιχείων
           </p>
           <p class="helpBtn large dikografiesHiddable" id="simansi" data-person="suspect">Γ.Ε.Ε.</p>
+          <fieldset class="endoOptions dikografiesHiddable" id="endoOptions">
+            <legend>Στοιχεία για ΒΑΣ, Υποβολή και Αποστολή</legend>
+            <fieldset class="dikografiesHiddable" id="dioksiEndo">
+              <legend>Επιθυμεί ποιν.δίωξη δράστη:</legend>
+
+              <div>
+                <input
+                  type="radio"
+                  id="dioksiNai"
+                  name="dioksi"
+                  value=""
+                  checked
+                />
+                <label for="dioksiNai">Ναι</label>
+              </div>
+
+              <div>
+                <input type="radio" id="dioksiOxi" name="dioksi" value="ΔΕΝ" />
+                <label for="dioksiOxi">Όχι</label>
+              </div>
+            </fieldset>
+            <fieldset class="dikografiesHiddable" id="drastisEndo">
+              <legend>Δράστης αποδέχεται:</legend>
+              <div>
+                <input
+                  type="radio"
+                  id="drastisYes"
+                  name="apodexetai"
+                  value="Yes"
+                />
+                <label for="drastisYes">Ναι</label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="drastisOXi"
+                  value="No"
+                  name="apodexetai"
+                  checked
+                />
+                <label for="drastisOXi">Όχι</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  id="drastisEnMeri"
+                  value="enMeri"
+                  name="apodexetai"
+                />
+                <label for="drastisEnMeri">Έν μέρη</label>
+              </div>
+            </fieldset>
+            <fieldset class="dikografiesHiddable" id="iatrodikEndo">
+              <legend>Χορηγήθηκε Ιατροδικαστική:</legend>
+
+              <div>
+                <input
+                  type="radio"
+                  id="iatrodikNai"
+                  name="iatrodik"
+                  value=""
+                  checked
+                />
+                <label for="iatrodikNai">Ναι</label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="iatrodikOxi"
+                  name="iatrodik"
+                  value="ΔΕΝ"
+                />
+                <label for="iatrodikOxi">Όχι</label>
+              </div>
+            </fieldset>
+            <fieldset class="dikografiesHiddable" id="oploEndo">
+              <legend>Δράστης κατέχει όπλο:</legend>
+
+              <div>
+                <input
+                  type="radio"
+                  id="oploNai"
+                  name="oplo"
+                  value="ΘΕΤΙΚΟ"
+                  checked
+                />
+                <label for="oploNai">Ναι</label>
+              </div>
+
+              <div>
+                <input type="radio" id="oploOxi" name="oplo" value="ΑΡΝΗΤΙΚΟ" />
+                <label for="oploOxi">Όχι</label>
+              </div>
+            </fieldset>
+            <fieldset class="dikografiesHiddable" id="ypotroposEndo">
+              <legend>Δράστης υπότροπος:</legend>
+
+              <div>
+                <input
+                  type="radio"
+                  id="ypotroposNai"
+                  name="ypotropos"
+                  value=""
+                  checked
+                />
+                <label for="ypotroposNai">Ναι</label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="ypotroposOxi"
+                  name="ypotropos"
+                  value="ΔΕΝ"
+                />
+                <label for="ypotroposOxi">Όχι</label>
+              </div>
+            </fieldset>
+            <fieldset class="dikografiesHiddable" id="autoforoEndo">
+              <legend>Στα πλαίσια αυτοφώρου:</legend>
+
+              <div>
+                <input
+                  type="radio"
+                  id="autoforoNai"
+                  name="autoforo"
+                  value="true"
+                  checked
+                />
+                <label for="autoforoNai">Ναι</label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  id="autoforoOxi"
+                  name="autoforo"
+                  value="false"
+                />
+                <label for="autoforoOxi">Όχι</label>
+              </div>
+            </fieldset>
+            <div class="protokolo-container dikografiesHiddable" id="protokEndo">
+              <label for="protokoloEndo">Αρ. πρωτοκόλλου 1049/2/</label>
+              <input type="text" id="protokoloEndo" />
+            </div>
+          </fieldset>
           <p class="helpBtn large dikografiesHiddable" id="vasEndo" data-person="suspect">ΒΑΣ</p>
-
-          <fieldset class="dikografiesHiddable" id="dioksiEndo">
-            <legend>Επιθυμεί ποιν.δίωξη δράστη:</legend>
-
-            <div>
-              <input
-                type="radio"
-                id="dioksiNai"
-                name="dioksi"
-                value=""
-                checked
-              />
-              <label for="dioksiNai">Ναι</label>
-            </div>
-
-            <div>
-              <input type="radio" id="dioksiOxi" name="dioksi" value="ΔΕΝ" />
-              <label for="dioksiOxi">Όχι</label>
-            </div>
-          </fieldset>
-          <fieldset class="dikografiesHiddable" id="drastisEndo">
-            <legend>Δράστης αποδέχεται:</legend>
-            <div>
-              <input
-                type="radio"
-                id="drastisYes"
-                name="apodexetai"
-                value="Yes"
-              />
-              <label for="drastisYes">Ναι</label>
-            </div>
-
-            <div>
-              <input
-                type="radio"
-                id="drastisOXi"
-                value="No"
-                name="apodexetai"
-                checked
-              />
-              <label for="drastisOXi">Όχι</label>
-            </div>
-            <div>
-              <input
-                type="radio"
-                id="drastisEnMeri"
-                value="enMeri"
-                name="apodexetai"
-              />
-              <label for="drastisEnMeri">Έν μέρη</label>
-            </div>
-          </fieldset>
-          <fieldset class="dikografiesHiddable" id="iatrodikEndo">
-            <legend>Χορηγήθηκε Ιατροδικαστική:</legend>
-
-            <div>
-              <input
-                type="radio"
-                id="iatrodikNai"
-                name="iatrodik"
-                value=""
-                checked
-              />
-              <label for="iatrodikNai">Ναι</label>
-            </div>
-
-            <div>
-              <input
-                type="radio"
-                id="iatrodikOxi"
-                name="iatrodik"
-                value="ΔΕΝ"
-              />
-              <label for="iatrodikOxi">Όχι</label>
-            </div>
-          </fieldset>
-          <fieldset class="dikografiesHiddable" id="oploEndo">
-            <legend>Δράστης κατέχει όπλο:</legend>
-
-            <div>
-              <input
-                type="radio"
-                id="oploNai"
-                name="oplo"
-                value="ΘΕΤΙΚΟ"
-                checked
-              />
-              <label for="oploNai">Ναι</label>
-            </div>
-
-            <div>
-              <input type="radio" id="oploOxi" name="oplo" value="ΑΡΝΗΤΙΚΟ" />
-              <label for="oploOxi">Όχι</label>
-            </div>
-          </fieldset>
-          <fieldset class="dikografiesHiddable" id="ypotroposEndo">
-            <legend>Δράστης υπότροπος:</legend>
-
-            <div>
-              <input
-                type="radio"
-                id="ypotroposNai"
-                name="ypotropos"
-                value=""
-                checked
-              />
-              <label for="ypotroposNai">Ναι</label>
-            </div>
-
-            <div>
-              <input
-                type="radio"
-                id="ypotroposOxi"
-                name="ypotropos"
-                value="ΔΕΝ"
-              />
-              <label for="ypotroposOxi">Όχι</label>
-            </div>
-          </fieldset>
-          <fieldset class="dikografiesHiddable" id="autoforoEndo">
-            <legend>Στα πλαίσια αυτοφώρου:</legend>
-
-            <div>
-              <input
-                type="radio"
-                id="autoforoNai"
-                name="autoforo"
-                value="true"
-                checked
-              />
-              <label for="autoforoNai">Ναι</label>
-            </div>
-
-            <div>
-              <input
-                type="radio"
-                id="autoforoOxi"
-                name="autoforo"
-                value="false"
-              />
-              <label for="autoforoOxi">Όχι</label>
-            </div>
-          </fieldset>
-
-          <div class="protokolo-container dikografiesHiddable" id="protokEndo">
-            <label for="protokoloEndo">1049/2/</label>
-            <input type="text" id="protokoloEndo" />
-          </div>
           <p class="helpBtn large dikografiesHiddable" id="ypovoliEndo" data-person="victim">
             Υποβολή προανακριτικού
           </p>
