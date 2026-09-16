@@ -129,6 +129,28 @@ async function handleDocxUpload(event) {
 initTheme();
 initNavMenu();
 
+// Help dropdown in the header (on narrow screens its items are listed inline)
+const helpMenu = document.getElementById("help-menu");
+const helpMenuToggle = document.getElementById("help-menu-toggle");
+
+function setHelpMenuOpen(open) {
+  helpMenu.classList.toggle("open", open);
+  helpMenuToggle.setAttribute("aria-expanded", String(open));
+}
+helpMenuToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setHelpMenuOpen(!helpMenu.classList.contains("open"));
+});
+document.getElementById("help-menu-list").addEventListener("click", (e) => {
+  if (e.target.closest("button")) setHelpMenuOpen(false);
+});
+document.addEventListener("click", (e) => {
+  if (!helpMenu.contains(e.target)) setHelpMenuOpen(false);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") setHelpMenuOpen(false);
+});
+
 const anakritikosSelect = document.querySelector("#anakritikos");
 const bAnakritikosSelect = document.querySelector("#anakritikos-b");
 
@@ -180,6 +202,11 @@ function applySelectedOfficer() {
 
 const initialText = document.getElementById("initial");
 const timeOffset = document.getElementById("time-offset");
+
+// The text is cut to one line to save space; clicking shows all of it
+initialText.addEventListener("click", () => {
+  initialText.classList.toggle("expanded");
+});
 
 // The top text shows the time of the latest report, so it has to follow every
 // download, not only investigator changes
@@ -475,6 +502,18 @@ function allAstynomikoiParts() {
 
 resetAstynomikosFields();
 
+// The officer fields are rarely edited, so they stay collapsed until needed
+const astynomikosBody = document.getElementById("astynomikos-body");
+const astynomikosToggle = document.getElementById("astynomikos-toggle");
+
+function setAstynomikosExpanded(open) {
+  astynomikosBody.classList.toggle("hidden", !open);
+  astynomikosToggle.setAttribute("aria-expanded", String(open));
+}
+astynomikosToggle.addEventListener("click", () => {
+  setAstynomikosExpanded(astynomikosBody.classList.contains("hidden"));
+});
+
 [astynomikosRank, astynomikosName, clipboardAstynomikos, astynomikosAit].forEach(
   (field) => field.addEventListener("input", syncAstynomikosState),
 );
@@ -558,6 +597,7 @@ astynomikosSelect.addEventListener("change", (e) => {
   updateOfficerSaveLabel();
   if (e.target.value === "placeholder") {
     resetAstynomikosFields();
+    setAstynomikosExpanded(true);
     return;
   }
   fillAstynomikosFields(getAstynomikosParts(state, parseInt(e.target.value)));
@@ -1504,12 +1544,13 @@ if (dateMatch) {
   const diffDays = Math.floor((today - patchDate) / (1000 * 60 * 60 * 24));
 
   if (diffDays <= 14) {
-    const whatsNewBtn = document.getElementById("patch-help");
-    whatsNewBtn.classList.add("glow-new");
+    // the help toggle is what's visible on wide screens, the item on narrow
+    const whatsNewBtns = [helpMenuToggle, document.getElementById("patch-help")];
+    whatsNewBtns.forEach((btn) => btn.classList.add("glow-new"));
 
     // Remove animation after 15 seconds
     setTimeout(() => {
-      whatsNewBtn.classList.remove("glow-new");
+      whatsNewBtns.forEach((btn) => btn.classList.remove("glow-new"));
     }, 15000);
   }
 }

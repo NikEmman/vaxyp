@@ -106,6 +106,79 @@ header a:hover {
   gap: 20px;
 }
 
+.headerEnd {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.settingsLink {
+  padding: 0.4em 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.settingsLink:hover {
+  background: rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+}
+
+/* Help dropdown: tour, F.A.Q. and patch notes */
+.helpMenu {
+  position: relative;
+}
+
+.helpMenu .helpBtn {
+  font: inherit;
+  font-weight: bold;
+}
+
+.helpMenuList {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  min-width: 220px;
+  flex-direction: column;
+  padding: 0.3em 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.helpMenu.open .helpMenuList {
+  display: flex;
+}
+
+.helpMenuList button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.6em 1em;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dark);
+  font: inherit;
+  text-align: left;
+}
+
+.helpMenuList button:hover {
+  background-color: var(--light-blue);
+}
+
+.helpMenuList .glow-new {
+  box-shadow: none;
+}
+
+.helpMenuList .glow-new::after {
+  top: calc(50% - 0.8em);
+  right: 10px;
+}
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -201,6 +274,36 @@ header a:hover {
   header:has(.nav-toggle) .navButtons .helpBtn:hover {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-light);
+  }
+
+  /* the help items are listed inline in the menu, no nested dropdown */
+  #help-menu-toggle {
+    display: none;
+  }
+
+  header:has(.nav-toggle) .helpMenuList {
+    display: flex;
+    position: static;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  header:has(.nav-toggle) .helpMenuList button {
+    color: var(--text-light);
+    font-weight: 900;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.9em 0.25em;
+  }
+
+  header:has(.nav-toggle) .helpMenuList button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .headerEnd {
+    margin-left: auto;
   }
 }
 /* ── Patch-glow animation ───────────────────────────────────── */
@@ -327,19 +430,51 @@ header a:hover {
   outline: none;
 }
 
-/* Top Section with Anakritikoi */
+/* Top bar: investigators and the opening text, set once per shift, so kept
+   to a single row */
 .top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em 0.75em;
   background-color: var(--background-white);
-  padding: 1.5em;
+  padding: 0.75em 1em;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2em;
-  margin-top: 2em;
-}
-
-#initial {
+  margin-bottom: 1em;
   margin-top: 1em;
 }
+
+.topOfficers {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.topOfficers label {
+  color: var(--label-color);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.topOfficers select {
+  max-width: 14em;
+}
+
+.top #initial {
+  flex: 1 1 300px;
+  min-width: 0;
+  padding: 0.35em 0.75em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.top #initial.expanded {
+  white-space: normal;
+}
+
 #initial,
 .output {
   font-family: "Calibri", sans-serif;
@@ -348,11 +483,6 @@ header a:hover {
   padding: 1em;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-}
-
-#copy-initial {
-  align-self: flex-end;
-  margin-top: 1em;
 }
 
 .anakritikoi {
@@ -444,6 +574,16 @@ select {
   width: 100%;
 }
 
+.officerBody {
+  justify-content: flex-start;
+  gap: 2em;
+  margin-top: 1em;
+}
+
+.officerBody .astynomikos-fields {
+  width: 55%;
+}
+
 .astynomikos-name-row {
   display: flex;
   gap: 0.5em;
@@ -499,15 +639,15 @@ textarea:focus {
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 1.5em 1em 0 1em;
+  gap: 6px;
+  padding: 0.5em 1em 0 1em;
   border-bottom: 2px solid var(--border-color);
   background-color: var(--background-light);
   position: relative;
 }
 .tab {
   cursor: pointer;
-  padding: 0.8em 1.2em;
+  padding: 0.45em 1.2em;
   background-color: var(--summary-bg);
   color: var(--text-light);
   font-weight: 600;
@@ -518,18 +658,16 @@ textarea:focus {
   outline: none;
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  min-width: 250px;
+  min-width: 180px;
   text-align: center;
   z-index: 1;
 }
 .tab:hover {
   background-color: var(--summary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 .clicked {
   cursor: default;
-  padding: 0.8em 1.2em;
+  padding: 0.45em 1.2em;
   /* background: var(--light-blue); */
   background: linear-gradient(
     to left,
@@ -544,7 +682,7 @@ textarea:focus {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   position: relative;
   top: -2px;
-  min-width: 250px;
+  min-width: 180px;
   text-align: center;
   z-index: 2;
   transition: all 0.3s ease;
@@ -555,7 +693,7 @@ textarea:focus {
   padding: 0;
   color: inherit;
   border: none;
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .tab::marker,
@@ -1293,9 +1431,16 @@ hr {
 
   .input,
   .output,
-  .astynomikos-fields {
+  .astynomikos-fields,
+  .officerBody .astynomikos-fields {
     width: 100%;
     height: 10em;
+  }
+  .topOfficers {
+    flex-wrap: wrap;
+  }
+  .top #initial {
+    flex-basis: 100%;
   }
   .astynomikos-fields {
     height: auto;

@@ -47,8 +47,16 @@ function closeKeywordsHelp() {
   if (dialog && dialog.open) dialog.close();
 }
 
+// The officer fields are collapsed by default
+function expandOfficer() {
+  const body = document.getElementById("astynomikos-body");
+  if (body?.classList.contains("hidden")) {
+    document.getElementById("astynomikos-toggle").click();
+  }
+}
+
 function clickFormLink() {
-  document.querySelector('.navButtons a[href="form/"]')?.click();
+  document.getElementById("settings-link")?.click();
 }
 
 const guides = {
@@ -56,15 +64,14 @@ const guides = {
     label: "Αρχική καταχώρηση στοιχείων",
     steps: [
       {
-        element: '.navButtons a[href="form/"]',
+        element: "#settings-link",
         popover: {
           title: "Καταχώρηση στοιχείων υπηρεσίας",
           description:
-            "Πατήστε «Επόμενο» για να μεταβείτε στη Φόρμα και να καταχωρήσετε τα στοιχεία της υπηρεσίας σας.",
+            "Πατήστε «Επόμενο» για να μεταβείτε στις Ρυθμίσεις και να καταχωρήσετε τα στοιχεία της υπηρεσίας σας.",
           showButtons: ["next", "close"],
           onNextClick: clickFormLink,
         },
-        onHighlightStarted: () => openNavMenu(),
       },
       {
         page: "form",
@@ -182,15 +189,14 @@ const guides = {
     label: "Πώς να εισάγετε παλιά στοιχεία",
     steps: [
       {
-        element: '.navButtons a[href="form/"]',
+        element: "#settings-link",
         popover: {
           title: "Ανέβασμα παλιών δεδομένων",
           description:
-            "Αν έχετε ξαναχρησιμοποιήσει την εφαρμογή και έχετε αποθηκευμένο το αρχείο data.json, μπορείτε να το ανεβάσετε στη Φόρμα. Πατήστε «Επόμενο» για να μεταβείτε εκεί.",
+            "Αν έχετε ξαναχρησιμοποιήσει την εφαρμογή και έχετε αποθηκευμένο το αρχείο data.json, μπορείτε να το ανεβάσετε στις Ρυθμίσεις. Πατήστε «Επόμενο» για να μεταβείτε εκεί.",
           showButtons: ["next", "close"],
           onNextClick: clickFormLink,
         },
-        onHighlightStarted: () => openNavMenu(),
       },
       {
         page: "form",
@@ -239,6 +245,7 @@ const guides = {
           description:
             "Επιλέξτε το φύλο, ώστε τα άρθρα στις εκθέσεις να είναι σωστά (ο/η, τον/την), και συμπληρώστε τον βαθμό (π.χ. Υ/Α') και το ΕΠΩΝΥΜΟ Όνομα του αστυνομικού.",
         },
+        onHighlightStarted: () => expandOfficer(),
       },
       {
         element: "#astynomikos-ait",
@@ -247,6 +254,7 @@ const guides = {
           description:
             "Βαθμός και ονοματεπώνυμο σε αιτιατική (π.χ. Υ/Α' ΠΑΠΑΔΟΠΟΥΛΟ Νικόλαο), για τις εκθέσεις σύλληψης («από τον ...»). Αν μείνει κενό, χρησιμοποιείται η ονομαστική.",
         },
+        onHighlightStarted: () => expandOfficer(),
       },
       {
         element: ".clipboard-id-astynomikos",
@@ -255,6 +263,7 @@ const guides = {
           description:
             "Εδώ γράφετε τα υπόλοιπα στοιχεία (γέννηση, κατοικία κτλ). Αν επικολλήσετε ολόκληρο κείμενο στη θέση του, με κενά τα δύο πεδία, θα χωριστεί αυτόματα στο πρώτο κόμμα.",
         },
+        onHighlightStarted: () => expandOfficer(),
       },
       {
         element: ".astynomikos-fields",
@@ -263,6 +272,7 @@ const guides = {
           description:
             "Το κείμενο αυτό θα περάσει, με λίγες τροποποιήσεις ανάλογα το έγγραφο, στις μαρτυρικές αστυνομικών, στις εκθέσεις σύλληψης, και παράδοσης/κατάσχεσης.",
         },
+        onHighlightStarted: () => expandOfficer(),
       },
       {
         element: ".save-astynomikos",
@@ -271,6 +281,7 @@ const guides = {
           description:
             "Πατήστε «Αποθήκευση» αν θέλετε να κρατήσετε τα στοιχεία των αστυνομικών στο browser για μελλοντική χρήση. Αν έχετε επιλέξει ήδη αποθηκευμένο αστυνομικό, το κουμπί γίνεται «Ενημέρωση» και αντικαθιστά τα στοιχεία του.",
         },
+        onHighlightStarted: () => expandOfficer(),
       },
       {
         element: "#astynomikoi",
@@ -287,17 +298,15 @@ const guides = {
           description:
             "Εάν θέλετε να διαγράψετε κάποιον, επιλέξτε τον από το μενού και πατήστε «Διαγραφή».",
         },
-        // back from the Backup step, which opens the nav menu
-        onHighlightStarted: () => closeNavMenu(),
+        onHighlightStarted: () => expandOfficer(),
       },
       {
-        element: '.navButtons a[href="form/"]',
+        element: "#settings-link",
         popover: {
           title: "10. Backup",
           description:
-            "Για να κρατήσετε τους αστυνομικούς σας στο backup αρχείο data.json πλοηγηθήτε στη Φόρμα και πατήστε «Αποθήκευση».",
+            "Για να κρατήσετε τους αστυνομικούς σας στο backup αρχείο data.json πλοηγηθείτε στις Ρυθμίσεις και πατήστε «Αποθήκευση».",
         },
-        onHighlightStarted: () => openNavMenu(),
       },
     ],
   },
