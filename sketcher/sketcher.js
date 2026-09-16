@@ -810,7 +810,7 @@
   });
   updateUndoButton();
   document.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() !== "z" || (!e.ctrlKey && !e.metaKey) || e.shiftKey) return;
+    if (e.code !== "KeyZ" || (!e.ctrlKey && !e.metaKey) || e.shiftKey) return;
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     e.preventDefault(); // stop the browser's own undo (e.g. in a contenteditable) from also firing
     undoBtn.click();
@@ -951,17 +951,17 @@
   // the mutual-exclusion/cleanup logic in their click handlers (stopping
   // whichever other tool was active, etc.) is reused rather than duplicated.
   const TOOL_KEY_BUTTONS = {
-    v: selectToolBtn, // pointer/select — "V" as in most design tools
-    m: measureBtn,
-    e: eraseBtn,
-    h: gridBtn, // "H" toggles the grid
+    KeyV: selectToolBtn, // pointer/select — "V" as in most design tools
+    KeyM: measureBtn,
+    KeyE: eraseBtn,
+    KeyH: gridBtn, // "H" toggles the grid
   };
   document.addEventListener("keydown", (e) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     const obj = canvas.getActiveObject();
     if (obj && obj.isEditing) return; // don't hijack letters typed into a Textbox
-    const btn = TOOL_KEY_BUTTONS[e.key.toLowerCase()];
+    const btn = TOOL_KEY_BUTTONS[e.code]; // e.code = physical key, layout-independent (works with Greek layout too)
     if (btn) btn.click();
   });
 
@@ -1236,7 +1236,7 @@
   // reusing whatever name is still sitting in the field from the last
   // save, which would silently overwrite it with no chance to reconsider.
   document.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() !== "s" || (!e.ctrlKey && !e.metaKey)) return;
+    if (e.code !== "KeyS" || (!e.ctrlKey && !e.metaKey)) return;
     e.preventDefault(); // stop the browser's own save-page dialog
     loadSketchPanel.hidden = true;
     saveSketchPanel.hidden = false;
