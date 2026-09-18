@@ -370,6 +370,13 @@ header a:hover {
     padding-left: 0.5em;
     padding-right: 0.5em;
   }
+  /* the header bleeds to the edges, so its pull matches the body padding */
+  header {
+    margin-left: -0.5em;
+    margin-right: -0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
   .navButtons {
     gap: 8px;
   }
@@ -560,7 +567,6 @@ select {
   color: var(--text-dark);
 }
 
-.input:focus,
 /* Police officer: rank + name inputs over the details textarea, together
    taking the place of a single .output */
 .astynomikos-fields {
@@ -600,6 +606,7 @@ select {
   min-width: 0;
 }
 
+.input:focus,
 .output:focus {
   outline: none;
   border-color: var(--secondary-blue);
@@ -713,13 +720,17 @@ textarea:focus {
 }
 .tabTitle {
   display: flex;
-  gap: 40px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 40px;
 }
 .tabTitle .anakritikoi {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
   gap: 10px;
+  margin-bottom: 0;
 }
 
 @keyframes fadeIn {
