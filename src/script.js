@@ -114,6 +114,8 @@ async function handleDocxUpload(event) {
     }
   }
 
+  // the missing person is the louder of the two, so it is reported last
+  reportAstynomikosPlaceholders();
   if (missingPerson) {
     const docText =
       sortedFiles.length === 1 ? "Το έγγραφο κατέβηκε" : "Τα έγγραφα κατέβηκαν";
@@ -444,7 +446,7 @@ const clipboardAstynomikos = document.querySelector(
   ".clipboard-id-astynomikos",
 );
 const astynomikosSelect = document.getElementById("astynomikoi");
-const defaultAstynomikosDetails = splitOfficerText(defaultAstynomikos).details;
+const defaultAstynomikosParts = splitOfficerText(defaultAstynomikos);
 
 function readAstynomikosFields() {
   return {
@@ -456,8 +458,43 @@ function readAstynomikosFields() {
   };
 }
 
+function astynomikosForDocs() {
+  const parts = readAstynomikosFields();
+  return {
+    ...parts,
+    rank: parts.rank || defaultAstynomikosParts.rank,
+    name: parts.name || defaultAstynomikosParts.name,
+  };
+}
+
+// True while neither the rank nor the name has been filled in, so the
+// documents are about to go out with the placeholders
+function astynomikosMissing() {
+  const { rank, name } = readAstynomikosFields();
+  return !rank && !name;
+}
+
+// Only one notification is on screen at a time, so the warning cannot be shown
+// before the download or the success message would bury it. The documents that
+// use the officer raise this flag on their way out and download() reports it
+// once the file is there, the way the bulk upload warns about a missing person.
+let officerPlaceholdersUsed = false;
+
+function flagAstynomikosMissing() {
+  if (astynomikosMissing()) officerPlaceholdersUsed = true;
+}
+
+function reportAstynomikosPlaceholders() {
+  if (!officerPlaceholdersUsed) return;
+  officerPlaceholdersUsed = false;
+  displayNotification(
+    "Προσοχή: η έκθεση κατέβηκε χωρίς στοιχεία αστυνομικού, με ΒΑΘΜΟΣ ΕΠΙΘΕΤΟ Όνομα.",
+    "warning",
+  );
+}
+
 function syncAstynomikosState() {
-  state.astynomikos = joinOfficerText(readAstynomikosFields());
+  state.astynomikos = joinOfficerText(astynomikosForDocs());
   state.astynomikosSex = astynomikosSex.value;
 }
 
@@ -472,12 +509,12 @@ function fillAstynomikosFields({ rank, name, details, sex, nameAit }) {
 }
 
 function resetAstynomikosFields() {
-  fillAstynomikosFields({ details: defaultAstynomikosDetails });
+  fillAstynomikosFields({ details: defaultAstynomikosParts.details });
 }
 
 // Short form for arrest/seizure documents, e.g. "Υ/Α ΠΑΠΑΣ Γεώργιος"
 function astynomikosShort() {
-  const { rank, name } = readAstynomikosFields();
+  const { rank, name } = astynomikosForDocs();
   return joinRankName(rank, name);
 }
 
@@ -486,6 +523,7 @@ function astynomikosShort() {
 function applyAstynomikosShort() {
   state.astynomShort = astynomikosShort();
   state.astynomShortAit = readAstynomikosFields().nameAit || state.astynomShort;
+  flagAstynomikosMissing();
 }
 
 // Parts for every saved officer, normalising legacy text-only entries so the
@@ -970,7 +1008,9 @@ const personLabel = (person) =>
 
 // Status line on the reports and ID tabs: who the documents will be filled
 // with, and the time the next ones continue from. Buttons whose required
-// person is missing are muted, but still clickable to show the error.
+// person is missing are muted, but still clickable to show the error. The
+// officer is only reported here, never muted: those reports download with
+// placeholders instead of failing.
 function renderStatus() {
   const { rank, name } = readAstynomikosFields();
   const values = {
@@ -1006,6 +1046,7 @@ async function download(
   const time = state.timeStart;
   const ok = await generateWord(ekthesi, replacements, person);
   if (ok && advances) state.timePassed += data.xronosPeratosis * 2;
+  if (ok) reportAstynomikosPlaceholders();
   refreshInitialText();
   renderStatus();
   if (ok) button.dataset.done = timed ? `✓ ${time}` : "✓";
@@ -1041,12 +1082,10 @@ martyraAstynomikos.addEventListener("click", (e) => {
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
   applyAllGrammar(state);
 
-  const officerName = readAstynomikosFields().name;
-  if (!officerName) {
-    displayNotification("Συμπληρώστε ονοματεπώνυμο αστυνομικού.", "error");
-    return;
-  }
-  const astynomikosData = { surname: officerName.split(" ")[0] };
+  flagAstynomikosMissing();
+  const astynomikosData = {
+    surname: astynomikosForDocs().name.split(" ")[0],
+  };
   download(e.currentTarget, ektheseis.astynomikos, astynomikosData, {
     timed: true,
   });
