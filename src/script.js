@@ -264,42 +264,33 @@ tabs.forEach((tab, index) => {
   });
 });
 
-//  victim / suspect select menus
-const victimSelect = document.getElementById("polVictim");
-if (victimSelect.value == "no") {
-  document.getElementById("taytotita").classList.add("hidden");
-  document.getElementById("dataForm").classList.remove("hidden");
-} else {
-  document.getElementById("taytotita").classList.remove("hidden");
-  document.getElementById("dataForm").classList.add("hidden");
+// victim / suspect entry mode: paste from POL, or type into the form
+function setupEntryMode(name, textareaId, formId) {
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  const apply = () => {
+    const manual =
+      document.querySelector(`input[name="${name}"]:checked`).value === "no";
+    document.getElementById(textareaId).classList.toggle("hidden", manual);
+    document.getElementById(formId).classList.toggle("hidden", !manual);
+  };
+  radios.forEach((radio) => radio.addEventListener("change", apply));
+  apply();
 }
-victimSelect.addEventListener("change", () => {
-  if (victimSelect.value == "no") {
-    document.getElementById("taytotita").classList.add("hidden");
-    document.getElementById("dataForm").classList.remove("hidden");
-  } else {
-    document.getElementById("taytotita").classList.remove("hidden");
-    document.getElementById("dataForm").classList.add("hidden");
-  }
-});
+setupEntryMode("polVictim", "taytotita", "dataForm");
+setupEntryMode("polSuspect", "taytotita-ypoptos", "dataForm-ypoptos");
 
-const suspectSelect = document.getElementById("polSuspect");
-if (suspectSelect.value == "no") {
-  document.getElementById("taytotita-ypoptos").classList.add("hidden");
-  document.getElementById("dataForm-ypoptos").classList.remove("hidden");
-} else {
-  document.getElementById("taytotita-ypoptos").classList.remove("hidden");
-  document.getElementById("dataForm-ypoptos").classList.add("hidden");
+// Διαγραφή only applies to an entry picked from its list
+function syncDeleteButtons() {
+  [
+    ["victims", "remove-victim"],
+    ["suspects", "remove-suspect"],
+    ["astynomikoi", "astynomikos-delete"],
+  ].forEach(([selectId, buttonId]) => {
+    document.getElementById(buttonId).disabled =
+      document.getElementById(selectId).value === "placeholder";
+  });
 }
-suspectSelect.addEventListener("change", () => {
-  if (suspectSelect.value == "no") {
-    document.getElementById("taytotita-ypoptos").classList.add("hidden");
-    document.getElementById("dataForm-ypoptos").classList.remove("hidden");
-  } else {
-    document.getElementById("taytotita-ypoptos").classList.remove("hidden");
-    document.getElementById("dataForm-ypoptos").classList.add("hidden");
-  }
-});
+
 // submit button event
 document.getElementById("submitForm").addEventListener("click", (event) => {
   event.preventDefault();
@@ -309,6 +300,7 @@ document.getElementById("submitForm").addEventListener("click", (event) => {
   state.victim = text;
   document.querySelector(".clipboard-id").value = text;
   document.getElementById("victims").value = "placeholder";
+  syncDeleteButtons();
 });
 // submit-ypoptos button event
 document
@@ -321,6 +313,7 @@ document
     state.suspect = text;
     document.querySelector(".clipboard-id-ypoptos").value = text;
     document.getElementById("suspects").value = "placeholder";
+    syncDeleteButtons();
   });
 
 //dilosi apoleias
@@ -432,6 +425,7 @@ taytotita.addEventListener("input", () => {
   state.victim = clipboardId.value;
   // a new paste is a new person, not the one picked from the list
   document.getElementById("victims").value = "placeholder";
+  syncDeleteButtons();
 });
 clipboardId.addEventListener("input", () => {
   state.victim = clipboardId.value;
@@ -549,6 +543,7 @@ const storeOfficerBtn = document.querySelector(".save-astynomikos");
 function updateOfficerSaveLabel() {
   storeOfficerBtn.textContent =
     astynomikosSelect.value === "placeholder" ? "Αποθήκευση" : "Ενημέρωση";
+  syncDeleteButtons();
 }
 storeOfficerBtn.addEventListener("click", () => {
   const parts = readAstynomikosFields();
@@ -671,6 +666,7 @@ taytotitaYpoptos.addEventListener("input", () => {
   );
   state.suspect = clipboardIdYpoptos.value;
   document.getElementById("suspects").value = "placeholder";
+  syncDeleteButtons();
 });
 
 clipboardIdYpoptos.addEventListener("input", () => {
@@ -716,11 +712,13 @@ addSuspect.addEventListener("click", () => {
   paintSuspectSelect();
   // the added suspect stays active, selected in the menu
   document.getElementById("suspects").value = String(state.suspects.length - 1);
+  syncDeleteButtons();
 });
 
 // suspect select menu functionality
 const suspectSelectMenu = document.getElementById("suspects");
 suspectSelectMenu.addEventListener("change", (e) => {
+  syncDeleteButtons();
   const clipboardSuspect = document.querySelector(".clipboard-id-ypoptos");
 
   if (e.target.value === "placeholder") {
@@ -748,6 +746,7 @@ suspectDelBtn.addEventListener("click", () => {
 
     // Re-draw the select menu so the name disappears
     paintSuspectSelect();
+    syncDeleteButtons();
     //clear values
     document.getElementById("person-ypoptos-clear").click();
 
@@ -906,11 +905,13 @@ addVictim.addEventListener("click", () => {
   paintVictimSelect();
   // the added victim stays active, selected in the menu
   document.getElementById("victims").value = String(state.victims.length - 1);
+  syncDeleteButtons();
 });
 
 // victim select menu functionality
 const victimSelectMenu = document.getElementById("victims");
 victimSelectMenu.addEventListener("change", (e) => {
+  syncDeleteButtons();
   if (e.target.value === "placeholder") {
     // clear values
     document.getElementById("person-clear").click();
@@ -935,6 +936,7 @@ victimDelBtn.addEventListener("click", () => {
 
     // Re-draw the select menu so the name disappears
     paintVictimSelect();
+    syncDeleteButtons();
     //clear values
     document.getElementById("person-clear").click();
 

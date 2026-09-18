@@ -159,11 +159,11 @@ const guides = {
         },
       },
       {
-        element: ".personsTab .anakritikoi",
+        element: ".personsTab .segmented",
         popover: {
           title: "7. Άτομο εκτός POL",
           description:
-            "Αν το άτομο δεν βρίσκεται στο POL (π.χ. αλλοδαπός υπήκοος), αλλάξτε την επιλογή σε «Όχι» για να καταχωρήσετε τα στοιχεία του χειροκίνητα.",
+            "Αν το άτομο δεν βρίσκεται στο POL (π.χ. αλλοδαπός υπήκοος), επιλέξτε «Χειροκίνητα» για να καταχωρήσετε τα στοιχεία του σε φόρμα.",
         },
       },
       {
@@ -175,7 +175,7 @@ const guides = {
         },
       },
       {
-        element: ".ektheseisTab .buttons p.helpBtn:first-child",
+        element: ".ektheseisTab .buttons button.helpBtn:first-child",
         popover: {
           title: "9. Λήψη Έκθεσης",
           description:

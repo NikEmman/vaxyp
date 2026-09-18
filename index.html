@@ -120,15 +120,28 @@
         <div class="tabTitle">
           <h3>Παθών</h3>
           <div class="anakritikoi">
-            <label for="polVictim">Άτομο από POL:</label>
-            <select name="polVictim" id="polVictim" class="smallSelect">
-              <option selected value="yes">Ναι</option>
-              <option value="no">Όχι</option>
-            </select>
+            <div
+              class="segmented"
+              role="radiogroup"
+              aria-label="Τρόπος καταχώρησης παθόντα"
+            >
+              <input type="radio" id="polVictim-yes" name="polVictim" value="yes" checked />
+              <label for="polVictim-yes">Επικόλληση από POL</label>
+              <input type="radio" id="polVictim-no" name="polVictim" value="no" />
+              <label for="polVictim-no">Χειροκίνητα</label>
+            </div>
             <label class="selectLabel" for="victims"> Επιλογή Παθόντα:</label>
             <select name="victims" id="victims">
               <option value="placeholder">Νέος Παθών</option>
             </select>
+            <button
+              class="deleteBtn"
+              id="remove-victim"
+              title="Αφαιρεί τον επιλεγμένο παθόντα από τη λίστα"
+              disabled
+            >
+              Διαγραφή
+            </button>
           </div>
         </div>
         <div class="person flex">
@@ -290,16 +303,9 @@
           </form>
 
           <div class="format">
-            <p class="helpBtn" id="person-help" title="Βοήθεια">?</p>
+            <button class="helpBtn" id="person-help" title="Βοήθεια">?</button>
             <p class="arrow">→</p>
             <button id="person-clear">Εκκαθάριση</button>
-            <button
-              class="deleteBtn"
-              id="remove-victim"
-              title="Αφαιρεί τον επιλεγμένο παθόντα από τη λίστα"
-            >
-              Διαγραφή
-            </button>
           </div>
           <textarea class="clipboard-id output"></textarea>
           <div class="format">
@@ -322,15 +328,28 @@
         <div class="tabTitle">
           <h3>Δράστης</h3>
           <div class="anakritikoi">
-            <label for="polSuspect">Άτομο από POL:</label>
-            <select name="polSuspect" id="polSuspect">
-              <option selected value="yes">Ναι</option>
-              <option value="no">Όχι</option>
-            </select>
+            <div
+              class="segmented"
+              role="radiogroup"
+              aria-label="Τρόπος καταχώρησης δράστη"
+            >
+              <input type="radio" id="polSuspect-yes" name="polSuspect" value="yes" checked />
+              <label for="polSuspect-yes">Επικόλληση από POL</label>
+              <input type="radio" id="polSuspect-no" name="polSuspect" value="no" />
+              <label for="polSuspect-no">Χειροκίνητα</label>
+            </div>
             <label class="selectLabel" for="suspects"> Επιλογή Δράστη:</label>
             <select name="suspects" id="suspects">
               <option value="placeholder">Νέος Δράστης</option>
             </select>
+            <button
+              class="deleteBtn"
+              id="remove-suspect"
+              title="Αφαιρεί τον επιλεγμένο δράστη από τη λίστα"
+              disabled
+            >
+              Διαγραφή
+            </button>
           </div>
         </div>
 
@@ -498,13 +517,6 @@
           <div class="format">
             <p class="arrow">→</p>
             <button id="person-ypoptos-clear">Εκκαθάριση</button>
-            <button
-              class="deleteBtn"
-              id="remove-suspect"
-              title="Αφαιρεί τον επιλεγμένο δράστη από τη λίστα"
-            >
-              Διαγραφή
-            </button>
           </div>
           <textarea class="clipboard-id-ypoptos output"></textarea>
           <div class="format">
@@ -540,7 +552,13 @@
             >
               ✎ Επεξεργασία
             </button>
-            <p class="helpBtn" id="astynomikos-help" title="Βοήθεια">?</p>
+            <button
+              class="helpBtn"
+              id="astynomikos-help"
+              title="Βοήθεια"
+            >
+              ?
+            </button>
           </div>
         </div>
         <div class="person flex officerBody hidden" id="astynomikos-body">
@@ -586,6 +604,7 @@
               class="deleteBtn"
               id="astynomikos-delete"
               title="Αφαιρεί τον επιλεγμένο αστυνομικό από τη λίστα και τη μνήμη"
+              disabled
             >
               Διαγραφή
             </button>
@@ -600,7 +619,7 @@
             placeholder="Αντέγραψε στοιχεία οχήματος και βάλτα εδώ"
           ></textarea>
           <div class="format">
-            <p class="helpBtn" id="vehicle-help" title="Βοήθεια">?</p>
+            <button class="helpBtn" id="vehicle-help" title="Βοήθεια">?</button>
             <p class="arrow">→</p>
             <button id="vehicle-clear">Εκκαθάριση</button>
           </div>
@@ -629,83 +648,155 @@
         
         <p>Με χρήση του πεδίου Παθών</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="martyra" data-person="victim">
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="martyra"
+            data-person="victim"
+          >
             Ένορκη Μάρτυρα
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="martyraDierm" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="martyraDierm"
+            data-person="victim"
+          >
             Ένορκη με Διερμ.
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="martyra-astynomikos" data-person="officer">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="martyra-astynomikos"
+            data-person="officer"
+          >
             Ένορκη Αστυνομικού
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="martyraXoris">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="martyraXoris"
+            data-person="victim"
+          >
             Μάρτυρα Χωρίς Όρκο
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="katasxesi" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="katasxesi"
+            data-person="victim"
+          >
             Παράδ & Κατάσχ
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="apodosi" data-person="victim">Απόδοσης</p>
-          <p class="helpBtn large dikografiesHiddable" id="egxeirisis" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="apodosi"
+            data-person="victim"
+          >
+            Απόδοσης
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="egxeirisis"
+            data-person="victim"
+          >
             Έκθεση Εγχείρησης
-          </p>
+          </button>
         </div>
         <hr />
         <p>Με χρήση του πεδίου Δράστης</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="syllipsi" data-person="suspect">
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="syllipsi"
+            data-person="suspect"
+          >
             Σύλληψης
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="gnostopoiisi" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="gnostopoiisi"
+            data-person="suspect"
+          >
             Γνωστοποίηση Δικ.
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="katigoroumenou" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="katigoroumenou"
+            data-person="suspect"
+          >
             Απολογίας
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="katigoroumenouDierm" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="katigoroumenouDierm"
+            data-person="suspect"
+          >
             Απολογία με Διερμ.
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="anomoti" data-person="suspect">Ανωμοτί</p>
-          <p class="helpBtn large dikografiesHiddable" id="praktikoZygisis" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="anomoti"
+            data-person="suspect"
+          >
+            Ανωμοτί
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="praktikoZygisis"
+            data-person="suspect"
+          >
             Πρακτικό Ζύγισης
-          </p>
-          <p
+          </button>
+          <button
             class="helpBtn large dikografiesHiddable"
             id="gnostopoiisiNarkwtikwn"
             data-person="suspect"
           >
             Γνωστοποίηση Ναρκ. Ουσιών
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="ypoptoy" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="ypoptoy"
+            data-person="suspect"
+          >
             Δελτίο Υπόπτου
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="feromenou" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="feromenou"
+            data-person="suspect"
+          >
             Δελτίο Φερομένου (Δακτυλικά)
-          </p>
+          </button>
         </div>
 
         <hr />
         <p>Ενδοοικογενειακή</p>
         <div class="buttons">
-          <p class="helpBtn large dikografiesHiddable" id="martyra-endooik" data-person="victim">
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="martyra-endooik"
+            data-person="victim"
+          >
             Ένορκη Αστυνομικού Ενδο.
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="thyma-endooik" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="thyma-endooik"
+            data-person="victim"
+          >
             Χωρίς Όρκο Θύμα
-          </p>
-          <p
+          </button>
+          <button
             class="helpBtn large dikografiesHiddable"
             id="iatrodikastiki-endooik"
             data-person="suspect"
           >
             Ιατροδικαστική
-          </p>
-          <p
+          </button>
+          <button
             class="helpBtn large dikografiesHiddable"
             id="panicBtn"
             data-person="victim"
           >
             Panic Button
-          </p>
+          </button>
           <fieldset class="dikografiesHiddable" id="panicEndo">
             <legend>Θέλει Panic Button:</legend>
             <div>
@@ -717,23 +808,55 @@
               <label for="panicOxi">Όχι</label>
             </div>
           </fieldset>
-          <p class="helpBtn large dikografiesHiddable" id="domi" data-person="victim">Δομή</p>
-          <p class="helpBtn large dikografiesHiddable" id="syllipsiEndo" data-person="suspect">
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="domi"
+            data-person="victim"
+          >
+            Δομή
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="syllipsiEndo"
+            data-person="suspect"
+          >
             Σύλληψης
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="afairesi" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="afairesi"
+            data-person="suspect"
+          >
             Έκθεση Αφαίρεσης
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="katasxesiEndo" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="katasxesiEndo"
+            data-person="victim"
+          >
             Παράδ & Κατάσχ
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="drastis-endooik" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="drastis-endooik"
+            data-person="suspect"
+          >
             Απολογίας
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="ypoptoyEndo" data-person="suspect">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="ypoptoyEndo"
+            data-person="suspect"
+          >
             Δελτίο Στοιχείων
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="simansi" data-person="suspect">Γ.Ε.Ε.</p>
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="simansi"
+            data-person="suspect"
+          >
+            Γ.Ε.Ε.
+          </button>
           <fieldset class="endoOptions dikografiesHiddable" id="endoOptions">
             <legend>Στοιχεία για ΒΑΣ, Υποβολή και Αποστολή</legend>
             <fieldset class="dikografiesHiddable" id="dioksiEndo">
@@ -883,13 +1006,27 @@
               <input type="text" id="protokoloEndo" />
             </div>
           </fieldset>
-          <p class="helpBtn large dikografiesHiddable" id="vasEndo" data-person="suspect">ΒΑΣ</p>
-          <p class="helpBtn large dikografiesHiddable" id="ypovoliEndo" data-person="victim">
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="vasEndo"
+            data-person="suspect"
+          >
+            ΒΑΣ
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="ypovoliEndo"
+            data-person="victim"
+          >
             Υποβολή προανακριτικού
-          </p>
-          <p class="helpBtn large dikografiesHiddable" id="apostoliEndo" data-person="victim">
+          </button>
+          <button
+            class="helpBtn large dikografiesHiddable"
+            id="apostoliEndo"
+            data-person="victim"
+          >
             Αποστολή συνοδείας
-          </p>
+          </button>
         </div>
         <hr>
         <p>Με Εκθέσεις-πρότυπα χρήστη</p>
@@ -905,58 +1042,100 @@
             >Επιλέξτε αρχεία .docx:</label
           >
           <input type="file" id="docx-file-input" accept=".docx" multiple />
-          <p class="helpBtn" id="docx-help" title="Βοήθεια">?</p>
+          <button class="helpBtn" id="docx-help" title="Βοήθεια">?</button>
         </div>
       </div>
       <div class="ypiresiakoTab hidden">
         <div class="data">
-          <div class="flex">
-            <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
-            <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
-            <div class="protokolo-container">
-              <label for="protokolo">3005/4/</label>
-              <input type="text" id="protokolo" />
-            </div>
-            <textarea
-              class="input"
-              id="apolesthen"
-              placeholder="Απωλεσθέντα"
-            ></textarea>
-            <p class="helpBtn large" id="ypiresiako" data-person="victim">Υπηρεσιακό Σημείωμα</p>
-            <p class="helpBtn large" id="ypefthini" data-person="victim">Υπεύθυνη Δήλωση</p>
+          <div class="statusLine">
+            <span>Με στοιχεία Παθόντα: <strong data-status="victim"></strong></span>
           </div>
-          <hr />
-          <p>Έκδοση Ταυτότητας</p>
-          <div class="buttons">
-            <div>
-              <label for="newId">Νέος αριθμός Δ.Τ.</label>
-              <input id="newId" type="text" placeholder="A01982834" />
+          <p hidden id="ypiresiako-title">Υπηρεσιακό Σημείωμα</p>
+          <p hidden id="ypefthini-title">Υπεύθυνη Δήλωση</p>
+          <section class="idCard">
+            <h3>Δήλωση απώλειας</h3>
+            <div class="idCardBody">
+              <div class="idCardInputs">
+                <div class="protokolo-container">
+                  <label for="protokolo">Αρ. πρωτοκόλλου 3005/4/</label>
+                  <input type="text" id="protokolo" />
+                </div>
+                <textarea
+                  class="input"
+                  id="apolesthen"
+                  placeholder="Απωλεσθέντα"
+                ></textarea>
+              </div>
+              <div class="idCardActions">
+                <button
+                  class="helpBtn large"
+                  id="ypiresiako"
+                  data-person="victim"
+                >
+                  Υπηρεσιακό Σημείωμα
+                </button>
+                <button
+                  class="helpBtn large"
+                  id="ypefthini"
+                  data-person="victim"
+                >
+                  Υπεύθυνη Δήλωση
+                </button>
+              </div>
             </div>
-            <select id="n" name="reason">
-              <option value="1">1. ΑΠΩΛΕΙΑ</option>
-              <option value="2">2. ΚΛΟΠΗ</option>
-              <option value="3">3. ΦΘΟΡΑ</option>
-              <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
-              <option selected value="5">
-                5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.
-              </option>
-              <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
-              <option value="7">
-                7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
-              </option>
-              <option value="8">8. ΑΠΟΒΟΛΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-              <option value="9">9. ΑΠΟΠΟΙΗΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-              <option value="10">10. ΕΚΠΤΩΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
-              <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
-              <option value="12">12. ΘΑΝΑΤΟΣ</option>
-            </select>
-            <div class="changeDate hidden">
-              <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
-              <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+          </section>
+          <section class="idCard">
+            <h3>Έκδοση Ταυτότητας</h3>
+            <div class="idCardBody">
+              <div class="idCardInputs">
+                <div>
+                  <label for="newId">Νέος αριθμός Δ.Τ.</label>
+                  <input id="newId" type="text" placeholder="A01982834" />
+                </div>
+                <div>
+                  <label for="n">Λόγος έκδοσης</label>
+              <select id="n" name="reason">
+                <option value="1">1. ΑΠΩΛΕΙΑ</option>
+                <option value="2">2. ΚΛΟΠΗ</option>
+                <option value="3">3. ΦΘΟΡΑ</option>
+                <option value="4">4. ΜΕΤΑΒΟΛΗ ΣΤΟΙΧΕΙΩΝ</option>
+                <option selected value="5">
+                  5. ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΠΑΛΑΙΟΥ ΤΥΠΟΥ Δ.Τ.
+                </option>
+                <option value="6">6. ΛΗΞΗ ΙΣΧΥΟΣ Δ.Τ.</option>
+                <option value="7">
+                  7. ΚΑΤΑΤΑΞΗ ΣΕ ΕΝΟΠΛΕΣ ΔΥΝΑΜΕΙΣ ΚΑΙ ΣΩΜΑΤΑ ΑΣΦΑΛΕΙΑΣ
+                </option>
+                <option value="8">8. ΑΠΟΒΟΛΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+                <option value="9">9. ΑΠΟΠΟΙΗΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+                <option value="10">10. ΕΚΠΤΩΣΗ ΙΘΑΓΕΝΕΙΑΣ</option>
+                <option value="11">11. ΚΑΤΑΣΧΕΣΗ - ΔΗΜΕΥΣΗ</option>
+                <option value="12">12. ΘΑΝΑΤΟΣ</option>
+              </select>
+                </div>
+                <div class="changeDate hidden">
+                  <label for="newIdAppDate">Ημερομηνία ακύρωσης</label>
+                  <input id="newIdAppDate" type="text" placeholder="22/07/2025" />
+                </div>
+              </div>
+              <div class="idCardActions">
+                <button
+                  class="helpBtn large"
+                  id="a130"
+                  data-person="victim"
+                >
+                  Α 130-2
+                </button>
+                <button
+                  class="helpBtn large"
+                  id="ypefthiniDAT"
+                  data-person="victim"
+                >
+                  Υ/Δ Απώλειας ΔΑΤ
+                </button>
+              </div>
             </div>
-            <p class="helpBtn large" id="a130" data-person="victim">Α 130-2</p>
-            <p class="helpBtn large" id="ypefthiniDAT" data-person="victim">Υ/Δ Απώλειας ΔΑΤ</p>
-          </div>
+          </section>
         </div>
       </div>
     </div>
@@ -1099,6 +1278,11 @@
       <div class="container">
         <p class="closeModal" id="patch-close">&times;</p>
         <ul>
+          <u>Αλλαγές 16-09-2026</u>
+          <li>Προστέθηκε δυνατότητα εισαγωγής και προσωρινής αποθήκευσης πολλαπλών παθόντων, όπως ήδη ίσχυε για τους δράστες</li>
+        </ul>
+        <hr />
+        <ul>
           <u>Αλλαγές 14-09-2026</u>
           <li>Διορθώθηκε σφάλμα όπου σε συνεχόμενες εκθέσεις η ώρα δεν προχωρούσε και η ώρα έναρξης ήταν ίδια με τη λήξη</li>
           <li>Στη Φόρμα, ο βαθμός και το ονοματεπώνυμο των Ανακριτικών συμπληρώνονται πλέον σε ξεχωριστά πεδία, ώστε να υποστηρίζονται πλήρεις βαθμοί (π.χ. Υπαστυνόμος Α'), διπλά επώνυμα και ονόματα</li>
@@ -1106,11 +1290,6 @@
           <li>Στον Αστυνομικό προστέθηκαν φύλο, για σωστά άρθρα στις εκθέσεις Σύλληψης, Κατάσχεσης και Απόδοσης (ο/η, τον/την), και προαιρετική αιτιατική για τις εκθέσεις Σύλληψης («από τον Υ/Α' ΠΑΠΑΔΟΠΟΥΛΟ Νικόλαο»)</li>
           <li>Νέες λέξεις κλειδιά για πρότυπα χρήστη: {astynomShort}, {astynomShortAit} και λέξεις φύλου αστυνομικού ({oAS}, {tonAS} κτλ)</li>
           <li><strong>Προσοχή:</strong> για ήδη αποθηκευμένους ανακριτικούς και αστυνομικούς, ελέγξτε μία φορά ότι ο βαθμός χωρίστηκε σωστά και αποθηκεύστε. Οι αποθηκευμένοι αστυνομικοί θεωρούνται άντρες μέχρι να οριστεί φύλο</li>
-        </ul>
-        <hr />
-        <ul>
-          <u>Αλλαγές 16-09-2026</u>
-          <li>Προστέθηκε δυνατότητα εισαγωγής και προσωρινής αποθήκευσης πολλαπλών παθόντων, όπως ήδη ίσχυε για τους δράστες</li>
         </ul>
         <hr />
         <ul>
@@ -1182,6 +1361,7 @@
           <u>Αλλαγές 12-01-2026</u>
           <li>Οι ανακριτικοί διαλέγουν φύλο για να περαστεί στις εκθέσεις</li>
         </ul>
+        <hr />
         <ul>
           <u>Αλλαγές 08-01-2026</u>
           <li>
@@ -1293,10 +1473,6 @@
             Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται
             ανανέωση σελίδας
           </li>
-          <li>
-            Προστέθηκε κουμπί για την ανανέωση της ώρας χωρίς να χρειάζεται
-            ανανέωση σελίδας
-          </li>
           <li>Άλλαξε μορφή η ανωμοτί, πλέον με 2 υπογραφές</li>
         </ul>
         <hr />
@@ -1365,39 +1541,6 @@
           <u>Αλλαγές 21-3-2025</u>
           <li>
             Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.
-          </li>
-        </ul>
-        <hr />
-        <ul>
-          <u>Αλλαγές 28-2-2025</u>
-          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
-          <li>
-            Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές
-            περνάνε και στις εκθέσεις
-          </li>
-          <li>
-            Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από
-            χαρτογράφηση
-          </li>
-        </ul>
-        <hr />
-        <ul>
-          <u>Αλλαγές 21-3-2025</u>
-          <li>
-            Αλλαγή μορφής Εκθέσεων, το word που κατεβαίνει είναι πιο όμορφο.
-          </li>
-        </ul>
-        <hr />
-        <ul>
-          <u>Αλλαγές 28-2-2025</u>
-          <li>Προσθήκη Έκθεσης Εγχείρησης</li>
-          <li>
-            Πλέον το φορμαρισμένο κείμενο ατόμου είναι επεξεργάσιμο, οι αλλαγές
-            περνάνε και στις εκθέσεις
-          </li>
-          <li>
-            Τα πεδία μετατροπής ατόμων, μετατρέπουν πλέον αλλδοαπούς από
-            χαρτογράφηση
           </li>
         </ul>
         <hr />

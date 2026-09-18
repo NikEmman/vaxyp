@@ -776,6 +776,7 @@ input[type="file"]::file-selector-button:active {
 button:disabled,
 .button:disabled {
   background-color: var(--disabled);
+  cursor: not-allowed;
   &:active {
     transform: none;
   }
@@ -803,6 +804,16 @@ button:disabled,
   max-width: 200px;
   padding: 0.6em 1.2em;
   height: 50px;
+}
+
+/* Report and help buttons were <p> elements; keep their text size */
+.tabContent button.helpBtn {
+  font: inherit;
+  font-weight: bold;
+}
+
+.tabContent button.helpBtn:not(.large) {
+  padding: 0;
 }
 
 .helpBtn:hover {
@@ -833,6 +844,96 @@ button:disabled,
 
 .format button {
   min-width: 120px;
+}
+
+/* the ? help button keeps its small square shape */
+.format button.helpBtn:not(.large) {
+  min-width: 0;
+  width: 1.8em;
+  height: 1.8em;
+}
+
+/* Entry mode switch: paste from POL or type into the form */
+.anakritikoi .segmented {
+  display: inline-flex;
+  flex-direction: row;
+  width: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.anakritikoi .segmented label {
+  margin: 0;
+  padding: 0.35em 0.9em;
+  cursor: pointer;
+  color: var(--label-color);
+  background-color: var(--background-white);
+}
+
+.anakritikoi .segmented input:checked + label {
+  background-color: var(--secondary-blue);
+  color: #ffffff;
+}
+
+.segmented input:focus-visible + label {
+  outline: 2px solid var(--secondary-blue);
+  outline-offset: -2px;
+}
+
+/* Ταυτότητες / Απώλειες: each document group with its own inputs */
+.idCard {
+  padding: 1em;
+  margin-bottom: 1em;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.idCard h3 {
+  margin-bottom: 0.6em;
+  color: var(--label-color);
+}
+
+.idCardBody {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1em 2em;
+}
+
+.idCardInputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1em;
+  flex: 1 1 400px;
+}
+
+.idCardInputs > div:not(.protokolo-container) {
+  display: flex;
+  flex-direction: column;
+}
+
+.idCardInputs .protokolo-container {
+  margin-bottom: 0;
+}
+
+.idCardInputs .input {
+  width: 100%;
+  height: 6em;
+}
+
+.idCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
 }
 
 /* Who the documents on this tab are filled with, and the running time */
