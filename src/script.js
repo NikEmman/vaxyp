@@ -990,16 +990,22 @@ function renderStatus() {
 }
 renderStatus();
 
-// Shared by the report buttons: after the download, the top text and status
-// follow the new time, and the button gets a "✓ time" mark until ⟳
+// Shared by the report buttons: every report is written in the slot the clock
+// currently points at, and only moves the clock on once it has been produced.
+// That way whichever report is drafted first starts at the reference time, and
+// a failed download does not eat a slot. Reports that carry no timestamp of
+// their own pass advances: false, so they never push the clock.
+// After the download the top text and status follow the new time, and the
+// button gets a "✓ time" mark until ⟳
 async function download(
   button,
   ekthesi,
   person,
-  { timed = false, replacements = state } = {},
+  { timed = false, advances = timed, replacements = state } = {},
 ) {
   const time = state.timeStart;
   const ok = await generateWord(ekthesi, replacements, person);
+  if (ok && advances) state.timePassed += data.xronosPeratosis * 2;
   refreshInitialText();
   renderStatus();
   if (ok) button.dataset.done = timed ? `✓ ${time}` : "✓";
@@ -1049,7 +1055,6 @@ martyraAstynomikos.addEventListener("click", (e) => {
 // martyraXorisOrko button
 const martyraXoris = document.getElementById("martyraXoris");
 martyraXoris.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1062,7 +1067,6 @@ martyraXoris.addEventListener("click", (e) => {
 //syllipsi button
 const syllipsi = document.getElementById("syllipsi");
 syllipsi.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1077,7 +1081,6 @@ syllipsi.addEventListener("click", (e) => {
 // anomoti button
 const anomoti = document.getElementById("anomoti");
 anomoti.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1090,7 +1093,6 @@ anomoti.addEventListener("click", (e) => {
 // katigoroumenou button
 const katigoroumenou = document.getElementById("katigoroumenou");
 katigoroumenou.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1103,7 +1105,6 @@ katigoroumenou.addEventListener("click", (e) => {
 // katigoroumenou me dierminea button
 const katigoroumenouDierm = document.getElementById("katigoroumenouDierm");
 katigoroumenouDierm.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1117,7 +1118,6 @@ katigoroumenouDierm.addEventListener("click", (e) => {
 //apodosi button
 const apodosi = document.getElementById("apodosi");
 apodosi.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1131,7 +1131,6 @@ apodosi.addEventListener("click", (e) => {
 // katasxesi button
 const katasxesi = document.getElementById("katasxesi");
 katasxesi.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1146,7 +1145,6 @@ katasxesi.addEventListener("click", (e) => {
 // gnostopoiisi button
 const gnostopoiisi = document.getElementById("gnostopoiisi");
 gnostopoiisi.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1160,7 +1158,6 @@ gnostopoiisi.addEventListener("click", (e) => {
 // egxeirisis button  printEgxeirisis(initial, person)
 const egxeirisis = document.getElementById("egxeirisis");
 egxeirisis.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1175,7 +1172,6 @@ const gnostopoiisiNarkwtikwn = document.getElementById(
   "gnostopoiisiNarkwtikwn",
 );
 gnostopoiisiNarkwtikwn.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1192,7 +1188,6 @@ gnostopoiisiNarkwtikwn.addEventListener("click", (e) => {
 // praktikoZygisis button
 const praktikoZygisis = document.getElementById("praktikoZygisis");
 praktikoZygisis.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1213,6 +1208,7 @@ ypiresiako.addEventListener("click", (e) => {
   // only this document uses the shortened person, so state keeps the full text
   download(e.currentTarget, ektheseis.ypiresiako, state.victimData, {
     timed: true,
+    advances: false, // no timestamp inside, so it does not take up a slot
     replacements: { ...state, victim: shortenFormattedPerson(state.victim) },
   });
 });
@@ -1247,6 +1243,7 @@ feromenou.addEventListener("click", (e) => {
   state.ypiresia = state.ypiresia.toUpperCase();
   download(e.currentTarget, ektheseis.feromenou, state.ypoptosData, {
     timed: true,
+    advances: false, // no timestamp inside, so it does not take up a slot
   });
 });
 
@@ -1267,7 +1264,6 @@ martyraEndooik.addEventListener("click", (e) => {
 // thyma endooik button
 const thymaEndooik = document.getElementById("thyma-endooik");
 thymaEndooik.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.autoforoTimeStart = state.timeStart;
@@ -1282,7 +1278,6 @@ thymaEndooik.addEventListener("click", (e) => {
 // drastis -apologia -katigoroumenos endooik button
 const drastisEndooik = document.getElementById("drastis-endooik");
 drastisEndooik.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1297,7 +1292,6 @@ drastisEndooik.addEventListener("click", (e) => {
 // iatrodikastiki button
 const iatrodikastiki = document.getElementById("iatrodikastiki-endooik");
 iatrodikastiki.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1321,7 +1315,6 @@ readPanicChoice();
 
 const panicBtn = document.getElementById("panicBtn");
 panicBtn.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.ypiresia = state.ypiresia.toUpperCase();
   state.timeStart = formatTime(today, state.timePassed);
   readPanicChoice();
@@ -1343,7 +1336,6 @@ domi.addEventListener("click", (e) => {
 //afairesi button
 const afairesi = document.getElementById("afairesi");
 afairesi.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1357,7 +1349,6 @@ afairesi.addEventListener("click", (e) => {
 // katasxesiEndo button
 const katasxesiEndo = document.getElementById("katasxesiEndo");
 katasxesiEndo.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1372,7 +1363,6 @@ katasxesiEndo.addEventListener("click", (e) => {
 //syllipsi button
 const syllipsiEndo = document.getElementById("syllipsiEndo");
 syllipsiEndo.addEventListener("click", (e) => {
-  state.timePassed += data.xronosPeratosis * 2;
   state.initial = constructInitialText();
   state.timeStart = formatTime(today, state.timePassed);
   state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
@@ -1538,25 +1528,50 @@ document
   .addEventListener("change", handleDocxUpload);
 
 //PATCH NOTES EFFECT
-// Check if latest patch note is within 2 weeks
-const patchDateText = document.querySelector("#patch-dialog u").textContent;
-const dateMatch = patchDateText.match(/Αλλαγές (\d{2})-(\d{2})-(\d{4})/);
-if (dateMatch) {
-  const patchDate = new Date(dateMatch[3], dateMatch[2] - 1, dateMatch[1]);
-  const today = new Date();
-  const diffDays = Math.floor((today - patchDate) / (1000 * 60 * 60 * 24));
+// Which entries the user has not read yet. Each entry carries a sortable
+// data-date, so nothing here depends on the Greek heading or on the entries
+// staying in order. The date of the newest entry is stored once the dialog is
+// closed, and everything after it counts as unread. A fresh install has
+// nothing stored, so there the last two weeks count as unread instead -
+// otherwise a first run would flag the whole history.
+const PATCH_SEEN_KEY = "patchSeen";
+const patchEntries = Array.from(
+  document.querySelectorAll("#patch-dialog [data-date]"),
+);
+const patchDates = patchEntries.map((entry) => entry.dataset.date);
+const newestPatch = patchDates.slice().sort().pop();
+const lastSeenPatch = localStorage.getItem(PATCH_SEEN_KEY);
+const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+  .toISOString()
+  .slice(0, 10);
+const unseenPatch = (date) =>
+  lastSeenPatch ? date > lastSeenPatch : date > twoWeeksAgo;
 
-  if (diffDays <= 14) {
-    // the help toggle is what's visible on wide screens, the item on narrow
-    const whatsNewBtns = [helpMenuToggle, document.getElementById("patch-help")];
-    whatsNewBtns.forEach((btn) => btn.classList.add("glow-new"));
+const unseenEntries = patchEntries.filter((entry) =>
+  unseenPatch(entry.dataset.date),
+);
+unseenEntries.forEach((entry) => entry.classList.add("patch-unseen"));
 
-    // Remove animation after 15 seconds
-    setTimeout(() => {
-      whatsNewBtns.forEach((btn) => btn.classList.remove("glow-new"));
-    }, 15000);
-  }
+// An unread entry buried in the archive is worth opening it for
+const patchArchive = document.getElementById("patch-archive");
+if (patchArchive && unseenEntries.some((entry) => patchArchive.contains(entry)))
+  patchArchive.open = true;
+
+if (unseenEntries.length) {
+  // the help toggle is what's visible on wide screens, the item on narrow
+  const whatsNewBtns = [helpMenuToggle, document.getElementById("patch-help")];
+  whatsNewBtns.forEach((btn) => btn.classList.add("glow-new"));
+
+  // Remove animation after 15 seconds
+  setTimeout(() => {
+    whatsNewBtns.forEach((btn) => btn.classList.remove("glow-new"));
+  }, 15000);
 }
+
+// Reading the notes marks them read, however the dialog was dismissed
+patchDialog.addEventListener("close", () => {
+  if (newestPatch) localStorage.setItem(PATCH_SEEN_KEY, newestPatch);
+});
 
 // Sketcher badge: same glow treatment as patch notes ("BETA" instead of
 // "ΝΕΟ"), but permanent — never removed, unlike the patch-notes glow.

@@ -1098,6 +1098,61 @@ dialog h3 {
   overflow-y: auto;
 }
 
+/* Patch notes: the recent entries are shown, the rest sit behind one toggle so
+   the dialog opens on what changed lately instead of on 19 months of history */
+#patch-archive > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--primary-blue);
+  padding: 0.6em 0.9em;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  user-select: none;
+}
+#patch-archive > summary::-webkit-details-marker {
+  display: none;
+}
+#patch-archive > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.5em;
+  transition: transform 0.15s ease;
+}
+#patch-archive[open] > summary::before {
+  transform: rotate(90deg);
+}
+#patch-archive > summary:hover {
+  background: var(--light-blue);
+  border-color: var(--secondary-blue);
+}
+#patch-archive[open] > summary {
+  margin-bottom: 2em;
+}
+/* the container's flex gap does not reach inside the details, so the archived
+   entries space themselves off their separators */
+#patch-archive > hr {
+  margin: 2em 0;
+}
+
+/* Entries the user has not read yet, so the newest ones stand out from the
+   two that are kept on screen for context */
+.patch-unseen > u::after {
+  content: "ΝΕΟ";
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.6em;
+  background: #ff4d4d;
+  color: #fff;
+  font-size: 0.6em;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
 .container img {
   width: 70%;
   max-width: 800px;
