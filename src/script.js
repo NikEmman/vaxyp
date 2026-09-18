@@ -1210,9 +1210,10 @@ ypiresiako.addEventListener("click", (e) => {
   state.ypiresia = state.ypiresia.toUpperCase();
   state.dAstynomias = state.dAstynomias.toUpperCase();
   state.geniki = state.geniki.toUpperCase();
-  state.victim = shortenFormattedPerson(state.victim);
+  // only this document uses the shortened person, so state keeps the full text
   download(e.currentTarget, ektheseis.ypiresiako, state.victimData, {
     timed: true,
+    replacements: { ...state, victim: shortenFormattedPerson(state.victim) },
   });
 });
 // ypefthini button
