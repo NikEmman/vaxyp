@@ -6,145 +6,99 @@
     <link rel="stylesheet" href="../../style.css" />
     <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
     <title>Συμπίεση PDF</title>
+    <link rel="stylesheet" href="../tools.css" />
     <style>
-      body { position: static; }
-      .upload-zone {
-        border: 2px dashed var(--border-color);
-        border-radius: 12px;
-        background: var(--background-white);
-        padding: 3.5em 2em;
-        text-align: center;
-        cursor: pointer;
-        transition: border-color 0.2s, background 0.2s;
-        margin-bottom: 1.5em;
-      }
-      .upload-zone.drag-over { border-color: var(--secondary-blue); background: var(--light-blue); }
-      .upload-zone svg {
-        width: 52px; height: 52px;
-        stroke: var(--secondary-blue); fill: none;
-        stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
-        display: block; margin: 0 auto 0.6em;
-      }
-      .upload-zone h2 { font-size: 1.15em; color: var(--primary-blue); margin-bottom: 0.3em; }
-      .upload-zone p  { font-size: 0.9em; color: var(--text-dark); opacity: 0.6; }
-      #file-input { display: none; }
-
-      .spinner {
-        width: 44px; height: 44px;
-        border: 4px solid var(--border-color);
-        border-top-color: var(--secondary-blue);
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        margin: 3em auto 1em;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      #loading-msg { text-align: center; color: var(--text-dark); opacity: 0.65; font-size: 0.95em; }
-
-      /* ── Toolbar ──────────────────────────────────────────────── */
-      .toolbar {
-        display: flex; align-items: center; gap: 0.8em; flex-wrap: wrap;
-        background: var(--background-white);
-        border: 1px solid var(--border-color);
-        border-radius: 8px; padding: 0.75em 1.2em;
-        margin-bottom: 1.2em;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      }
-      .toolbar .file-info {
-        font-weight: 600; color: var(--primary-blue);
-        flex: 1; min-width: 0;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      #file-size { font-size: 0.88em; color: var(--text-dark); opacity: 0.65; white-space: nowrap; }
-
-      /* ── Options panel ────────────────────────────────────────── */
-      .options-panel {
-        display: flex; align-items: center; gap: 1.5em; flex-wrap: wrap;
-        background: var(--background-white);
-        border: 1px solid var(--border-color);
-        border-radius: 8px; padding: 0.8em 1.2em;
-        margin-bottom: 1.2em;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      }
-      .option-group { display: flex; align-items: center; gap: 0.5em; }
-      .option-group label { font-size: 0.85em; font-weight: 600; color: var(--label-color); white-space: nowrap; }
-      .toggle-group { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
-      .toggle-btn {
-        padding: 0.4em 1em;
-        background: var(--background-white);
-        color: var(--text-dark);
-        border: none; border-radius: 0;
-        font-size: 0.85em; font-weight: 600;
-        cursor: pointer; transition: background 0.15s, color 0.15s;
-      }
-      .toggle-btn:not(:last-child) { border-right: 1px solid var(--border-color); }
-      .toggle-btn.active { background: var(--secondary-blue); color: #fff; }
-      .toggle-btn:hover:not(.active) { background: var(--light-blue); }
-      .options-hint { font-size: 0.82em; color: var(--text-dark); opacity: 0.55; }
-
-      /* ── Result banner ────────────────────────────────────────── */
-      #result-banner {
-        display: flex; align-items: center; gap: 1.2em; flex-wrap: wrap;
-        background: var(--light-blue);
-        border: 1px solid var(--secondary-blue);
-        border-radius: 8px; padding: 0.9em 1.2em;
-        margin-bottom: 1.2em;
-      }
-      #result-banner.hidden { display: none; }
-      #result-banner.warn { background: rgba(220, 90, 60, 0.08); border-color: var(--error-red, #c0392b); }
-      #result-banner .sizes { flex: 1; min-width: 0; font-size: 0.92em; color: var(--text-dark); }
-      #result-banner .sizes strong { color: var(--primary-blue); }
-      #result-banner .pct { font-weight: 700; }
-      #result-banner .pct.good { color: #1a8a4a; }
-      #result-banner .pct.bad  { color: var(--error-red, #c0392b); }
-
-      /* ── Page grid (preview only) ─────────────────────────────── */
-      .page-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      .doc-summary {
+        display: flex;
+        align-items: center;
         gap: 1em;
-        padding-bottom: 7em;
-      }
-      .page-card {
         background: var(--background-white);
         border: 1px solid var(--border-color);
         border-radius: 8px;
-        padding: 0.5em 0.5em 0.4em;
-        display: flex; flex-direction: column; align-items: center; gap: 0.4em;
-        user-select: none;
+        padding: 0.9em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
       }
-      .page-card canvas  { width: 100%; height: auto; display: block; border-radius: 3px; border: 1px solid var(--border-color); }
-      .page-num          { font-size: 0.75em; color: var(--text-dark); opacity: 0.6; }
-
-      /* ── Progress overlay ─────────────────────────────────────── */
-      #progress-overlay {
-        position: sticky; inset: 0;
-        background: rgba(0,0,0,0.45);
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        z-index: 200; gap: 1em;
+      .doc-summary .preview {
+        width: 58px;
+        height: 76px;
+        flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--background-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      #progress-overlay.hidden { display: none; }
-      #progress-overlay .spinner { margin: 0; border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
-      #progress-overlay p { color: #fff; font-size: 0.95em; opacity: 0.9; }
-
-      /* ── Action bar ───────────────────────────────────────────── */
-      .action-bar {
-        position: sticky; bottom: -2em;
-        margin: 0 -2em -2em;
-        background: var(--background-white);
-        border-top: 1px solid var(--border-color);
-        padding: 0.85em 2em;
-        display: flex; gap: 0.8em; align-items: center;
-        box-shadow: 0 -3px 12px rgba(0,0,0,0.08);
-        z-index: 100;
+      .doc-summary .preview canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
       }
-      .action-bar .hint { flex: 1; font-size: 0.88em; color: var(--text-dark); opacity: 0.55; }
-
-      @media (max-width: 600px) {
-        .action-bar { flex-wrap: wrap; }
-        .action-bar .hint { width: 100%; }
-        .options-panel { gap: 0.8em; }
-        #result-banner { flex-direction: column; align-items: stretch; }
+      .doc-summary .meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .doc-summary .meta .name {
+        font-weight: 600;
+        color: var(--primary-blue);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .doc-summary .meta .facts {
+        font-size: 0.85em;
+        color: var(--text-dark);
+        opacity: 0.65;
+      }
+      .warn-box {
+        display: flex;
+        gap: 0.6em;
+        background: var(--alert-bg);
+        color: var(--alert-color);
+        border: 1px solid currentColor;
+        border-radius: 8px;
+        padding: 0.7em 1em;
+        font-size: 0.85em;
+        margin-bottom: 1.2em;
+      }
+      #result-banner {
+        display: flex;
+        align-items: center;
+        gap: 1.2em;
+        flex-wrap: wrap;
+        background: var(--light-blue);
+        border: 1px solid var(--secondary-blue);
+        border-radius: 8px;
+        padding: 0.9em 1.2em;
+        margin-bottom: 1.2em;
+      }
+      #result-banner.hidden {
+        display: none;
+      }
+      #result-banner.warn {
+        background: var(--alert-bg);
+        border-color: var(--error-red);
+      }
+      #result-banner .sizes {
+        flex: 1;
+        min-width: 12em;
+        font-size: 0.92em;
+        color: var(--text-dark);
+      }
+      #result-banner .sizes strong {
+        color: var(--primary-blue);
+      }
+      #result-banner .pct {
+        font-weight: 700;
+      }
+      #result-banner .pct.good {
+        color: #1a8a4a;
+      }
+      #result-banner .pct.bad {
+        color: var(--error-red);
       }
     </style>
   </head>
@@ -154,36 +108,59 @@
       <div class="navButtons">
         <a href="../">← Εργαλεία PDF</a>
       </div>
-      <button class="theme-toggle" id="theme-toggle" title="Αλλαγή θέματος"></button>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        title="Αλλαγή θέματος"
+      ></button>
     </header>
 
     <main>
+      <div class="tool-head">
+        <h1>Συμπίεση PDF</h1>
+        <p>
+          Μικρότερο αρχείο για αποστολή με email, μετατρέποντας κάθε σελίδα σε
+          εικόνα.
+        </p>
+      </div>
+
+      <div id="error-box" class="inline-error hidden"></div>
+
       <!-- IDLE -->
       <div id="upload-section">
         <div class="upload-zone" id="upload-zone">
           <svg viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           <h2>Ανεβάστε ένα PDF αρχείο</h2>
           <p>Σύρετε &amp; αφήστε, ή κάντε κλικ για επιλογή</p>
         </div>
         <input type="file" id="file-input" accept=".pdf,application/pdf" />
+        <p class="privacy-note">
+          🔒 Η επεξεργασία γίνεται τοπικά στον υπολογιστή σας — το αρχείο δεν
+          ανεβαίνει πουθενά.
+        </p>
       </div>
 
       <!-- LOADING -->
       <div id="loading-section" class="hidden">
         <div class="spinner"></div>
-        <p id="loading-msg">Φόρτωση σελίδων…</p>
+        <p id="loading-msg">Άνοιγμα αρχείου…</p>
       </div>
 
       <!-- READY -->
       <div id="ready-section" class="hidden">
-        <div class="toolbar">
-          <span class="file-info" id="file-name"></span>
-          <span id="file-size"></span>
-          <button id="btn-change-file">Άλλο αρχείο</button>
+        <div class="doc-summary">
+          <div class="preview" id="preview"></div>
+          <div class="meta">
+            <div class="name" id="file-name"></div>
+            <div class="facts" id="file-facts"></div>
+          </div>
+          <button id="btn-change-file" class="btn-secondary">
+            Άλλο αρχείο
+          </button>
         </div>
 
         <div class="options-panel">
@@ -191,80 +168,74 @@
             <label>Επίπεδο συμπίεσης</label>
             <div class="toggle-group">
               <button class="toggle-btn" data-preset="low">Χαμηλή</button>
-              <button class="toggle-btn active" data-preset="medium">Μέτρια</button>
+              <button class="toggle-btn active" data-preset="medium">
+                Μέτρια
+              </button>
               <button class="toggle-btn" data-preset="high">Υψηλή</button>
             </div>
           </div>
-          <span class="options-hint">Μεγαλύτερη συμπίεση σημαίνει μικρότερο αρχείο αλλά χαμηλότερη ποιότητα εικόνας.</span>
+          <span class="options-hint" id="preset-hint"></span>
         </div>
 
-        <p class="options-hint" style="margin: -0.6em 0 1.2em;">
-          ⚠ Κάθε σελίδα μετατρέπεται σε εικόνα — το αποτέλεσμα δεν θα έχει επιλέξιμο/αναζητήσιμο κείμενο.
-        </p>
+        <div class="warn-box">
+          <span>⚠</span>
+          <span>
+            Κάθε σελίδα μετατρέπεται σε εικόνα: το κείμενο δεν θα είναι πλέον
+            επιλέξιμο ούτε αναζητήσιμο, και η αναζήτηση μέσα στο έγγραφο παύει
+            να δουλεύει.
+          </span>
+        </div>
 
         <div id="result-banner" class="hidden">
           <span class="sizes" id="result-text"></span>
-          <button id="btn-download">Λήψη PDF</button>
         </div>
-
-        <div class="page-grid" id="page-grid"></div>
       </div>
     </main>
 
-    <!-- Progress overlay (shown during compression) -->
     <div id="progress-overlay" class="hidden">
       <div class="spinner"></div>
       <p id="progress-msg">Επεξεργασία…</p>
+      <button id="btn-cancel" class="btn-secondary">Ακύρωση</button>
     </div>
 
     <div class="action-bar hidden" id="action-bar">
-      <span class="hint" id="action-hint">Επιλέξτε επίπεδο συμπίεσης και πατήστε συμπίεση</span>
+      <span class="hint" id="action-hint"
+        >Επιλέξτε επίπεδο συμπίεσης και πατήστε συμπίεση</span
+      >
+      <div id="continue-host" class="hidden"></div>
+      <button id="btn-download" class="hidden">Λήψη PDF</button>
       <button id="btn-compress">Συμπίεση PDF</button>
     </div>
 
     <script src="../../libs/pdf.min.js"></script>
     <script src="../../libs/pdf-lib.min.js"></script>
+    <script src="../tool-common.js"></script>
     <script>
-      // ── Theme ────────────────────────────────────────────────────
-      const getTheme = () =>
-        localStorage.getItem("vaxyp-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      const applyTheme = (t) =>
-        t === "dark" ? document.body.classList.add("dark") : document.body.classList.remove("dark");
-      applyTheme(getTheme());
-      document.getElementById("theme-toggle").addEventListener("click", () => {
-        const t = document.body.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem("vaxyp-theme", t);
-        applyTheme(t);
-      });
-      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-        if (!localStorage.getItem("vaxyp-theme")) applyTheme(e.matches ? "dark" : "light");
-      });
-
+      Tools.initTheme();
       pdfjsLib.GlobalWorkerOptions.workerSrc = "../../libs/pdf.worker.min.js";
-
-      // ── Presets ───────────────────────────────────────────────────
-      // scale is relative to pdf.js's 72dpi baseline (scale 1 = 72dpi)
-      const PRESETS = {
-        low:    { scale: 200 / 72, quality: 0.85 },
-        medium: { scale: 150 / 72, quality: 0.70 },
-        high:   { scale: 100 / 72, quality: 0.45 },
-      };
-      let currentPreset = "medium";
-
-      // ── State ─────────────────────────────────────────────────────
-      let pdfBytes   = null;
-      let pageCount  = 0;
-      let baseName   = "";
-      let lastOutput = null; // { bytes, name }
 
       const $ = (id) => document.getElementById(id);
 
+      // scale is relative to pdf.js's 72dpi baseline (scale 1 = 72dpi)
+      const PRESETS = {
+        low: { scale: 200 / 72, quality: 0.85, hint: "200 dpi — καλή ποιότητα εκτύπωσης, μέτριο κέρδος σε μέγεθος." },
+        medium: { scale: 150 / 72, quality: 0.7, hint: "150 dpi — ισορροπία μεγέθους και ποιότητας, κατάλληλο για email." },
+        high: { scale: 100 / 72, quality: 0.45, hint: "100 dpi — το μικρότερο αρχείο, ορατή απώλεια ποιότητας." },
+      };
+      let currentPreset = "medium";
+
+      let pdfBytes = null;
+      let pageCount = 0;
+      let baseName = "";
+      let originalSize = 0;
+      let lastOutput = null;
+      let cancelled = false;
+
       function setState(s) {
-        $("upload-section") .classList.toggle("hidden", s !== "idle");
+        $("upload-section").classList.toggle("hidden", s !== "idle");
         $("loading-section").classList.toggle("hidden", s !== "loading");
-        $("ready-section")  .classList.toggle("hidden", s !== "ready");
-        $("action-bar")     .classList.toggle("hidden", s !== "ready");
+        $("ready-section").classList.toggle("hidden", s !== "ready");
+        $("action-bar").classList.toggle("hidden", s !== "ready");
       }
 
       function formatSize(bytes) {
@@ -276,153 +247,210 @@
       // ── Preset toggle ─────────────────────────────────────────────
       document.querySelectorAll("[data-preset]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll("[data-preset]")
+            .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           currentPreset = btn.dataset.preset;
+          $("preset-hint").textContent = PRESETS[currentPreset].hint;
+          // a new setting means the previous result no longer matches
+          resetResult();
         });
       });
 
+      function resetResult() {
+        lastOutput = null;
+        $("result-banner").classList.add("hidden");
+        $("btn-download").classList.add("hidden");
+        $("continue-host").classList.add("hidden");
+      }
+
       // ── Upload ────────────────────────────────────────────────────
       const uploadZone = $("upload-zone");
-      const fileInput  = $("file-input");
+      const fileInput = $("file-input");
 
       uploadZone.addEventListener("click", () => fileInput.click());
-      uploadZone.addEventListener("dragover", (e) => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag-over");
+      });
       ["dragleave", "drop"].forEach((ev) =>
-        uploadZone.addEventListener(ev, () => uploadZone.classList.remove("drag-over"))
+        uploadZone.addEventListener(ev, () =>
+          uploadZone.classList.remove("drag-over"),
+        ),
       );
-      uploadZone.addEventListener("drop", (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
-      fileInput.addEventListener("change", () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      });
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files[0]) handleFile(fileInput.files[0]);
+      });
       $("btn-change-file").addEventListener("click", () => {
-        setState("idle"); fileInput.value = ""; $("page-grid").innerHTML = "";
-        $("result-banner").classList.add("hidden");
-        lastOutput = null;
+        setState("idle");
+        fileInput.value = "";
+        resetResult();
       });
 
-      // ── Load & render thumbnails ───────────────────────────────────
       async function handleFile(file) {
-        if (file.type && file.type !== "application/pdf") { alert("Παρακαλώ επιλέξτε αρχείο PDF."); return; }
-        baseName = file.name.replace(/\.pdf$/i, "");
-        setState("loading");
-        pdfBytes = await file.arrayBuffer();
-        lastOutput = null;
-        $("result-banner").classList.add("hidden");
-
-        $("loading-msg").textContent = "Φόρτωση αρχείου…";
-        const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
-        pageCount = pdfDoc.numPages;
-        $("page-grid").innerHTML = "";
-
-        for (let i = 1; i <= pageCount; i++) {
-          $("loading-msg").textContent = `Επεξεργασία σελίδας ${i} από ${pageCount}…`;
-          await renderThumbnail(pdfDoc, i);
+        if (
+          file.type !== "application/pdf" &&
+          !file.name.toLowerCase().endsWith(".pdf")
+        ) {
+          Tools.showError("Επιλέξτε αρχείο PDF.");
+          return;
         }
-
-        $("file-name").textContent = file.name;
-        $("file-size").textContent = formatSize(pdfBytes.byteLength);
-        setState("ready");
+        await loadPdf(file.name, await file.arrayBuffer());
       }
 
-      async function renderThumbnail(pdfDoc, n) {
-        const page     = await pdfDoc.getPage(n);
-        const viewport = page.getViewport({ scale: 0.28 });
-        const canvas   = document.createElement("canvas");
-        canvas.width   = viewport.width;
-        canvas.height  = viewport.height;
-        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
-
-        const card = document.createElement("div");
-        card.className = "page-card";
-
-        const num = document.createElement("span");
-        num.className   = "page-num";
-        num.textContent = `Σελίδα ${n}`;
-
-        card.appendChild(canvas);
-        card.appendChild(num);
-        $("page-grid").appendChild(card);
+      async function loadPdf(name, bytes) {
+        Tools.hideError();
+        baseName = name.replace(/\.pdf$/i, "");
+        pdfBytes = bytes;
+        originalSize = bytes.byteLength;
+        resetResult();
+        setState("loading");
+        try {
+          const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) })
+            .promise;
+          pageCount = pdfDoc.numPages;
+          $("file-name").textContent = name;
+          $("file-facts").textContent = `${pageCount} σελίδ${pageCount === 1 ? "α" : "ες"} · ${formatSize(originalSize)}`;
+          $("preset-hint").textContent = PRESETS[currentPreset].hint;
+          setState("ready");
+          // one small preview is enough — this tool works on the whole document
+          renderPreview(pdfDoc);
+        } catch (err) {
+          setState("idle");
+          Tools.showError(Tools.describeError(err));
+        }
       }
 
-      // ── Render a page to JPEG bytes at the chosen preset ───────────
+      async function renderPreview(pdfDoc) {
+        try {
+          const page = await pdfDoc.getPage(1);
+          const viewport = page.getViewport({ scale: 0.22 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({
+            canvasContext: canvas.getContext("2d"),
+            viewport,
+          }).promise;
+          $("preview").innerHTML = "";
+          $("preview").appendChild(canvas);
+        } catch {
+          /* preview is optional */
+        }
+      }
+
+      // ── Compression ───────────────────────────────────────────────
       function canvasToJpegBytes(canvas, quality) {
         return new Promise((resolve) => {
-          canvas.toBlob(async (blob) => {
-            resolve(new Uint8Array(await blob.arrayBuffer()));
-          }, "image/jpeg", quality);
+          canvas.toBlob(
+            async (blob) => resolve(new Uint8Array(await blob.arrayBuffer())),
+            "image/jpeg",
+            quality,
+          );
         });
       }
 
       async function renderPageToJpeg(pdfDoc, n, preset) {
-        const page     = await pdfDoc.getPage(n);
+        const page = await pdfDoc.getPage(n);
         const viewport = page.getViewport({ scale: preset.scale });
-        const canvas   = document.createElement("canvas");
-        canvas.width   = viewport.width;
-        canvas.height  = viewport.height;
-        const ctx      = canvas.getContext("2d");
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext("2d");
 
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
 
         const bytes = await canvasToJpegBytes(canvas, preset.quality);
-        const base  = page.getViewport({ scale: 1 });
+        const base = page.getViewport({ scale: 1 });
         return { bytes, width: base.width, height: base.height };
       }
 
-      // ── Compress ──────────────────────────────────────────────────
+      $("btn-cancel").addEventListener("click", () => {
+        cancelled = true;
+        $("progress-msg").textContent = "Ακύρωση…";
+      });
+
       $("btn-compress").addEventListener("click", async () => {
-        const preset  = PRESETS[currentPreset];
-        const overlay = $("progress-overlay");
-        const progMsg = $("progress-msg");
+        const preset = PRESETS[currentPreset];
+        cancelled = false;
         $("btn-compress").disabled = true;
-        overlay.classList.remove("hidden");
+        $("progress-overlay").classList.remove("hidden");
 
         try {
-          const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+          const pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) })
+            .promise;
           const { PDFDocument } = PDFLib;
           const outDoc = await PDFDocument.create();
 
           for (let n = 1; n <= pageCount; n++) {
-            progMsg.textContent = `Συμπίεση σελίδας ${n} από ${pageCount}…`;
-            const { bytes, width, height } = await renderPageToJpeg(pdfDoc, n, preset);
+            if (cancelled) return;
+            $("progress-msg").textContent =
+              `Συμπίεση σελίδας ${n} από ${pageCount}…`;
+            const { bytes, width, height } = await renderPageToJpeg(
+              pdfDoc,
+              n,
+              preset,
+            );
             const embedded = await outDoc.embedJpg(bytes);
-            const outPage  = outDoc.addPage([width, height]);
-            outPage.drawImage(embedded, { x: 0, y: 0, width, height });
+            outDoc.addPage([width, height]).drawImage(embedded, {
+              x: 0,
+              y: 0,
+              width,
+              height,
+            });
           }
 
-          progMsg.textContent = "Αποθήκευση PDF…";
+          $("progress-msg").textContent = "Αποθήκευση PDF…";
           const outBytes = await outDoc.save();
+          const outName = Tools.safeName(`${baseName}_συμπιεσμένο.pdf`);
+          lastOutput = { bytes: outBytes, name: outName };
 
-          lastOutput = { bytes: outBytes, name: `${baseName}_συμπιεσμένο.pdf` };
-
-          const originalSize = pdfBytes.byteLength;
-          const newSize      = outBytes.byteLength;
-          const pct          = Math.round((1 - newSize / originalSize) * 100);
-          const banner       = $("result-banner");
-
-          if (pct > 0) {
-            banner.classList.remove("warn");
-            $("result-text").innerHTML =
-              `<strong>${formatSize(originalSize)}</strong> → <strong>${formatSize(newSize)}</strong> ` +
-              `(<span class="pct good">${pct}% μικρότερο</span>)`;
-          } else {
-            banner.classList.add("warn");
-            $("result-text").innerHTML =
-              `<strong>${formatSize(originalSize)}</strong> → <strong>${formatSize(newSize)}</strong> ` +
-              `(<span class="pct bad">${-pct}% μεγαλύτερο</span>) — δοκιμάστε χαμηλότερο επίπεδο συμπίεσης`;
-          }
+          const newSize = outBytes.byteLength;
+          const pct = Math.round((1 - newSize / originalSize) * 100);
+          const banner = $("result-banner");
+          banner.classList.toggle("warn", pct <= 0);
+          $("result-text").innerHTML =
+            `<strong>${formatSize(originalSize)}</strong> → <strong>${formatSize(newSize)}</strong> ` +
+            (pct > 0
+              ? `(<span class="pct good">${pct}% μικρότερο</span>)`
+              : `(<span class="pct bad">${-pct}% μεγαλύτερο</span>) — δοκιμάστε χαμηλότερο επίπεδο συμπίεσης`);
           banner.classList.remove("hidden");
+
+          // the download is the next thing you want, so it lives in the action bar
+          $("btn-download").classList.remove("hidden");
+          $("action-hint").textContent =
+            pct > 0
+              ? `Έτοιμο: ${formatSize(newSize)} (${pct}% μικρότερο)`
+              : "Η συμπίεση δεν μείωσε το μέγεθος — δοκιμάστε άλλο επίπεδο.";
+          $("btn-compress").textContent = "Νέα συμπίεση";
+          Tools.renderContinueMenu($("continue-host"), "compress", () => ({
+            name: lastOutput.name,
+            bytes: lastOutput.bytes.slice().buffer,
+          }));
+        } catch (err) {
+          Tools.showError(Tools.describeError(err));
         } finally {
-          overlay.classList.add("hidden");
+          $("progress-overlay").classList.add("hidden");
           $("btn-compress").disabled = false;
+          if (cancelled) $("action-hint").textContent = "Η συμπίεση ακυρώθηκε.";
         }
       });
 
       $("btn-download").addEventListener("click", () => {
-        if (!lastOutput) return;
-        const url = URL.createObjectURL(new Blob([lastOutput.bytes], { type: "application/pdf" }));
-        Object.assign(document.createElement("a"), { href: url, download: lastOutput.name }).click();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        if (lastOutput)
+          Tools.download(lastOutput.bytes, "application/pdf", lastOutput.name);
+      });
+
+      Tools.takeHandoff().then((entry) => {
+        if (entry) loadPdf(entry.name, entry.bytes);
       });
     </script>
   </body>

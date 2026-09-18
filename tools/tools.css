@@ -1,0 +1,541 @@
+/* Chrome shared by every PDF tool page.
+   Tool-specific rules stay in each page's own <style> block. */
+
+body {
+  position: static;
+}
+
+/* ── Upload zone ──────────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  background: var(--background-white);
+  padding: 2.6em 2em;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    padding 0.3s;
+  margin-bottom: 1.2em;
+}
+.upload-zone.compact {
+  padding: 1.2em 2em;
+}
+.upload-zone.compact svg,
+.upload-zone.compact p {
+  display: none;
+}
+.upload-zone.compact h2 {
+  font-size: 0.95em;
+  margin: 0;
+}
+.upload-zone.drag-over {
+  border-color: var(--secondary-blue);
+  background: var(--light-blue);
+}
+.upload-zone svg {
+  width: 44px;
+  height: 44px;
+  stroke: var(--secondary-blue);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+  margin: 0 auto 0.5em;
+}
+.upload-zone h2 {
+  font-size: 1.1em;
+  color: var(--primary-blue);
+  margin-bottom: 0.3em;
+}
+.upload-zone p {
+  font-size: 0.9em;
+  color: var(--text-dark);
+  opacity: 0.6;
+}
+#file-input {
+  display: none;
+}
+
+/* ── Spinner / loading ────────────────────────────────────────── */
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--secondary-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 3em auto 1em;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+#loading-msg {
+  text-align: center;
+  color: var(--text-dark);
+  opacity: 0.65;
+  font-size: 0.95em;
+  margin-bottom: 1em;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  flex-wrap: wrap;
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  margin-bottom: 1.2em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.toolbar .file-info {
+  font-weight: 600;
+  color: var(--primary-blue);
+  flex: 1;
+  min-width: 8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toolbar button {
+  font-size: 0.85em;
+  padding: 0.45em 0.9em;
+}
+#selection-info,
+#move-info,
+#file-size {
+  font-size: 0.85em;
+  color: var(--text-dark);
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+/* ── Page grid ────────────────────────────────────────────────── */
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1em;
+  padding-bottom: 7em;
+}
+.page-card {
+  position: relative;
+  background: var(--background-white);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5em 0.5em 0.4em;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+  user-select: none;
+}
+.page-card:hover {
+  border-color: var(--secondary-blue);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+}
+.page-card.selected {
+  border-color: var(--secondary-blue);
+  background: var(--light-blue);
+  box-shadow: 0 0 0 2px var(--secondary-blue);
+}
+.thumb-box {
+  width: 100%;
+  line-height: 0;
+}
+.page-card canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 3px;
+  border: 1px solid var(--border-color);
+}
+.page-num {
+  font-size: 0.75em;
+  color: var(--text-dark);
+  opacity: 0.6;
+}
+.page-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--secondary-blue);
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  transform: scale(0.6);
+}
+.page-card.selected .page-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Options panel ────────────────────────────────────────────── */
+.options-panel {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+  flex-wrap: wrap;
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.8em 1.2em;
+  margin-bottom: 1.2em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.option-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.option-group label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--label-color);
+  white-space: nowrap;
+}
+.options-hint {
+  font-size: 0.8em;
+  color: var(--text-dark);
+  opacity: 0.6;
+  flex: 1;
+  min-width: 12em;
+}
+.toggle-group {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+.toggle-btn {
+  padding: 0.35em 0.9em;
+  background: var(--background-white);
+  color: var(--text-dark);
+  border: none;
+  border-radius: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.toggle-btn:not(:last-child) {
+  border-right: 1px solid var(--border-color);
+}
+.toggle-btn.active {
+  background: var(--secondary-blue);
+  color: #fff;
+}
+.toggle-btn:hover:not(.active) {
+  background: var(--light-blue);
+  color: var(--text-dark);
+}
+.toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── File / image lists ───────────────────────────────────────── */
+.list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  flex-wrap: wrap;
+  margin-bottom: 0.6em;
+}
+.list-header .summary {
+  flex: 1;
+  min-width: 8em;
+  font-size: 0.9em;
+  color: var(--text-dark);
+  opacity: 0.65;
+}
+.list-header #output-name {
+  width: 200px;
+  font-size: 0.85em;
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--background-white);
+  color: var(--text-dark);
+}
+#file-list,
+#image-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 7em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+.file-item,
+.img-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  background: var(--background-white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6em 0.8em;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+.file-item.drag-over-item,
+.img-item.drag-over-item {
+  border-color: var(--secondary-blue);
+  box-shadow: 0 0 0 2px var(--secondary-blue);
+}
+.file-item.dragging,
+.img-item.dragging {
+  opacity: 0.4;
+}
+.drag-handle {
+  cursor: grab;
+  color: var(--border-color);
+  font-size: 1.2em;
+  line-height: 1;
+  padding: 0 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+.file-thumb,
+.img-thumb {
+  width: 44px;
+  height: 52px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--background-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.file-thumb canvas,
+.img-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.file-thumb .thumb-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--secondary-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.file-meta,
+.img-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+}
+.file-meta .name,
+.img-meta .name,
+.file-name {
+  font-weight: 600;
+  font-size: 0.92em;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-item > .file-name {
+  flex: 1;
+}
+.file-meta .pages,
+.img-meta .dims,
+.file-pages {
+  font-size: 0.78em;
+  color: var(--text-dark);
+  opacity: 0.55;
+  white-space: nowrap;
+}
+.order-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--light-blue);
+  color: var(--primary-blue);
+  font-size: 0.75em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.move-btns {
+  display: flex;
+  gap: 0.2em;
+  flex-shrink: 0;
+}
+.move-btns button,
+.btn-move {
+  background: transparent;
+  color: var(--primary-blue);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 0.85em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.move-btns button:hover:not(:disabled),
+.btn-move:hover:not(:disabled) {
+  background: var(--light-blue);
+  border-color: var(--secondary-blue);
+  color: var(--primary-blue);
+}
+.move-btns button:disabled,
+.btn-move:disabled {
+  background: transparent;
+  opacity: 0.35;
+  border-color: var(--border-color);
+}
+.btn-remove {
+  background: transparent;
+  color: var(--error-red);
+  border: 1px solid var(--error-red);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  flex-shrink: 0;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.btn-remove:hover {
+  background: var(--error-red);
+  color: #fff;
+}
+
+/* ── Progress overlay ─────────────────────────────────────────── */
+#progress-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  gap: 1em;
+}
+#progress-overlay.hidden {
+  display: none;
+}
+#progress-overlay .spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+#progress-overlay p {
+  color: #fff;
+  font-size: 0.95em;
+  opacity: 0.9;
+}
+#progress-overlay .btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+#progress-overlay .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* ── Action bar ───────────────────────────────────────────────── */
+.action-bar {
+  position: sticky;
+  bottom: -2em;
+  margin: 0 -2em -2em;
+  background: var(--background-white);
+  border-top: 1px solid var(--border-color);
+  padding: 0.85em 2em;
+  display: flex;
+  gap: 0.8em;
+  align-items: center;
+  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+.action-bar.hidden {
+  display: none;
+}
+.action-bar .hint {
+  flex: 1;
+  min-width: 8em;
+  font-size: 0.88em;
+  color: var(--text-dark);
+  opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+  .action-bar {
+    flex-wrap: wrap;
+  }
+  .action-bar .hint {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .action-bar button {
+    flex: 1;
+  }
+  .list-header #output-name,
+  .toolbar .range-field input {
+    width: 100%;
+  }
+}
+
+/* The body's side padding shrinks on small screens — the sticky bar's
+   negative pull has to shrink with it, or the page scrolls sideways. */
+@media (max-width: 480px) {
+  .action-bar {
+    margin-left: -0.5em;
+    margin-right: -0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+}

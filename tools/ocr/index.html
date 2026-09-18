@@ -4,155 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../../style.css" />
-    <link
-      rel="shortcut icon"
-      href="../../images/logo.png"
-      type="image/x-icon"
-    />
-    <title>OCR – Ανάγνωση Κειμένου</title>
+    <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
+    <title>OCR – Ανάγνωση κειμένου</title>
+    <link rel="stylesheet" href="../tools.css" />
     <style>
-      body {
-        position: static;
-      }
-
-      .upload-zone {
-        border: 2px dashed var(--border-color);
-        border-radius: 12px;
-        background: var(--background-white);
-        padding: 3.5em 2em;
-        text-align: center;
-        cursor: pointer;
-        transition:
-          border-color 0.2s,
-          background 0.2s,
-          padding 0.3s;
-        margin-bottom: 1.2em;
-      }
-      .upload-zone.compact {
-        padding: 1.2em 2em;
-      }
-      .upload-zone.compact svg,
-      .upload-zone.compact p {
-        display: none;
-      }
-      .upload-zone.compact h2 {
-        font-size: 0.95em;
-        margin: 0;
-      }
-      .upload-zone.drag-over {
-        border-color: var(--secondary-blue);
-        background: var(--light-blue);
-      }
-      .upload-zone svg {
-        width: 52px;
-        height: 52px;
-        stroke: var(--secondary-blue);
-        fill: none;
-        stroke-width: 1.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        display: block;
-        margin: 0 auto 0.6em;
-      }
-      .upload-zone h2 {
-        font-size: 1.15em;
-        color: var(--primary-blue);
-        margin-bottom: 0.3em;
-      }
-      .upload-zone p {
-        font-size: 0.9em;
-        color: var(--text-dark);
-        opacity: 0.6;
-      }
-      #file-input {
-        display: none;
-      }
-
-      /* ── Options bar ─────────────────────────────────────────── */
-      .options-panel {
-        display: flex;
-        align-items: center;
-        gap: 1.2em;
-        flex-wrap: wrap;
-        background: var(--background-white);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.75em 1.2em;
-        margin-bottom: 1.2em;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-      }
-      .option-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-      }
-      .option-group label {
-        font-size: 0.85em;
-        font-weight: 600;
-        color: var(--label-color);
-        white-space: nowrap;
-      }
-      .toggle-group {
-        display: flex;
-        border-radius: 6px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-      }
-      .toggle-btn {
-        padding: 0.35em 0.9em;
-        background: var(--background-white);
-        color: var(--text-dark);
-        border: none;
-        border-radius: 0;
-        font-size: 0.85em;
-        font-weight: 600;
-        cursor: pointer;
-        transition:
-          background 0.15s,
-          color 0.15s;
-      }
-      .toggle-btn:not(:last-child) {
-        border-right: 1px solid var(--border-color);
-      }
-      .toggle-btn.active {
-        background: var(--secondary-blue);
-        color: #fff;
-      }
-      .toggle-btn:hover:not(.active) {
-        background: var(--light-blue);
-      }
-
-      /* ── File list ───────────────────────────────────────────── */
-      .list-header {
-        display: flex;
-        align-items: center;
-        gap: 0.8em;
-        margin-bottom: 0.6em;
-      }
-      .list-header .summary {
-        flex: 1;
-        font-size: 0.9em;
-        color: var(--text-dark);
-        opacity: 0.65;
-      }
-
-      #file-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 1em;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5em;
-      }
-      .file-item {
-        display: flex;
-        align-items: center;
-        gap: 0.8em;
-        background: var(--background-white);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.6em 0.9em;
-      }
       .file-item .file-icon {
         width: 32px;
         height: 32px;
@@ -172,59 +27,31 @@
         stroke-linecap: round;
         stroke-linejoin: round;
       }
-      .file-item .file-name {
-        flex: 1;
-        font-size: 0.9em;
-        font-weight: 600;
-        color: var(--text-dark);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .file-item .file-pages {
-        font-size: 0.78em;
-        color: var(--text-dark);
-        opacity: 0.5;
-        flex-shrink: 0;
-      }
-      .btn-remove {
-        background: transparent;
-        color: var(--error-red);
-        border: 1px solid var(--error-red);
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75em;
-        flex-shrink: 0;
-        cursor: pointer;
-        transition:
-          background 0.15s,
-          color 0.15s;
-      }
-      .btn-remove:hover {
-        background: var(--error-red);
-        color: #fff;
-      }
-
-      /* ── Progress ────────────────────────────────────────────── */
       .progress-section {
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.9em 1.2em;
         margin-bottom: 1.2em;
       }
       .progress-label {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 0.8em;
         font-size: 0.85em;
         color: var(--text-dark);
         margin-bottom: 0.4em;
       }
+      .progress-label #progress-msg {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
       .progress-label .pct {
         font-weight: 700;
-        color: var(--secondary-blue);
       }
       .progress-bar-track {
         height: 6px;
@@ -239,23 +66,26 @@
         transition: width 0.25s;
         width: 0%;
       }
-
-      /* ── Output textarea ─────────────────────────────────────── */
       .output-header {
         display: flex;
         align-items: center;
-        gap: 0.8em;
+        gap: 0.6em;
+        flex-wrap: wrap;
         margin-bottom: 0.5em;
       }
       .output-header h3 {
         flex: 1;
+        min-width: 8em;
         font-size: 1em;
         color: var(--primary-blue);
         margin: 0;
       }
+      .output-header button {
+        font-size: 0.85em;
+        padding: 0.4em 0.9em;
+      }
       #output-text {
         width: 100%;
-        box-sizing: border-box;
         min-height: 320px;
         max-height: 65vh;
         resize: vertical;
@@ -274,39 +104,6 @@
         outline: none;
         border-color: var(--secondary-blue);
       }
-
-      /* ── Action bar ──────────────────────────────────────────── */
-      .action-bar {
-        position: sticky;
-        bottom: -2em;
-        margin: 0 -2em -2em;
-        background: var(--background-white);
-        border-top: 1px solid var(--border-color);
-        padding: 0.85em 2em;
-        display: flex;
-        gap: 0.8em;
-        align-items: center;
-        box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08);
-        z-index: 100;
-      }
-      .action-bar .hint {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.15em;
-      }
-      .action-bar .hint-main {
-        font-size: 0.88em;
-        color: var(--text-dark);
-        opacity: 0.55;
-      }
-      .action-bar .hint-tip {
-        font-size: 0.78em;
-        color: var(--text-dark);
-        opacity: 0.38;
-      }
-
-      /* ── Hidden canvas ───────────────────────────────────────── */
       #render-canvas {
         display: none;
       }
@@ -326,6 +123,16 @@
     </header>
 
     <main>
+      <div class="tool-head">
+        <h1>OCR – Ανάγνωση κειμένου</h1>
+        <p>
+          Εξάγετε κείμενο από σαρωμένα PDF ή εικόνες. Το κείμενο εμφανίζεται
+          εδώ για διόρθωση πριν το αντιγράψετε ή το κατεβάσετε.
+        </p>
+      </div>
+
+      <div id="error-box" class="inline-error hidden"></div>
+
       <div class="upload-zone" id="upload-zone">
         <svg viewBox="0 0 24 24">
           <path
@@ -336,9 +143,7 @@
           <path d="M7 18s.5-2 5-2 5 2 5 2" />
         </svg>
         <h2>Προσθέστε αρχεία για OCR</h2>
-        <p>
-          PDF ή εικόνες (PNG, JPEG, WebP) · Σύρετε &amp; αφήστε ή κάντε κλικ
-        </p>
+        <p>PDF ή εικόνες (PNG, JPEG, WebP) · Σύρετε &amp; αφήστε ή κάντε κλικ</p>
       </div>
       <input
         type="file"
@@ -362,14 +167,16 @@
             <button class="toggle-btn" data-enhance="off">Ανενεργό</button>
           </div>
         </div>
+        <span class="options-hint">
+          Η βελτίωση βοηθά σε καθαρές ασπρόμαυρες σαρώσεις· απενεργοποιήστε την
+          σε φωτογραφίες ή έγχρωμα έγγραφα.
+        </span>
       </div>
 
       <div id="list-section" class="hidden">
         <div class="list-header">
           <span class="summary" id="summary"></span>
-          <button id="btn-clear" style="background: var(--error-red)">
-            Καθαρισμός
-          </button>
+          <button id="btn-clear" class="btn-danger">Καθαρισμός</button>
         </div>
         <ul id="file-list"></ul>
       </div>
@@ -387,31 +194,30 @@
       <div id="output-section" class="hidden">
         <div class="output-header">
           <h3>Εξαγόμενο κείμενο</h3>
-          <button
-            id="btn-copy"
-            style="min-width: unset; padding: 0.4em 1em; font-size: 0.85em"
+          <span class="options-hint" id="output-note"
+            >Μπορείτε να διορθώσετε το κείμενο πριν το αντιγράψετε.</span
           >
-            Αντιγραφή
-          </button>
+          <button id="btn-copy" class="btn-secondary">Αντιγραφή</button>
+          <button id="btn-save-txt" class="btn-secondary">Λήψη .txt</button>
         </div>
         <textarea
           id="output-text"
-          readonly
           placeholder="Το κείμενο θα εμφανιστεί εδώ…"
+          spellcheck="false"
         ></textarea>
       </div>
+
+      <p class="privacy-note" id="privacy-note">
+        🔒 Η αναγνώριση γίνεται τοπικά στον υπολογιστή σας — τα αρχεία δεν
+        ανεβαίνουν πουθενά.
+      </p>
     </main>
 
-    <div class="action-bar">
-      <div class="hint">
-        <span class="hint-tip"
-          >Προσθέστε τουλάχιστον 1 αρχείο για να ξεκινήσετε.</span
-        >
-        <span id="action-hint"
-          >&#128161; Για καλύτερα αποτελέσματα, σαρώστε στη μέγιστη δυνατή
-          ανάλυση.</span
-        >
-      </div>
+    <div class="action-bar" id="action-bar">
+      <span class="hint" id="action-hint"
+        >Προσθέστε τουλάχιστον 1 αρχείο για να ξεκινήσετε</span
+      >
+      <button id="btn-cancel" class="btn-secondary hidden">Διακοπή</button>
       <button id="btn-run" disabled>Εξαγωγή κειμένου</button>
     </div>
 
@@ -419,40 +225,19 @@
 
     <script src="../../libs/pdf.min.js"></script>
     <script src="../../libs/tesseract5/tesseract.min.js"></script>
+    <script src="../tool-common.js"></script>
     <script>
-      // ── Theme ────────────────────────────────────────────────────
-      const getTheme = () =>
-        localStorage.getItem("vaxyp-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light");
-      const applyTheme = (t) =>
-        t === "dark"
-          ? document.body.classList.add("dark")
-          : document.body.classList.remove("dark");
-      applyTheme(getTheme());
-      document.getElementById("theme-toggle").addEventListener("click", () => {
-        const t = document.body.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem("vaxyp-theme", t);
-        applyTheme(t);
-      });
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (!localStorage.getItem("vaxyp-theme"))
-            applyTheme(e.matches ? "dark" : "light");
-        });
-
+      Tools.initTheme();
       pdfjsLib.GlobalWorkerOptions.workerSrc = "../../libs/pdf.worker.min.js";
 
-      // ── State ────────────────────────────────────────────────────
+      const $ = (id) => document.getElementById(id);
+
       let files = []; // { id, name, type, file, pageCount }
       let nextId = 0;
       let optLang = "ell";
       let optEnhance = true;
       let running = false;
-
-      const $ = (id) => document.getElementById(id);
+      let cancelled = false;
 
       // ── Options ──────────────────────────────────────────────────
       document.querySelectorAll("[data-lang]").forEach((btn) =>
@@ -508,34 +293,46 @@
       });
 
       async function addFiles(incoming) {
+        Tools.hideError();
+        let skipped = 0;
         for (const file of incoming) {
           const isPdf =
             file.type === "application/pdf" ||
             file.name.toLowerCase().endsWith(".pdf");
           const isImg = file.type.startsWith("image/");
-          if (!isPdf && !isImg) continue;
-
-          let pageCount = 1;
-          if (isPdf) {
-            try {
-              const buf = await file.arrayBuffer();
-              const doc = await pdfjsLib.getDocument({ data: buf }).promise;
-              pageCount = doc.numPages;
-            } catch {
-              pageCount = 1;
-            }
+          if (!isPdf && !isImg) {
+            skipped++;
+            continue;
           }
-
-          files.push({
-            id: nextId++,
-            name: file.name,
-            type: isPdf ? "pdf" : "img",
-            file,
-            pageCount,
-          });
+          await addEntry(file, isPdf);
         }
+        if (skipped)
+          Tools.showError(
+            `${skipped} αρχεί${skipped === 1 ? "ο" : "α"} αγνοήθηκ${skipped === 1 ? "ε" : "αν"} — δεκτά είναι PDF και εικόνες.`,
+          );
         rebuildFileList();
         updateUI();
+      }
+
+      async function addEntry(file, isPdf) {
+        let pageCount = 1;
+        if (isPdf) {
+          try {
+            const buf = await file.arrayBuffer();
+            const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+            pageCount = doc.numPages;
+          } catch (err) {
+            Tools.showError(`«${file.name}»: ${Tools.describeError(err)}`);
+            return;
+          }
+        }
+        files.push({
+          id: nextId++,
+          name: file.name,
+          type: isPdf ? "pdf" : "img",
+          file,
+          pageCount,
+        });
       }
 
       function rebuildFileList() {
@@ -545,10 +342,8 @@
           const li = document.createElement("li");
           li.className = "file-item";
           li.dataset.id = id;
-          const pagesLabel =
-            type === "pdf"
-              ? `${pageCount} σελ${pageCount !== 1 ? "." : "."}`
-              : "εικόνα";
+          const safe = Tools.escapeHtml(name);
+          const pagesLabel = type === "pdf" ? `${pageCount} σελ.` : "εικόνα";
           li.innerHTML = `
             <div class="file-icon">
               ${
@@ -557,9 +352,9 @@
                   : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
               }
             </div>
-            <span class="file-name" title="${name}">${name}</span>
+            <span class="file-name" title="${safe}">${safe}</span>
             <span class="file-pages">${pagesLabel}</span>
-            <button class="btn-remove" data-id="${id}" title="Αφαίρεση">✕</button>
+            <button class="btn-remove" data-id="${id}" title="Αφαίρεση" aria-label="Αφαίρεση">✕</button>
           `;
           li.querySelector(".btn-remove").addEventListener("click", () =>
             removeFile(id),
@@ -578,19 +373,27 @@
         const n = files.length;
         $("list-section").classList.toggle("hidden", n === 0);
         $("options-panel").classList.toggle("hidden", n === 0);
+        $("privacy-note").classList.toggle("hidden", n > 0);
         uploadZone.classList.toggle("compact", n > 0);
 
         const total = files.reduce((s, f) => s + f.pageCount, 0);
-        $("summary").textContent =
-          n > 0
-            ? `${n} αρχεί${n === 1 ? "ο" : "α"}, ${total} σελίδ${total === 1 ? "α" : "ες"} / εικόνες`
-            : "";
+        $("summary").textContent = n
+          ? `${n} αρχεί${n === 1 ? "ο" : "α"}, ${total} σελίδ${total === 1 ? "α" : "ες"} / εικόνες`
+          : "";
 
         $("btn-run").disabled = n === 0 || running;
-        $("action-hint").textContent =
-          n > 0
-            ? `${total} σελίδ${total === 1 ? "α" : "ες"} προς ανάγνωση`
-            : "Προσθέστε τουλάχιστον 1 αρχείο για να ξεκινήσετε";
+        if (running) return; // the run itself owns the hint while it works
+        $("action-hint").textContent = n
+          ? `${total} σελίδ${total === 1 ? "α" : "ες"} προς ανάγνωση · περίπου ${estimate(total)}`
+          : "Προσθέστε τουλάχιστον 1 αρχείο · για καλύτερα αποτελέσματα σαρώστε στη μέγιστη ανάλυση";
+      }
+
+      /** Rough expectation so nobody thinks a long run has frozen. */
+      function estimate(pages) {
+        const secs = pages * 8;
+        if (secs < 60) return "λίγα δευτερόλεπτα";
+        const mins = Math.round(secs / 60);
+        return `${mins} λεπτ${mins === 1 ? "ό" : "ά"}`;
       }
 
       // ── Image enhancement (grayscale + threshold) ─────────────────
@@ -606,7 +409,6 @@
         ctx.putImageData(img, 0, 0);
       }
 
-      // ── Render a PDF page to the shared canvas ────────────────────
       async function renderPdfPage(pdfDoc, pageNum) {
         const page = await pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: 2.5 });
@@ -619,7 +421,6 @@
         return canvas;
       }
 
-      // ── Render an image file to the shared canvas ─────────────────
       async function renderImage(file) {
         const url = URL.createObjectURL(file);
         const img = new Image();
@@ -638,7 +439,6 @@
         return canvas;
       }
 
-      // ── Progress helpers ──────────────────────────────────────────
       function setProgress(msg, pct) {
         $("progress-msg").textContent = msg;
         $("progress-pct").textContent = Math.round(pct) + "%";
@@ -647,47 +447,55 @@
 
       // ── Main OCR run ──────────────────────────────────────────────
       $("btn-run").addEventListener("click", runOcr);
+      $("btn-cancel").addEventListener("click", () => {
+        cancelled = true;
+        setProgress("Διακοπή μετά την τρέχουσα σελίδα…", 100);
+      });
 
       async function runOcr() {
         if (running || files.length === 0) return;
         running = true;
+        cancelled = false;
+        Tools.hideError();
         $("btn-run").disabled = true;
+        $("btn-cancel").classList.remove("hidden");
         $("output-section").classList.add("hidden");
         $("progress-section").classList.remove("hidden");
         setProgress("Φόρτωση μηχανής OCR…", 0);
 
         const abs = (rel) => new URL(rel, location.href).href;
-        const worker = await Tesseract.createWorker(optLang, 1, {
-          workerPath: abs("../../libs/tesseract5/worker.min.js"),
-          langPath: abs("../../libs/tessdata-4.0.0_best"),
-          corePath: abs("../../libs/tesseract5/tesseract-core-simd.wasm.js"),
-          logger: () => {},
-        });
-
+        let worker = null;
         const outputParts = [];
         const total = files.reduce((s, f) => s + f.pageCount, 0);
         let done = 0;
 
         try {
+          worker = await Tesseract.createWorker(optLang, 1, {
+            workerPath: abs("../../libs/tesseract5/worker.min.js"),
+            langPath: abs("../../libs/tessdata-4.0.0_best"),
+            corePath: abs("../../libs/tesseract5/tesseract-core-simd.wasm.js"),
+            logger: () => {},
+          });
+
           for (const entry of files) {
+            if (cancelled) break;
+
             if (entry.type === "pdf") {
               const buf = await entry.file.arrayBuffer();
               const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
 
               for (let p = 1; p <= pdfDoc.numPages; p++) {
+                if (cancelled) break;
                 const label = `${entry.name} – σελ. ${p}/${pdfDoc.numPages}`;
                 setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
 
                 const canvas = await renderPdfPage(pdfDoc, p);
                 if (optEnhance) enhanceCanvas(canvas);
-
                 const {
                   data: { text },
                 } = await worker.recognize(canvas);
                 const trimmed = text.trim();
-                if (trimmed) {
-                  outputParts.push(`── ${label} ──\n${trimmed}`);
-                }
+                if (trimmed) outputParts.push(`── ${label} ──\n${trimmed}`);
                 done++;
                 setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
               }
@@ -697,45 +505,86 @@
 
               const canvas = await renderImage(entry.file);
               if (optEnhance) enhanceCanvas(canvas);
-
               const {
                 data: { text },
               } = await worker.recognize(canvas);
               const trimmed = text.trim();
-              if (trimmed) {
-                outputParts.push(`── ${label} ──\n${trimmed}`);
-              }
+              if (trimmed) outputParts.push(`── ${label} ──\n${trimmed}`);
               done++;
               setProgress(`Ανάγνωση: ${label}`, (done / total) * 100);
             }
           }
+
+          const text = outputParts.join("\n\n");
+          $("output-text").value = text;
+          $("output-section").classList.remove("hidden");
+          setProgress(
+            cancelled ? `Διακόπηκε μετά από ${done} σελίδες` : "Ολοκληρώθηκε",
+            (done / total) * 100,
+          );
+          $("action-hint").textContent = text
+            ? cancelled
+              ? `Διακόπηκε — κείμενο από ${done} σελίδ${done === 1 ? "α" : "ες"}`
+              : "Η ανάγνωση ολοκληρώθηκε"
+            : "Δεν βρέθηκε αναγνωρίσιμο κείμενο — δοκιμάστε χωρίς «Βελτίωση εικόνας» ή με καλύτερη σάρωση.";
+        } catch (err) {
+          $("progress-section").classList.add("hidden");
+          Tools.showError(
+            "Η μηχανή OCR δεν ξεκίνησε ή διακόπηκε: " +
+              (err && err.message ? err.message : err),
+          );
         } finally {
-          await worker.terminate();
+          if (worker) {
+            try {
+              await worker.terminate();
+            } catch {
+              /* already gone */
+            }
+          }
           running = false;
+          $("btn-cancel").classList.add("hidden");
           updateUI();
         }
-
-        setProgress("Ολοκληρώθηκε", 100);
-        $("output-text").value = outputParts.join("\n\n");
-        $("output-section").classList.remove("hidden");
       }
 
-      // ── Copy to clipboard ─────────────────────────────────────────
+      // ── Copy / save ───────────────────────────────────────────────
       $("btn-copy").addEventListener("click", async () => {
         const text = $("output-text").value;
         if (!text) return;
+        const btn = $("btn-copy");
         try {
           await navigator.clipboard.writeText(text);
-          const btn = $("btn-copy");
-          btn.textContent = "Αντιγράφηκε!";
-          setTimeout(() => {
-            btn.textContent = "Αντιγραφή";
-          }, 2000);
         } catch {
           $("output-text").select();
           document.execCommand("copy");
         }
+        btn.textContent = "Αντιγράφηκε!";
+        setTimeout(() => (btn.textContent = "Αντιγραφή"), 2000);
       });
+
+      $("btn-save-txt").addEventListener("click", () => {
+        const text = $("output-text").value;
+        if (!text) return;
+        const base = files.length
+          ? files[0].name.replace(/\.[^.]+$/, "")
+          : "κείμενο";
+        Tools.download(
+          new TextEncoder().encode(text),
+          "text/plain;charset=utf-8",
+          Tools.safeName(`${base}_κείμενο.txt`),
+        );
+      });
+
+      // ── A file handed over from another tool ─────────────────────
+      Tools.takeHandoff().then(async (entry) => {
+        if (!entry) return;
+        const file = new File([entry.bytes], entry.name, {
+          type: "application/pdf",
+        });
+        await addFiles([file]);
+      });
+
+      updateUI();
     </script>
   </body>
 </html>
