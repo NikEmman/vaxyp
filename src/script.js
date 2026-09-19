@@ -23,6 +23,8 @@ import {
   splitOfficerText,
   getAstynomikosParts,
   getSuspectSurname,
+  calculateAge,
+  formatSuspectsForKatagrafi,
 } from "./formatters.js";
 import {
   getData,
@@ -398,6 +400,8 @@ refreshInitialBtn.addEventListener("click", () => {
   today = new Date();
   //reset time passed
   state.timePassed = 0;
+  // the clock moved back to the new timestamp, so the slot follows it
+  state.timeStart = formatTime(today, state.timePassed);
   refreshInitialText();
   document
     .querySelectorAll("[data-done]")
@@ -689,7 +693,14 @@ const clipboardIdYpoptos = document.querySelector(".clipboard-id-ypoptos");
 const copyIdYpoptosBtn = document.querySelector(".copy-id-ypoptos");
 
 if (taytotitaYpoptos.value) {
-  clipboardIdYpoptos.value = formatIdInfo(taytotitaYpoptos.value, data, state);
+  // the browser restores the textarea across reloads, so this parses the
+  // suspect back into ypoptosData; without the flag it lands in victimData
+  clipboardIdYpoptos.value = formatIdInfo(
+    taytotitaYpoptos.value,
+    data,
+    state,
+    true,
+  );
   state.suspect = clipboardIdYpoptos.value;
 } else {
   state.suspect = "";
@@ -1284,6 +1295,40 @@ feromenou.addEventListener("click", (e) => {
     timed: true,
     advances: false, // no timestamp inside, so it does not take up a slot
   });
+});
+
+// deltio diereynisis methis button
+const deltioDiereynisis = document.getElementById("deltioDiereynisis");
+deltioDiereynisis.addEventListener("click", (e) => {
+  applySelectedOfficer();
+  Object.assign(state, { ...state.ypoptosData });
+  // the form prints the patronymic inline, so it reads as Δημητρίου, not ΔΗΜΗΤΡΙΟΥ
+  state.fatherNameGen = capitalize(state.fatherNameGen || "");
+  state.timeStart = formatTime(today, state.timePassed);
+  state.age = calculateAge(state.ypoptosData.birthDate, today);
+  download(e.currentTarget, ektheseis.deltioDiereynisis, state.ypoptosData, {
+    timed: true,
+    advances: false, // standalone traffic form, not part of the report sequence
+  });
+});
+
+// deltio katagrafis methis button (all stored suspects, numbered 1. 2. 3. ...)
+const deltioKatagrafisMethis = document.getElementById(
+  "deltioKatagrafisMethis",
+);
+deltioKatagrafisMethis.addEventListener("click", (e) => {
+  applySelectedOfficer();
+  applyAllGrammar(state);
+  // does not advance the clock, but reports the slot it currently points at
+  state.timeStart = formatTime(today, state.timePassed);
+  state.suspectsCount = state.suspects.length;
+  state.suspectsList = formatSuspectsForKatagrafi(state.suspects);
+  download(
+    e.currentTarget,
+    ektheseis.deltioKatagrafisMethis,
+    state.suspects[0]?.data || {},
+    { advances: false }, // standalone shift bulletin, not part of the report sequence
+  );
 });
 
 /// ENDOOIKOGENIAKI

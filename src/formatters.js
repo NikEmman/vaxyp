@@ -209,6 +209,9 @@ export function formatIdInfo(input, data, state, suspect = false) {
       streetNumber: getValue("Αριθμός"),
       sex: getValue("Φύλο"),
     };
+    fields.fatherNameGen = toGenitiveMale(fields.fatherName);
+    // holders of an Α.Δ.Τ. (Greek national ID card) are Greek citizens by law
+    fields.nationality = "ΕΛΛΗΝΙΚΗ";
 
     // Handle special cases
     if (fields.streetNumber === "Ταχ.Κώδικας") {
@@ -269,6 +272,7 @@ export function formatIdInfo(input, data, state, suspect = false) {
       birthPlace: getValue("Χώρα Γέννησης"),
       nationality: getValue("Υπηκοότητα(ες)"),
     };
+    fields.fatherNameGen = toGenitiveMale(fields.fatherName);
 
     // extract the data for ypefthini dilosi usage
     suspect ? (state.ypoptosData = fields) : (state.victimData = fields);
@@ -277,6 +281,76 @@ export function formatIdInfo(input, data, state, suspect = false) {
     const formattedString = `${fields.surname} ${fields.firstName} του ${fields.fatherName} και της ${fields.motherName}, υπηκοότητα ${fields.nationality}, γεν. ${fields.birthDate} στ ${fields.birthPlace}, κάτοικος ****, οδός **** αρ. ****`;
     return formattedString;
   }
+}
+// age in full years on referenceDate, from a DD-MM-YYYY birth date
+export function calculateAge(birthDateStr, referenceDate) {
+  const [day, month, year] = (birthDateStr || "").split("-").map(Number);
+  if (!day || !month || !year) return "";
+  let age = referenceDate.getFullYear() - year;
+  const hadBirthdayThisYear =
+    referenceDate.getMonth() + 1 > month ||
+    (referenceDate.getMonth() + 1 === month && referenceDate.getDate() >= day);
+  if (!hadBirthdayThisYear) age--;
+  return String(age);
+}
+
+// The keyword swap drops its value straight into document.xml, so {suspectsList}
+// carries its own runs: bold keys, plain values and breaks between the entries.
+const xmlEscape = (text) =>
+  String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const KATAGRAFI_FONT =
+  '<w:rFonts w:cs="Arial" w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/>';
+
+const katagrafiRun = (text, bold) =>
+  `<w:r><w:rPr>${KATAGRAFI_FONT}${bold ? "<w:b/>" : '<w:b w:val="false"/>'}` +
+  `</w:rPr><w:t xml:space="preserve">${xmlEscape(text)}</w:t></w:r>`;
+
+const KATAGRAFI_LINE_BREAK = "<w:r><w:br/></w:r>";
+
+// numbered entries ("N. Επώνυμο: ... ΤΟΠΟΣ ΕΛΕΓΧΟΥ: -") for every stored suspect;
+// fields the app doesn't collect (driving licence, AFM, alcohol readings, stop
+// location) are left as "-" for the officer to fill in by hand
+export function formatSuspectsForKatagrafi(suspects) {
+  if (!suspects.length) return "";
+
+  const entries = suspects.map(({ data }, index) => {
+    const d = data || {};
+    const field = (value) => value || "-";
+    const address =
+      cleanSpaces(`${d.street || ""} ${d.streetNumber || ""}`) || "-";
+    const pairs = [
+      [`${index + 1}. Επώνυμο: `, `${field(d.surname)} `],
+      ["Όνομα: ", `${field(d.firstName)} `],
+      ["Πατρώνυμο: ", `${field(d.fatherName)} `],
+      ["Μητρώνυμο: ", `${field(d.motherName)} `],
+      ["Ημ.γεν. ", `${field(d.birthDate)} `],
+      ["Τόπος γέννησης: ", `${field(d.birthPlace)}, `],
+      ["κάτοικος: ", `${field(d.area)}, `],
+      ["οδός: ", `${address}, `],
+      ["Υπηκοότητα: ", `${field(d.nationality)} `],
+      ["με Α.Δ.Τ.: ", `${field(d.idNumber)} `],
+      ["Α.Φ.Μ: ", "-, "],
+      ["Αριθμός άδειας οδηγήσεως: ", "-, "],
+      ["Κατηγορία: ", "-, "],
+      ["Ποσοστό Αιθυλικής Αλκοόλης: ", "α) - mg/lt β) - mg/lt."],
+    ];
+    return (
+      pairs
+        .map(([key, value]) => katagrafiRun(key, true) + katagrafiRun(value, false))
+        .join("") +
+      KATAGRAFI_LINE_BREAK +
+      katagrafiRun("ΤΟΠΟΣ ΕΛΕΓΧΟΥ: ", true) +
+      katagrafiRun("-", false)
+    );
+  });
+
+  // close the run holding the keyword, then reopen one for the template to close
+  return (
+    "</w:t></w:r>" +
+    entries.join(KATAGRAFI_LINE_BREAK + KATAGRAFI_LINE_BREAK) +
+    `<w:r><w:rPr>${KATAGRAFI_FONT}<w:b w:val="false"/></w:rPr><w:t xml:space="preserve">`
+  );
 }
 
 //person formatter for manual info entry

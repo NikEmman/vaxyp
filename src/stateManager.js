@@ -1,9 +1,11 @@
 import {
   defaultData,
   months,
+  monthsNominative,
   days,
   defaultAstynomikos,
 } from "./defaultData.js";
+import { formatTime } from "./formatters.js";
 
 export const getData = () => {
   const localStorageData = JSON.parse(localStorage.getItem("dataObject"));
@@ -41,10 +43,14 @@ export const getState = (localData, todayDate) => {
     dayName: days[specificDate.getDay()],
     year: todayDate.getFullYear(),
     month: months[todayDate.getMonth()],
+    monthNom: monthsNominative[todayDate.getMonth()],
     day: todayDate.getDate(),
     victimData: {},
     ypoptosData: {},
     timePassed: 0,
+    // the report buttons recompute this from timePassed; seeded here so a
+    // template that reads it still fills in before any report is produced
+    timeStart: formatTime(todayDate),
     apolesthen: "",
     protokolo: "",
     protokoloEndo: "",

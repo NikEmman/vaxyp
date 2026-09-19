@@ -630,6 +630,20 @@
           <textarea readonly class="clipboard-oxima output"></textarea>
           <button class="copy-oxima">Αντιγραφή</button>
         </div>
+        <hr />
+        <p>Τροχονομικά</p>
+        <div class="buttons">
+          <button
+            class="helpBtn large"
+            id="deltioDiereynisis"
+            data-person="suspect"
+          >
+            Δελτίο Διερεύνησης Μέθης
+          </button>
+          <button class="helpBtn large" id="deltioKatagrafisMethis">
+            Δελτίο Καταγραφής Μέθης
+          </button>
+        </div>
       </div>
       <div class="ektheseisTab data hidden">
         <div class="statusLine">
@@ -1690,6 +1704,8 @@
           <tr><td>{timeStart}</td><td>Ώρα έναρξης (π.χ. 22:15)</td></tr>
           <tr><td>{timeEnd}</td><td>Ώρα λήξης (π.χ. 22:25)</td></tr>
           <tr><td>{arrestTime}</td><td>Ώρα σύλληψης, 5 λεπτά πριν την ώρα έναρξης· υπολογίζεται μόνο όταν ανεβάσετε αρχείο με "Σύλληψη" στο όνομά του</td></tr>
+          <tr><td>{suspectsList}</td><td>Όλοι οι αποθηκευμένοι δράστες (καρτέλα "Ύποπτος"), αριθμημένοι 1. 2. 3. ...</td></tr>
+          <tr><td>{suspectsCount}</td><td>Πλήθος αποθηκευμένων δραστών</td></tr>
         </table>
 
         <h3>Στοιχεία Παθόντα/Δράστη</h3>
@@ -1698,7 +1714,9 @@
           <tr><td>{surname}</td><td>Επώνυμο</td></tr>
           <tr><td>{firstName}</td><td>Όνομα</td></tr>
           <tr><td>{fatherName}</td><td>Πατρώνυμο</td></tr>
+          <tr><td>{fatherNameGen}</td><td>Πατρώνυμο σε γενική (π.χ. "του Δημητρίου")</td></tr>
           <tr><td>{motherName}</td><td>Μητρώνυμο</td></tr>
+          <tr><td>{age}</td><td>Ηλικία, υπολογισμένη από την ημερομηνία γέννησης</td></tr>
           <tr><td>{birthDate}</td><td>Ημερομηνία γέννησης</td></tr>
           <tr><td>{birthPlace}</td><td>Τόπος γέννησης</td></tr>
           <tr><td>{idNumber}</td><td>Αριθμός Δ.Τ.</td></tr>
@@ -1725,6 +1743,15 @@
           <tr><td>{iatro}</td><td>Ιατρός</td></tr>
         </table>
 
+        <h3>Στοιχεία Διοικητή</h3>
+        <p>Συμπληρώνονται στις Ρυθμίσεις</p>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
+          <tr><td>{dioikitisName}</td><td>Ονοματεπώνυμο Διοικητή</td></tr>
+          <tr><td>{dioikitisRank}</td><td>Βαθμός Διοικητή</td></tr>
+          <tr><td>{oYD}</td><td>Άρθρο "Ο"/"Η" ανάλογα με το φύλο του Διοικητή (π.χ. "{oYD} ΔΙΟΙΚΗΤΗΣ")</td></tr>
+        </table>
+
         <h3>Στοιχεία Αστυνομικού</h3>
         <table>
           <tr><th>Λέξη Κλειδί</th><th>Περιγραφή / Παράδειγμα</th></tr>
@@ -1738,7 +1765,8 @@
           <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
           <tr><td>{formattedDate}</td><td>Ημερομηνία (DD-MM-YYYY)</td></tr>
           <tr><td>{year}</td><td>Έτος</td></tr>
-          <tr><td>{month}</td><td>Μήνας</td></tr>
+          <tr><td>{month}</td><td>Μήνας σε γενική (π.χ. "Σεπτεμβρίου")</td></tr>
+          <tr><td>{monthNom}</td><td>Μήνας σε ονομαστική (π.χ. "Σεπτέμβριος")</td></tr>
           <tr><td>{day}</td><td>Ημέρα μήνα</td></tr>
           <tr><td>{dayName}</td><td>Όνομα ημέρας (Δευτέρα, κλπ)</td></tr>
         </table>

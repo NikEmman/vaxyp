@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tilefono").value = data.tilefono || "";
     document.getElementById("email").value = data.email || "";
     document.getElementById("amy").value = data.amy || "";
+    document.getElementById("dioikitisName").value = data.dioikitisName || "";
+    document.getElementById("dioikitisRank").value = data.dioikitisRank || "";
+    document.getElementById("dioikitisSex").value = data.dioikitisSex || "Άντρας";
   }
 
   // Check if localStorage dataObject exists and populate form fields
@@ -234,6 +237,9 @@ document.addEventListener("DOMContentLoaded", () => {
       tilefono: formData.get("tilefono").replace(/\s/g, ""),
       email: formData.get("email"),
       amy: formData.get("amy"),
+      dioikitisName: formData.get("dioikitisName"),
+      dioikitisRank: formData.get("dioikitisRank"),
+      dioikitisSex: formData.get("dioikitisSex"),
     };
     // Save to local storage
     localStorage.setItem("dataObject", JSON.stringify(data));

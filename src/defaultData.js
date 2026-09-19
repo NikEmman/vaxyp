@@ -13,6 +13,9 @@ const defaultData = {
   geniki: "Α.Μ.Θ.",
   iatro: "ΡΟΔΟΠΗΣ",
   amy: "4587",
+  dioikitisName: "",
+  dioikitisRank: "",
+  dioikitisSex: "Άντρας",
 };
 const months = [
   "Ιανουαρίου",
@@ -27,6 +30,21 @@ const months = [
   "Οκτωβρίου",
   "Νοεμβρίου",
   "Δεκεμβρίου",
+];
+// months is genitive, for "του μήνα Σεπτεμβρίου"; form fields labelled "Μήνας" need nominative
+const monthsNominative = [
+  "Ιανουάριος",
+  "Φεβρουάριος",
+  "Μάρτιος",
+  "Απρίλιος",
+  "Μάιος",
+  "Ιούνιος",
+  "Ιούλιος",
+  "Αύγουστος",
+  "Σεπτέμβριος",
+  "Οκτώβριος",
+  "Νοέμβριος",
+  "Δεκέμβριος",
 ];
 
 const days = [
@@ -76,4 +94,11 @@ const dikografies = {
   //   "apostoliEndo",
   // ],
 };
-export { defaultData, months, days, dikografies, defaultAstynomikos };
+export {
+  defaultData,
+  months,
+  monthsNominative,
+  days,
+  dikografies,
+  defaultAstynomikos,
+};
