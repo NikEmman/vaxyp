@@ -471,28 +471,35 @@ function astynomikosForDocs() {
   };
 }
 
-// True while neither the rank nor the name has been filled in, so the
-// documents are about to go out with the placeholders
+// True while either the rank or the name is still empty: astynomikosForDocs()
+// falls back per field, so one blank is enough for a placeholder to go out
 function astynomikosMissing() {
   const { rank, name } = readAstynomikosFields();
-  return !rank && !name;
+  return !rank || !name;
 }
 
 // Only one notification is on screen at a time, so the warning cannot be shown
 // before the download or the success message would bury it. The documents that
 // use the officer raise this flag on their way out and download() reports it
 // once the file is there, the way the bulk upload warns about a missing person.
-let officerPlaceholdersUsed = false;
+// holds the officer line as it went into the document, so the warning names the
+// placeholder actually used - "ΥΑ ΕΠΙΘΕΤΟ Όνομα" when only the name is blank
+let officerPlaceholdersUsed = "";
 
 function flagAstynomikosMissing() {
-  if (astynomikosMissing()) officerPlaceholdersUsed = true;
+  if (!astynomikosMissing()) return;
+  const { rank, name } = astynomikosForDocs();
+  officerPlaceholdersUsed = joinRankName(rank, name);
 }
 
-function reportAstynomikosPlaceholders() {
-  if (!officerPlaceholdersUsed) return;
-  officerPlaceholdersUsed = false;
+// The flag belongs to the attempt that raised it, so it is cleared here either
+// way: a report that failed must not leave the warning behind for the next one.
+function reportAstynomikosPlaceholders(notify = true) {
+  const used = officerPlaceholdersUsed;
+  officerPlaceholdersUsed = "";
+  if (!used || !notify) return;
   displayNotification(
-    "Προσοχή: η έκθεση κατέβηκε χωρίς στοιχεία αστυνομικού, με ΒΑΘΜΟΣ ΕΠΙΘΕΤΟ Όνομα.",
+    `Προσοχή: η έκθεση κατέβηκε χωρίς πλήρη στοιχεία αστυνομικού, με ${used}.`,
     "warning",
   );
 }
@@ -1041,6 +1048,28 @@ function renderStatus() {
 }
 renderStatus();
 
+// One report at a time. The button handlers write the timestamps, the initial
+// text and the grammar into the shared `state` before download() is ever
+// reached, so a second click during a generation would both reuse the slot the
+// clock still points at and rewrite the fields the in-flight document is
+// reading. The click is swallowed in the capture phase, before any handler
+// runs; preventDefault matters because the two submit buttons would otherwise
+// still submit their form.
+let downloadInFlight = false;
+
+document.addEventListener(
+  "click",
+  (e) => {
+    if (!downloadInFlight) return;
+    // every report button is .helpBtn.large, as are the two submit buttons
+    // that replace the person a running report is being filled with
+    if (!e.target.closest(".helpBtn.large:not(#help-menu-toggle)")) return;
+    e.stopPropagation();
+    e.preventDefault();
+  },
+  true,
+);
+
 // Shared by the report buttons: every report is written in the slot the clock
 // currently points at, and only moves the clock on once it has been produced.
 // That way whichever report is drafted first starts at the reference time, and
@@ -1055,9 +1084,15 @@ async function download(
   { timed = false, advances = timed, replacements = state } = {},
 ) {
   const time = state.timeStart;
-  const ok = await generateWord(ekthesi, replacements, person);
+  let ok = false;
+  downloadInFlight = true;
+  try {
+    ok = await generateWord(ekthesi, replacements, person);
+  } finally {
+    downloadInFlight = false;
+  }
   if (ok && advances) state.timePassed += data.xronosPeratosis * 2;
-  if (ok) reportAstynomikosPlaceholders();
+  reportAstynomikosPlaceholders(ok);
   refreshInitialText();
   renderStatus();
   if (ok) button.dataset.done = timed ? `✓ ${time}` : "✓";

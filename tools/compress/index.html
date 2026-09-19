@@ -346,10 +346,18 @@
       }
 
       // ── Compression ───────────────────────────────────────────────
+      // toBlob hands back null when the browser cannot encode the canvas (too
+      // large); rejecting keeps the run from hanging behind the modal overlay
       function canvasToJpegBytes(canvas, quality) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           canvas.toBlob(
-            async (blob) => resolve(new Uint8Array(await blob.arrayBuffer())),
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Η σελίδα ήταν πολύ μεγάλη για συμπίεση."));
+                return;
+              }
+              blob.arrayBuffer().then((buf) => resolve(new Uint8Array(buf)), reject);
+            },
             "image/jpeg",
             quality,
           );

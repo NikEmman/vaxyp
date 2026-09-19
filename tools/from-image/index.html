@@ -383,9 +383,17 @@
         canvas.height = img.naturalHeight;
         canvas.getContext("2d").drawImage(img, 0, 0);
 
-        return new Promise((res) =>
-          canvas.toBlob(async (blob) => {
-            res({ bytes: new Uint8Array(await blob.arrayBuffer()), fmt: "png" });
+        // a null blob means the browser could not encode the canvas; rejecting
+        // lets the create handler report it instead of hanging on the overlay
+        return new Promise((res, rej) =>
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              rej(new Error(`Η εικόνα ${file.name} ήταν πολύ μεγάλη.`));
+              return;
+            }
+            blob
+              .arrayBuffer()
+              .then((buf) => res({ bytes: new Uint8Array(buf), fmt: "png" }), rej);
           }, "image/png"),
         );
       }
@@ -417,17 +425,24 @@
               const canvas = document.createElement("canvas");
               const img = new Image();
               const url = URL.createObjectURL(entry.file);
-              await new Promise((res) => {
-                img.onload = res;
-                img.src = url;
-              });
-              URL.revokeObjectURL(url);
+              try {
+                await new Promise((res, rej) => {
+                  img.onload = res;
+                  img.onerror = () =>
+                    rej(new Error(`Η εικόνα ${entry.file.name} δεν διαβάστηκε.`));
+                  img.src = url;
+                });
+              } finally {
+                URL.revokeObjectURL(url);
+              }
               canvas.width = img.naturalWidth;
               canvas.height = img.naturalHeight;
               canvas.getContext("2d").drawImage(img, 0, 0);
               const blob = await new Promise((res) =>
                 canvas.toBlob(res, "image/png"),
               );
+              if (!blob)
+                throw new Error(`Η εικόνα ${entry.file.name} ήταν πολύ μεγάλη.`);
               embedded = await doc.embedPng(
                 new Uint8Array(await blob.arrayBuffer()),
               );

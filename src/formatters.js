@@ -353,11 +353,20 @@ export function formatSuspectsForKatagrafi(suspects) {
   );
 }
 
+// <input type="date"> hands back YYYY-MM-DD, while the scanned documents and
+// everything that reads a date back - the age on the Δελτίο Διερεύνησης, the
+// issue year on the Δελτίο Φερόμενου, the dates printed in the reports - work
+// in DD-MM-YYYY. The two sources are brought to the same shape here.
+const fromDateInput = (value) => {
+  const [year, month, day] = (value || "").split("-");
+  return day ? `${day}-${month}-${year}` : value || "";
+};
+
 //person formatter for manual info entry
 export function extractPersonInfo(formId) {
   const formData = new FormData(document.getElementById(formId));
 
-  return {
+  const fields = {
     nationality: formData.get("nationality"),
     surname: formData.get("surname"),
     firstName: formData.get("firstName"),
@@ -365,12 +374,12 @@ export function extractPersonInfo(formId) {
     fatherSurname: formData.get("surname"),
     motherName: formData.get("motherName"),
     motherSurname: "",
-    birthDate: formData.get("birthDate"),
+    birthDate: fromDateInput(formData.get("birthDate")),
     birthPlace: formData.get("birthPlace"),
     docuType: formData.get("docuType"),
     idNumber: formData.get("idNumber"),
     issuingAuthority: formData.get("issuingAuthority"),
-    issueDate: formData.get("issueDate"),
+    issueDate: fromDateInput(formData.get("issueDate")),
     phoneNumber: formData.get("phoneNumber"),
     email: formData.get("email"),
     street: formData.get("street"),
@@ -378,6 +387,11 @@ export function extractPersonInfo(formId) {
     area: formData.get("area"),
     sex: formData.get("sex"),
   };
+  // the scanned paths carry the patronymic in the genitive as well, and the
+  // person objects are copied over the state wholesale: without it here, a
+  // manually entered suspect would keep the previous one's showing through
+  fields.fatherNameGen = toGenitiveMale(fields.fatherName);
+  return fields;
 }
 export function formatFormData(data) {
   return `${data.surname.toUpperCase()} ${capitalize(
