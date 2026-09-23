@@ -126,6 +126,7 @@
     { slug: "merge", label: "Συγχώνευση PDF" },
     { slug: "compress", label: "Συμπίεση PDF" },
     { slug: "to-image", label: "PDF σε εικόνα" },
+    { slug: "to-word", label: "PDF σε Word" },
     { slug: "ocr", label: "OCR – Ανάγνωση κειμένου" },
   ];
 
