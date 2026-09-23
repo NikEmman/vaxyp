@@ -12,6 +12,7 @@
   --light-blue: #e3f2fd;
   --accent-blue: #1976d2;
   --disabled: #98aec4;
+  --disabled-text: #ffffff;
   --text-dark: #263238;
   --text-light: #ffffff;
   --border-color: #90caf9;
@@ -30,6 +31,7 @@
   --label-color: #1976d2;
   --btn-hover: #0d47a1;
   --btn-hover-text: #ffffff;
+  --header-bg: var(--primary-blue);
 }
 .dark {
   color-scheme: dark;
@@ -40,15 +42,16 @@
   --light-blue: #1a2236;
 
   --primary-blue: #4a8fd4;
-  --secondary-blue: #3a7bbf;
-  --accent-blue: #6aaee8;
+  --secondary-blue: #2f6db3;
+  --accent-blue: #3d82cc;
   --label-color: #89b8e8;
 
   --text-dark: #c8d3e0;
   --text-light: #eef3f8;
 
   --border-color: #2a3547;
-  --disabled: #3d4d60;
+  --disabled: #283241;
+  --disabled-text: #718096;
 
   --summary-bg: #1d2840;
   --summary-hover: #253252;
@@ -62,8 +65,10 @@
   --invalid-bg: #2a1515;
 
   /* Button Hovers */
-  --btn-hover: #5aa0d8;
+  --btn-hover: #4a8fd4;
   --btn-hover-text: #ffffff;
+
+  --header-bg: #152036;
 }
 
 body {
@@ -85,11 +90,15 @@ header {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  background-color: var(--primary-blue);
+  background-color: var(--header-bg);
   margin: -2em -2em 0 -2em;
   padding: 1em 2em;
   color: var(--text-light);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.dark header {
+  border-bottom: 1px solid var(--border-color);
 }
 
 header a {
@@ -827,6 +836,7 @@ input[type="file"]::file-selector-button:active {
 button:disabled,
 .button:disabled {
   background-color: var(--disabled);
+  color: var(--disabled-text);
   cursor: not-allowed;
   &:active {
     transform: none;
@@ -1061,7 +1071,7 @@ dialog:focus {
 }
 
 dialog a {
-  color: var(--accent-blue);
+  color: var(--label-color);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -1747,8 +1757,8 @@ hr {
 
 /* dark mode state: knob slides right, shows moon */
 .dark .theme-toggle {
-  background: rgba(70, 102, 147, 0.25);
-  border-color: rgba(35, 45, 63, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dark .theme-toggle::before {
@@ -1758,8 +1768,8 @@ hr {
 }
 
 .dark .theme-toggle:hover {
-  background: rgba(44, 67, 100, 0.25);
-  border-color: rgba(18, 24, 34, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 @media (max-width: 680px) {
   .navButtons {
@@ -1786,6 +1796,9 @@ button.btn-secondary:disabled {
   background: transparent;
   color: var(--disabled);
   border-color: var(--border-color);
+}
+.dark .btn-secondary:disabled {
+  color: var(--disabled-text);
 }
 .btn-danger,
 button.btn-danger {
