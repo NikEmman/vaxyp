@@ -39,7 +39,7 @@
     const name = (err && (err.name || "")) + "";
     const msg = (err && (err.message || err)) + "";
     if (/password|Encrypted|encrypt/i.test(name + msg))
-      return "Το PDF προστατεύεται με κωδικό. Αφαιρέστε τον κωδικό και δοκιμάστε ξανά.";
+      return "Το PDF είναι κλειδωμένο. Ξεκλειδώστε το πρώτα με το εργαλείο «Ξεκλείδωμα PDF» και δοκιμάστε ξανά.";
     if (/Invalid PDF|InvalidPDF|Failed to parse|structure/i.test(name + msg))
       return "Το αρχείο δεν φαίνεται να είναι έγκυρο PDF ή είναι κατεστραμμένο.";
     return "Κάτι πήγε στραβά με το αρχείο: " + msg;

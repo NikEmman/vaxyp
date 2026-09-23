@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="shortcut icon" href="../../images/logo.png" type="image/x-icon" />
+    <title>Ξεκλείδωμα PDF</title>
+    <link rel="stylesheet" href="../tools.css" />
+    <style>
+      .doc-summary {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        background: var(--background-white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.9em 1.2em;
+        margin-bottom: 1.2em;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .doc-summary .preview {
+        width: 58px;
+        height: 76px;
+        flex-shrink: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--background-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .doc-summary .preview canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .doc-summary .preview svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--primary-blue);
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0.7;
+      }
+      .doc-summary .meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .doc-summary .meta .name {
+        font-weight: 600;
+        color: var(--primary-blue);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .doc-summary .meta .facts {
+        font-size: 0.85em;
+        color: var(--text-dark);
+        opacity: 0.65;
+      }
+      #pw-input {
+        width: 16em;
+        max-width: 100%;
+      }
+      .show-pw {
+        display: flex;
+        align-items: center;
+        gap: 0.35em;
+        font-size: 0.85em;
+        color: var(--text-dark);
+        cursor: pointer;
+        user-select: none;
+      }
+      .options-hint.is-error {
+        color: var(--error-red);
+        opacity: 1;
+        font-weight: 600;
+      }
+      #result-banner {
+        display: flex;
+        gap: 0.6em;
+        background: var(--light-blue);
+        border: 1px solid var(--secondary-blue);
+        border-radius: 8px;
+        padding: 0.9em 1.2em;
+        margin-bottom: 1.2em;
+        font-size: 0.92em;
+        color: var(--text-dark);
+      }
+      #pw-form.hidden,
+      #result-banner.hidden {
+        display: none;
+      }
+      #result-banner strong {
+        color: var(--primary-blue);
+      }
+      @media (max-width: 700px) {
+        #pw-form .option-group {
+          flex-wrap: wrap;
+          width: 100%;
+        }
+        #pw-input {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <script src="../../src/themeInit.js"></script>
+    <header>
+      <div class="navButtons">
+        <a href="../">← Εργαλεία PDF</a>
+      </div>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        title="Αλλαγή θέματος"
+      ></button>
+    </header>
+
+    <main>
+      <div class="tool-head">
+        <h1>Ξεκλείδωμα PDF</h1>
+        <p>
+          Αφαιρέστε τον κωδικό ή τους περιορισμούς εκτύπωσης, αντιγραφής και
+          επεξεργασίας. Το κείμενο και η ποιότητα μένουν ανέπαφα.
+        </p>
+      </div>
+
+      <div id="error-box" class="inline-error hidden"></div>
+
+      <!-- IDLE -->
+      <div id="upload-section">
+        <div class="upload-zone" id="upload-zone">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <h2>Ανεβάστε ένα κλειδωμένο PDF</h2>
+          <p>Σύρετε &amp; αφήστε, ή κάντε κλικ για επιλογή</p>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,application/pdf" />
+        <p class="privacy-note">
+          🔒 Η επεξεργασία γίνεται τοπικά στον υπολογιστή σας — το αρχείο και ο
+          κωδικός δεν ανεβαίνουν πουθενά.
+        </p>
+      </div>
+
+      <!-- LOADING -->
+      <div id="loading-section" class="hidden">
+        <div class="spinner"></div>
+        <p id="loading-msg">Άνοιγμα αρχείου…</p>
+      </div>
+
+      <!-- LOCKED / DONE -->
+      <div id="ready-section" class="hidden">
+        <div class="doc-summary">
+          <div class="preview" id="preview"></div>
+          <div class="meta">
+            <div class="name" id="file-name"></div>
+            <div class="facts" id="file-facts"></div>
+          </div>
+          <button id="btn-change-file" class="btn-secondary">
+            Άλλο αρχείο
+          </button>
+        </div>
+
+        <form id="pw-form" class="options-panel" autocomplete="off">
+          <div class="option-group">
+            <label for="pw-input">Κωδικός</label>
+            <input type="password" id="pw-input" spellcheck="false" />
+          </div>
+          <label class="show-pw">
+            <input type="checkbox" id="pw-show" /> Εμφάνιση
+          </label>
+          <span class="options-hint" id="pw-hint"></span>
+        </form>
+
+        <div id="result-banner" class="hidden">
+          <span>✓</span>
+          <span id="result-text"></span>
+        </div>
+      </div>
+    </main>
+
+    <div class="action-bar hidden" id="action-bar">
+      <span class="hint" id="action-hint"></span>
+      <div id="continue-host" class="hidden"></div>
+      <button id="btn-download" class="hidden">Λήψη PDF</button>
+      <button id="btn-unlock" type="submit" form="pw-form">Ξεκλείδωμα</button>
+    </div>
+
+    <script src="../../libs/pdf.min.js"></script>
+    <script src="../../libs/qpdf/qpdf.js"></script>
+    <script src="../tool-common.js"></script>
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "../../libs/pdf.worker.min.js";
+
+      const $ = (id) => document.getElementById(id);
+
+      const PW_HINT =
+        "Χρειάζεται ο κωδικός με τον οποίο ανοίγει το αρχείο — ξεχασμένοι κωδικοί δεν ανακτώνται.";
+      const LOCK_ICON = `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>`;
+
+      let pdfBytes = null;
+      let baseName = "";
+      let lastOutput = null;
+
+      function setState(s) {
+        $("upload-section").classList.toggle("hidden", s !== "idle");
+        $("loading-section").classList.toggle("hidden", s !== "loading");
+        $("ready-section").classList.toggle("hidden", s !== "locked" && s !== "done");
+        $("action-bar").classList.toggle("hidden", s !== "locked" && s !== "done");
+        $("pw-form").classList.toggle("hidden", s !== "locked");
+        $("btn-unlock").classList.toggle("hidden", s !== "locked");
+        $("result-banner").classList.toggle("hidden", s !== "done");
+        $("btn-download").classList.toggle("hidden", s !== "done");
+        if (s !== "done") $("continue-host").classList.add("hidden");
+      }
+
+      function formatSize(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      function setPwHint(msg, isError) {
+        $("pw-hint").textContent = msg;
+        $("pw-hint").classList.toggle("is-error", !!isError);
+      }
+
+      // ── qpdf (WebAssembly) ────────────────────────────────────────
+      // pdf-lib can't decrypt, and re-rendering through pdf.js would turn the
+      // text into images — qpdf writes a real decrypted copy instead.
+      let qpdfReady = null;
+      function getQpdf() {
+        if (!qpdfReady)
+          qpdfReady = Module().catch((err) => {
+            qpdfReady = null;
+            throw err;
+          });
+        return qpdfReady;
+      }
+
+      const IN = "/in.pdf";
+      const OUT = "/out.pdf";
+
+      // qpdf exit codes: 0 ok, 2 error, 3 ok with warnings
+      async function runQpdf(args) {
+        const q = await getQpdf();
+        q.FS.writeFile(IN, new Uint8Array(pdfBytes));
+        try {
+          let code;
+          try {
+            code = q.callMain(args);
+          } catch (e) {
+            code = e && typeof e.status === "number" ? e.status : 2;
+          }
+          const out = code !== 2 && args.includes(OUT) ? q.FS.readFile(OUT) : null;
+          return { code, out };
+        } finally {
+          for (const p of [IN, OUT]) {
+            try {
+              q.FS.unlink(p);
+            } catch {
+              /* not written */
+            }
+          }
+        }
+      }
+
+      async function isEncrypted() {
+        return (await runQpdf(["--is-encrypted", IN])).code === 0;
+      }
+
+      async function decrypt(password) {
+        const args = ["--decrypt"];
+        if (password) args.push("--password=" + password);
+        const { out } = await runQpdf([...args, IN, OUT]);
+        if (!out) throw new Error("Δεν ήταν δυνατή η αφαίρεση της προστασίας.");
+        return out;
+      }
+
+      // callMain blocks the page; give the spinner a frame to show first
+      const nextFrame = () =>
+        new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+
+      // ── Upload ────────────────────────────────────────────────────
+      const uploadZone = $("upload-zone");
+      const fileInput = $("file-input");
+
+      uploadZone.addEventListener("click", () => fileInput.click());
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag-over");
+      });
+      ["dragleave", "drop"].forEach((ev) =>
+        uploadZone.addEventListener(ev, () =>
+          uploadZone.classList.remove("drag-over"),
+        ),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      });
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files[0]) handleFile(fileInput.files[0]);
+      });
+      $("btn-change-file").addEventListener("click", () => {
+        setState("idle");
+        fileInput.value = "";
+        lastOutput = null;
+        pdfBytes = null;
+      });
+
+      async function handleFile(file) {
+        if (
+          file.type !== "application/pdf" &&
+          !file.name.toLowerCase().endsWith(".pdf")
+        ) {
+          Tools.showError("Επιλέξτε αρχείο PDF.");
+          return;
+        }
+        await loadPdf(file.name, await file.arrayBuffer());
+      }
+
+      async function loadPdf(name, bytes) {
+        Tools.hideError();
+        baseName = name.replace(/\.pdf$/i, "");
+        pdfBytes = bytes;
+        lastOutput = null;
+        $("file-name").textContent = name;
+        $("loading-msg").textContent = "Άνοιγμα αρχείου…";
+        setState("loading");
+        try {
+          // opens without a password → either not locked, or only restricted
+          await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+          await nextFrame();
+          if (!(await isEncrypted())) {
+            setState("idle");
+            Tools.showError(
+              "Το PDF δεν είναι κλειδωμένο — μπορείτε να το χρησιμοποιήσετε απευθείας στα άλλα εργαλεία.",
+            );
+            return;
+          }
+          await unlock("");
+        } catch (err) {
+          if (err && err.name === "PasswordException") {
+            showLocked();
+            return;
+          }
+          setState("idle");
+          Tools.showError(Tools.describeError(err));
+        }
+      }
+
+      function showLocked() {
+        $("preview").innerHTML = LOCK_ICON;
+        $("file-facts").textContent =
+          `Προστατεύεται με κωδικό · ${formatSize(pdfBytes.byteLength)}`;
+        $("pw-input").value = "";
+        setPwHint(PW_HINT);
+        $("action-hint").textContent =
+          "Πληκτρολογήστε τον κωδικό και πατήστε Ξεκλείδωμα";
+        setState("locked");
+        $("pw-input").focus();
+      }
+
+      // ── Password ──────────────────────────────────────────────────
+      $("pw-show").addEventListener("change", () => {
+        $("pw-input").type = $("pw-show").checked ? "text" : "password";
+      });
+      $("pw-input").addEventListener("input", () => setPwHint(PW_HINT));
+
+      $("pw-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const password = $("pw-input").value;
+        if (!password) {
+          setPwHint("Πληκτρολογήστε τον κωδικό.", true);
+          $("pw-input").focus();
+          return;
+        }
+        Tools.hideError();
+        $("btn-unlock").disabled = true;
+        try {
+          // pdf.js tells a wrong password apart from a broken file; qpdf doesn't
+          await pdfjsLib.getDocument({ data: pdfBytes.slice(0), password })
+            .promise;
+        } catch (err) {
+          $("btn-unlock").disabled = false;
+          if (err && err.name === "PasswordException") {
+            setPwHint("Λάθος κωδικός — δοκιμάστε ξανά.", true);
+            $("pw-input").select();
+          } else {
+            Tools.showError(Tools.describeError(err));
+          }
+          return;
+        }
+        try {
+          $("loading-msg").textContent = "Ξεκλείδωμα…";
+          setState("loading");
+          await nextFrame();
+          await unlock(password);
+        } catch (err) {
+          showLocked();
+          Tools.showError(Tools.describeError(err));
+        } finally {
+          $("btn-unlock").disabled = false;
+        }
+      });
+
+      // ── Unlock ────────────────────────────────────────────────────
+      async function unlock(password) {
+        const outBytes = await decrypt(password);
+        lastOutput = {
+          bytes: outBytes,
+          name: Tools.safeName(`${baseName}_ξεκλείδωτο.pdf`),
+        };
+
+        const outDoc = await pdfjsLib.getDocument({ data: outBytes.slice() })
+          .promise;
+        const n = outDoc.numPages;
+        $("file-facts").textContent =
+          `${n} σελίδ${n === 1 ? "α" : "ες"} · ${formatSize(outBytes.byteLength)}`;
+        $("result-text").innerHTML = password
+          ? "<strong>Ο κωδικός αφαιρέθηκε.</strong> Το αρχείο ανοίγει πλέον χωρίς κωδικό και χωρίς περιορισμούς."
+          : "<strong>Οι περιορισμοί αφαιρέθηκαν.</strong> Το αρχείο μπορεί πλέον να εκτυπωθεί, να αντιγραφεί και να επεξεργαστεί στα άλλα εργαλεία.";
+        $("action-hint").textContent = "Έτοιμο — κατεβάστε το ξεκλείδωτο PDF";
+        setState("done");
+        Tools.renderContinueMenu($("continue-host"), "unlock", () => ({
+          name: lastOutput.name,
+          bytes: lastOutput.bytes.slice().buffer,
+        }));
+        renderPreview(outDoc);
+      }
+
+      async function renderPreview(pdfDoc) {
+        $("preview").innerHTML = "";
+        try {
+          const page = await pdfDoc.getPage(1);
+          const viewport = page.getViewport({ scale: 0.22 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({
+            canvasContext: canvas.getContext("2d"),
+            viewport,
+          }).promise;
+          $("preview").appendChild(canvas);
+        } catch {
+          /* preview is optional */
+        }
+      }
+
+      $("btn-download").addEventListener("click", () => {
+        if (lastOutput)
+          Tools.download(lastOutput.bytes, "application/pdf", lastOutput.name);
+      });
+
+      Tools.takeHandoff().then((entry) => {
+        if (entry) loadPdf(entry.name, entry.bytes);
+      });
+    </script>
+  </body>
+</html>
