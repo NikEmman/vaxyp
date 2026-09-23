@@ -74,7 +74,7 @@
     applyGrid();
     canvas.requestRenderAll();
   }
-  window.applySketcherTheme = setTheme;
+  document.addEventListener("vaxyp-theme", (e) => setTheme(e.detail.dark));
 
   // Runs `captureFn` with the canvas forced to light palette, grid hidden,
   // and connector markers removed, then restores all three synchronously

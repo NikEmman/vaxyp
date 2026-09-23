@@ -72,48 +72,6 @@ export function saveData(currentData, newObject) {
   localStorage.setItem("dataObject", JSON.stringify(mergedData));
 }
 
-export const getTheme = () => {
-  const stored = localStorage.getItem("vaxyp-theme");
-  if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-};
-
-export const saveTheme = (theme) => {
-  localStorage.setItem("vaxyp-theme", theme);
-};
-
-const applyTheme = (theme) => {
-  if (theme === "dark") {
-    document.body.classList.add("dark");
-  } else {
-    document.body.classList.remove("dark");
-  }
-};
-
-export const initTheme = () => {
-  applyTheme(getTheme());
-
-  const toggleBtn = document.getElementById("theme-toggle");
-  if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-      const currentTheme = document.body.classList.contains("dark")
-        ? "dark"
-        : "light";
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      saveTheme(newTheme);
-      applyTheme(newTheme);
-    });
-  }
-
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", (e) => {
-      if (!localStorage.getItem("vaxyp-theme")) {
-        applyTheme(e.matches ? "dark" : "light");
-      }
-    });
-};
-
 export function openNavMenu() {
   const toggleBtn = document.getElementById("nav-toggle");
   const navButtons = document.getElementById("navButtons");

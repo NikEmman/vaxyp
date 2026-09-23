@@ -107,6 +107,7 @@
   </head>
 
   <body>
+    <script src="../src/themeInit.js"></script>
     <header>
       <div class="navButtons">
         <a href="../">← Πίσω στην εφαρμογή</a>
@@ -291,34 +292,5 @@
       </p>
     </main>
 
-    <script>
-      const getTheme = () =>
-        localStorage.getItem("vaxyp-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light");
-
-      const applyTheme = (theme) => {
-        if (theme === "dark") document.body.classList.add("dark");
-        else document.body.classList.remove("dark");
-      };
-
-      applyTheme(getTheme());
-
-      document.getElementById("theme-toggle").addEventListener("click", () => {
-        const newTheme = document.body.classList.contains("dark")
-          ? "light"
-          : "dark";
-        localStorage.setItem("vaxyp-theme", newTheme);
-        applyTheme(newTheme);
-      });
-
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (!localStorage.getItem("vaxyp-theme"))
-            applyTheme(e.matches ? "dark" : "light");
-        });
-    </script>
   </body>
 </html>

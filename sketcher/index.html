@@ -1405,31 +1405,5 @@
       import { displayNotification } from "../src/wordGenerators.js";
       window.displayNotification = displayNotification;
     </script>
-    <script>
-      // ── Theme ────────────────────────────────────────────────────
-      const getTheme = () =>
-        localStorage.getItem("vaxyp-theme") ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light");
-      const applyTheme = (t) => {
-        t === "dark"
-          ? document.body.classList.add("dark")
-          : document.body.classList.remove("dark");
-        if (window.applySketcherTheme) window.applySketcherTheme(t === "dark");
-      };
-      applyTheme(getTheme());
-      document.getElementById("theme-toggle").addEventListener("click", () => {
-        const t = document.body.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem("vaxyp-theme", t);
-        applyTheme(t);
-      });
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (!localStorage.getItem("vaxyp-theme"))
-            applyTheme(e.matches ? "dark" : "light");
-        });
-    </script>
   </body>
 </html>

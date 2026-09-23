@@ -31,7 +31,6 @@ import {
   getState,
   getAnakritikoiSelection,
   saveData,
-  initTheme,
   initNavMenu,
 } from "./stateManager.js";
 import { initTourGuide } from "./tourGuide.js";
@@ -130,7 +129,6 @@ async function handleDocxUpload(event) {
   renderStatus();
 }
 
-initTheme();
 initNavMenu();
 
 // Help dropdown in the header (on narrow screens its items are listed inline)

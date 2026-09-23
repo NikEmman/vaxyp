@@ -1,35 +1,6 @@
 /* Shared helpers for the PDF tools pages.
    Loaded before each tool's own inline script. */
 (function () {
-  // ── Theme ────────────────────────────────────────────────────────
-  const getTheme = () =>
-    localStorage.getItem("vaxyp-theme") ||
-    (window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light");
-
-  const applyTheme = (t) =>
-    t === "dark"
-      ? document.body.classList.add("dark")
-      : document.body.classList.remove("dark");
-
-  function initTheme() {
-    applyTheme(getTheme());
-    const btn = document.getElementById("theme-toggle");
-    if (btn)
-      btn.addEventListener("click", () => {
-        const t = document.body.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem("vaxyp-theme", t);
-        applyTheme(t);
-      });
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (e) => {
-        if (!localStorage.getItem("vaxyp-theme"))
-          applyTheme(e.matches ? "dark" : "light");
-      });
-  }
-
   // ── Escaping (file names end up in innerHTML) ─────────────────────
   const escapeHtml = (s) =>
     String(s).replace(
@@ -196,7 +167,6 @@
   }
 
   window.Tools = {
-    initTheme,
     escapeHtml,
     showError,
     hideError,

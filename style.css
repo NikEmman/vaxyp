@@ -1755,6 +1755,20 @@ hr {
   transform: none;
 }
 
+/* Theme switch: the page cross-fades between palettes (see the toggle handlers) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 /* dark mode state: knob slides right, shows moon */
 .dark .theme-toggle {
   background: rgba(255, 255, 255, 0.06);

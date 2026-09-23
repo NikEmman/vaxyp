@@ -2,7 +2,6 @@ import { startGuide } from "./tourGuide.js";
 import {
   getPendingTour,
   clearPendingTour,
-  initTheme,
 } from "./stateManager.js";
 import { defaultData } from "./defaultData.js";
 import {
@@ -12,8 +11,6 @@ import {
 } from "./formatters.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
-
   const pendingTour = getPendingTour();
   if (pendingTour) {
     clearPendingTour();
