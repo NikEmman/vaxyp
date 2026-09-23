@@ -1,6 +1,6 @@
 export async function generateWord(ekthesi, replacements, person) {
   if (!person.surname) {
-    const notificationText = `Σφαλμα της ${ekthesi.title}, ελέγξτε το πεδίο παθόντα / δράστη.`;
+    const notificationText = `Λείπουν τα στοιχεία του παθόντα ή του δράστη για «${ekthesi.title}».`;
     displayNotification(notificationText, "error");
     return false;
   }
