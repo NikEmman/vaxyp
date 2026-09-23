@@ -1034,6 +1034,7 @@ function renderStatus() {
   const values = {
     victim: personLabel(state.victimData),
     suspect: personLabel(state.ypoptosData),
+    suspects: katagrafiSuspects().length ? "ok" : "",
     officer: name ? joinRankName(rank, name) : "",
     time: formatTime(today, state.timePassed),
   };
@@ -1347,21 +1348,36 @@ deltioDiereynisis.addEventListener("click", (e) => {
   });
 });
 
+// The drunk-driving bulletin lists the stored suspects. With none stored, a
+// single-incident shift still gets one from the suspect currently filled in.
+function katagrafiSuspects() {
+  if (state.suspects.length) return state.suspects;
+  return state.ypoptosData?.surname ? [{ data: state.ypoptosData }] : [];
+}
+
 // deltio katagrafis methis button (all stored suspects, numbered 1. 2. 3. ...)
 const deltioKatagrafisMethis = document.getElementById(
   "deltioKatagrafisMethis",
 );
 deltioKatagrafisMethis.addEventListener("click", (e) => {
+  const suspects = katagrafiSuspects();
+  if (!suspects.length) {
+    displayNotification(
+      "Δεν υπάρχει δράστης. Συμπλήρωσε δράστη ή πρόσθεσε με «Κράτα στη λίστα».",
+      "error",
+    );
+    return;
+  }
   applySelectedOfficer();
   applyAllGrammar(state);
   // does not advance the clock, but reports the slot it currently points at
   state.timeStart = formatTime(today, state.timePassed);
-  state.suspectsCount = state.suspects.length;
-  state.suspectsList = formatSuspectsForKatagrafi(state.suspects);
+  state.suspectsCount = suspects.length;
+  state.suspectsList = formatSuspectsForKatagrafi(suspects);
   download(
     e.currentTarget,
     ektheseis.deltioKatagrafisMethis,
-    state.suspects[0]?.data || {},
+    suspects[0].data,
     { advances: false }, // standalone shift bulletin, not part of the report sequence
   );
 });
