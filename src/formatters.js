@@ -156,6 +156,51 @@ export function formatVehicleInfo(input) {
     fields.ownerFatherName,
   )}`;
 }
+// the labels of the foreign-person record, in the order POL lists them
+const FOREIGN_LABELS = new Set([
+  "Επώνυμο",
+  "Όνομα",
+  "Πατρώνυμο",
+  "Υπηκοότητα(ες)",
+  "Ημερομηνία Γέννησης",
+  "Φύλο",
+  "Μητρώνυμο",
+  "Γένος (Μητέρας)",
+  "Χώρα Γέννησης",
+  "Όνομα Συζύγου",
+  "Φωτογραφίες Ατόμου",
+  "Έγγραφα ατόμου",
+]);
+const FOREIGN_SEX = { ΑΡΡΕΝ: "Άντρας", ΘΗΛΥ: "Γυναίκα" };
+
+// Every field either entry path can store for a person. The report buttons
+// copy a person onto the shared state through these keys only, so a person
+// without one of them (a foreigner has no Α.Δ.Τ.) blanks it instead of
+// showing the previous person's value.
+export const PERSON_FIELDS = [
+  "surname",
+  "firstName",
+  "fatherName",
+  "fatherNameGen",
+  "motherName",
+  "motherSurname",
+  "fatherSurname",
+  "birthDate",
+  "birthPlace",
+  "area",
+  "region",
+  "idNumber",
+  "issueDate",
+  "issuingAuthority",
+  "phoneNumber",
+  "personEmail",
+  "street",
+  "streetNumber",
+  "sex",
+  "nationality",
+  "docuType",
+];
+
 export function formatIdInfo(input, data, state, suspect = false) {
   // Parse input text into an array of lines
   if (input.trim() === "") return "";
@@ -226,15 +271,14 @@ export function formatIdInfo(input, data, state, suspect = false) {
     if (fields.area === "Οδός") {
       fields.area = " ******** ";
     }
-    if (fields.area === fields.birthPlace) {
-      fields.area = "ομοίως";
-    }
     if (fields.region === "Περιοχή") {
       fields.region = " ******** ";
     }
+    // "ομοίως" only reads right in the running text; the forms that print
+    // the area on its own still need the place itself
     const residence =
-      fields.area === "ομοίως"
-        ? fields.area
+      fields.area === fields.birthPlace
+        ? "ομοίως"
         : `${capitalize(fields.area)} ${capitalize(fields.region)}`;
     // extract the data for ypefthini dilosi usage
     suspect ? (state.ypoptosData = fields) : (state.victimData = fields);
@@ -259,18 +303,26 @@ export function formatIdInfo(input, data, state, suspect = false) {
     } τηλεφωνικής σύνδεσης, email: ********`;
     return formattedString;
   } else {
+    // An empty field has no value line, so the parser pairs its label with
+    // the next label ("Γένος (Μητέρας)" → "Χώρα Γέννησης")
+    const getField = (key) => {
+      const value = getValue(key);
+      return FOREIGN_LABELS.has(value) ? "" : value;
+    };
     // Extract all required fields
     const fields = {
-      surname: getValue("Επώνυμο"),
-      firstName: getValue("Όνομα"),
-      fatherName: getValue("Πατρώνυμο"),
-      motherName: getValue("Μητρώνυμο"),
-      fatherSurname: getValue("Επώνυμο"),
-      motherSurname: getValue("Γένος (Μητέρας)"),
-      birthDate: formatDate(getValue("Ημερομηνία Γέννησης")),
-      sex: getValue("Φύλο"),
-      birthPlace: getValue("Χώρα Γέννησης"),
-      nationality: getValue("Υπηκοότητα(ες)"),
+      surname: getField("Επώνυμο"),
+      firstName: getField("Όνομα"),
+      fatherName: getField("Πατρώνυμο"),
+      motherName: getField("Μητρώνυμο"),
+      fatherSurname: getField("Επώνυμο"),
+      motherSurname: getField("Γένος (Μητέρας)"),
+      birthDate: formatDate(getField("Ημερομηνία Γέννησης")),
+      // ΑΡΡΕΝ / ΘΗΛΥ here, while the grammar and the forms expect the
+      // values of the Α.Δ.Τ. and the manual form
+      sex: FOREIGN_SEX[getField("Φύλο")] || getField("Φύλο"),
+      birthPlace: getField("Χώρα Γέννησης"),
+      nationality: getField("Υπηκοότητα(ες)"),
     };
     fields.fatherNameGen = toGenitiveMale(fields.fatherName);
 
@@ -362,16 +414,27 @@ const fromDateInput = (value) => {
   return day ? `${day}-${month}-${year}` : value || "";
 };
 
+// Greek capitals are written without accents: Παπαδόπουλος → ΠΑΠΑΔΟΠΟΥΛΟΣ
+const toPlainUpper = (text) =>
+  (text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFC")
+    .toUpperCase()
+    .trim();
+
 //person formatter for manual info entry
 export function extractPersonInfo(formId) {
   const formData = new FormData(document.getElementById(formId));
 
   const fields = {
     nationality: formData.get("nationality"),
-    surname: formData.get("surname"),
+    // in capitals like the ID card, so documents and file names match
+    // however the person was entered
+    surname: toPlainUpper(formData.get("surname")),
     firstName: formData.get("firstName"),
     fatherName: formData.get("fatherName"),
-    fatherSurname: formData.get("surname"),
+    fatherSurname: toPlainUpper(formData.get("surname")),
     motherName: formData.get("motherName"),
     motherSurname: "",
     birthDate: fromDateInput(formData.get("birthDate")),
@@ -381,7 +444,8 @@ export function extractPersonInfo(formId) {
     issuingAuthority: formData.get("issuingAuthority"),
     issueDate: fromDateInput(formData.get("issueDate")),
     phoneNumber: formData.get("phoneNumber"),
-    email: formData.get("email"),
+    // not "email": that key is the station's, printed in the letterheads
+    personEmail: formData.get("email"),
     street: formData.get("street"),
     streetNumber: formData.get("streetNumber"),
     area: formData.get("area"),
@@ -393,20 +457,24 @@ export function extractPersonInfo(formId) {
   fields.fatherNameGen = toGenitiveMale(fields.fatherName);
   return fields;
 }
-export function formatFormData(data) {
-  return `${data.surname.toUpperCase()} ${capitalize(
-    data.firstName,
-  )} του ${capitalize(toGenitiveMale(data.fatherName))} και της ${capitalize(
-    toGenitiveFemale(data.motherName),
-  )}, γεν. ${data.birthDate} στην ${capitalize(
-    data.birthPlace,
-  )}, κάτοικος ${capitalize(data.area)}, οδός ${capitalize(data.street)} αρ. ${
-    data.streetNumber
-  }, κάτοχος του υπ'αριθ ${data.idNumber} ${data.docuType} εκδ. ${
-    data.issueDate
-  } από ${data.issuingAuthority} χρήστης της υπ'αριθ. ${
-    data.phoneNumber
-  } τηλεφωνικής σύνδεσης, email: ${data.email}`;
+// Same shape as the pasted Α.Δ.Τ. text, so shortenFormattedPerson cuts both
+// at the Α.Φ.Μ. and the reports read alike whichever way the person came in
+export function formatFormData(person, data) {
+  return `${person.surname} ${capitalize(
+    person.firstName,
+  )} του ${capitalize(toGenitiveMale(person.fatherName))} και της ${capitalize(
+    toGenitiveFemale(person.motherName),
+  )}, γεν. ${person.birthDate} στην ${capitalize(
+    person.birthPlace,
+  )}, κάτοικος ${capitalize(person.area)}, οδός ${capitalize(person.street)} αρ. ${
+    person.streetNumber
+  }, επάγγελμα ***** , κάτοχος του υπ'αριθ ${person.idNumber} ${
+    person.docuType
+  } εκδοθέντος ${person.issueDate} από ${
+    person.issuingAuthority
+  }, με Α.Φ.Μ ******** / Δ.Ο.Υ. ${data.doy}, χρήστης της υπ'αριθ. ${
+    person.phoneNumber
+  } τηλεφωνικής σύνδεσης, email: ${person.personEmail || "********"}`;
 }
 
 // Police officers (astynomikoi): stored as one paragraph "rank name, details",

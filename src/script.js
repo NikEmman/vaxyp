@@ -25,6 +25,7 @@ import {
   getSuspectSurname,
   calculateAge,
   formatSuspectsForKatagrafi,
+  PERSON_FIELDS,
 } from "./formatters.js";
 import {
   getData,
@@ -57,6 +58,14 @@ function isArrestDocument(fileName) {
   return normalized.includes("συλληψ");
 }
 
+// Puts a person's fields on the shared state for the templates. Fields the
+// person doesn't have are blanked, not left over from the previous person.
+function applyPerson(person) {
+  PERSON_FIELDS.forEach((key) => {
+    state[key] = person?.[key] ?? "";
+  });
+}
+
 async function handleDocxUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
@@ -69,7 +78,7 @@ async function handleDocxUpload(event) {
   const dataSource = document.getElementById("docx-replacement-source").value;
   const personData =
     dataSource === "victimData" ? state.victimData : state.ypoptosData;
-  Object.assign(state, { ...personData });
+  applyPerson(personData);
   const missingPerson = !personData.surname;
   const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
@@ -296,9 +305,9 @@ function syncDeleteButtons() {
 // submit button event
 document.getElementById("submitForm").addEventListener("click", (event) => {
   event.preventDefault();
-  const data = extractPersonInfo("dataForm");
-  state.victimData = data;
-  const text = formatFormData(data);
+  const person = extractPersonInfo("dataForm");
+  state.victimData = person;
+  const text = formatFormData(person, data);
   state.victim = text;
   document.querySelector(".clipboard-id").value = text;
   document.getElementById("victims").value = "placeholder";
@@ -309,9 +318,9 @@ document
   .getElementById("submitForm-ypoptos")
   .addEventListener("click", (event) => {
     event.preventDefault();
-    const data = extractPersonInfo("dataForm-ypoptos");
-    state.ypoptosData = data;
-    const text = formatFormData(data);
+    const person = extractPersonInfo("dataForm-ypoptos");
+    state.ypoptosData = person;
+    const text = formatFormData(person, data);
     state.suspect = text;
     document.querySelector(".clipboard-id-ypoptos").value = text;
     document.getElementById("suspects").value = "placeholder";
@@ -1299,7 +1308,7 @@ ypiresiako.addEventListener("click", (e) => {
 // ypefthini button
 const ypefthini = document.getElementById("ypefthini");
 ypefthini.addEventListener("click", (e) => {
-  Object.assign(state, { ...state.victimData });
+  applyPerson(state.victimData);
   applySelectedOfficer();
   download(e.currentTarget, ektheseis.ypefthini, state.victimData);
 });
@@ -1308,7 +1317,7 @@ ypefthini.addEventListener("click", (e) => {
 const ypoptoy = document.getElementById("ypoptoy");
 ypoptoy.addEventListener("click", (e) => {
   applySelectedOfficer();
-  Object.assign(state, { ...state.ypoptosData });
+  applyPerson(state.ypoptosData);
   download(e.currentTarget, ektheseis.deltioYpoptou, state.ypoptosData);
 });
 
@@ -1316,12 +1325,12 @@ ypoptoy.addEventListener("click", (e) => {
 const feromenou = document.getElementById("feromenou");
 feromenou.addEventListener("click", (e) => {
   applySelectedOfficer();
-  Object.assign(state, { ...state.ypoptosData });
+  applyPerson(state.ypoptosData);
   state.timeStart = formatTime(today, state.timePassed);
   state.man = " ";
   state.woman = " ";
   state.sex == "Γυναίκα" ? (state.woman = "X") : (state.man = "X");
-  state.isuYear = state.issueDate.split("-")[2];
+  state.isuYear = state.issueDate.split("-")[2] || "";
   state.issuingAuthority = state.issuingAuthority.toUpperCase();
   state.merosSyntaksisEkthesis = state.merosSyntaksisEkthesis.toUpperCase();
   state.ypiresia = state.ypiresia.toUpperCase();
@@ -1335,7 +1344,7 @@ feromenou.addEventListener("click", (e) => {
 const deltioDiereynisis = document.getElementById("deltioDiereynisis");
 deltioDiereynisis.addEventListener("click", (e) => {
   applySelectedOfficer();
-  Object.assign(state, { ...state.ypoptosData });
+  applyPerson(state.ypoptosData);
   // the form prints the patronymic inline, so it reads as Δημητρίου, not ΔΗΜΗΤΡΙΟΥ
   state.fatherNameGen = capitalize(state.fatherNameGen || "");
   state.timeStart = formatTime(today, state.timePassed);
@@ -1512,13 +1521,13 @@ syllipsiEndo.addEventListener("click", (e) => {
 const ypoptoyEndo = document.getElementById("ypoptoyEndo");
 ypoptoyEndo.addEventListener("click", (e) => {
   applySelectedOfficer();
-  Object.assign(state, { ...state.ypoptosData });
+  applyPerson(state.ypoptosData);
   download(e.currentTarget, ektheseis.deltioYpoptouEndo, state.ypoptosData);
 });
 //ypovlitiki button
 const ypovoliEndo = document.getElementById("ypovoliEndo");
 ypovoliEndo.addEventListener("click", (e) => {
-  Object.assign(state, { ...state.victimData });
+  applyPerson(state.victimData);
   state.nextDay = getNextDay(state.formattedDate);
 
   if (
@@ -1547,7 +1556,7 @@ ypovoliEndo.addEventListener("click", (e) => {
 //ypovlitiki button
 const apostoliEndo = document.getElementById("apostoliEndo");
 apostoliEndo.addEventListener("click", (e) => {
-  Object.assign(state, { ...state.victimData });
+  applyPerson(state.victimData);
   state.nextDay = getNextDay(state.formattedDate);
 
   if (
@@ -1578,7 +1587,7 @@ apostoliEndo.addEventListener("click", (e) => {
 const simansi = document.getElementById("simansi");
 simansi.addEventListener("click", (e) => {
   applySelectedOfficer();
-  Object.assign(state, { ...state.ypoptosData });
+  applyPerson(state.ypoptosData);
   applyAllGrammar(state);
   download(e.currentTarget, ektheseis.simansi, state.ypoptosData);
 });
@@ -1604,7 +1613,7 @@ vasEndo.addEventListener("click", (e) => {
 // new IDs btn
 const a130 = document.getElementById("a130");
 a130.addEventListener("click", (e) => {
-  Object.assign(state, { ...state.victimData });
+  applyPerson(state.victimData);
   state.n = document.getElementById("n").value;
   state.newId = document.getElementById("newId").value;
   state.newIdAppDate = document.getElementById("newIdAppDate").value;
@@ -1618,7 +1627,7 @@ a130.addEventListener("click", (e) => {
 const ypefthiniDAT = document.getElementById("ypefthiniDAT");
 
 ypefthiniDAT.addEventListener("click", (e) => {
-  Object.assign(state, { ...state.victimData });
+  applyPerson(state.victimData);
   state.idNumber1 = state.idNumber;
   download(e.currentTarget, ektheseis.ypefthiniDAT, state.victimData);
 });
