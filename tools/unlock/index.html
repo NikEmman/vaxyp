@@ -225,12 +225,6 @@
         if (s !== "done") $("continue-host").classList.add("hidden");
       }
 
-      function formatSize(bytes) {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-      }
-
       function setPwHint(msg, isError) {
         $("pw-hint").textContent = msg;
         $("pw-hint").classList.toggle("is-error", !!isError);
@@ -252,19 +246,12 @@
       const IN = "/in.pdf";
       const OUT = "/out.pdf";
 
-      // qpdf exit codes: 0 ok, 2 error, 3 ok with warnings
-      async function runQpdf(args) {
+      /** Writes the PDF into qpdf's file system once, for all of `fn`'s runs. */
+      async function withQpdf(fn) {
         const q = await getQpdf();
         q.FS.writeFile(IN, new Uint8Array(pdfBytes));
         try {
-          let code;
-          try {
-            code = q.callMain(args);
-          } catch (e) {
-            code = e && typeof e.status === "number" ? e.status : 2;
-          }
-          const out = code !== 2 && args.includes(OUT) ? q.FS.readFile(OUT) : null;
-          return { code, out };
+          return fn((args) => runQpdf(q, args));
         } finally {
           for (const p of [IN, OUT]) {
             try {
@@ -276,16 +263,42 @@
         }
       }
 
-      async function isEncrypted() {
-        return (await runQpdf(["--is-encrypted", IN])).code === 0;
+      // qpdf exit codes: 0 ok, 2 error, 3 ok with warnings
+      function runQpdf(q, args) {
+        let code;
+        try {
+          code = q.callMain(args);
+        } catch (e) {
+          if (!e || typeof e.status !== "number") {
+            // aborted (WebAssembly trap) — the instance is unusable now
+            qpdfReady = null;
+            throw e;
+          }
+          code = e.status;
+        }
+        const out = code !== 2 && args.includes(OUT) ? q.FS.readFile(OUT) : null;
+        return { code, out };
       }
 
-      async function decrypt(password) {
+      const isEncrypted = (run) => run(["--is-encrypted", IN]).code === 0;
+
+      function decrypt(run, password) {
         const args = ["--decrypt"];
         if (password) args.push("--password=" + password);
-        const { out } = await runQpdf([...args, IN, OUT]);
+        const { out } = run([...args, IN, OUT]);
         if (!out) throw new Error("Δεν ήταν δυνατή η αφαίρεση της προστασίας.");
         return out;
+      }
+
+      /** Opens a PDF with pdf.js and frees it again — pdf.js keeps a copy
+          of every document in its worker until destroyed. */
+      async function probePdf(opts) {
+        const task = pdfjsLib.getDocument(opts);
+        try {
+          await task.promise;
+        } finally {
+          task.destroy();
+        }
       }
 
       // callMain blocks the page; give the spinner a frame to show first
@@ -342,30 +355,33 @@
         setState("loading");
         try {
           // opens without a password → either not locked, or only restricted
-          await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+          await probePdf({ data: pdfBytes.slice(0) });
           await nextFrame();
-          if (!(await isEncrypted())) {
+          const out = await withQpdf((run) =>
+            isEncrypted(run) ? decrypt(run, "") : null,
+          );
+          if (!out) {
             setState("idle");
             Tools.showError(
               "Το PDF δεν είναι κλειδωμένο — μπορείτε να το χρησιμοποιήσετε απευθείας στα άλλα εργαλεία.",
             );
             return;
           }
-          await unlock("");
+          await showUnlocked(out, "");
         } catch (err) {
           if (err && err.name === "PasswordException") {
             showLocked();
             return;
           }
           setState("idle");
-          Tools.showError(Tools.describeError(err));
+          Tools.showError(Tools.describeError(err, { unlocking: true }));
         }
       }
 
       function showLocked() {
         $("preview").innerHTML = LOCK_ICON;
         $("file-facts").textContent =
-          `Προστατεύεται με κωδικό · ${formatSize(pdfBytes.byteLength)}`;
+          `Προστατεύεται με κωδικό · ${Tools.formatSize(pdfBytes.byteLength)}`;
         $("pw-input").value = "";
         setPwHint(PW_HINT);
         $("action-hint").textContent =
@@ -392,15 +408,14 @@
         $("btn-unlock").disabled = true;
         try {
           // pdf.js tells a wrong password apart from a broken file; qpdf doesn't
-          await pdfjsLib.getDocument({ data: pdfBytes.slice(0), password })
-            .promise;
+          await probePdf({ data: pdfBytes.slice(0), password });
         } catch (err) {
           $("btn-unlock").disabled = false;
           if (err && err.name === "PasswordException") {
             setPwHint("Λάθος κωδικός — δοκιμάστε ξανά.", true);
             $("pw-input").select();
           } else {
-            Tools.showError(Tools.describeError(err));
+            Tools.showError(Tools.describeError(err, { unlocking: true }));
           }
           return;
         }
@@ -408,28 +423,36 @@
           $("loading-msg").textContent = "Ξεκλείδωμα…";
           setState("loading");
           await nextFrame();
-          await unlock(password);
+          await showUnlocked(
+            await withQpdf((run) => decrypt(run, password)),
+            password,
+          );
         } catch (err) {
           showLocked();
-          Tools.showError(Tools.describeError(err));
+          Tools.showError(Tools.describeError(err, { unlocking: true }));
         } finally {
           $("btn-unlock").disabled = false;
         }
       });
 
       // ── Unlock ────────────────────────────────────────────────────
-      async function unlock(password) {
-        const outBytes = await decrypt(password);
+      async function showUnlocked(outBytes, password) {
         lastOutput = {
           bytes: outBytes,
           name: Tools.safeName(`${baseName}_ξεκλείδωτο.pdf`),
         };
 
-        const outDoc = await pdfjsLib.getDocument({ data: outBytes.slice() })
-          .promise;
+        const outTask = pdfjsLib.getDocument({ data: outBytes.slice() });
+        let outDoc;
+        try {
+          outDoc = await outTask.promise;
+        } catch (err) {
+          outTask.destroy();
+          throw err;
+        }
         const n = outDoc.numPages;
         $("file-facts").textContent =
-          `${n} σελίδ${n === 1 ? "α" : "ες"} · ${formatSize(outBytes.byteLength)}`;
+          `${n} σελίδ${n === 1 ? "α" : "ες"} · ${Tools.formatSize(outBytes.byteLength)}`;
         $("result-text").innerHTML = password
           ? "<strong>Ο κωδικός αφαιρέθηκε.</strong> Το αρχείο ανοίγει πλέον χωρίς κωδικό και χωρίς περιορισμούς."
           : "<strong>Οι περιορισμοί αφαιρέθηκαν.</strong> Το αρχείο μπορεί πλέον να εκτυπωθεί, να αντιγραφεί και να επεξεργαστεί στα άλλα εργαλεία.";
@@ -439,7 +462,7 @@
           name: lastOutput.name,
           bytes: lastOutput.bytes.slice().buffer,
         }));
-        renderPreview(outDoc);
+        renderPreview(outDoc).finally(() => outTask.destroy());
       }
 
       async function renderPreview(pdfDoc) {

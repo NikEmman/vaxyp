@@ -53,9 +53,33 @@
   }
 
   // ── Reading a text page (pdf.js) ──────────────────────────────────
-  async function readPdfPage(page) {
-    const vp = page.getViewport({ scale: 1 });
-    const content = await page.getTextContent();
+  /**
+   * The page rotation (0/90/180/270) that makes most of the text horizontal.
+   * Usually the page's own /Rotate, but a page turned sideways in a viewer
+   * would otherwise have all its text dropped as "rotated".
+   */
+  function textRotation(page, items) {
+    const weight = new Map();
+    for (const it of items) {
+      if (!it.str || !it.str.trim()) continue;
+      const [a, b] = it.transform;
+      const deg = Math.round((Math.atan2(b, a) * 180) / Math.PI / 90) * 90;
+      const rot = ((deg % 360) + 360) % 360;
+      weight.set(rot, (weight.get(rot) || 0) + it.str.length);
+    }
+    let best = page.rotate;
+    for (const [rot, w] of weight)
+      if (w > (weight.get(best) || 0)) best = rot;
+    return best;
+  }
+
+  /** `content` is the page's getTextContent(), if the caller already has it. */
+  async function readPdfPage(page, content) {
+    content = content || (await page.getTextContent());
+    const vp = page.getViewport({
+      scale: 1,
+      rotation: textRotation(page, content.items),
+    });
     // Font objects, with their real names and bold/italic flags, only reach
     // the main thread once the page's operator list has been built.
     await page.getOperatorList();
@@ -441,6 +465,8 @@
   const xmlText = (s) =>
     String(s)
       .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, "")
+      // unpaired surrogates (broken ToUnicode maps) are invalid in XML
+      .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")

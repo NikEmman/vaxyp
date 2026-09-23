@@ -184,13 +184,22 @@
       // Fewer characters than this and the page is treated as a scan
       const MIN_TEXT_CHARS = 20;
 
-      let pdfBytes = null;
+      // Kept open from loading to conversion; pdf.js holds a copy of the
+      // file in its worker until the document is destroyed.
+      let pdfDoc = null;
+      let textContents = []; // per page, read once while loading
       let baseName = "";
       let pageCount = 0;
       let scanned = new Set(); // 1-based page numbers without a text layer
       let scanMode = "ocr";
       let running = false;
       let cancelled = false;
+
+      function closePdf() {
+        if (pdfDoc) pdfDoc.destroy();
+        pdfDoc = null;
+        textContents = [];
+      }
 
       function setState(s) {
         $("upload-section").classList.toggle("hidden", s !== "idle");
@@ -255,7 +264,7 @@
       $("btn-change-file").addEventListener("click", () => {
         setState("idle");
         fileInput.value = "";
-        pdfBytes = null;
+        closePdf();
       });
 
       async function handleFile(file) {
@@ -272,21 +281,22 @@
       async function loadPdf(name, bytes) {
         Tools.hideError();
         baseName = name.replace(/\.pdf$/i, "");
-        pdfBytes = bytes;
+        closePdf();
         $("file-name").textContent = name;
         $("result-banner").classList.add("hidden");
         setState("loading");
+        const task = pdfjsLib.getDocument({ data: bytes });
         try {
-          const doc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) })
-            .promise;
+          const doc = await task.promise;
           pageCount = doc.numPages;
           scanned = new Set();
           for (let p = 1; p <= pageCount; p++) {
             $("loading-msg").textContent =
               `Ανάλυση σελίδας ${p} από ${pageCount}…`;
             const page = await doc.getPage(p);
-            const { items } = await page.getTextContent();
-            const chars = items.reduce(
+            const content = await page.getTextContent();
+            textContents[p - 1] = content;
+            const chars = content.items.reduce(
               (n, it) => n + (it.str ? it.str.replace(/\s/g, "").length : 0),
               0,
             );
@@ -305,9 +315,12 @@
           $("scan-options").classList.toggle("hidden", n === 0);
           $("scan-hint").textContent = SCAN_HINTS[scanMode];
           updateHint();
+          pdfDoc = doc;
           setState("ready");
           renderPreview(doc);
         } catch (err) {
+          task.destroy();
+          textContents = [];
           setState("idle");
           Tools.showError(Tools.describeError(err));
         }
@@ -376,7 +389,7 @@
       });
 
       $("btn-convert").addEventListener("click", async () => {
-        if (running || !pdfBytes) return;
+        if (running || !pdfDoc) return;
         running = true;
         cancelled = false;
         Tools.hideError();
@@ -386,8 +399,7 @@
 
         let worker = null;
         try {
-          const doc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) })
-            .promise;
+          const doc = pdfDoc;
           const pages = [];
           let ocrDone = 0;
           for (let p = 1; p <= doc.numPages; p++) {
@@ -398,7 +410,7 @@
             if (!scanned.has(p)) {
               $("progress-msg").textContent =
                 `Σελίδα ${p} από ${doc.numPages}…`;
-              pages.push({ kind: "text", ...(await PdfToWord.readPdfPage(page)) });
+              pages.push({ kind: "text", ...(await PdfToWord.readPdfPage(page, textContents[p - 1])) });
             } else if (scanMode === "ocr") {
               $("progress-msg").textContent =
                 `Αναγνώριση κειμένου: σελίδα ${p} από ${doc.numPages}` +

@@ -238,12 +238,6 @@
         $("action-bar").classList.toggle("hidden", s !== "ready");
       }
 
-      function formatSize(bytes) {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-      }
-
       // ── Preset toggle ─────────────────────────────────────────────
       document.querySelectorAll("[data-preset]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -316,7 +310,7 @@
             .promise;
           pageCount = pdfDoc.numPages;
           $("file-name").textContent = name;
-          $("file-facts").textContent = `${pageCount} σελίδ${pageCount === 1 ? "α" : "ες"} · ${formatSize(originalSize)}`;
+          $("file-facts").textContent = `${pageCount} σελίδ${pageCount === 1 ? "α" : "ες"} · ${Tools.formatSize(originalSize)}`;
           $("preset-hint").textContent = PRESETS[currentPreset].hint;
           setState("ready");
           // one small preview is enough — this tool works on the whole document
@@ -426,7 +420,7 @@
           const banner = $("result-banner");
           banner.classList.toggle("warn", pct <= 0);
           $("result-text").innerHTML =
-            `<strong>${formatSize(originalSize)}</strong> → <strong>${formatSize(newSize)}</strong> ` +
+            `<strong>${Tools.formatSize(originalSize)}</strong> → <strong>${Tools.formatSize(newSize)}</strong> ` +
             (pct > 0
               ? `(<span class="pct good">${pct}% μικρότερο</span>)`
               : `(<span class="pct bad">${-pct}% μεγαλύτερο</span>) — δοκιμάστε χαμηλότερο επίπεδο συμπίεσης`);
@@ -436,7 +430,7 @@
           $("btn-download").classList.remove("hidden");
           $("action-hint").textContent =
             pct > 0
-              ? `Έτοιμο: ${formatSize(newSize)} (${pct}% μικρότερο)`
+              ? `Έτοιμο: ${Tools.formatSize(newSize)} (${pct}% μικρότερο)`
               : "Η συμπίεση δεν μείωσε το μέγεθος — δοκιμάστε άλλο επίπεδο.";
           $("btn-compress").textContent = "Νέα συμπίεση";
           Tools.renderContinueMenu($("continue-host"), "compress", () => ({

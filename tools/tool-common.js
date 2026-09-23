@@ -34,15 +34,26 @@
     if (box) box.classList.add("hidden");
   }
 
-  /** Turns a thrown pdf.js/pdf-lib error into something a user can act on. */
-  function describeError(err) {
+  /**
+   * Turns a thrown pdf.js/pdf-lib error into something a user can act on.
+   * The unlock tool passes `{ unlocking: true }` so it doesn't point to itself.
+   */
+  function describeError(err, { unlocking = false } = {}) {
     const name = (err && (err.name || "")) + "";
     const msg = (err && (err.message || err)) + "";
     if (/password|Encrypted|encrypt/i.test(name + msg))
-      return "Το PDF είναι κλειδωμένο. Ξεκλειδώστε το πρώτα με το εργαλείο «Ξεκλείδωμα PDF» και δοκιμάστε ξανά.";
+      return unlocking
+        ? "Δεν ήταν δυνατή η αφαίρεση της προστασίας — το είδος κλειδώματος αυτού του PDF δεν υποστηρίζεται."
+        : "Το PDF είναι κλειδωμένο. Ξεκλειδώστε το πρώτα με το εργαλείο «Ξεκλείδωμα PDF» και δοκιμάστε ξανά.";
     if (/Invalid PDF|InvalidPDF|Failed to parse|structure/i.test(name + msg))
       return "Το αρχείο δεν φαίνεται να είναι έγκυρο PDF ή είναι κατεστραμμένο.";
     return "Κάτι πήγε στραβά με το αρχείο: " + msg;
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
 
   // ── Download ──────────────────────────────────────────────────────
@@ -172,6 +183,7 @@
     showError,
     hideError,
     describeError,
+    formatSize,
     download,
     safeName,
     putHandoff,
