@@ -1551,6 +1551,20 @@
           <div
             class="palette-item"
             draggable="true"
+            data-shape="scrapemarks"
+            data-categories="other"
+            data-keywords="χαραγές χαράγματα γρατζουνιές απόξεση τριβή εκδορά μέταλλο οδόστρωμα ίχνη"
+            title="Χαραγές στο οδόστρωμα από μέταλλο που σύρθηκε πάνω του (αμάξωμα, ζάντα, μοτοσικλέτα)· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M7.5 21 9 3M10 21l.8-16M12 21V3M14 21l-.6-14M16.5 21l-1.2-17" />
+              <path d="M9.5 21.5l1-.5.5 1-1 .5z" />
+            </svg>
+            Χαραγές Μετάλλου
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
             data-shape="liquidsmall"
             data-categories="other"
             data-keywords="αίμα λάδι νερό κηλίδα υγρό"
@@ -1901,14 +1915,14 @@
           <div class="sep"></div>
           <div
             class="segment-length-control"
-            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας, ιχνών ελαστικών ή ευθέων βελών πορείας που θα προστεθούν στο σκαρίφημα"
+            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας, ιχνών ελαστικών, χαραγών ή ευθέων βελών πορείας που θα προστεθούν στο σκαρίφημα"
           >
             <label for="segment-length-input">Μήκος τμήματος: </label>
             <input
               type="range"
               id="segment-length-input"
               value="20"
-              min="3"
+              min="0.5"
               max="20"
               step="0.1"
             />

@@ -274,7 +274,8 @@ function tireMarksGroup(parts) {
 
 // Braking skid marks: two tracks a car's width apart, near-straight.
 function createSkidMarks(ppm, lengthM = ROAD_LENGTH_M) {
-  const drift = (t) => 0.06 * Math.sin(t * Math.PI * 1.3);
+  // Drift scaled down on short marks, or a 0.5 m mark bends into a chevron.
+  const drift = (t) => 0.06 * Math.min(1, lengthM / 5) * Math.sin(t * Math.PI * 1.3);
   const track = (side, seed) =>
     tireTrack(ppm, { x: (side * SKID_TRACK_WIDTH_M) / 2, lengthM, widthM: 0.2, drift, seed });
   return tireMarksGroup([...track(-1, 11), ...track(1, 29)]);
@@ -285,11 +286,73 @@ function createSkidMarks(ppm, lengthM = ROAD_LENGTH_M) {
 // Tires dragged sideways smear a wider band, scuffed diagonally, and the
 // path bows as the car rotates.
 function createSkidMarksSideways(ppm, lengthM = ROAD_LENGTH_M) {
-  const bow = Math.min(0.8, lengthM * 0.06);
+  const bow = Math.min(0.8, lengthM * 0.06) * Math.min(1, lengthM / 5);
   const drift = (t) => bow * Math.sin(t * Math.PI);
   const track = (side, seed) =>
     tireTrack(ppm, { x: side * 1.35, lengthM, widthM: 0.32, drift, seed, streaks: 0, hatch: true });
   return tireMarksGroup([...track(-1, 7), ...track(1, 43)]);
+}
+
+// Metal scrape marks (Χαραγές μετάλλου): where bodywork, a rim or a
+// sliding motorcycle ground into the asphalt. A ~0.5 m wide bundle of fine
+// sharp scratches, a few deeper gouges with a chipped divot where they dug
+// in, some broken where the part bounced. Travel is up (-y) like the tire
+// marks; most scratches start right at contact, fewer run all the way.
+function createScrapeMarks(ppm, lengthM = ROAD_LENGTH_M) {
+  const rand = seededRandom(23);
+  const widthM = 0.5;
+  const count = 14;
+  const drift = (t) => 0.1 * Math.min(1, lengthM / 5) * Math.sin(t * Math.PI * 0.9);
+  const P = (x, y) => `${x * ppm} ${y * ppm}`;
+  const scratches = [];
+  const divots = [];
+
+  for (let k = 0; k < count; k++) {
+    const deep = k % 5 === 2;
+    const off = ((k + rand()) / count - 0.5) * widthM;
+    const t0 = rand() < 0.6 ? rand() * 0.06 : rand() * 0.35;
+    const t1 = 1 - (rand() < 0.5 ? rand() * 0.05 : rand() * 0.4);
+    const slant = (rand() - 0.5) * 0.012; // meters sideways per meter
+    const n = Math.max(2, Math.ceil(((t1 - t0) * lengthM) / 0.5));
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = t0 + ((t1 - t0) * i) / n;
+      pts.push(P(off + drift(t) + slant * t * lengthM + (rand() - 0.5) * 0.01, lengthM / 2 - t * lengthM));
+    }
+    const bouncing = !deep && k % 4 === 1;
+    scratches.push(
+      new fabric.Path(`M ${pts.join(" L ")}`, {
+        fill: "",
+        stroke: LINE_COLOR,
+        strokeWidth: deep ? Math.max(1.5, 0.03 * ppm) : Math.max(0.75, 0.012 * ppm),
+        strokeLineCap: "round",
+        strokeLineJoin: "round",
+        strokeDashArray: bouncing ? [(1 + rand() * 1.5) * ppm, (0.2 + rand() * 0.4) * ppm] : null,
+        opacity: deep ? 0.9 : 0.6,
+        selectable: false,
+        evented: false,
+      })
+    );
+
+    if (deep) {
+      const cx = off + drift(t0);
+      const cy = lengthM / 2 - t0 * lengthM;
+      const r = 0.035 + rand() * 0.025;
+      const corners = 8;
+      divots.push(
+        new fabric.Polygon(
+          Array.from({ length: corners }, (_, c) => {
+            const a = ((c + rand() * 0.5) / corners) * Math.PI * 2;
+            const rr = r * (0.7 + rand() * 0.3);
+            return { x: (cx + Math.cos(a) * rr) * ppm, y: (cy + Math.sin(a) * rr) * ppm };
+          }),
+          { fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 0.5, strokeLineJoin: "round", selectable: false, evented: false }
+        )
+      );
+    }
+  }
+
+  return tireMarksGroup([...scratches, ...divots]);
 }
 
 // Pool of spilled liquid (blood, oil, coolant...): an irregular blob with a
@@ -569,11 +632,11 @@ const PATH_ARROW_HEAD_LEN_M = 0.8;
 const PATH_ARROW_HEAD_HW_M = 0.33;
 
 // `d`: SVG path in pixels, ending at the head's base. `tip` (meters) and
-// `dir` (unit vector) place the head.
-function movementArrow(ppm, d, tip, dir, dashed = false) {
+// `dir` (unit vector) place the head; `headScale` shrinks it on short arrows.
+function movementArrow(ppm, d, tip, dir, dashed = false, headScale = 1) {
   const [dx, dy] = dir;
-  const headLen = PATH_ARROW_HEAD_LEN_M * ppm;
-  const headHw = PATH_ARROW_HEAD_HW_M * ppm;
+  const headLen = PATH_ARROW_HEAD_LEN_M * headScale * ppm;
+  const headHw = PATH_ARROW_HEAD_HW_M * headScale * ppm;
   const t = { x: tip.x * ppm, y: tip.y * ppm };
   const base = { x: t.x - dx * headLen, y: t.y - dy * headLen };
   const head = new fabric.Polygon(
@@ -594,11 +657,15 @@ function movementArrow(ppm, d, tip, dir, dashed = false) {
   );
 }
 
-// Straight, sized by the segment-length slider like skid marks.
+// Straight, sized by the segment-length slider like skid marks. On short
+// arrows the head shrinks to at most 40% of the length, so it never
+// swallows the shaft.
 function straightPathArrow(ppm, lengthM, dashed) {
   const L = lengthM ?? 8;
   const m = (v) => v * ppm;
-  return movementArrow(ppm, `M 0 ${m(L / 2)} L 0 ${m(-L / 2 + PATH_ARROW_HEAD_LEN_M)}`, { x: 0, y: -L / 2 }, [0, -1], dashed);
+  const headScale = Math.min(1, (L * 0.4) / PATH_ARROW_HEAD_LEN_M);
+  const headLen = PATH_ARROW_HEAD_LEN_M * headScale;
+  return movementArrow(ppm, `M 0 ${m(L / 2)} L 0 ${m(-L / 2 + headLen)}`, { x: 0, y: -L / 2 }, [0, -1], dashed, headScale);
 }
 
 function createPathStraight(ppm, lengthM) {
@@ -2655,6 +2722,7 @@ const SHAPE_FACTORIES = {
   tree: createTree,
   skidmarks: createSkidMarks,
   skidmarkssideways: createSkidMarksSideways,
+  scrapemarks: createScrapeMarks,
   liquidsmall: createLiquidSmall,
   liquidmedium: createLiquidMedium,
   liquidlarge: createLiquidLarge,
