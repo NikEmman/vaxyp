@@ -164,49 +164,495 @@ function createTrainTracks(ppm, lengthM = ROAD_LENGTH_M) {
   return markAsGroundMarking(group);
 }
 
-// A pair of tire skid marks: thick, slightly irregular streaks that fade in
-// and out like rubber laid down under hard braking, instead of crisp
-// straight lines. Sized by the same length slider as straight road pieces.
+// ── Tire marks ───────────────────────────────────────────────────
+// Rubber laid down by sliding tires, sized by the same length slider as
+// straight road pieces. The vehicle travels up (-y) like everywhere else:
+// a mark starts faint at the bottom (where the tires began to slide) and
+// ends abruptly at the top (where they stopped).
+//
+// Each track is a translucent ink band with slightly ragged edges plus
+// darker broken streaks from the tread grooves, all faded in with an ink
+// gradient (sketcher.js's theme restyle recolors gradient stops too).
+// Everything is in meters, so it scales with ppm. Randomness is seeded:
+// the same mark always looks the same.
 const SKID_TRACK_WIDTH_M = 1.6; // typical distance between a car's tires
-const SKID_MARK_WIDTH_PX = 5;
-const SKID_SEGMENTS = 12;
+const SKID_SAMPLE_M = 0.25; // spacing of the edge/centerline samples
+const SKID_BODY_OPACITY = 0.5;
 
-function skidMark(xOffset, h, seed) {
-  const parts = [];
-  for (let i = 0; i < SKID_SEGMENTS; i++) {
-    const t0 = i / SKID_SEGMENTS;
-    const t1 = (i + 1) / SKID_SEGMENTS;
-    const y0 = -h / 2 + h * t0;
-    const y1 = -h / 2 + h * t1;
-    const tMid = (t0 + t1) / 2;
-    // fades in quickly as the tire locks up, stays dark, fades out slower
-    // toward the stop
-    const fade = Math.min(1, tMid / 0.15, (1 - tMid) / 0.3);
-    const jitter = Math.sin(i * 2.3 + seed) * 1.5;
-    parts.push(
-      new fabric.Line([xOffset + jitter, y0, xOffset + jitter, y1], {
-        stroke: LINE_COLOR,
-        strokeWidth: SKID_MARK_WIDTH_PX,
-        strokeLineCap: "round",
-        opacity: Math.max(0.12, fade),
-        selectable: false,
-        evented: false,
-      }),
-    );
+// mulberry32: tiny seeded PRNG, returns floats in [0, 1).
+function seededRandom(seed) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Ink gradient running up an object from its bottom edge: faint at the
+// bottom, full strength `fadePx` above it and beyond. Pixel coords are
+// relative to the object's own bounding box.
+function fadeInGradient(obj, fadePx) {
+  return new fabric.Gradient({
+    type: "linear",
+    gradientUnits: "pixels",
+    coords: { x1: 0, y1: obj.height, x2: 0, y2: Math.max(0, obj.height - fadePx) },
+    colorStops: [
+      { offset: 0, color: LINE_COLOR, opacity: 0.1 },
+      { offset: 1, color: LINE_COLOR, opacity: 1 },
+    ],
+  });
+}
+
+// `drift(t)`: sideways offset in meters at t (0 = start, 1 = stop), shared
+// by all tracks of a mark so they bend together.
+// `hatch`: diagonal scuffs across the band (sideways slide).
+function tireTrack(ppm, { x, lengthM, widthM, drift, seed, streaks = 4, hatch = false }) {
+  const rand = seededRandom(seed);
+  const n = Math.max(2, Math.ceil(lengthM / SKID_SAMPLE_M));
+  const samples = Array.from({ length: n + 1 }, (_, i) => {
+    const t = i / n;
+    const cx = x + drift(t);
+    return {
+      y: lengthM / 2 - t * lengthM,
+      cx,
+      left: cx - widthM / 2 + (rand() - 0.5) * widthM * 0.15,
+      right: cx + widthM / 2 + (rand() - 0.5) * widthM * 0.15,
+    };
+  });
+  const P = (px, py) => `${px * ppm} ${py * ppm}`;
+  // Fade in over the first quarter, at most 3 m.
+  const fadePx = Math.min(lengthM * 0.25, 3) * ppm;
+  const faded = (path, prop, opacity) => {
+    path.set({ [prop]: fadeInGradient(path, fadePx), opacity });
+    return path;
+  };
+
+  const bandPts = [...samples.map((s) => P(s.left, s.y)), ...[...samples].reverse().map((s) => P(s.right, s.y))];
+  const parts = [
+    faded(new fabric.Path(`M ${bandPts.join(" L ")} Z`, { stroke: "", selectable: false, evented: false }), "fill", SKID_BODY_OPACITY),
+  ];
+
+  // Tread-groove streaks across the band, broken up by random dashes.
+  const streakPx = Math.max(1, 0.018 * ppm);
+  for (let k = 0; k < streaks; k++) {
+    const off = (((k + 0.5) / streaks - 0.5) * 0.75 + (rand() - 0.5) * 0.08) * widthM;
+    const pts = samples.map((s) => P(s.cx + off, s.y));
+    const dashes = Array.from({ length: 6 }, (_, i) => (i % 2 ? 0.15 + rand() * 0.5 : 0.6 + rand() * 2.2) * ppm);
+    const streak = new fabric.Path(`M ${pts.join(" L ")}`, {
+      fill: "",
+      strokeWidth: streakPx,
+      strokeDashArray: dashes,
+      selectable: false,
+      evented: false,
+    });
+    parts.push(faded(streak, "stroke", 0.55));
+  }
+
+  if (hatch) {
+    const d = [];
+    for (let i = 0; i < n; i++) {
+      for (const f of [0.2, 0.7]) {
+        const a = samples[i];
+        const b = samples[i + 1];
+        const y = a.y + (b.y - a.y) * f;
+        const cx = a.cx + (b.cx - a.cx) * f;
+        d.push(`M ${P(cx - widthM * 0.45, y + widthM * 0.3)} L ${P(cx + widthM * 0.45, y - widthM * 0.3)}`);
+      }
+    }
+    const scuffs = new fabric.Path(d.join(" "), { fill: "", strokeWidth: streakPx, selectable: false, evented: false });
+    parts.push(faded(scuffs, "stroke", 0.4));
   }
   return parts;
 }
 
+function tireMarksGroup(parts) {
+  return markAsGroundMarking(
+    new fabric.Group(parts, { originX: "center", originY: "center", subTargetCheck: false })
+  );
+}
+
+// Braking skid marks: two tracks a car's width apart, near-straight.
 function createSkidMarks(ppm, lengthM = ROAD_LENGTH_M) {
-  const h = lengthM * ppm;
-  const trackX = (SKID_TRACK_WIDTH_M * ppm) / 2;
-  const parts = [...skidMark(-trackX, h, 0), ...skidMark(trackX, h, 10)];
+  const drift = (t) => 0.06 * Math.sin(t * Math.PI * 1.3);
+  const track = (side, seed) =>
+    tireTrack(ppm, { x: (side * SKID_TRACK_WIDTH_M) / 2, lengthM, widthM: 0.2, drift, seed });
+  return tireMarksGroup([...track(-1, 11), ...track(1, 29)]);
+}
+
+// Sideways slide: the car moves broadside (its length across the marks),
+// so the front and rear tires leave two tracks a wheelbase (~2.7 m) apart.
+// Tires dragged sideways smear a wider band, scuffed diagonally, and the
+// path bows as the car rotates.
+function createSkidMarksSideways(ppm, lengthM = ROAD_LENGTH_M) {
+  const bow = Math.min(0.8, lengthM * 0.06);
+  const drift = (t) => bow * Math.sin(t * Math.PI);
+  const track = (side, seed) =>
+    tireTrack(ppm, { x: side * 1.35, lengthM, widthM: 0.32, drift, seed, streaks: 0, hatch: true });
+  return tireMarksGroup([...track(-1, 7), ...track(1, 43)]);
+}
+
+// Pool of spilled liquid (blood, oil, coolant...): an irregular blob with a
+// few splash droplets, translucent ink so the road/lines underneath still
+// show. Fill and outline are separate objects so only the fill is faded.
+// The edge is a few low-frequency waves summed around the circle, so it
+// wobbles like a real puddle instead of forming regular lobes; `phases`
+// just makes each size's outline different.
+const LIQUID_OPACITY = 0.3;
+
+function puddleRadii(phases, count = 28) {
+  const [p2, p3, p5] = phases;
+  return Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2;
+    return 1 + 0.13 * Math.sin(2 * a + p2) + 0.09 * Math.sin(3 * a + p3) + 0.05 * Math.sin(5 * a + p5);
+  });
+}
+
+function blobPath(cx, cy, rx, ry, radii) {
+  const pts = radii.map((f, i) => {
+    const a = (i / radii.length) * Math.PI * 2;
+    return { x: cx + Math.cos(a) * rx * f, y: cy + Math.sin(a) * ry * f };
+  });
+  // Catmull-Rom through the points, as cubic Béziers.
+  const n = pts.length;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    const p3 = pts[(i + 2) % n];
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${p2.x} ${p2.y}`;
+  }
+  return d + " Z";
+}
+
+// `droplets`: [{ angleDeg, dist, r }], dist/r as fractions of the half-length.
+function liquidPool(ppm, lengthM, aspect, phases, droplets) {
+  const rx = (lengthM / 2) * ppm;
+  const ry = rx * aspect;
+  const blobs = [
+    blobPath(0, 0, rx, ry, puddleRadii(phases)),
+    ...droplets.map(({ angleDeg, dist, r }) => {
+      const a = (angleDeg * Math.PI) / 180;
+      const dr = r * rx;
+      return blobPath(Math.cos(a) * rx * dist, Math.sin(a) * ry * dist, dr, dr * 0.85, [1, 0.9, 1.05, 0.95, 1, 0.9]);
+    }),
+  ];
+  const parts = blobs.flatMap((d) => [
+    new fabric.Path(d, { fill: LINE_COLOR, opacity: LIQUID_OPACITY, stroke: "", selectable: false, evented: false }),
+    new fabric.Path(d, { fill: "", stroke: LINE_COLOR, strokeWidth: 1.5, selectable: false, evented: false }),
+  ]);
   const group = new fabric.Group(parts, {
     originX: "center",
     originY: "center",
     subTargetCheck: false,
   });
   return markAsGroundMarking(group);
+}
+
+function createLiquidSmall(ppm) {
+  return liquidPool(ppm, 0.6, 0.8, [0.4, 2.1, 1.0], [
+    { angleDeg: 20, dist: 1.35, r: 0.12 },
+  ]);
+}
+
+function createLiquidMedium(ppm) {
+  return liquidPool(ppm, 1.4, 0.7, [1.7, 0.3, 4.0], [
+    { angleDeg: -30, dist: 1.25, r: 0.08 },
+    { angleDeg: 160, dist: 1.3, r: 0.06 },
+  ]);
+}
+
+function createLiquidLarge(ppm) {
+  return liquidPool(
+    ppm,
+    2.8,
+    0.6,
+    [2.8, 5.1, 2.2],
+    [
+      { angleDeg: 10, dist: 1.22, r: 0.05 },
+      { angleDeg: 100, dist: 1.45, r: 0.04 },
+      { angleDeg: 200, dist: 1.2, r: 0.06 },
+      { angleDeg: 290, dist: 1.5, r: 0.035 },
+    ]
+  );
+}
+
+// ── Debris (Θραύσματα) ───────────────────────────────────────────
+// A scatter of shards, denser toward the middle: outlined ones read as
+// glass, solid ones as dark plastic. The large field adds recognizable car
+// parts on top. Seeded, so a given field always looks the same. Ground
+// markings, so they stay above roads.
+const debrisPart = (extra = {}) => ({ selectable: false, evented: false, ...extra });
+
+// `spreadX/Y`: rough half-extents of the field, meters.
+function debrisShards(ppm, rand, count, spreadX, spreadY, minM, maxM) {
+  const gauss = () => {
+    // Box-Muller, clamped so nothing lands far outside the field.
+    const g = Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
+    return Math.max(-2, Math.min(2, g)) / 2;
+  };
+  const shards = [];
+  for (let i = 0; i < count; i++) {
+    const cx = gauss() * spreadX;
+    const cy = gauss() * spreadY;
+    const size = minM + rand() * (maxM - minM);
+    const corners = 3 + Math.floor(rand() * 3);
+    const start = rand() * Math.PI * 2;
+    const points = Array.from({ length: corners }, (_, k) => {
+      const a = start + (k / corners) * Math.PI * 2 + (rand() - 0.5) * 0.9;
+      const r = size * (0.45 + rand() * 0.55);
+      return { x: (cx + Math.cos(a) * r) * ppm, y: (cy + Math.sin(a) * r) * ppm };
+    });
+    const glass = rand() < 0.5;
+    shards.push(
+      new fabric.Polygon(
+        points,
+        debrisPart(
+          glass
+            ? { fill: "", stroke: LINE_COLOR, strokeWidth: 1, strokeLineJoin: "round" }
+            : { fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 0.5, strokeLineJoin: "round" }
+        )
+      )
+    );
+  }
+  return shards;
+}
+
+// Wraps one debris item's parts (built around 0,0) and drops it at x, y.
+function debrisItem(ppm, parts, x, y, angle) {
+  return new fabric.Group(parts, {
+    left: x * ppm,
+    top: y * ppm,
+    angle,
+    originX: "center",
+    originY: "center",
+    subTargetCheck: false,
+    ...debrisPart(),
+  });
+}
+
+function debrisGroup(parts) {
+  return markAsGroundMarking(
+    new fabric.Group(parts, { originX: "center", originY: "center", subTargetCheck: false })
+  );
+}
+
+// Small: ~1.2 x 0.8 m of glass and plastic bits (broken lights, trim).
+function createDebrisSmall(ppm) {
+  const rand = seededRandom(5);
+  return debrisGroup(debrisShards(ppm, rand, 34, 0.6, 0.4, 0.03, 0.09));
+}
+
+// Large: ~3.5 x 2.4 m, shards plus half a bumper, a side mirror, a
+// hubcap, a broken light unit, a license plate and a panel fragment.
+function createDebrisLarge(ppm) {
+  const rand = seededRandom(17);
+  const body = () => ({ ...vehicleBody(), strokeWidth: 1.5 });
+  const line = () => ({ ...vehicleLine() });
+
+  const bumper = debrisItem(
+    ppm,
+    [
+      vehiclePath(
+        ppm,
+        [
+          ["M", -0.55, -0.06],
+          ["Q", 0, -0.17, 0.5, -0.1],
+          ["L", 0.45, -0.04],
+          ["L", 0.53, 0.0],
+          ["L", 0.46, 0.04],
+          ["L", 0.5, 0.08],
+          ["Q", 0, 0.03, -0.55, 0.09],
+          ["Q", -0.64, 0.02, -0.55, -0.06],
+          ["Z"],
+        ],
+        body()
+      ),
+      vehiclePath(ppm, [["M", -0.52, 0.0], ["Q", 0, -0.09, 0.44, -0.05]], line()),
+    ],
+    -0.6,
+    -0.45,
+    -18
+  );
+
+  const mirror = debrisItem(
+    ppm,
+    [
+      vehicleRect(ppm, -0.16, 0, 0.07, 0.06, { ...vehicleSolid(), rx: 0, ry: 0 }),
+      vehiclePath(ppm, [["M", -0.13, -0.08], ["L", 0.09, -0.08], ["Q", 0.17, 0, 0.09, 0.08], ["L", -0.13, 0.08], ["Z"]], body()),
+      vehiclePath(ppm, [["M", -0.1, -0.05], ["L", 0.08, -0.05], ["Q", 0.13, 0, 0.08, 0.05], ["L", -0.1, 0.05], ["Z"]], vehicleGlass()),
+    ],
+    0.95,
+    0.35,
+    40
+  );
+
+  const hubcap = debrisItem(
+    ppm,
+    [
+      new fabric.Circle({ radius: 0.19 * ppm, originX: "center", originY: "center", ...debrisPart(body()) }),
+      ...[0, 72, 144, 216, 288].map((deg) => {
+        const a = (deg * Math.PI) / 180;
+        return vehiclePath(ppm, [["M", Math.cos(a) * 0.06, Math.sin(a) * 0.06], ["L", Math.cos(a) * 0.16, Math.sin(a) * 0.16]], line());
+      }),
+      new fabric.Circle({ radius: 0.06 * ppm, originX: "center", originY: "center", ...debrisPart(body()) }),
+    ],
+    1.2,
+    -0.55,
+    0
+  );
+
+  const lightUnit = debrisItem(
+    ppm,
+    [
+      vehicleRect(ppm, 0, 0, 0.36, 0.16, { ...body(), rx: 0.05 * ppm, ry: 0.05 * ppm }),
+      vehiclePath(ppm, [["M", -0.05, -0.08], ["L", -0.05, 0.08], ["M", 0.07, -0.08], ["L", 0.07, 0.08]], line()),
+      vehiclePath(ppm, [["M", 0.12, -0.08], ["L", 0.15, -0.01], ["L", 0.11, 0.03], ["L", 0.14, 0.08]], line()), // crack
+    ],
+    -0.25,
+    0.6,
+    -65
+  );
+
+  const plate = debrisItem(
+    ppm,
+    [
+      vehicleRect(ppm, 0, 0, 0.52, 0.11, { ...body(), rx: 0.015 * ppm, ry: 0.015 * ppm }),
+      vehicleRect(ppm, 0, 0, 0.46, 0.07, { ...line(), rx: 0.01 * ppm, ry: 0.01 * ppm }),
+      ...[-0.15, -0.06, 0.04, 0.13].map((x) => vehicleRect(ppm, x, 0, 0.06, 0.035, { ...vehicleSolid(), rx: 0, ry: 0 })),
+    ],
+    0.35,
+    -0.2,
+    12
+  );
+
+  const panel = debrisItem(
+    ppm,
+    [
+      new fabric.Polygon(
+        [
+          { x: -0.2, y: -0.1 },
+          { x: 0.12, y: -0.14 },
+          { x: 0.22, y: -0.02 },
+          { x: 0.15, y: 0.06 },
+          { x: 0.2, y: 0.12 },
+          { x: -0.05, y: 0.1 },
+          { x: -0.18, y: 0.05 },
+        ].map((p) => ({ x: p.x * ppm, y: p.y * ppm })),
+        debrisPart({ ...body(), strokeLineJoin: "round" })
+      ),
+    ],
+    -1.25,
+    0.15,
+    25
+  );
+
+  return debrisGroup([
+    ...debrisShards(ppm, rand, 70, 1.75, 1.2, 0.03, 0.11),
+    bumper,
+    mirror,
+    hubcap,
+    lightUnit,
+    plate,
+    panel,
+  ]);
+}
+
+// ── Vehicle path arrows (Πορεία οχημάτων) ────────────────────────
+// Annotation arrows showing which way a vehicle moved, pointing up (-y)
+// like the vehicles so a rotated car and its arrow line up. Thick line
+// plus a solid head; ground markings, so they stay above roads.
+const PATH_ARROW_HEAD_LEN_M = 0.8;
+const PATH_ARROW_HEAD_HW_M = 0.33;
+
+// `d`: SVG path in pixels, ending at the head's base. `tip` (meters) and
+// `dir` (unit vector) place the head.
+function movementArrow(ppm, d, tip, dir, dashed = false) {
+  const [dx, dy] = dir;
+  const headLen = PATH_ARROW_HEAD_LEN_M * ppm;
+  const headHw = PATH_ARROW_HEAD_HW_M * ppm;
+  const t = { x: tip.x * ppm, y: tip.y * ppm };
+  const base = { x: t.x - dx * headLen, y: t.y - dy * headLen };
+  const head = new fabric.Polygon(
+    [t, { x: base.x - dy * headHw, y: base.y + dx * headHw }, { x: base.x + dy * headHw, y: base.y - dx * headHw }],
+    { fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 1, strokeLineJoin: "round", selectable: false, evented: false }
+  );
+  const line = new fabric.Path(d, {
+    fill: "",
+    stroke: LINE_COLOR,
+    strokeWidth: 3,
+    strokeLineCap: dashed ? "butt" : "round",
+    strokeDashArray: dashed ? [12, 9] : null,
+    selectable: false,
+    evented: false,
+  });
+  return markAsGroundMarking(
+    new fabric.Group([line, head], { originX: "center", originY: "center", subTargetCheck: false })
+  );
+}
+
+// Straight, sized by the segment-length slider like skid marks.
+function straightPathArrow(ppm, lengthM, dashed) {
+  const L = lengthM ?? 8;
+  const m = (v) => v * ppm;
+  return movementArrow(ppm, `M 0 ${m(L / 2)} L 0 ${m(-L / 2 + PATH_ARROW_HEAD_LEN_M)}`, { x: 0, y: -L / 2 }, [0, -1], dashed);
+}
+
+function createPathStraight(ppm, lengthM) {
+  return straightPathArrow(ppm, lengthM, false);
+}
+
+function createPathStraightDashed(ppm, lengthM) {
+  return straightPathArrow(ppm, lengthM, true);
+}
+
+// 90° turn: 2 m lead-in, 5 m radius. `side`: -1 left, 1 right.
+function turnPathArrow(ppm, side) {
+  const m = (v) => v * ppm;
+  const R = 5;
+  const lead = 2;
+  const outY = -lead - R;
+  const d = [
+    `M 0 0`,
+    `L 0 ${m(-lead)}`,
+    `A ${m(R)} ${m(R)} 0 0 ${side > 0 ? 1 : 0} ${m(side * R)} ${m(outY)}`,
+    `L ${m(side * (R + 0.4))} ${m(outY)}`,
+  ].join(" ");
+  return movementArrow(ppm, d, { x: side * (R + 0.4 + PATH_ARROW_HEAD_LEN_M), y: outY }, [side, 0]);
+}
+
+// Lane change: one lane (3 m) sideways over ~8 m.
+function laneChangePathArrow(ppm, side) {
+  const m = (v) => v * ppm;
+  const x = side * ROAD_LANE_WIDTH;
+  const d = `M 0 0 L 0 ${m(-1)} C 0 ${m(-5)} ${m(x)} ${m(-5)} ${m(x)} ${m(-9)} L ${m(x)} ${m(-9.4)}`;
+  return movementArrow(ppm, d, { x, y: -9.4 - PATH_ARROW_HEAD_LEN_M }, [0, -1]);
+}
+
+// U-turn to the left (driving on the right).
+function createPathUTurn(ppm) {
+  const m = (v) => v * ppm;
+  const r = 2.5;
+  const d = `M 0 0 L 0 ${m(-4)} A ${m(r)} ${m(r)} 0 0 0 ${m(-2 * r)} ${m(-4)} L ${m(-2 * r)} ${m(-1.2)}`;
+  return movementArrow(ppm, d, { x: -2 * r, y: -1.2 + PATH_ARROW_HEAD_LEN_M }, [0, 1]);
+}
+
+// Spin: a vehicle rotating in place after an impact — nearly a full
+// clockwise circle.
+function createPathSpin(ppm) {
+  const r = 1.8;
+  const a0 = (100 * Math.PI) / 180;
+  const a1 = (390 * Math.PI) / 180;
+  const pt = (a) => ({ x: Math.cos(a) * r, y: Math.sin(a) * r });
+  const s = pt(a0);
+  const e = pt(a1);
+  const tangent = [-Math.sin(a1), Math.cos(a1)]; // clockwise on screen
+  const d = `M ${s.x * ppm} ${s.y * ppm} A ${r * ppm} ${r * ppm} 0 1 1 ${e.x * ppm} ${e.y * ppm}`;
+  const tip = { x: e.x + tangent[0] * PATH_ARROW_HEAD_LEN_M, y: e.y + tangent[1] * PATH_ARROW_HEAD_LEN_M };
+  return movementArrow(ppm, d, tip, tangent);
 }
 
 // One lane, no direction drawn on the piece itself — pair with a "Βέλος
@@ -1090,50 +1536,943 @@ function createYieldMarking(ppm) {
   );
 }
 
-function vehicle(ppm, lengthM, widthM) {
-  const w = widthM * ppm;
-  const h = lengthM * ppm;
+// ── Vehicles ─────────────────────────────────────────────────────
+// Top-down, front pointing up (-y). Parts are laid out in meters (x across,
+// y along the vehicle, 0,0 at its center) and scaled by ppm.
+// Glass is ink-filled at low opacity (fill stays LINE_COLOR so the theme
+// restyle still matches it); tires and mirrors are solid ink, drawn before
+// the body so the body hides their inner half and only the rim pokes out.
+const GLASS_OPACITY = 0.2;
 
-  const body = new fabric.Rect({
-    width: w,
-    height: h,
-    rx: w * 0.18,
-    ry: w * 0.18,
-    fill: SHAPE_FILL,
-    stroke: LINE_COLOR,
-    strokeWidth: 2,
+// `segs`: [["M", x, y], ["L", x, y], ["Q", cx, cy, x, y], ["Z"]] in meters.
+function vehiclePath(ppm, segs, style) {
+  const d = segs.map(([cmd, ...nums]) => [cmd, ...nums.map((n) => n * ppm)].join(" ")).join(" ");
+  return new fabric.Path(d, { selectable: false, evented: false, ...style });
+}
+
+function vehicleRect(ppm, cx, cy, wM, hM, style) {
+  return new fabric.Rect({
+    left: cx * ppm,
+    top: cy * ppm,
+    width: wM * ppm,
+    height: hM * ppm,
+    rx: Math.min(wM, hM) * ppm * 0.3,
+    ry: Math.min(wM, hM) * ppm * 0.3,
     originX: "center",
     originY: "center",
     selectable: false,
     evented: false,
+    ...style,
   });
-  const windshield = new fabric.Rect({
-    left: -w * 0.32,
-    top: -h * 0.32,
-    width: w * 0.64,
-    height: h * 0.22,
-    fill: "",
-    stroke: LINE_COLOR,
-    strokeWidth: 1,
-    originX: "left",
-    originY: "top",
-    selectable: false,
-    evented: false,
-  });
+}
 
-  return new fabric.Group([body, windshield], {
+const vehicleSolid = () => ({ fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 1 });
+const vehicleBody = () => ({ fill: SHAPE_FILL, stroke: LINE_COLOR, strokeWidth: 2 });
+const vehicleGlass = () => ({ fill: LINE_COLOR, opacity: GLASS_OPACITY, stroke: "" });
+const vehicleLine = () => ({ fill: "", stroke: LINE_COLOR, strokeWidth: 1 });
+
+// Mirror-images a list of path segments across the vehicle's centerline.
+const mirrorX = (segs) => segs.map(([cmd, ...nums]) => [cmd, ...nums.map((n, i) => (i % 2 === 0 ? -n : n))]);
+
+function vehicleGroup(parts) {
+  return new fabric.Group(parts, {
     originX: "center",
     originY: "center",
     subTargetCheck: false,
   });
 }
 
-function createCar(ppm) {
-  return vehicle(ppm, 4.4, 1.8);
+// Two tires at ±x on the same axle. `poke`: how far each tire sticks out
+// past `hw` (the body's half width), which is all that ends up visible.
+function wheelPair(ppm, hw, y, wM, lM, poke = 0.06) {
+  return [-1, 1].map((side) => vehicleRect(ppm, side * (hw + poke - wM / 2), y, wM, lM, vehicleSolid()));
 }
 
+// Small solid mirrors on the A-pillars (cars, vans).
+function doorMirrors(ppm, hw, y) {
+  const r = [["M", hw - 0.05, y - 0.12], ["L", hw + 0.18, y - 0.06], ["L", hw + 0.18, y + 0.08], ["L", hw - 0.05, y + 0.1], ["Z"]];
+  return [r, mirrorX(r)].map((segs) => vehiclePath(ppm, segs, vehicleSolid()));
+}
+
+// Big mirrors on arms (trucks, buses).
+function armMirrors(ppm, hw, y) {
+  return [-1, 1].flatMap((side) => [
+    vehiclePath(ppm, [["M", side * hw, y + 0.05], ["L", side * (hw + 0.22), y]], { ...vehicleLine(), strokeWidth: 2 }),
+    vehicleRect(ppm, side * (hw + 0.3), y, 0.14, 0.42, vehicleSolid()),
+  ]);
+}
+
+// Chassis rails showing in the gap between a cab and whatever is behind it.
+function chassisRails(ppm, fromY, toY) {
+  return [-1, 1].map((side) =>
+    vehicleRect(ppm, side * 0.45, (fromY + toY) / 2, 0.14, toY - fromY, { ...vehicleSolid(), rx: 0, ry: 0 })
+  );
+}
+
+// Flat-fronted cab-over cab (trucks, tractor units, fire engines): body
+// with rounded front corners and a windshield across the front.
+function cabOverCab(ppm, hw, front, back) {
+  const cab = vehiclePath(
+    ppm,
+    [
+      ["M", -hw + 0.2, front],
+      ["L", hw - 0.2, front],
+      ["Q", hw, front, hw, front + 0.2],
+      ["L", hw, back],
+      ["L", -hw, back],
+      ["L", -hw, front + 0.2],
+      ["Q", -hw, front, -hw + 0.2, front],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -hw + 0.12, front + 0.14],
+      ["L", hw - 0.12, front + 0.14],
+      ["L", hw - 0.2, front + 0.5],
+      ["L", -hw + 0.2, front + 0.5],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  return [cab, windshield];
+}
+
+// Cargo box / trailer body: roof ribs across it and the rear doors' seam.
+function cargoBox(ppm, hw, front, back, ribSpacing) {
+  const box = vehicleRect(ppm, 0, (front + back) / 2, hw * 2, back - front, {
+    ...vehicleBody(),
+    rx: 0.06 * ppm,
+    ry: 0.06 * ppm,
+  });
+  const ribs = [];
+  for (let y = front + ribSpacing; y < back - 0.4; y += ribSpacing) {
+    ribs.push(vehiclePath(ppm, [["M", -hw + 0.12, y], ["L", hw - 0.12, y]], vehicleLine()));
+  }
+  const doorSeam = vehiclePath(ppm, [["M", 0, back - 0.02], ["L", 0, back - 0.3]], vehicleLine());
+  return [box, ...ribs, doorSeam];
+}
+
+// Emergency light bar across the roof: solid lamps at both ends.
+function lightBar(ppm, y, wM) {
+  const lampW = wM * 0.32;
+  return [
+    vehicleRect(ppm, 0, y, wM, 0.26, { ...vehicleBody(), strokeWidth: 1.5, rx: 0.06 * ppm, ry: 0.06 * ppm }),
+    ...[-1, 1].map((side) =>
+      vehicleRect(ppm, side * (wM / 2 - lampW / 2 - 0.04), y, lampW, 0.18, { ...vehicleSolid(), rx: 0.04 * ppm, ry: 0.04 * ppm })
+    ),
+  ];
+}
+
+// Passenger car, ~4.4 x 1.8 m: rounded nose, glass cabin, wheels, mirrors,
+// headlights at the front and taillights at the back so its heading reads
+// at a glance. `hoodCreases: false` leaves the hood clear (police lettering).
+function carParts(ppm, { hoodCreases = true } = {}) {
+  const hw = 0.9; // half width
+  const hl = 2.2; // half length
+
+  const wheels = [-1.35, 1.35].flatMap((y) => wheelPair(ppm, hw, y, 0.24, 0.66, 0.08));
+  const mirrors = doorMirrors(ppm, hw, -0.5);
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -0.62, -hl + 0.04],
+      ["Q", 0, -hl - 0.04, 0.62, -hl + 0.04],
+      ["Q", hw, -hl + 0.08, hw, -hl + 0.5],
+      ["L", hw, hl - 0.4],
+      ["Q", hw, hl - 0.04, 0.62, hl - 0.02],
+      ["Q", 0, hl + 0.02, -0.62, hl - 0.02],
+      ["Q", -hw, hl - 0.04, -hw, hl - 0.4],
+      ["L", -hw, -hl + 0.5],
+      ["Q", -hw, -hl + 0.08, -0.62, -hl + 0.04],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -0.74, -0.92],
+      ["Q", 0, -1.08, 0.74, -0.92],
+      ["L", 0.62, -0.3],
+      ["Q", 0, -0.36, -0.62, -0.3],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const rearWindow = vehiclePath(
+    ppm,
+    [
+      ["M", -0.62, 1.05],
+      ["Q", 0, 1.0, 0.62, 1.05],
+      ["L", 0.7, 1.5],
+      ["Q", 0, 1.58, -0.7, 1.5],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.67, -0.28], ["L", 0.8, -0.34], ["L", 0.8, 1.1], ["L", 0.67, 1.03], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const roof = vehicleRect(ppm, 0, 0.375, 1.24, 1.35, { ...vehicleLine(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+
+  // Hood creases, running from the windshield toward the nose.
+  const hoodR = [["M", 0.45, -1.0], ["Q", 0.5, -1.6, 0.4, -2.02]];
+  const hood = hoodCreases ? [hoodR, mirrorX(hoodR)].map((segs) => vehiclePath(ppm, segs, vehicleLine())) : [];
+
+  const headlightR = [["M", 0.5, -hl + 0.1], ["L", 0.78, -hl + 0.2], ["L", 0.84, -hl + 0.38], ["L", 0.5, -hl + 0.22], ["Z"]];
+  const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * 0.7, hl - 0.12, 0.26, 0.1, vehicleSolid()));
+
+  return [
+    ...wheels,
+    ...mirrors,
+    body,
+    windshield,
+    rearWindow,
+    ...sideWindows,
+    roof,
+    ...hood,
+    ...headlights,
+    ...taillights,
+  ];
+}
+
+function createCar(ppm) {
+  return vehicleGroup(carParts(ppm));
+}
+
+// Police patrol car (Περιπολικό): the car with a light bar across the roof
+// and ΕΛ.ΑΣ. lettering on the hood.
+function createPoliceCar(ppm) {
+  const lettering = new fabric.Text("ΕΛ.ΑΣ.", {
+    left: 0,
+    top: -1.55 * ppm,
+    fontSize: 0.34 * ppm,
+    fontWeight: "bold",
+    fontFamily: "Arial, sans-serif",
+    fill: LINE_COLOR,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  return vehicleGroup([...carParts(ppm, { hoodCreases: false }), ...lightBar(ppm, 0.05, 1.3), lettering]);
+}
+
+// Van, ~5.3 x 2 m (Sprinter/Transit class): short sloped hood, long flat
+// roof with pressed ribs, rear doors. `ribs: false` leaves the roof clear
+// for the ambulance's markings.
+function vanParts(ppm, lengthM, { ribs = true } = {}) {
+  const hw = 1.0;
+  const hl = lengthM / 2;
+  const front = -hl;
+  const windshieldFront = front + 0.72;
+  const roofFront = front + 1.22;
+
+  const wheels = [front + 0.95, hl - 1.25].flatMap((y) => wheelPair(ppm, hw, y, 0.26, 0.72, 0.08));
+  const mirrors = doorMirrors(ppm, hw, roofFront - 0.12);
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -0.7, front + 0.05],
+      ["Q", 0, front - 0.03, 0.7, front + 0.05],
+      ["Q", hw, front + 0.1, hw, front + 0.55],
+      ["L", hw, hl - 0.12],
+      ["Q", hw, hl, hw - 0.12, hl],
+      ["L", -hw + 0.12, hl],
+      ["Q", -hw, hl, -hw, hl - 0.12],
+      ["L", -hw, front + 0.55],
+      ["Q", -hw, front + 0.1, -0.7, front + 0.05],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -0.84, windshieldFront],
+      ["Q", 0, windshieldFront - 0.12, 0.84, windshieldFront],
+      ["L", 0.86, roofFront],
+      ["L", -0.86, roofFront],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.88, roofFront + 0.05], ["L", 0.95, roofFront + 0.05], ["L", 0.95, roofFront + 0.75], ["L", 0.88, roofFront + 0.75], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const roofBack = hl - 0.1;
+  const roof = vehicleRect(ppm, 0, (roofFront + roofBack) / 2, 1.72, roofBack - roofFront, {
+    ...vehicleLine(),
+    rx: 0.1 * ppm,
+    ry: 0.1 * ppm,
+  });
+  const roofRibs = ribs
+    ? [-0.4, 0, 0.4].map((x) => vehiclePath(ppm, [["M", x, roofFront + 0.4], ["L", x, roofBack - 0.4]], vehicleLine()))
+    : [];
+  const doorSeam = vehiclePath(ppm, [["M", 0, hl], ["L", 0, roofBack]], vehicleLine());
+
+  const headlightR = [["M", 0.55, front + 0.08], ["L", 0.86, front + 0.2], ["L", 0.9, front + 0.38], ["L", 0.55, front + 0.22], ["Z"]];
+  const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.1), hl - 0.3, 0.1, 0.4, vehicleSolid()));
+
+  return {
+    parts: [...wheels, ...mirrors, body, windshield, ...sideWindows, roof, ...roofRibs, doorSeam, ...headlights, ...taillights],
+    roofFront,
+    roofBack,
+  };
+}
+
+function createVan(ppm) {
+  return vehicleGroup(vanParts(ppm, 5.3).parts);
+}
+
+// Ambulance (Ασθενοφόρο), ~6 x 2 m: a long van with a light bar over the
+// windshield and a large cross on the roof.
+function createAmbulance(ppm) {
+  const { parts, roofFront, roofBack } = vanParts(ppm, 6, { ribs: false });
+  const cy = (roofFront + 0.4 + roofBack) / 2;
+  const arm = 0.55; // cross half-span
+  const t = 0.19; // cross half-thickness
+  const cross = vehiclePath(
+    ppm,
+    [
+      ["M", -t, cy - arm],
+      ["L", t, cy - arm],
+      ["L", t, cy - t],
+      ["L", arm, cy - t],
+      ["L", arm, cy + t],
+      ["L", t, cy + t],
+      ["L", t, cy + arm],
+      ["L", -t, cy + arm],
+      ["L", -t, cy + t],
+      ["L", -arm, cy + t],
+      ["L", -arm, cy - t],
+      ["L", -t, cy - t],
+      ["Z"],
+    ],
+    vehicleSolid()
+  );
+  return vehicleGroup([...parts, ...lightBar(ppm, roofFront + 0.22, 1.5), cross]);
+}
+
+// Box truck, ~7 x 2.5 m: cab-over cab up front, separate cargo box behind
+// it (with the chassis showing in the gap), and big arm-mounted mirrors.
 function createTruck(ppm) {
-  return vehicle(ppm, 7, 2.5);
+  const hl = 3.5;
+  const cabHw = 1.15;
+  const cabBack = -1.75;
+  const boxFront = -1.55;
+
+  const cabRoof = vehicleRect(ppm, 0, (-hl + 0.5 + cabBack) / 2 + 0.05, 1.7, 1.0, { ...vehicleLine(), rx: 0.1 * ppm, ry: 0.1 * ppm });
+
+  return vehicleGroup([
+    ...chassisRails(ppm, cabBack, boxFront),
+    ...wheelPair(ppm, cabHw, -2.55, 0.32, 1.0, 0.14),
+    ...wheelPair(ppm, 1.25, 2.2, 0.4, 1.0, 0.08),
+    ...armMirrors(ppm, cabHw, -3.05),
+    ...cabOverCab(ppm, cabHw, -hl, cabBack),
+    cabRoof,
+    ...cargoBox(ppm, 1.25, boxFront, hl, 0.85),
+  ]);
+}
+
+// Semi-truck (Νταλίκα), ~16.5 x 2.55 m: tractor unit with a roof fairing,
+// and a 13.6 m trailer riding over its drive axles. Drawn as one rigid
+// piece, straight.
+function createSemiTruck(ppm) {
+  const hl = 8.25;
+  const cabHw = 1.25;
+  const cabBack = -6.05;
+  const trailerHw = 1.275;
+  const trailerFront = -5.55;
+
+  // Roof fairing: narrow at the front, flaring out to the cab's full width.
+  const fairing = vehiclePath(
+    ppm,
+    [
+      ["M", -0.8, -hl + 0.65],
+      ["L", 0.8, -hl + 0.65],
+      ["L", 1.05, cabBack - 0.1],
+      ["L", -1.05, cabBack - 0.1],
+      ["Z"],
+    ],
+    vehicleLine()
+  );
+
+  return vehicleGroup([
+    ...chassisRails(ppm, cabBack, trailerFront),
+    ...wheelPair(ppm, cabHw, -7.2, 0.32, 1.0, 0.1),
+    ...[-4.6, -3.35].flatMap((y) => wheelPair(ppm, trailerHw, y, 0.4, 1.0, 0.06)),
+    ...[4.6, 5.9, 7.2].flatMap((y) => wheelPair(ppm, trailerHw, y, 0.4, 1.0, 0.06)),
+    ...armMirrors(ppm, cabHw, -7.75),
+    ...cabOverCab(ppm, cabHw, -hl, cabBack),
+    fairing,
+    ...cargoBox(ppm, trailerHw, trailerFront, hl, 1.2),
+  ]);
+}
+
+// City bus (Λεωφορείο), ~12 x 2.55 m: wraparound windshield, a row of
+// side windows, roof A/C unit and hatches, engine grille at the back.
+function createBus(ppm) {
+  const hw = 1.275;
+  const hl = 6;
+
+  const mirrors = [-1, 1].flatMap((side) => [
+    vehiclePath(ppm, [["M", side * hw, -hl + 0.6], ["Q", side * (hw + 0.35), -hl + 0.5, side * (hw + 0.35), -hl + 0.15]], {
+      ...vehicleLine(),
+      strokeWidth: 2,
+    }),
+    vehicleRect(ppm, side * (hw + 0.35), -hl + 0.05, 0.14, 0.4, vehicleSolid()),
+  ]);
+
+  const body = vehicleRect(ppm, 0, 0, hw * 2, hl * 2, { ...vehicleBody(), rx: 0.35 * ppm, ry: 0.35 * ppm });
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -hw + 0.12, -hl + 0.2],
+      ["Q", 0, -hl + 0.02, hw - 0.12, -hl + 0.2],
+      ["L", hw - 0.1, -hl + 0.55],
+      ["L", -hw + 0.1, -hl + 0.55],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const sideWindows = [];
+  for (let y = -hl + 0.75; y < hl - 1.4; y += 1.45) {
+    const segs = [["M", hw - 0.14, y], ["L", hw - 0.04, y], ["L", hw - 0.04, y + 1.3], ["L", hw - 0.14, y + 1.3], ["Z"]];
+    sideWindows.push(vehiclePath(ppm, segs, vehicleGlass()), vehiclePath(ppm, mirrorX(segs), vehicleGlass()));
+  }
+  const acUnit = vehicleRect(ppm, 0, -0.8, 1.5, 2.4, { ...vehicleLine(), rx: 0.12 * ppm, ry: 0.12 * ppm });
+  const hatches = [-3.6, 2.4].map((y) => vehicleRect(ppm, 0, y, 0.7, 0.7, { ...vehicleLine(), rx: 0.05 * ppm, ry: 0.05 * ppm }));
+  const grille = [0.35, 0.5, 0.65].map((d) =>
+    vehiclePath(ppm, [["M", -0.6, hl - d], ["L", 0.6, hl - d]], vehicleLine())
+  );
+
+  return vehicleGroup([
+    ...wheelPair(ppm, hw, -3.3, 0.32, 1.0, 0.06),
+    ...wheelPair(ppm, hw, 2.8, 0.4, 1.0, 0.06),
+    ...mirrors,
+    body,
+    windshield,
+    ...sideWindows,
+    acUnit,
+    ...hatches,
+    ...grille,
+  ]);
+}
+
+// Fire engine (Πυροσβεστικό), ~8.5 x 2.5 m: crew cab with a light bar,
+// equipment body with side lockers, and a ladder running from the
+// turntable at the back up over the cab.
+function createFireTruck(ppm) {
+  const hl = 4.25;
+  const cabHw = 1.2;
+  const cabBack = -1.6;
+  const bodyHw = 1.25;
+  const bodyFront = -1.45;
+
+  const equipmentBody = vehicleRect(ppm, 0, (bodyFront + hl) / 2, bodyHw * 2, hl - bodyFront, {
+    ...vehicleBody(),
+    rx: 0.06 * ppm,
+    ry: 0.06 * ppm,
+  });
+  // Tops of the roller-shutter lockers down both sides.
+  const lockers = [-1, 1].map((side) =>
+    vehiclePath(ppm, [["M", side * (bodyHw - 0.25), bodyFront + 0.15], ["L", side * (bodyHw - 0.25), hl - 0.15]], vehicleLine())
+  );
+
+  const turntableY = hl - 1.0;
+  const turntable = new fabric.Circle({
+    left: 0,
+    top: turntableY * ppm,
+    radius: 0.7 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...vehicleBody(),
+  });
+
+  const ladderFront = -hl + 0.8;
+  const ladderHw = 0.4;
+  const ladderBed = vehicleRect(ppm, 0, (ladderFront + turntableY) / 2, ladderHw * 2, turntableY - ladderFront, {
+    ...vehicleBody(),
+    rx: 0,
+    ry: 0,
+  });
+  const rungs = [];
+  for (let y = ladderFront + 0.3; y < turntableY; y += 0.3) {
+    rungs.push(vehiclePath(ppm, [["M", -ladderHw, y], ["L", ladderHw, y]], vehicleLine()));
+  }
+
+  return vehicleGroup([
+    ...chassisRails(ppm, cabBack, bodyFront),
+    ...wheelPair(ppm, cabHw, -2.95, 0.34, 1.05, 0.12),
+    ...wheelPair(ppm, bodyHw, 2.4, 0.4, 1.05, 0.08),
+    ...armMirrors(ppm, cabHw, -3.65),
+    ...cabOverCab(ppm, cabHw, -hl, cabBack),
+    ...lightBar(ppm, -hl + 0.68, 2.0),
+    equipmentBody,
+    ...lockers,
+    turntable,
+    ladderBed,
+    ...rungs,
+  ]);
+}
+
+// Motorcycle (Μοτοσικλέτα), ~2.1 x 0.8 m across the handlebars.
+function createMotorcycle(ppm) {
+  const frontTire = vehicleRect(ppm, 0, -0.72, 0.12, 0.62, vehicleSolid());
+  const rearTire = vehicleRect(ppm, 0, 0.72, 0.18, 0.64, vehicleSolid());
+  // Tank flowing into the seat and tail.
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", 0, -0.55],
+      ["Q", 0.2, -0.5, 0.18, -0.15],
+      ["Q", 0.15, 0.05, 0.14, 0.15],
+      ["L", 0.14, 0.75],
+      ["Q", 0.12, 0.9, 0, 0.92],
+      ["Q", -0.12, 0.9, -0.14, 0.75],
+      ["L", -0.14, 0.15],
+      ["Q", -0.15, 0.05, -0.18, -0.15],
+      ["Q", -0.2, -0.5, 0, -0.55],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+  const seatLine = vehiclePath(ppm, [["M", -0.14, 0.1], ["Q", 0, 0.05, 0.14, 0.1]], vehicleLine());
+  const handlebar = vehiclePath(ppm, [["M", -0.32, -0.46], ["Q", 0, -0.62, 0.32, -0.46]], { ...vehicleLine(), strokeWidth: 3 });
+  const grips = [-1, 1].map((side) => vehicleRect(ppm, side * 0.36, -0.44, 0.1, 0.06, vehicleSolid()));
+  const mirrors = [-1, 1].map(
+    (side) =>
+      new fabric.Circle({
+        left: side * 0.24 * ppm,
+        top: -0.6 * ppm,
+        radius: 0.045 * ppm,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+        ...vehicleSolid(),
+      })
+  );
+  const headlight = vehiclePath(ppm, [["M", -0.08, -0.58], ["Q", 0, -0.66, 0.08, -0.58]], { ...vehicleLine(), strokeWidth: 2 });
+
+  return vehicleGroup([frontTire, rearTire, body, seatLine, handlebar, ...grips, ...mirrors, headlight]);
+}
+
+// Bicycle (Ποδήλατο), ~1.75 x 0.6 m across the handlebars.
+function createBicycle(ppm) {
+  const wheels = [-0.52, 0.52].map((y) => vehicleRect(ppm, 0, y, 0.05, 0.66, vehicleSolid()));
+  const frame = vehiclePath(ppm, [["M", 0, -0.48], ["L", 0, 0.45]], { ...vehicleLine(), strokeWidth: 2.5 });
+  const handlebar = vehiclePath(ppm, [["M", -0.28, -0.36], ["Q", 0, -0.5, 0.28, -0.36]], { ...vehicleLine(), strokeWidth: 2 });
+  const grips = [-1, 1].map((side) => vehicleRect(ppm, side * 0.28, -0.36, 0.07, 0.1, vehicleSolid()));
+  const crank = vehiclePath(ppm, [["M", -0.18, 0.02], ["L", 0.18, 0.02]], { ...vehicleLine(), strokeWidth: 2 });
+  const pedals = [-1, 1].map((side) => vehicleRect(ppm, side * 0.2, 0.02, 0.06, 0.12, vehicleSolid()));
+  const saddle = vehiclePath(
+    ppm,
+    [
+      ["M", 0, 0.14],
+      ["Q", 0.05, 0.14, 0.04, 0.24],
+      ["Q", 0.1, 0.36, 0, 0.38],
+      ["Q", -0.1, 0.36, -0.04, 0.24],
+      ["Q", -0.05, 0.14, 0, 0.14],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+
+  return vehicleGroup([...wheels, frame, crank, ...pedals, handlebar, ...grips, saddle]);
+}
+
+// Electric scooter (Ηλεκτρικό πατίνι), ~1.15 m long, 0.5 m across the
+// handlebar: narrow deck, small wheels, handlebar right over the front wheel.
+function createScooter(ppm) {
+  const wheels = [
+    vehicleRect(ppm, 0, -0.45, 0.05, 0.22, vehicleSolid()),
+    vehicleRect(ppm, 0, 0.46, 0.06, 0.22, vehicleSolid()),
+  ];
+  const deck = vehicleRect(ppm, 0, 0.04, 0.17, 0.74, { ...vehicleBody(), rx: 0.06 * ppm, ry: 0.06 * ppm });
+  const gripTape = vehicleRect(ppm, 0, 0.06, 0.1, 0.56, { ...vehicleLine(), rx: 0.03 * ppm, ry: 0.03 * ppm });
+  const neck = vehicleRect(ppm, 0, -0.38, 0.07, 0.12, { ...vehicleBody(), strokeWidth: 1.5, rx: 0, ry: 0 });
+  const rearFender = vehiclePath(ppm, [["M", -0.05, 0.4], ["Q", 0, 0.62, 0.05, 0.4]], { ...vehicleLine(), strokeWidth: 1.5 });
+  const handlebar = vehiclePath(ppm, [["M", -0.24, -0.4], ["L", 0.24, -0.4]], { ...vehicleLine(), strokeWidth: 3 });
+  const grips = [-1, 1].map((side) => vehicleRect(ppm, side * 0.23, -0.4, 0.09, 0.05, vehicleSolid()));
+  const display = vehicleRect(ppm, 0, -0.4, 0.08, 0.06, { ...vehicleBody(), strokeWidth: 1.5, rx: 0.01 * ppm, ry: 0.01 * ppm });
+
+  return vehicleGroup([...wheels, rearFender, deck, gripTape, neck, handlebar, ...grips, display]);
+}
+
+// ── Fallen two-wheelers ──────────────────────────────────────────
+// Seen from above, a bike lying on its side shows its side profile. Parts
+// are laid out in profile coordinates (u forward, v up from the ground, in
+// meters) and turned so the front points up (-y) like the other vehicles,
+// with the top of the bike to the left.
+const sideSegs = (segs) =>
+  segs.map(([cmd, ...nums]) => {
+    const out = [cmd];
+    for (let i = 0; i < nums.length; i += 2) out.push(-nums[i + 1], -nums[i]);
+    return out;
+  });
+
+function sideLine(ppm, u1, v1, u2, v2, strokeWidth) {
+  return vehiclePath(ppm, sideSegs([["M", u1, v1], ["L", u2, v2]]), { ...vehicleLine(), strokeWidth, strokeLineCap: "round" });
+}
+
+function sideCircle(ppm, u, v, r, style) {
+  return new fabric.Circle({
+    left: -v * ppm,
+    top: -u * ppm,
+    radius: r * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...style,
+  });
+}
+
+// Fallen bicycle (Πεσμένο ποδήλατο), ~1.75 m long.
+function createFallenBicycle(ppm) {
+  const wheelR = 0.34;
+  const rearHub = [-0.525, wheelR];
+  const frontHub = [0.525, wheelR];
+  const bb = [-0.05, 0.3]; // bottom bracket
+  const seatTop = [-0.2, 0.85];
+  const headTop = [0.38, 0.85];
+  const headBottom = [0.42, 0.7];
+  const bar = [0.33, 1.0];
+
+  const wheels = [rearHub, frontHub].flatMap(([u, v]) => [
+    sideCircle(ppm, u, v, wheelR, { fill: "", stroke: LINE_COLOR, strokeWidth: 2.5 }),
+    sideCircle(ppm, u, v, wheelR - 0.04, { fill: "", stroke: LINE_COLOR, strokeWidth: 0.75 }),
+    sideCircle(ppm, u, v, 0.03, vehicleSolid()),
+  ]);
+  const tube = (a, b) => sideLine(ppm, a[0], a[1], b[0], b[1], 2.5);
+  const frame = [
+    tube(rearHub, bb),
+    tube(rearHub, seatTop),
+    tube(bb, seatTop),
+    tube(seatTop, headTop),
+    tube(bb, headBottom),
+    tube(headTop, headBottom),
+    tube(headBottom, frontHub),
+    tube(headTop, bar),
+  ];
+  const handlebar = sideLine(ppm, bar[0] - 0.1, bar[1] + 0.02, bar[0] + 0.02, bar[1], 3);
+  const chainring = sideCircle(ppm, bb[0], bb[1], 0.1, { ...vehicleBody(), strokeWidth: 1.5 });
+  const crank = sideLine(ppm, bb[0] + 0.12, bb[1] - 0.14, bb[0] - 0.12, bb[1] + 0.14, 2.5);
+  const saddle = vehiclePath(
+    ppm,
+    sideSegs([
+      ["M", seatTop[0] - 0.14, seatTop[1] + 0.07],
+      ["Q", seatTop[0], seatTop[1] + 0.1, seatTop[0] + 0.12, seatTop[1] + 0.05],
+      ["L", seatTop[0] - 0.12, seatTop[1] + 0.03],
+      ["Z"],
+    ]),
+    vehicleSolid()
+  );
+
+  return vehicleGroup([...wheels, ...frame, chainring, crank, handlebar, saddle]);
+}
+
+// Fallen motorcycle (Πεσμένη μοτοσικλέτα), ~2.1 m long.
+function createFallenMotorcycle(ppm) {
+  const wheelR = 0.32;
+  const rearHub = [-0.7, wheelR];
+  const frontHub = [0.7, wheelR];
+
+  const wheels = [rearHub, frontHub].flatMap(([u, v]) => [
+    sideCircle(ppm, u, v, wheelR, vehicleSolid()),
+    sideCircle(ppm, u, v, wheelR - 0.1, vehicleBody()),
+    sideCircle(ppm, u, v, 0.05, vehicleSolid()),
+  ]);
+  const swingarm = sideLine(ppm, rearHub[0], rearHub[1], -0.2, 0.38, 4);
+  const fork = sideLine(ppm, frontHub[0], frontHub[1], 0.46, 0.92, 4);
+  const exhaust = sideLine(ppm, 0.15, 0.2, -0.78, 0.42, 5);
+  const engine = vehiclePath(
+    ppm,
+    sideSegs([
+      ["M", 0.32, 0.58],
+      ["L", 0.32, 0.3],
+      ["Q", 0.3, 0.2, 0.18, 0.2],
+      ["L", -0.18, 0.22],
+      ["Q", -0.28, 0.24, -0.28, 0.34],
+      ["L", -0.26, 0.6],
+      ["Z"],
+    ]),
+    vehicleBody()
+  );
+  // Tank, seat and tail as one outline.
+  const body = vehiclePath(
+    ppm,
+    sideSegs([
+      ["M", 0.46, 0.66],
+      ["L", 0.42, 0.86],
+      ["Q", 0.15, 0.95, -0.08, 0.84],
+      ["L", -0.6, 0.84],
+      ["L", -0.9, 0.92],
+      ["L", -0.88, 0.8],
+      ["L", -0.55, 0.62],
+      ["L", 0.3, 0.6],
+      ["Z"],
+    ]),
+    vehicleBody()
+  );
+  const seatLine = vehiclePath(ppm, sideSegs([["M", -0.08, 0.84], ["L", -0.12, 0.76]]), vehicleLine());
+  const frontFender = vehiclePath(
+    ppm,
+    sideSegs([["M", frontHub[0] - 0.3, frontHub[1] + 0.2], ["Q", frontHub[0], frontHub[1] + 0.48, frontHub[0] + 0.32, frontHub[1] + 0.14]]),
+    { ...vehicleLine(), strokeWidth: 3 }
+  );
+  const headlight = sideCircle(ppm, 0.56, 0.84, 0.07, { ...vehicleBody(), strokeWidth: 1.5 });
+  const handlebar = sideLine(ppm, 0.44, 0.96, 0.3, 1.04, 3);
+
+  // Swingarm, fork and exhaust go under the wheels so the tires cover
+  // where they'd cross the rims.
+  return vehicleGroup([swingarm, fork, exhaust, ...wheels, engine, frontFender, body, seatLine, headlight, handlebar]);
+}
+
+// Fallen electric scooter (Πεσμένο ηλεκτρικό πατίνι): side profile, deck
+// low to the ground and the tall stem lying out to the side.
+function createFallenScooter(ppm) {
+  const wheelR = 0.1;
+  const wheels = [-0.45, 0.45].flatMap((u) => [
+    sideCircle(ppm, u, wheelR, wheelR, vehicleSolid()),
+    sideCircle(ppm, u, wheelR, 0.04, vehicleBody()),
+  ]);
+  const deck = vehiclePath(
+    ppm,
+    sideSegs([
+      ["M", -0.36, 0.09],
+      ["L", 0.3, 0.09],
+      ["L", 0.3, 0.15],
+      ["L", -0.36, 0.15],
+      ["Z"],
+    ]),
+    { ...vehicleBody(), strokeWidth: 1.5 }
+  );
+  const neck = sideLine(ppm, 0.28, 0.12, 0.42, 0.24, 3);
+  const fork = sideLine(ppm, 0.45, wheelR, 0.42, 0.26, 3);
+  const stem = sideLine(ppm, 0.42, 0.24, 0.33, 1.1, 4);
+  const handlebar = sideLine(ppm, 0.26, 1.12, 0.38, 1.1, 3);
+  const rearFender = vehiclePath(
+    ppm,
+    sideSegs([["M", -0.58, 0.1], ["Q", -0.58, 0.175, -0.515, 0.213], ["Q", -0.45, 0.25, -0.385, 0.213]]),
+    { ...vehicleLine(), strokeWidth: 2 }
+  );
+
+  return vehicleGroup([fork, ...wheels, rearFender, deck, neck, stem, handlebar]);
+}
+
+// Farm tractor (Τρακτέρ), ~3.8 x 2.05 m: narrow hood, small front
+// wheels, big treaded rear wheels wider than the cab.
+function createTractor(ppm) {
+  const treadedTire = (x, y, wM, lM, step) => {
+    const parts = [vehicleRect(ppm, x, y, wM, lM, { ...vehicleBody(), rx: 0.08 * ppm, ry: 0.08 * ppm })];
+    for (let ty = y - lM / 2 + step; ty < y + lM / 2 - step / 2; ty += step) {
+      parts.push(vehiclePath(ppm, [["M", x - wM / 2, ty], ["L", x + wM / 2, ty]], vehicleLine()));
+    }
+    return parts;
+  };
+
+  const frontAxle = vehiclePath(ppm, [["M", -0.62, -1.3], ["L", 0.62, -1.3]], { ...vehicleLine(), strokeWidth: 3 });
+  const frontTires = [-1, 1].flatMap((side) => treadedTire(side * 0.65, -1.3, 0.28, 0.85, 0.17));
+  const rearTires = [-1, 1].flatMap((side) => treadedTire(side * 0.8, 0.75, 0.46, 1.5, 0.19));
+
+  const hood = vehicleRect(ppm, 0, -1.0, 0.7, 1.9, { ...vehicleBody(), rx: 0.12 * ppm, ry: 0.12 * ppm });
+  const grille = [-1.75, -1.65, -1.55].map((y) => vehiclePath(ppm, [["M", -0.2, y], ["L", 0.2, y]], vehicleLine()));
+  const cab = vehicleRect(ppm, 0, 0.75, 1.2, 1.4, { ...vehicleBody(), rx: 0.1 * ppm, ry: 0.1 * ppm });
+  const cabRoof = vehicleRect(ppm, 0, 0.75, 0.96, 1.16, { ...vehicleLine(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+  const exhaust = new fabric.Circle({
+    left: 0.22 * ppm,
+    top: -0.25 * ppm,
+    radius: 0.06 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...vehicleSolid(),
+  });
+  const hitch = vehicleRect(ppm, 0, 1.6, 0.3, 0.16, { ...vehicleSolid(), rx: 0, ry: 0 });
+
+  return vehicleGroup([frontAxle, ...frontTires, ...rearTires, hitch, hood, ...grille, cab, cabRoof, exhaust]);
+}
+
+// Pedestrian (Πεζός), seen from above: shoulders, head, and feet stepping
+// out in front so the walking direction shows.
+function createPedestrian(ppm) {
+  const foot = (x, y) =>
+    new fabric.Ellipse({
+      left: x * ppm,
+      top: y * ppm,
+      rx: 0.05 * ppm,
+      ry: 0.09 * ppm,
+      originX: "center",
+      originY: "center",
+      selectable: false,
+      evented: false,
+      ...vehicleSolid(),
+    });
+  const shoulders = new fabric.Ellipse({
+    left: 0,
+    top: 0,
+    rx: 0.25 * ppm,
+    ry: 0.13 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...vehicleBody(),
+  });
+  const head = new fabric.Circle({
+    left: 0,
+    top: -0.01 * ppm,
+    radius: 0.1 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...vehicleBody(),
+  });
+
+  return vehicleGroup([foot(-0.08, -0.15), foot(0.08, -0.07), shoulders, head]);
+}
+
+// ── Fallen people ────────────────────────────────────────────────
+// Articulated "dolls" lying on the ground, seen from above: a person thrown
+// from a car or off a bike. One adult skeleton (~1.75 m) posed by joint
+// angles; every part is an outlined capsule, like a jointed mannequin.
+// Angles are absolute, in degrees: 0 points along the body toward the feet,
+// 90 to the figure's right (+x), -90 to its left, ±180 up past the head.
+// Each limb is [upper, lower] (upper arm + forearm, thigh + shin).
+const HUMAN_BODY = {
+  shoulderHw: 0.19,
+  hipHw: 0.1,
+  torsoLen: 0.52,
+  upperArm: 0.3,
+  foreArm: 0.26,
+  thigh: 0.45,
+  shin: 0.43,
+};
+
+const HUMAN_POSES = {
+  // Ανάσκελα: flat on the back, arms by the sides.
+  humansupine: { lArm: [-20, -10], rArm: [20, 10], lLeg: [-4, -2], rLeg: [4, 2] },
+  // Απλωμένος: sprawled, limbs flung out — thrown from a vehicle.
+  humansprawled: { lArm: [-105, -150], rArm: [55, 20], lLeg: [-25, -8], rLeg: [14, 40] },
+  // Χέρια πάνω από το κεφάλι.
+  humanarmsup: { lArm: [-160, -172], rArm: [150, 164], lLeg: [-6, -4], rLeg: [10, 18] },
+  // Στο πλάι: both knees drawn up to one side, arms reaching the same way.
+  humanside: { lArm: [30, 120], rArm: [70, 140], lLeg: [45, -10], rLeg: [65, 5] },
+  // Κουλουριασμένος: curled up, knees toward the chest.
+  humancurled: { lArm: [60, 150], rArm: [95, 155], lLeg: [100, 10], rLeg: [118, 25] },
+  // Λυγισμένο πόδι: one leg twisted under, one arm bent up.
+  humantwisted: { lArm: [-45, -20], rArm: [80, 170], lLeg: [-5, -3], rLeg: [50, -35] },
+};
+
+function humanJoints(pose) {
+  const b = HUMAN_BODY;
+  const limb = (root, [a1, a2], l1, l2) => {
+    const mid = humanStep(root, a1, l1);
+    return { root, mid, end: humanStep(mid, a2, l2), endAngle: a2 };
+  };
+  return {
+    lArm: limb({ x: -b.shoulderHw, y: 0 }, pose.lArm, b.upperArm, b.foreArm),
+    rArm: limb({ x: b.shoulderHw, y: 0 }, pose.rArm, b.upperArm, b.foreArm),
+    lLeg: limb({ x: -b.hipHw, y: b.torsoLen }, pose.lLeg, b.thigh, b.shin),
+    rLeg: limb({ x: b.hipHw, y: b.torsoLen }, pose.rLeg, b.thigh, b.shin),
+  };
+}
+
+// Point `len` meters from p in the direction `deg` (see HUMAN_POSES).
+function humanStep(p, deg, len) {
+  const a = (deg * Math.PI) / 180;
+  return { x: p.x + Math.sin(a) * len, y: p.y + Math.cos(a) * len };
+}
+
+const humanPart = () => ({ ...vehicleBody(), strokeWidth: 1.5 });
+
+// A rounded bar from p1 to p2 (meters), `w` meters thick.
+function capsule(ppm, p1, p2, w) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  return new fabric.Rect({
+    left: ((p1.x + p2.x) / 2) * ppm,
+    top: ((p1.y + p2.y) / 2) * ppm,
+    width: (Math.hypot(dx, dy) + w) * ppm,
+    height: w * ppm,
+    rx: (w / 2) * ppm,
+    ry: (w / 2) * ppm,
+    angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...humanPart(),
+  });
+}
+
+function createHuman(ppm, pose) {
+  const j = humanJoints(pose);
+
+  const legs = [j.lLeg, j.rLeg].flatMap((leg) => [
+    capsule(ppm, leg.mid, leg.end, 0.12),
+    capsule(ppm, leg.end, humanStep(leg.end, leg.endAngle, 0.1), 0.09), // foot
+    capsule(ppm, leg.root, leg.mid, 0.16),
+  ]);
+  const arms = [j.lArm, j.rArm].flatMap((arm) => {
+    const hand = humanStep(arm.end, arm.endAngle, 0.04);
+    return [
+      capsule(ppm, arm.mid, arm.end, 0.085),
+      capsule(ppm, arm.root, arm.mid, 0.1),
+      new fabric.Circle({
+        left: hand.x * ppm,
+        top: hand.y * ppm,
+        radius: 0.05 * ppm,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+        ...humanPart(),
+      }),
+    ];
+  });
+  const neck = capsule(ppm, { x: 0, y: 0 }, { x: 0, y: -0.1 }, 0.1);
+  const torso = vehiclePath(
+    ppm,
+    [
+      ["M", -0.2, -0.03],
+      ["Q", 0, -0.08, 0.2, -0.03],
+      ["Q", 0.25, 0, 0.23, 0.1],
+      ["L", 0.17, 0.45],
+      ["Q", 0.18, 0.6, 0, 0.6],
+      ["Q", -0.18, 0.6, -0.17, 0.45],
+      ["L", -0.23, 0.1],
+      ["Q", -0.25, 0, -0.2, -0.03],
+      ["Z"],
+    ],
+    humanPart()
+  );
+  const head = new fabric.Ellipse({
+    left: 0,
+    top: -0.2 * ppm,
+    rx: 0.1 * ppm,
+    ry: 0.12 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...humanPart(),
+  });
+
+  return vehicleGroup([...legs, ...arms, neck, torso, head]);
 }
 
 // Traffic signal head (Φωτεινός σηματοδότης), vector-drawn — no catalog
@@ -1297,11 +2636,59 @@ const SHAPE_FACTORIES = {
   yieldmarking: createYieldMarking,
   car: createCar,
   truck: createTruck,
+  van: createVan,
+  bus: createBus,
+  semitruck: createSemiTruck,
+  motorcycle: createMotorcycle,
+  bicycle: createBicycle,
+  fallenmotorcycle: createFallenMotorcycle,
+  fallenbicycle: createFallenBicycle,
+  scooter: createScooter,
+  fallenscooter: createFallenScooter,
+  tractor: createTractor,
+  policecar: createPoliceCar,
+  ambulance: createAmbulance,
+  firetruck: createFireTruck,
+  pedestrian: createPedestrian,
+  ...Object.fromEntries(Object.entries(HUMAN_POSES).map(([key, pose]) => [key, (ppm) => createHuman(ppm, pose)])),
   trafficlight: createTrafficLight,
   tree: createTree,
   skidmarks: createSkidMarks,
+  skidmarkssideways: createSkidMarksSideways,
+  liquidsmall: createLiquidSmall,
+  liquidmedium: createLiquidMedium,
+  liquidlarge: createLiquidLarge,
+  debrissmall: createDebrisSmall,
+  debrislarge: createDebrisLarge,
+  pathstraight: createPathStraight,
+  pathstraightdashed: createPathStraightDashed,
+  pathturnleft: (ppm) => turnPathArrow(ppm, -1),
+  pathturnright: (ppm) => turnPathArrow(ppm, 1),
+  pathlaneleft: (ppm) => laneChangePathArrow(ppm, -1),
+  pathlaneright: (ppm) => laneChangePathArrow(ppm, 1),
+  pathuturn: createPathUTurn,
+  pathspin: createPathSpin,
   text: () => createText(),
 };
+
+// Mirrored twins ("<key>mirror") of the lopsided shapes: the fallen
+// two-wheelers lie with their top to one side and the human poses lean one
+// way. Same drawing, flipped left-right. (The supine figure is symmetric, so
+// it has none.)
+const MIRRORED_SHAPES = [
+  "fallenmotorcycle",
+  "fallenbicycle",
+  "fallenscooter",
+  "humansprawled",
+  "humanarmsup",
+  "humanside",
+  "humancurled",
+  "humantwisted",
+];
+MIRRORED_SHAPES.forEach((key) => {
+  const factory = SHAPE_FACTORIES[key];
+  SHAPE_FACTORIES[`${key}mirror`] = (ppm, lengthM) => factory(ppm, lengthM).set({ flipX: true });
+});
 
 // ── Traffic signs (Πινακίδες) ────────────────────────────────────
 // Cropped from a Greek traffic-sign catalog, one PNG per sign under

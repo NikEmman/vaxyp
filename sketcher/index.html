@@ -427,6 +427,8 @@
           <option value="markings">Διαγραμμίσεις</option>
           <option value="signs">Πινακίδες</option>
           <option value="vehicles">Οχήματα</option>
+          <option value="people">Άνθρωποι</option>
+          <option value="paths">Πορεία Οχημάτων</option>
           <option value="other">Άλλα</option>
         </select>
         <div class="palette-items" id="palette-items">
@@ -949,8 +951,11 @@
           >
             <svg viewBox="0 0 24 24">
               <path
-                d="M3 16l1.5-5A2 2 0 0 1 6.4 9.5h11.2a2 2 0 0 1 1.9 1.5L21 16v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3z"
+                d="M5 16H3a1 1 0 0 1-1-1v-2.6a1 1 0 0 1 .8-1l3-.6 2.3-3A2 2 0 0 1 9.7 7h4.8a2 2 0 0 1 1.5.7l2.6 3 2.6.6a1 1 0 0 1 .8 1V15a1 1 0 0 1-1 1h-2M9 16h6"
               />
+              <path d="M5.8 10.8h12.4M12 7v3.8" />
+              <circle cx="7" cy="16" r="2" />
+              <circle cx="17" cy="16" r="2" />
             </svg>
             Επιβατικό
           </div>
@@ -961,9 +966,530 @@
             data-categories="vehicles"
           >
             <svg viewBox="0 0 24 24">
-              <path d="M2 7h11v10H2zM13 11h5l3 3v3h-8z" />
+              <path d="M4.2 16H2V5h12v11H7.8" />
+              <path d="M18.8 16H22v-3.4a1 1 0 0 0-.2-.6L19 8.4a1 1 0 0 0-.8-.4H14M14 16h1.2" />
+              <path d="M15.5 9.5h2.4l2 2.5h-4.4z" />
+              <circle cx="6" cy="16" r="1.8" />
+              <circle cx="17" cy="16" r="1.8" />
             </svg>
             Φορτηγό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="van"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4.2 17H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11.5a1 1 0 0 1 .8.4L19 11l2.2.6a1 1 0 0 1 .8 1V16a1 1 0 0 1-1 1h-1.2M16.2 17H7.8" />
+              <path d="M14 7.5h.9l2.6 3.5H14zM11 6v11" />
+              <circle cx="6" cy="17" r="1.8" />
+              <circle cx="18" cy="17" r="1.8" />
+            </svg>
+            Βαν
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="bus"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4.2 17H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h17.3a1 1 0 0 1 .95.68L22 9v7a1 1 0 0 1-1 1h-1.7M15.7 17H7.8" />
+              <path d="M2 10h20M7 5v5M12 5v5M17 5v5" />
+              <circle cx="6" cy="17" r="1.8" />
+              <circle cx="17.5" cy="17" r="1.8" />
+            </svg>
+            Λεωφορείο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="semitruck"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M1 5h14v9H1z" />
+              <path d="M16 14V8h3.6a1 1 0 0 1 .8.4l2.4 3.2a1 1 0 0 1 .2.6V14zM15 12h1" />
+              <path d="M17.5 9.5h2l1.5 2h-3.5z" />
+              <circle cx="4" cy="16" r="1.8" />
+              <circle cx="8" cy="16" r="1.8" />
+              <circle cx="19.5" cy="16" r="1.8" />
+            </svg>
+            Νταλίκα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="motorcycle"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="5" cy="16.5" r="3" />
+              <circle cx="19" cy="16.5" r="3" />
+              <path d="M5 16.5 8 11h7.5l3.5 5.5" />
+              <path d="M8 11l1.5-2h4l1.5 2M17.2 13.7 15 7h2.5" />
+            </svg>
+            Μοτοσικλέτα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="bicycle"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="5.5" cy="16" r="3.5" />
+              <circle cx="18.5" cy="16" r="3.5" />
+              <path d="M5.5 16H12L10 9zM10 9h6M12 16 16 9l2.5 7" />
+              <path d="M10 9l-.5-2M8 7h3M16 9l-.8-2.5h2" />
+            </svg>
+            Ποδήλατο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="scooter"
+            data-categories="vehicles"
+            data-keywords="πατίνι scooter"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="5" cy="18" r="2" />
+              <circle cx="19" cy="18" r="2" />
+              <path d="M5 15.5h11.5M19 18 16.5 4M14 4h4.5" />
+            </svg>
+            Ηλεκτρικό Πατίνι
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenmotorcycle"
+            data-categories="vehicles"
+            data-keywords="πτώση ανατροπή"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="rotate(-90 12 12)">
+                <circle cx="5" cy="16.5" r="3" />
+                <circle cx="19" cy="16.5" r="3" />
+                <path d="M5 16.5 8 11h7.5l3.5 5.5" />
+                <path d="M8 11l1.5-2h4l1.5 2M17.2 13.7 15 7h2.5" />
+              </g>
+            </svg>
+            Πεσμένη Μοτοσικλέτα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenmotorcyclemirror"
+            data-categories="vehicles"
+            data-keywords="πτώση ανατροπή κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <g transform="rotate(-90 12 12)">
+                  <circle cx="5" cy="16.5" r="3" />
+                  <circle cx="19" cy="16.5" r="3" />
+                  <path d="M5 16.5 8 11h7.5l3.5 5.5" />
+                  <path d="M8 11l1.5-2h4l1.5 2M17.2 13.7 15 7h2.5" />
+                </g>
+              </g>
+            </svg>
+            Πεσμένη Μοτοσικλέτα (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenbicycle"
+            data-categories="vehicles"
+            data-keywords="πτώση ανατροπή"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="rotate(-90 12 12)">
+                <circle cx="5.5" cy="16" r="3.5" />
+                <circle cx="18.5" cy="16" r="3.5" />
+                <path d="M5.5 16H12L10 9zM10 9h6M12 16 16 9l2.5 7" />
+                <path d="M10 9l-.5-2M8 7h3M16 9l-.8-2.5h2" />
+              </g>
+            </svg>
+            Πεσμένο Ποδήλατο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenbicyclemirror"
+            data-categories="vehicles"
+            data-keywords="πτώση ανατροπή κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <g transform="rotate(-90 12 12)">
+                  <circle cx="5.5" cy="16" r="3.5" />
+                  <circle cx="18.5" cy="16" r="3.5" />
+                  <path d="M5.5 16H12L10 9zM10 9h6M12 16 16 9l2.5 7" />
+                  <path d="M10 9l-.5-2M8 7h3M16 9l-.8-2.5h2" />
+                </g>
+              </g>
+            </svg>
+            Πεσμένο Ποδήλατο (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenscooter"
+            data-categories="vehicles"
+            data-keywords="πατίνι scooter πτώση ανατροπή"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="rotate(-90 12 12)">
+                <circle cx="5" cy="18" r="2" />
+                <circle cx="19" cy="18" r="2" />
+                <path d="M5 15.5h11.5M19 18 16.5 4M14 4h4.5" />
+              </g>
+            </svg>
+            Πεσμένο Ηλεκτρικό Πατίνι
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="fallenscootermirror"
+            data-categories="vehicles"
+            data-keywords="πατίνι scooter πτώση ανατροπή κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <g transform="rotate(-90 12 12)">
+                  <circle cx="5" cy="18" r="2" />
+                  <circle cx="19" cy="18" r="2" />
+                  <path d="M5 15.5h11.5M19 18 16.5 4M14 4h4.5" />
+                </g>
+              </g>
+            </svg>
+            Πεσμένο Ηλεκτρικό Πατίνι (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="tractor"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="7" cy="16" r="4.5" />
+              <circle cx="7" cy="16" r="1.5" />
+              <circle cx="19" cy="18" r="2.5" />
+              <path d="M4 10.5V4h6.5l1 6h9a1 1 0 0 1 1 1v4.5M11.5 15h5M17 10V6.5" />
+            </svg>
+            Τρακτέρ
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="policecar"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M5 16H3a1 1 0 0 1-1-1v-2.6a1 1 0 0 1 .8-1l3-.6 2.3-3A2 2 0 0 1 9.7 7h4.8a2 2 0 0 1 1.5.7l2.6 3 2.6.6a1 1 0 0 1 .8 1V15a1 1 0 0 1-1 1h-2M9 16h6"
+              />
+              <path d="M5.8 10.8h12.4M12 7v3.8M9.5 7V4.5h5V7M12 4.5V7" />
+              <circle cx="7" cy="16" r="2" />
+              <circle cx="17" cy="16" r="2" />
+            </svg>
+            Περιπολικό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="ambulance"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4.2 17H3a1 1 0 0 1-1-1V5h13v12H7.8" />
+              <path d="M19.8 17H21a1 1 0 0 0 1-1v-4l-3.5-4H15M15 17h1.2M16 11h4" />
+              <path d="M8.5 8v6M5.5 11h6" />
+              <circle cx="6" cy="17" r="1.8" />
+              <circle cx="18" cy="17" r="1.8" />
+            </svg>
+            Ασθενοφόρο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="firetruck"
+            data-categories="vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M3.8 18H2v-7h20v7h-2.2M16.2 18H7.8M17.5 11v3.5H22" />
+              <path d="M3 6h14M3 9h14M5 6v3M8 6v3M11 6v3M14 6v3M15 9v2" />
+              <circle cx="6" cy="18" r="1.8" />
+              <circle cx="18" cy="18" r="1.8" />
+            </svg>
+            Πυροσβεστικό
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pedestrian"
+            data-categories="people vehicles"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="4.5" r="2" />
+              <path d="M12 7.5v7M7 11.5l5-3 5 3M8.5 21l3.5-6.5 3.5 6.5" />
+            </svg>
+            Πεζός
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humansupine"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="12.0" cy="3.4" r="1.2" />
+              <path d="M9.8 5.7 L8.6 9.0 L8.1 12.0 M14.2 5.7 L15.4 9.0 L15.9 12.0 M10.8 11.8 L10.5 17.0 L10.3 22.0 M13.2 11.8 L13.5 17.0 L13.7 22.0 M9.8 5.7 L14.2 5.7 M12.0 4.8 L12.0 11.8 M10.8 11.8 L13.2 11.8" />
+            </svg>
+            Πεσμένος — Ανάσκελα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humansprawled"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="12.5" cy="3.4" r="1.2" />
+              <path d="M10.2 5.8 L6.8 4.9 L5.2 2.2 M14.8 5.8 L17.7 7.9 L18.8 10.8 M11.3 12.0 L9.0 16.9 L8.3 22.0 M13.7 12.0 L15.0 17.3 L18.3 21.2 M10.2 5.8 L14.8 5.8 M12.5 4.9 L12.5 12.0 M11.3 12.0 L13.7 12.0" />
+            </svg>
+            Πεσμένος — Απλωμένος
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humansprawledmirror"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <circle cx="12.5" cy="3.4" r="1.2" />
+                <path d="M10.2 5.8 L6.8 4.9 L5.2 2.2 M14.8 5.8 L17.7 7.9 L18.8 10.8 M11.3 12.0 L9.0 16.9 L8.3 22.0 M13.7 12.0 L15.0 17.3 L18.3 21.2 M10.2 5.8 L14.8 5.8 M12.5 4.9 L12.5 12.0 M11.3 12.0 L13.7 12.0" />
+              </g>
+            </svg>
+            Πεσμένος — Απλωμένος (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humanarmsup"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="11.6" cy="5.5" r="1.1" />
+              <path d="M9.6 7.6 L8.5 4.7 L8.2 2.0 M13.5 7.6 L15.1 4.9 L15.8 2.3 M10.5 12.9 L10.1 17.6 L9.7 22.0 M12.6 12.9 L13.4 17.5 L14.8 21.7 M9.6 7.6 L13.5 7.6 M11.6 6.7 L11.6 12.9 M10.5 12.9 L12.6 12.9" />
+            </svg>
+            Πεσμένος — Χέρια Πάνω
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humanarmsupmirror"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <circle cx="11.6" cy="5.5" r="1.1" />
+                <path d="M9.6 7.6 L8.5 4.7 L8.2 2.0 M13.5 7.6 L15.1 4.9 L15.8 2.3 M10.5 12.9 L10.1 17.6 L9.7 22.0 M12.6 12.9 L13.4 17.5 L14.8 21.7 M9.6 7.6 L13.5 7.6 M11.6 6.7 L11.6 12.9 M10.5 12.9 L12.6 12.9" />
+              </g>
+            </svg>
+            Πεσμένος — Χέρια Πάνω (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humanside"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="9.2" cy="3.5" r="1.3" />
+              <path d="M6.8 6.0 L8.7 9.3 L11.5 7.7 M11.6 6.0 L15.1 7.3 L17.2 4.8 M7.9 12.6 L11.9 16.6 L11.0 22.0 M10.4 12.6 L15.6 15.0 L16.1 20.4 M6.8 6.0 L11.6 6.0 M9.2 5.0 L9.2 12.6 M7.9 12.6 L10.4 12.6" />
+            </svg>
+            Πεσμένος — Στο Πλάι
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humansidemirror"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <circle cx="9.2" cy="3.5" r="1.3" />
+                <path d="M6.8 6.0 L8.7 9.3 L11.5 7.7 M11.6 6.0 L15.1 7.3 L17.2 4.8 M7.9 12.6 L11.9 16.6 L11.0 22.0 M10.4 12.6 L15.6 15.0 L16.1 20.4 M6.8 6.0 L11.6 6.0 M9.2 5.0 L9.2 12.6 M7.9 12.6 L10.4 12.6" />
+              </g>
+            </svg>
+            Πεσμένος — Στο Πλάι (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humancurled"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="7.9" cy="4.0" r="1.7" />
+              <path d="M4.7 7.4 L9.1 9.9 L11.2 6.1 M11.1 7.4 L16.1 7.0 L18.0 3.0 M6.2 16.2 L13.7 14.9 L14.9 22.0 M9.6 16.2 L16.3 12.6 L19.3 19.2 M4.7 7.4 L11.1 7.4 M7.9 6.0 L7.9 16.2 M6.2 16.2 L9.6 16.2" />
+            </svg>
+            Πεσμένος — Κουλουριασμένος
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humancurledmirror"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <circle cx="7.9" cy="4.0" r="1.7" />
+                <path d="M4.7 7.4 L9.1 9.9 L11.2 6.1 M11.1 7.4 L16.1 7.0 L18.0 3.0 M6.2 16.2 L13.7 14.9 L14.9 22.0 M9.6 16.2 L16.3 12.6 L19.3 19.2 M4.7 7.4 L11.1 7.4 M7.9 6.0 L7.9 16.2 M6.2 16.2 L9.6 16.2" />
+              </g>
+            </svg>
+            Πεσμένος — Κουλουριασμένος (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humantwisted"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle cx="11.8" cy="3.4" r="1.2" />
+              <path d="M9.6 5.7 L7.1 8.2 L6.1 11.0 M14.0 5.7 L17.4 6.3 L17.9 3.4 M10.6 11.8 L10.1 17.0 L9.9 22.0 M12.9 11.8 L16.9 15.1 L14.1 19.2 M9.6 5.7 L14.0 5.7 M11.8 4.8 L11.8 11.8 M10.6 11.8 L12.9 11.8" />
+            </svg>
+            Πεσμένος — Λυγισμένο Πόδι
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="humantwistedmirror"
+            data-categories="people"
+            data-keywords="άνθρωπος πεσμένος τραυματίας θύμα φιγούρα κούκλα σώμα οδηγός επιβάτης πεζός αναβάτης κατοπτρικό αντίστροφο καθρέφτης"
+          >
+            <svg viewBox="0 0 24 24">
+              <g transform="matrix(-1 0 0 1 24 0)">
+                <circle cx="11.8" cy="3.4" r="1.2" />
+                <path d="M9.6 5.7 L7.1 8.2 L6.1 11.0 M14.0 5.7 L17.4 6.3 L17.9 3.4 M10.6 11.8 L10.1 17.0 L9.9 22.0 M12.9 11.8 L16.9 15.1 L14.1 19.2 M9.6 5.7 L14.0 5.7 M11.8 4.8 L11.8 11.8 M10.6 11.8 L12.9 11.8" />
+              </g>
+            </svg>
+            Πεσμένος — Λυγισμένο Πόδι (Κατοπτρικό)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathstraight"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+            title="Το μήκος του βέλους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 21V4M7 9l5-5 5 5" />
+            </svg>
+            Ευθεία Πορεία
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathstraightdashed"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+            title="Π.χ. η πορεία που θα ακολουθούσε το όχημα. Το μήκος του βέλους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 21V5" stroke-dasharray="2.5 2" />
+              <path d="M7 9l5-5 5 5" />
+            </svg>
+            Ευθεία Πορεία (Διακεκομμένη)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathturnleft"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M16 21v-7a5 5 0 0 0-5-5H5M8 6 5 9l3 3" />
+            </svg>
+            Στροφή Αριστερά
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathturnright"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M8 21v-7a5 5 0 0 1 5-5h6M16 6l3 3-3 3" />
+            </svg>
+            Στροφή Δεξιά
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathlaneleft"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M16 21v-4c0-3-8-4-8-7V4M5 7l3-3 3 3" />
+            </svg>
+            Αλλαγή Λωρίδας Αριστερά
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathlaneright"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M8 21v-4c0-3 8-4 8-7V4M13 7l3-3 3 3" />
+            </svg>
+            Αλλαγή Λωρίδας Δεξιά
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathuturn"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M16 21V9a4 4 0 0 0-8 0v10M5 16l3 3 3-3" />
+            </svg>
+            Αναστροφή
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="pathspin"
+            data-categories="paths"
+            data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα περιστροφή σβούρα"
+            title="Όχημα που περιστράφηκε γύρω από τον εαυτό του, π.χ. μετά από σύγκρουση"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+            </svg>
+            Περιστροφή Οχήματος
           </div>
           <div
             class="palette-item"
@@ -999,6 +1525,7 @@
             draggable="true"
             data-shape="skidmarks"
             data-categories="other"
+            data-keywords="ίχνη ελαστικών λάστιχα φρενάρισμα ολίσθηση"
             title="Ίχνη φρεναρίσματος ελαστικών· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
           >
             <svg viewBox="0 0 24 24">
@@ -1006,6 +1533,94 @@
               <path d="M15 3c1.5 3 1.5 4 0 7s-1.5 4 0 7 1.5 4 0 4" stroke-dasharray="1.5 1.5" />
             </svg>
             Ίχνη Φρεναρίσματος
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="skidmarkssideways"
+            data-categories="other"
+            data-keywords="ίχνη ελαστικών λάστιχα ολίσθηση πλαγιολίσθηση ντεραπάρισμα πλάγια"
+            title="Ίχνη ελαστικών οχήματος που γλιστράει πλάγια (τα ίχνη μπροστινών και πίσω τροχών)· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M4 3c1.5 6 1.5 12 0 18M8 3c1.5 6 1.5 12 0 18M15 3c1.5 6 1.5 12 0 18M19 3c1.5 6 1.5 12 0 18" />
+              <path d="M4.8 8.5l4-2M5.3 13l4-2M5 17.5l4-2M15.8 8.5l4-2M16.3 13l4-2M16 17.5l4-2" />
+            </svg>
+            Ίχνη Πλαγιολίσθησης
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="liquidsmall"
+            data-categories="other"
+            data-keywords="αίμα λάδι νερό κηλίδα υγρό"
+            title="Κηλίδα υγρού στο οδόστρωμα — αίμα, λάδι, νερό/ψυκτικό υγρό κ.λπ."
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M8 10c1-2.5 5-3 7-1.5s2.5 4 .5 5.5-5.5 2-7 .5-1.5-2.5-.5-4.5z" />
+              <circle cx="18.5" cy="8" r="0.8" />
+            </svg>
+            Κηλίδα Υγρού (Μικρή)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="liquidmedium"
+            data-categories="other"
+            data-keywords="αίμα λάδι νερό κηλίδα υγρό"
+            title="Κηλίδα υγρού στο οδόστρωμα — αίμα, λάδι, νερό/ψυκτικό υγρό κ.λπ."
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M5 11c.5-3 4-4.5 7-3.5s3.5-1 6 .5 2.5 4.5.5 6-3 .5-5 2-5.5 1-7-.5S4.5 13 5 11z" />
+              <circle cx="20.5" cy="7" r="0.8" />
+              <circle cx="3" cy="16.5" r="0.7" />
+            </svg>
+            Κηλίδα Υγρού (Μεσαία)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="liquidlarge"
+            data-categories="other"
+            data-keywords="αίμα λάδι νερό κηλίδα υγρό"
+            title="Κηλίδα υγρού στο οδόστρωμα — αίμα, λάδι, νερό/ψυκτικό υγρό κ.λπ."
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M2.5 12c0-3 3-4.5 5.5-4s3-2 6-1.5 3.5 1.5 6 1.5 3 3.5 1.5 5.5-3 1-4.5 2.5-4 1.5-6 .5-2 1.5-4.5 1S2.5 14.5 2.5 12z" />
+              <circle cx="21.5" cy="5.5" r="0.7" />
+              <circle cx="5" cy="19" r="0.8" />
+              <circle cx="12.5" cy="3.5" r="0.6" />
+            </svg>
+            Κηλίδα Υγρού (Μεγάλη)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="debrissmall"
+            data-categories="other"
+            data-keywords="θραύσματα συντρίμμια κομμάτια γυαλιά τζάμια φανάρι πλαστικά"
+            title="Μικρά θραύσματα — σπασμένα τζάμια, φανάρια ή μικρά αδιευκρίνιστα κομμάτια"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M5 10l2.5-1.5.5 2.5zM10 6l2.5.5-1.5 2zM14.5 10.5l3-.5-1 2.5zM8 14.5l2 1-2.5 1zM16 15.5l2.5 1.5-2 1zM11 18l1.5 2.5-2.5-.5zM11.5 11.5l1.5.5-.5 1.5z" />
+            </svg>
+            Θραύσματα (Μικρά)
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="debrislarge"
+            data-categories="other"
+            data-keywords="θραύσματα συντρίμμια κομμάτια γυαλιά τζάμια φανάρι πλαστικά προφυλακτήρας καθρέφτης τάσι πινακίδα εξαρτήματα"
+            title="Μεγάλο πεδίο θραυσμάτων — θραύσματα μαζί με κομμάτια οχήματος, π.χ. μισός προφυλακτήρας, καθρέφτης, τάσι, πινακίδα"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M2.5 9c3-1.6 6-2.1 9-1.9l-.8 1.2 1 .7-.3 1.2c-3-.2-6 .2-8.9 1.5z" />
+              <circle cx="18" cy="6.5" r="3" />
+              <rect x="4" y="15" width="7.5" height="2.5" rx=".5" />
+              <path d="M15 13l2-1 .5 2zM19 17.5l1.5.5-1 1.5zM7 20.5l1.5-.5.5 1.5zM14 19.5l1 1.5-2 .2z" />
+            </svg>
+            Θραύσματα (Μεγάλα)
           </div>
           <div
             class="palette-item"
@@ -1286,7 +1901,7 @@
           <div class="sep"></div>
           <div
             class="segment-length-control"
-            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας ή ιχνών φρεναρίσματος που θα προστεθούν στο σκαρίφημα"
+            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας, ιχνών ελαστικών ή ευθέων βελών πορείας που θα προστεθούν στο σκαρίφημα"
           >
             <label for="segment-length-input">Μήκος τμήματος: </label>
             <input
@@ -1295,9 +1910,9 @@
               value="20"
               min="3"
               max="20"
-              step="1"
+              step="0.1"
             />
-            <div><span id="segment-length-value">20</span> μ</div>
+            <div><span id="segment-length-value">20,0</span> μ</div>
           </div>
           <div class="sep"></div>
           <div class="toolbar-group" id="toolbar-export-group">

@@ -51,15 +51,27 @@
 
   // Matched by value, so it works from either starting theme; recurses
   // into group children (roads/vehicles/measurements are groups).
+  // Gradients (the tire marks' fade-in) are rebuilt with their ink stops
+  // swapped, since mutating one in place doesn't invalidate Fabric's cache.
   function restyleObjects(palette) {
+    const isInk = (c) => c === PALETTES.light.ink || c === PALETTES.dark.ink;
+    const restyleGradient = (g) =>
+      new fabric.Gradient({
+        ...g.toObject(),
+        colorStops: g.colorStops.map((s) => (isInk(s.color) ? { ...s, color: palette.ink } : s)),
+      });
     function walk(objects) {
       objects.forEach((o) => {
         if (o.fill === PALETTES.light.bg || o.fill === PALETTES.dark.bg)
           o.set("fill", palette.bg);
-        else if (o.fill === PALETTES.light.ink || o.fill === PALETTES.dark.ink)
+        else if (isInk(o.fill))
           o.set("fill", palette.ink);
-        if (o.stroke === PALETTES.light.ink || o.stroke === PALETTES.dark.ink)
+        else if (o.fill instanceof fabric.Gradient)
+          o.set("fill", restyleGradient(o.fill));
+        if (isInk(o.stroke))
           o.set("stroke", palette.ink);
+        else if (o.stroke instanceof fabric.Gradient)
+          o.set("stroke", restyleGradient(o.stroke));
         if (o._objects) walk(o._objects);
       });
     }
@@ -138,11 +150,14 @@
   // Browsers restore a range input's position on reload without firing
   // "input" (and without moving it back to its HTML default), so force
   // both the slider and its readout back to the authored default here.
+  // Steps by 0.1 m; the readout always shows one decimal with a Greek
+  // decimal comma ("6,1").
+  const showSegmentLength = () => {
+    segmentLengthValue.textContent = parseFloat(segmentLengthInput.value).toFixed(1).replace(".", ",");
+  };
   segmentLengthInput.value = segmentLengthInput.defaultValue;
-  segmentLengthValue.textContent = segmentLengthInput.value;
-  segmentLengthInput.addEventListener("input", () => {
-    segmentLengthValue.textContent = segmentLengthInput.value;
-  });
+  showSegmentLength();
+  segmentLengthInput.addEventListener("input", showSegmentLength);
 
   // Traffic-sign factories return a Promise (async image load); others
   // are synchronous. Promise.resolve() handles both uniformly.
@@ -217,6 +232,8 @@
     if (opt.value !== "all") categoryLabels[opt.value] = opt.textContent.trim();
   });
 
+  // Items can also list extra search terms in data-keywords (space-separated)
+  // for words their label doesn't contain, e.g. "αίμα" for a liquid pool.
   const paletteSearchText = new Map();
   const paletteSearchWords = new Map();
   paletteItems.forEach((item) => {
@@ -224,7 +241,8 @@
       ? item.dataset.categories.split(/\s+/)
       : [];
     const labels = categories.map((c) => categoryLabels[c] || "").join(" ");
-    const text = normalizeGreek(`${item.textContent.trim()} ${labels}`.trim());
+    const keywords = item.dataset.keywords || "";
+    const text = normalizeGreek(`${item.textContent.trim()} ${labels} ${keywords}`.trim());
     paletteSearchText.set(item, text);
     paletteSearchWords.set(item, text.split(/\s+/));
   });
