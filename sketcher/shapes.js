@@ -2605,54 +2605,213 @@ function createText() {
   });
 }
 
-// A tree seen from above: trunk cross-section with buttress roots, top-down
-// like the roads/vehicles (unlike the pictorial signs/traffic light).
-// Root angles/lengths are irregular on purpose — an even ring reads as a
-// compass rose, not a tree.
+// ── Roadside objects (Εμπόδια) ───────────────────────────────────
+// Things a vehicle can hit, top-down at real size like the vehicles.
+// Solid structure is hatched like the generic obstacles and islands.
+const objPart = (extra = {}) => ({ selectable: false, evented: false, ...extra });
+const objBody = () => objPart({ fill: SHAPE_FILL, stroke: LINE_COLOR, strokeWidth: 2 });
+const objLine = (strokeWidth = 1) => objPart({ fill: "", stroke: LINE_COLOR, strokeWidth });
+
+function objCircle(ppm, x, y, rM, style) {
+  return new fabric.Circle({ left: x * ppm, top: y * ppm, radius: rM * ppm, originX: "center", originY: "center", ...style });
+}
+
+function objGroup(parts) {
+  return new fabric.Group(parts, { originX: "center", originY: "center", subTargetCheck: false });
+}
+
+// Hatched round cross-section (pole, trunk, bollard) at 0,0.
+function hatchedDisc(ppm, rM, spacingM) {
+  return [objCircle(ppm, 0, 0, rM, objBody()), ...hatchGroupEllipse(rM * ppm, rM * ppm, spacingM * ppm)];
+}
+
+// Scalloped "cloud" outline: `bumps` arcs around a circle of radius rM,
+// radii jittered by `wobble` (seeded) so it doesn't look stamped; `depth`
+// is how far each arc bulges (control-point radius, as a fraction of rM).
+function scallopPath(rM, bumps, seed, wobble = 0.08, depth = 1.22) {
+  const rand = seededRandom(seed);
+  const pts = Array.from({ length: bumps }, (_, i) => {
+    const a = ((i + (rand() - 0.5) * 0.3) / bumps) * Math.PI * 2;
+    const r = rM * (0.86 + (rand() - 0.5) * wobble);
+    return { a, r };
+  });
+  const xy = ({ a, r }) => [Math.cos(a) * r, Math.sin(a) * r];
+  let d = `M ${xy(pts[0]).join(" ")}`;
+  for (let i = 0; i < bumps; i++) {
+    const p = pts[i];
+    const q = pts[(i + 1) % bumps];
+    let mid = (p.a + q.a) / 2;
+    if (q.a < p.a) mid += Math.PI; // wraparound segment
+    const cr = rM * depth;
+    d += ` Q ${Math.cos(mid) * cr} ${Math.sin(mid) * cr} ${xy(q).join(" ")}`;
+  }
+  return d + " Z";
+}
+
+// Path in meters → pixels (numbers only; no arc commands).
+function scaledPath(ppm, d, style) {
+  return new fabric.Path(d.replace(/-?\d+(\.\d+)?(e-?\d+)?/g, (n) => String(parseFloat(n) * ppm)), style);
+}
+
+// Tree trunk cross-section with growth rings — the part a car hits.
+function trunkParts(ppm, rM) {
+  return [
+    objCircle(ppm, 0, 0, rM, objBody()),
+    objCircle(ppm, 0.02, -0.01, rM * 0.62, objLine()),
+    objCircle(ppm, 0.03, -0.02, rM * 0.28, objLine()),
+  ];
+}
+
+// Tree (Δέντρο): canopy outline (~5 m across, unfilled so the road
+// underneath stays visible) with a few faint foliage strokes, trunk at the
+// center.
 function createTree(ppm) {
-  const trunkR = 0.35; // meters
-  const trunkRpx = trunkR * ppm;
+  const foliage = [
+    "M -1.5 -0.6 Q -1.2 -1.1 -0.7 -1.2",
+    "M 0.5 -1.4 Q 1.1 -1.3 1.4 -0.8",
+    "M 1.5 0.4 Q 1.4 1.0 0.9 1.3",
+    "M -0.4 1.5 Q -1.0 1.4 -1.3 1.0",
+    "M -0.9 0.2 Q -0.9 0.6 -0.6 0.8",
+    "M 0.6 -0.5 Q 0.9 -0.3 0.9 0.1",
+  ].map((d) => scaledPath(ppm, d, objPart({ fill: "", stroke: LINE_COLOR, strokeWidth: 1, opacity: 0.5 })));
+  return objGroup([scaledPath(ppm, scallopPath(2.5, 17, 3, 0.1, 1.1), objLine(1.5)), ...foliage, ...trunkParts(ppm, 0.3)]);
+}
 
-  const roots = [
-    { angleDeg: -100, lengthM: 0.4, halfWidthM: 0.16 },
-    { angleDeg: -5, lengthM: 0.5, halfWidthM: 0.13 },
-    { angleDeg: 95, lengthM: 0.35, halfWidthM: 0.15 },
-    { angleDeg: 190, lengthM: 0.45, halfWidthM: 0.14 },
-  ].map(({ angleDeg, lengthM, halfWidthM }) => {
-    const theta = (angleDeg * Math.PI) / 180;
-    const dx = Math.cos(theta);
-    const dy = Math.sin(theta);
-    const px = -dy; // perpendicular to the root's direction
-    const py = dx;
-    const baseR = trunkRpx * 0.85; // starts inside the trunk circle, so the join is hidden under it
-    const tipR = trunkRpx + lengthM * ppm;
-    const baseHalfWidthPx = halfWidthM * ppm;
-    return new fabric.Polygon(
-      [
-        { x: baseR * dx + baseHalfWidthPx * px, y: baseR * dy + baseHalfWidthPx * py },
-        { x: tipR * dx, y: tipR * dy },
-        { x: baseR * dx - baseHalfWidthPx * px, y: baseR * dy - baseHalfWidthPx * py },
-      ],
-      { fill: SHAPE_FILL, stroke: LINE_COLOR, strokeWidth: 2, selectable: false, evented: false }
-    );
-  });
+// Trunk only (Κορμός δέντρου), for pinpointing an impact without the canopy.
+function createTreeTrunk(ppm) {
+  return objGroup(trunkParts(ppm, 0.35));
+}
 
-  const trunk = new fabric.Circle({
-    radius: trunkRpx,
-    fill: SHAPE_FILL,
-    stroke: LINE_COLOR,
-    strokeWidth: 2,
-    originX: "center",
-    originY: "center",
-    selectable: false,
-    evented: false,
-  });
+// Bush / shrub (Θάμνος), ~1.6 m, filled — it hides what's behind it.
+function createBush(ppm) {
+  const twig = (d) => scaledPath(ppm, d, objPart({ fill: "", stroke: LINE_COLOR, strokeWidth: 1, opacity: 0.6 }));
+  return objGroup([
+    scaledPath(ppm, scallopPath(0.8, 8, 12, 0.12), objBody()),
+    twig("M -0.35 -0.1 Q -0.2 -0.3 0 -0.25"),
+    twig("M 0.1 0.25 Q 0.3 0.2 0.35 0"),
+    twig("M -0.25 0.3 Q -0.3 0.15 -0.15 0.1"),
+  ]);
+}
 
-  return new fabric.Group([...roots, trunk], {
-    originX: "center",
-    originY: "center",
-    subTargetCheck: false,
-  });
+// Utility pole (Στύλος ΔΕΗ): hatched pole with its crossarm and three
+// insulators.
+function createUtilityPole(ppm) {
+  return objGroup([
+    vehicleRect(ppm, 0, 0, 1.8, 0.1, { ...objBody(), strokeWidth: 1.5, rx: 0, ry: 0 }),
+    ...[-0.75, 0.75].map((x) => objCircle(ppm, x, 0, 0.06, objPart({ fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 1 }))),
+    ...hatchedDisc(ppm, 0.15, 0.07),
+  ]);
+}
+
+// Street light (Φωτιστικός στύλος): pole with an arm reaching out over
+// the road (up, -y) and the lamp head at its end.
+function createStreetLight(ppm) {
+  return objGroup([
+    scaledPath(ppm, "M 0 0 L 0 -1.55", objLine(3)),
+    vehicleRect(ppm, 0, -1.75, 0.22, 0.5, { ...objBody(), strokeWidth: 1.5, rx: 0.08 * ppm, ry: 0.08 * ppm }),
+    vehicleRect(ppm, 0, -1.77, 0.12, 0.34, { ...vehicleGlass(), rx: 0.05 * ppm, ry: 0.05 * ppm }),
+    ...hatchedDisc(ppm, 0.13, 0.07),
+  ]);
+}
+
+// Bollard (Κολωνάκι): short post, ~0.2 m.
+function createBollard(ppm) {
+  return objGroup([objCircle(ppm, 0, 0, 0.1, objBody()), objCircle(ppm, 0, 0, 0.04, objPart({ fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 0.5 }))]);
+}
+
+// Fire hydrant (Πυροσβεστικός κρουνός): barrel with two side outlets.
+function createHydrant(ppm) {
+  return objGroup([
+    vehicleRect(ppm, 0, 0, 0.44, 0.1, { ...objBody(), strokeWidth: 1.5, rx: 0.02 * ppm, ry: 0.02 * ppm }),
+    vehicleRect(ppm, 0, -0.14, 0.12, 0.1, { ...objBody(), strokeWidth: 1.5, rx: 0.02 * ppm, ry: 0.02 * ppm }),
+    objCircle(ppm, 0, 0, 0.15, objBody()),
+    objCircle(ppm, 0, 0, 0.05, objPart({ fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 0.5 })),
+  ]);
+}
+
+// Traffic cone (Κώνος): square base, cone rings, tip.
+function createCone(ppm) {
+  return objGroup([
+    vehicleRect(ppm, 0, 0, 0.36, 0.36, { ...objBody(), strokeWidth: 1.5, rx: 0.05 * ppm, ry: 0.05 * ppm }),
+    objCircle(ppm, 0, 0, 0.14, objPart({ fill: SHAPE_FILL, stroke: LINE_COLOR, strokeWidth: 1.5 })),
+    objCircle(ppm, 0, 0, 0.09, objPart({ fill: "", stroke: LINE_COLOR, strokeWidth: 3 })),
+    objCircle(ppm, 0, 0, 0.03, objPart({ fill: LINE_COLOR, stroke: LINE_COLOR, strokeWidth: 0.5 })),
+  ]);
+}
+
+// Wheelie bin (Κάδος απορριμμάτων), 1100 L: ~1.37 x 1.07 m. Lid with its
+// hinge at the back (+y), handle bar at the front.
+function createBin(ppm) {
+  return objGroup([
+    vehicleRect(ppm, 0, -0.58, 0.8, 0.08, { ...vehicleSolid(), rx: 0.03 * ppm, ry: 0.03 * ppm }),
+    vehicleRect(ppm, 0, 0, 1.37, 1.07, { ...objBody(), rx: 0.08 * ppm, ry: 0.08 * ppm }),
+    vehicleRect(ppm, 0, -0.03, 1.2, 0.86, { ...objLine(), rx: 0.06 * ppm, ry: 0.06 * ppm }),
+    scaledPath(ppm, "M -0.6 0.44 L 0.6 0.44", objLine(1.5)),
+    ...[-0.35, 0.35].map((x) => vehicleRect(ppm, x, 0.44, 0.14, 0.06, { ...vehicleSolid(), rx: 0, ry: 0 })),
+  ]);
+}
+
+// ── Linear objects, sized by the segment-length slider ──
+// Run along y, like road pieces.
+
+// Wall (Τοίχος): 0.3 m thick, hatched.
+function createWall(ppm, lengthM = 10) {
+  const w = 0.3 * ppm;
+  const h = lengthM * ppm;
+  const pts = [
+    { x: -w / 2, y: -h / 2 },
+    { x: w / 2, y: -h / 2 },
+    { x: w / 2, y: h / 2 },
+    { x: -w / 2, y: h / 2 },
+  ];
+  return objGroup([
+    new fabric.Rect({ width: w, height: h, originX: "center", originY: "center", ...objBody() }),
+    ...hatchGroup(pts, 0.2 * ppm),
+  ]);
+}
+
+// Fence (Φράχτης): a line with posts every 2.5 m and the map symbol's
+// crosses between them.
+function createFence(ppm, lengthM = 10) {
+  const L = lengthM;
+  const spacing = 2.5;
+  const n = Math.max(1, Math.round(L / spacing));
+  const step = L / n;
+  const parts = [scaledPath(ppm, `M 0 ${L / 2} L 0 ${-L / 2}`, objLine(1.5))];
+  for (let i = 0; i <= n; i++) {
+    parts.push(vehicleRect(ppm, 0, L / 2 - i * step, 0.1, 0.1, { ...vehicleSolid(), rx: 0, ry: 0 }));
+    if (i < n) {
+      const y = L / 2 - (i + 0.5) * step;
+      const c = Math.min(0.12, step / 6);
+      parts.push(scaledPath(ppm, `M ${-c} ${y - c} L ${c} ${y + c} M ${c} ${y - c} L ${-c} ${y + c}`, objLine(1.5)));
+    }
+  }
+  return objGroup(parts);
+}
+
+// Guardrail (Μπαριέρα / στηθαίο): W-beam rail with posts behind it every
+// 2 m (on the +x side, away from traffic) and flared ends.
+function createGuardrail(ppm, lengthM = 12) {
+  const L = lengthM;
+  const n = Math.max(1, Math.round(L / 2));
+  const step = L / n;
+  const flare = Math.min(0.5, L / 6);
+  const parts = [];
+  for (let i = 0; i <= n; i++) {
+    const y = L / 2 - i * step;
+    parts.push(vehicleRect(ppm, 0.2, y, 0.15, 0.15, { ...objBody(), strokeWidth: 1.5, rx: 0, ry: 0 }));
+    parts.push(scaledPath(ppm, `M 0.06 ${y} L 0.13 ${y}`, objLine(2)));
+  }
+  const beam = `M 0.12 ${L / 2} Q 0 ${L / 2} 0 ${L / 2 - flare} L 0 ${-L / 2 + flare} Q 0 ${-L / 2} 0.12 ${-L / 2}`;
+  parts.push(scaledPath(ppm, beam, objLine(2.5)));
+  parts.push(
+    scaledPath(
+      ppm,
+      `M 0.06 ${L / 2 - flare * 0.4} L 0.06 ${-L / 2 + flare * 0.4}`,
+      objPart({ fill: "", stroke: LINE_COLOR, strokeWidth: 1, opacity: 0.6 })
+    )
+  );
+  return objGroup(parts);
 }
 
 const SHAPE_FACTORIES = {
@@ -2720,6 +2879,17 @@ const SHAPE_FACTORIES = {
   ...Object.fromEntries(Object.entries(HUMAN_POSES).map(([key, pose]) => [key, (ppm) => createHuman(ppm, pose)])),
   trafficlight: createTrafficLight,
   tree: createTree,
+  treetrunk: createTreeTrunk,
+  bush: createBush,
+  utilitypole: createUtilityPole,
+  streetlight: createStreetLight,
+  bollard: createBollard,
+  hydrant: createHydrant,
+  cone: createCone,
+  bin: createBin,
+  wall: createWall,
+  fence: createFence,
+  guardrail: createGuardrail,
   skidmarks: createSkidMarks,
   skidmarkssideways: createSkidMarksSideways,
   scrapemarks: createScrapeMarks,
