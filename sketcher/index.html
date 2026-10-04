@@ -1442,9 +1442,11 @@
     <script type="module">
       // sketcher.js is a classic script (it shares top-level scope with
       // shapes.js), so it can't `import` directly — expose the app's
-      // existing notification helper as a global instead of duplicating it.
+      // existing helpers as globals instead of duplicating them.
       import { displayNotification } from "../src/wordGenerators.js";
+      import { getOfficerParts } from "../src/formatters.js";
       window.displayNotification = displayNotification;
+      window.getOfficerParts = getOfficerParts;
     </script>
   </body>
 </html>

@@ -1334,15 +1334,8 @@ function createSketchLegend() {
 function createSketchSignature() {
   const { data, anakr } = sketchSettings();
   const i = anakr.aAnakr || 0;
-  const parts = data.anakritikoiParts?.[i];
-  let rank = parts?.rankNom || "";
-  let name = parts?.nameNom || "";
-  if (!parts) {
-    const full = (data.anakritikoiEnikos?.[i] || "").trim();
-    const gap = full.indexOf(" ");
-    rank = gap === -1 ? "" : full.slice(0, gap);
-    name = gap === -1 ? full : full.slice(gap + 1);
-  }
+  // Same rank/name resolution as the main app (exposed by index.html)
+  const { rankNom: rank, nameNom: name } = window.getOfficerParts(data, i);
   const female = data.anakrSex?.[i] === "Γυναίκα";
   const now = new Date();
   const place = data.merosSyntaksisEkthesis || "……………";
