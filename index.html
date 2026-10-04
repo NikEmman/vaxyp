@@ -1048,6 +1048,41 @@
           >
             Δελτίο Καταγραφής Μέθης
           </button>
+          <button
+            class="helpBtn large"
+            id="prosdiorismosAlkoolis"
+            data-person="suspect"
+          >
+            Έκθεση Προσδιορισμού Αλκοόλης
+          </button>
+          <button
+            class="helpBtn large"
+            id="syllipsiAutoforo"
+            data-person="suspect"
+          >
+            Σύλληψη Επ' Αυτοφώρω
+          </button>
+          <button
+            class="helpBtn large"
+            id="pliroforiakoD33"
+            data-person="suspect"
+          >
+            Πληροφοριακό
+          </button>
+          <button
+            class="helpBtn large"
+            id="akinitopoiisi"
+            data-person="suspect"
+          >
+            Έκθεση Ακινητοποίησης
+          </button>
+          <button
+            class="helpBtn large"
+            id="iatrikiVevaiosi"
+            data-person="victim"
+          >
+            Αίτηση Ιατρικής Βεβαίωσης
+          </button>
         </div>
         <hr>
         <p>Με Εκθέσεις-πρότυπα χρήστη</p>
@@ -1776,6 +1811,25 @@
           <tr><td>{astynomShortAit}</td><td>Βαθμός και ονοματεπώνυμο σε αιτιατική (Υ/Α' ΠΑΠΑΔΟΠΟΥΛΟ Νικόλαο)· αν δεν έχει συμπληρωθεί, ίδιο με το {astynomShort}</td></tr>
         </table>
 
+        <h3>Ανακριτικοί / Τροχονομικά</h3>
+        <p>Τα στοιχεία οχήματος παίρνονται από το πεδίο "Όχημα"· όσα λείπουν γράφονται ***</p>
+        <table>
+          <tr><th>Λέξη Κλειδί</th><th>Περιγραφή / Παράδειγμα</th></tr>
+          <tr><td>{anakritikos}</td><td>Α΄ ανακριτικός σε ονομαστική (Αρχ/κας ΠΑΠΠΑΣ Ιωάννης)</td></tr>
+          <tr><td>{anakritikosGen}</td><td>Α΄ ανακριτικός σε γενική (Αρχ/κα ΠΑΠΠΑ Ιωάννη)</td></tr>
+          <tr><td>{anakritikosB}</td><td>Β΄ ανακριτικός σε ονομαστική</td></tr>
+          <tr><td>{anakritikosBGen}</td><td>Β΄ ανακριτικός σε γενική</td></tr>
+          <tr><td>{arthroTopou}</td><td>Άρθρο τόπου σύνταξης από τις Ρυθμίσεις (π.χ. "Στην")</td></tr>
+          <tr><td>{plate}</td><td>Αριθμός κυκλοφορίας</td></tr>
+          <tr><td>{vehicleUse}</td><td>Χρήση/είδος (π.χ. Ι.Χ.Ε)</td></tr>
+          <tr><td>{vehicleMake}</td><td>Μάρκα και μοντέλο</td></tr>
+          <tr><td>{vehicleColor}</td><td>Χρώμα</td></tr>
+          <tr><td>{ownerName}</td><td>Ιδιοκτήτης (ΕΠΩΝΥΜΟ Όνομα του Πατρώνυμο)</td></tr>
+          <tr><td>{ownerNameGen}</td><td>Ιδιοκτήτης σε γενική με άρθρο (του ΕΠΩΝΥΜΟ Γεωργίου του Δημητρίου / της ΕΠΩΝΥΜΟ Άννας του ...)</td></tr>
+          <tr><td>{ownerO}</td><td>Άρθρο "ο"/"η" για τον ιδιοκτήτη, από το όνομά του</td></tr>
+          <tr><td>{ownerAddress}</td><td>Διεύθυνση ιδιοκτήτη (Πόλη, οδός ...)</td></tr>
+        </table>
+
         <h3>Ημερομηνία/Ώρα</h3>
         <table>
           <tr><th>Λέξη Κλειδί</th><th>Περιγραφή</th></tr>
@@ -1813,6 +1867,7 @@
           <tr><td>enta</td><td>έντα</td><td>είσα</td><td>έντα</td><td>είσα</td><td>-</td><td>-</td><td>έντα / είσα</td></tr>
           <tr><td>oY</td><td>Ο</td><td>Η</td><td>Ο</td><td>Η</td><td>Ο/Η</td><td>Ο/Η</td><td>Ο / Η</td></tr>
           <tr><td>sa</td><td>ς</td><td>σα</td><td>ς</td><td>σα</td><td>-</td><td>-</td><td>ς / σα</td></tr>
+          <tr><td>ountos</td><td>ούντος</td><td>ούσης</td><td>ούντος</td><td>ούσης</td><td>-</td><td>-</td><td>ούντος / ούσης</td></tr>
         </table>
         <p><em>Παράδειγμα: {oS} = "ο" για άνδρα δράστη, {touV} = "της" για γυναίκα παθόντα, {oYA1} = "Ο" για υπογραφή άντρα Ά ανακριτικού, {tonAS} = "την" για γυναίκα αστυνομικό. Ο αστυνομικός θεωρείται άντρας αν δεν έχει οριστεί φύλο</em></p>
       </div>
