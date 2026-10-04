@@ -1803,10 +1803,3 @@ if (unseenEntries.length) {
 patchDialog.addEventListener("close", () => {
   if (newestPatch) localStorage.setItem(PATCH_SEEN_KEY, newestPatch);
 });
-
-// Sketcher badge: same glow treatment as patch notes ("BETA" instead of
-// "ΝΕΟ"), but permanent — never removed, unlike the patch-notes glow.
-const sketcherLink = document.getElementById("sketcher-link");
-if (sketcherLink) {
-  sketcherLink.classList.add("glow-new", "glow-beta");
-}
