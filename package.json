@@ -1,6 +1,6 @@
 {
   "name": "vaxyp",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Βοηθητική εφαρμογή ΑΞ.ΥΠ",
   "main": "electron/main.js",
   "scripts": {

@@ -295,6 +295,7 @@ const genderMap = {
     enta: "είσα",
     oY: "Η",
     sa: "σα",
+    ountos: "ούσης",
   },
   Άνδρας: {
     o: "ο",
@@ -319,6 +320,7 @@ const genderMap = {
     enta: "έντα",
     oY: "Ο",
     sa: "ς",
+    ountos: "ούντος",
   },
 };
 export function applyAllGrammar(state) {

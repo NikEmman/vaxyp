@@ -93,7 +93,8 @@ export function shortenFormattedPerson(formattedString) {
   return formattedString.split(", με Α.Φ.Μ")[0];
 }
 // formatters
-export function formatVehicleInfo(input) {
+// Parses the vehicle record from the official app into its separate fields
+export function parseVehicleInfo(input) {
   // Parse input text into an array of key-value pairs
   const lines = input
     .split("\n")
@@ -135,25 +136,43 @@ export function formatVehicleInfo(input) {
     ownerSurname: getValue("Επώνυμο") || "",
     ownerFirstName: getValue("Όνομα") || "",
     ownerFatherName: getValue("Πατρώνυμο") || "",
+    ownerStreet: getValue("Διεύθυνση") || "",
+    ownerCity: getValue("Πόλη") || "",
   };
 
   // Format the usage and type
-  const formattedUsage =
+  fields.formattedUsage =
     fields.type === "ΔΙΚΥΚΛΟ"
       ? "δίκυκλο"
       : fields.usage.match(/Ι.Χ|Δ.Χ/)
         ? `${fields.usage}.${Array.from(fields.type)[0]}`
         : fields.usage;
+  return fields;
+}
 
+// The owner after "ιδιοκτησίας", e.g. "του ΠΑΠΑΣ Γεωργίου του Δημητρίου". The
+// record has no sex, so a first name found among the female names makes it
+// "της"; the surname stays as it is, like the persons' surnames do.
+export function ownerGenitive(fields) {
+  const femaleGen = toGenitiveFemale(fields.ownerFirstName);
+  const female = femaleGen !== fields.ownerFirstName;
+  const firstNameGen = female
+    ? femaleGen
+    : toGenitiveMale(fields.ownerFirstName);
+  return `${female ? "της" : "του"} ${fields.ownerSurname} ${capitalize(
+    firstNameGen,
+  )} του ${capitalize(toGenitiveMale(fields.ownerFatherName))}`;
+}
+
+export function formatVehicleInfo(input) {
+  const fields = parseVehicleInfo(input);
   // Format the output string
-  return `${fields.licensePlate} ${formattedUsage} χρώματος ${
+  return `${fields.licensePlate} ${fields.formattedUsage} χρώματος ${
     fields.color
   }, μάρκας ${fields.make} ${fields.model}, με αριθμό πλαισίου ${
     fields.chassisNumber
-  } και αριθμό κινητήρα ${fields.engineNumber} ιδιοκτησίας του ${
-    fields.ownerSurname
-  } ${capitalize(fields.ownerFirstName)} του ${capitalize(
-    fields.ownerFatherName,
+  } και αριθμό κινητήρα ${fields.engineNumber} ιδιοκτησίας ${ownerGenitive(
+    fields,
   )}`;
 }
 // the labels of the foreign-person record, in the order POL lists them

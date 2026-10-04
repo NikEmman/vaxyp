@@ -2605,6 +2605,159 @@ function createText() {
   });
 }
 
+// ── Ready-made text boxes of the sketch (Πλαίσια κειμένου) ──────────
+// The framed boxes an accident sketch carries: service header, title,
+// legend and signature. An editable Textbox that draws a frame around its
+// text in the text colour, so the theme switch restyles both. Registered
+// with Fabric so saved sketches load it back as a framed box.
+const TEXTBOX_FRAME_PAD = 6; // px between the text and its frame
+
+class FramedTextbox extends fabric.Textbox {
+  static type = "FramedTextbox";
+
+  // the frame sits outside the object's own bounds, which a cached object
+  // would clip, so these render straight to the canvas
+  static getDefaults() {
+    return { ...super.getDefaults(), objectCaching: false };
+  }
+
+  _renderBackground(ctx) {
+    super._renderBackground(ctx);
+    const p = TEXTBOX_FRAME_PAD;
+    ctx.save();
+    ctx.strokeStyle = this.fill;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(
+      -this.width / 2 - p,
+      -this.height / 2 - p,
+      this.width + 2 * p,
+      this.height + 2 * p,
+    );
+    ctx.restore();
+  }
+}
+fabric.classRegistry.setClass(FramedTextbox);
+
+// The main app's saved settings and selected investigator (same origin), so
+// the boxes open filled in; without them the fields are left as dots.
+function sketchSettings() {
+  try {
+    return {
+      data: JSON.parse(localStorage.getItem("dataObject")) || {},
+      anakr: JSON.parse(localStorage.getItem("anakr")) || { aAnakr: 0 },
+    };
+  } catch {
+    return { data: {}, anakr: { aAnakr: 0 } };
+  }
+}
+
+// "Κομοτηνής" → "ΚΟΜΟΤΗΝΗΣ": headers are capitals without accents
+function plainUpper(text) {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toUpperCase();
+}
+
+const SKETCH_MONTHS = [
+  "Ιανουαρίου",
+  "Φεβρουαρίου",
+  "Μαρτίου",
+  "Απριλίου",
+  "Μαΐου",
+  "Ιουνίου",
+  "Ιουλίου",
+  "Αυγούστου",
+  "Σεπτεμβρίου",
+  "Οκτωβρίου",
+  "Νοεμβρίου",
+  "Δεκεμβρίου",
+];
+
+// boldLines: indexes of the lines printed bold (the box headings)
+function framedTextbox(text, { width, textAlign = "center", boldLines = [] }) {
+  const lines = text.split("\n");
+  const styles = {};
+  boldLines.forEach((i) => {
+    styles[i] = {};
+    for (let c = 0; c < lines[i].length; c++)
+      styles[i][c] = { fontWeight: "bold" };
+  });
+  return new FramedTextbox(text, {
+    width,
+    fontSize: 14,
+    fill: LINE_COLOR,
+    textAlign,
+    styles,
+    editable: true,
+  });
+}
+
+function createSketchHeader() {
+  const { data } = sketchSettings();
+  const d = data.dAstynomias ? plainUpper(data.dAstynomias) : "……………";
+  const ypiresia = data.ypiresia ? plainUpper(data.ypiresia) : "……………";
+  return framedTextbox(`ΑΣΤΥΝΟΜΙΚΗ ΔΙΕΥΘΥΝΣΗ ${d}\n${ypiresia}`, {
+    width: 280,
+    boldLines: [0, 1],
+  });
+}
+
+function createSketchTitle() {
+  const { data } = sketchSettings();
+  const now = new Date();
+  const date = [now.getDate(), now.getMonth() + 1]
+    .map((n) => String(n).padStart(2, "0"))
+    .concat(now.getFullYear())
+    .join("-");
+  const arthro = (data.arthro || "στην").toLowerCase();
+  const place = data.merosSyntaksisEkthesis || "……………";
+  return framedTextbox(
+    "ΠΡΟΧΕΙΡΟ ΣΧΕΔΙΑΓΡΑΜΜΑ\n" +
+      `Που απεικονίζει τον τόπο του τροχαίου ατυχήματος που συνέβη την ${date} ` +
+      `και ώρα **:** ${arthro} ${place} και στη Δ/νση των οδών *** και ***`,
+    { width: 380, boldLines: [0] },
+  );
+}
+
+function createSketchLegend() {
+  return framedTextbox(
+    [
+      "ΥΠΟΜΝΗΜΑ",
+      "Α: Όχημα υπ΄ αριθ. ***",
+      "Β: Όχημα υπ΄ αριθ. ***",
+      "Π.Π.Α: Πιθανή Πορεία Α΄ Οχήματος",
+      "Π.Π.Β: Πιθανή Πορεία Β΄ Οχήματος",
+      "Π.Σ.Σ: Πιθανό Σημείο Σύγκρουσης",
+      "Τ.Θ.Α: Τελική Θέση Α΄ Οχήματος",
+      "Τ.Θ.Β: Τελική Θέση Β΄ Οχήματος",
+    ].join("\n"),
+    { width: 300, textAlign: "left", boldLines: [0] },
+  );
+}
+
+// Signed by the investigator selected in the main app (nominative form)
+function createSketchSignature() {
+  const { data, anakr } = sketchSettings();
+  const i = anakr.aAnakr || 0;
+  // Same rank/name resolution as the main app (exposed by index.html)
+  const { rankNom: rank, nameNom: name } = window.getOfficerParts(data, i);
+  const female = data.anakrSex?.[i] === "Γυναίκα";
+  const now = new Date();
+  const place = data.merosSyntaksisEkthesis || "……………";
+  return framedTextbox(
+    [
+      `${place} ${now.getDate()} ${SKETCH_MONTHS[now.getMonth()]} ${now.getFullYear()}`,
+      female ? "Η" : "Ο",
+      female ? "Σ Υ Ν Τ Α Ξ Α Σ Α" : "Σ Υ Ν Τ Α Ξ Α Σ",
+      "",
+      name || "……………",
+      rank || "……………",
+    ].join("\n"),
+    { width: 240, boldLines: [1, 2] },
+  );
+}
+
 // ── Roadside objects (Εμπόδια) ───────────────────────────────────
 // Things a vehicle can hit, top-down at real size like the vehicles.
 // Solid structure is hatched like the generic obstacles and islands.
@@ -2907,6 +3060,10 @@ const SHAPE_FACTORIES = {
   pathuturn: createPathUTurn,
   pathspin: createPathSpin,
   text: () => createText(),
+  sketchheader: () => createSketchHeader(),
+  sketchtitle: () => createSketchTitle(),
+  sketchlegend: () => createSketchLegend(),
+  sketchsignature: () => createSketchSignature(),
 };
 
 // Mirrored twins ("<key>mirror") of the lopsided shapes: the fallen

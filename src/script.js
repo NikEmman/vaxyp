@@ -1,6 +1,6 @@
 import ektheseis from "./ektheseis.js";
 import { dikografies, defaultAstynomikos, defaultData } from "./defaultData.js";
-import { applyAllGrammar } from "./grammar.js";
+import { applyAllGrammar, toGenitiveMale } from "./grammar.js";
 import {
   generateWord,
   processDocument,
@@ -14,6 +14,8 @@ import {
   getOfficerParts,
   shortenFormattedPerson,
   formatVehicleInfo,
+  parseVehicleInfo,
+  ownerGenitive,
   formatIdInfo,
   formatFormData,
   extractPersonInfo,
@@ -83,7 +85,7 @@ async function handleDocxUpload(event) {
   const surnameSuffix = missingPerson ? "" : `-${personData.surname}`;
 
   applyAstynomikosShort();
-  applyAllGrammar(state);
+  applyTrafficFields(); // ends with applyAllGrammar
 
   for (const file of sortedFiles) {
     try {
@@ -1389,6 +1391,93 @@ deltioKatagrafisMethis.addEventListener("click", (e) => {
   );
 });
 
+// Fields shared by the drunk-driving reports: both investigators in nominative
+// and genitive, the place article, and the vehicle split into its parts. A
+// vehicle field left empty prints *** so it stands out in the document.
+function applyTrafficFields() {
+  applySelectedOfficer();
+  const a = getOfficerParts(state, anakritikosSelect.selectedIndex);
+  const b = getOfficerParts(state, bAnakritikosSelect.selectedIndex);
+  state.anakritikosGen = joinRankName(a.rankGen, a.nameGen);
+  state.anakritikosB = joinRankName(b.rankNom, b.nameNom);
+  state.anakritikosBGen = joinRankName(b.rankGen, b.nameGen);
+  state.arthroTopou = state.arthro ? capitalize(state.arthro) : "Στην";
+
+  const v = parseVehicleInfo(state.vehicle || "");
+  const orStars = (text) => cleanSpaces(text) || "***";
+  state.plate = orStars(v.licensePlate);
+  state.vehicleUse = orStars(v.formattedUsage);
+  state.vehicleMake = orStars(`${v.make} ${v.model}`);
+  state.vehicleColor = orStars(v.color);
+  state.ownerName = orStars(
+    v.ownerSurname &&
+      `${v.ownerSurname} ${capitalize(v.ownerFirstName)} του ${capitalize(
+        toGenitiveMale(v.ownerFatherName),
+      )}`,
+  );
+  state.ownerNameGen = orStars(v.ownerSurname && ownerGenitive(v));
+  // "Ιδιοκτήτης ... είναι ο/η", following the gender ownerGenitive picked
+  state.ownerO = ownerGenitive(v).startsWith("της") ? "η" : "ο";
+  state.ownerAddress = orStars(
+    v.ownerCity &&
+      `${capitalize(v.ownerCity)}, οδός ${capitalize(v.ownerStreet)}`,
+  );
+  applyAllGrammar(state);
+}
+
+// ekthesi prosdiorismou alkoolis button
+const prosdiorismosAlkoolis = document.getElementById("prosdiorismosAlkoolis");
+prosdiorismosAlkoolis.addEventListener("click", (e) => {
+  applyTrafficFields();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  download(e.currentTarget, ektheseis.prosdiorismosAlkoolis, state.ypoptosData, {
+    timed: true,
+  });
+});
+
+// ekthesi syllipsis epautoforo button, written by the arresting A investigator
+const syllipsiAutoforo = document.getElementById("syllipsiAutoforo");
+syllipsiAutoforo.addEventListener("click", (e) => {
+  applyTrafficFields();
+  state.timeStart = formatTime(today, state.timePassed);
+  state.timeEnd = formatTime(today, data.xronosPeratosis + state.timePassed);
+  download(e.currentTarget, ektheseis.syllipsiAutoforo, state.ypoptosData, {
+    timed: true,
+  });
+});
+
+// ekthesi akinitopoiisis button; the release part stays blank for later
+const akinitopoiisi = document.getElementById("akinitopoiisi");
+akinitopoiisi.addEventListener("click", (e) => {
+  applyTrafficFields();
+  state.timeStart = formatTime(today, state.timePassed);
+  download(e.currentTarget, ektheseis.akinitopoiisi, state.ypoptosData, {
+    timed: true,
+    advances: false, // a single moment, not a drafting slot
+  });
+});
+
+// pliroforiako D-33 button, handed to the arrested suspect
+const pliroforiakoD33 = document.getElementById("pliroforiakoD33");
+pliroforiakoD33.addEventListener("click", (e) => {
+  applyTrafficFields();
+  state.timeStart = formatTime(today, state.timePassed);
+  download(e.currentTarget, ektheseis.pliroforiakoD33, state.ypoptosData, {
+    timed: true,
+    advances: false, // receipt of a form, not a drafting slot
+  });
+});
+
+// aitisi iatrikis vevaiosis button, for the victim injured in the accident
+const iatrikiVevaiosi = document.getElementById("iatrikiVevaiosi");
+iatrikiVevaiosi.addEventListener("click", (e) => {
+  applyTrafficFields();
+  applyPerson(state.victimData);
+  state.fatherNameGen = capitalize(state.fatherNameGen || "");
+  download(e.currentTarget, ektheseis.iatrikiVevaiosi, state.victimData);
+});
+
 /// ENDOOIKOGENIAKI
 
 //martyra astyn endo button
@@ -1714,10 +1803,3 @@ if (unseenEntries.length) {
 patchDialog.addEventListener("close", () => {
   if (newestPatch) localStorage.setItem(PATCH_SEEN_KEY, newestPatch);
 });
-
-// Sketcher badge: same glow treatment as patch notes ("BETA" instead of
-// "ΝΕΟ"), but permanent — never removed, unlike the patch-notes glow.
-const sketcherLink = document.getElementById("sketcher-link");
-if (sketcherLink) {
-  sketcherLink.classList.add("glow-new", "glow-beta");
-}
