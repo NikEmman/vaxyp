@@ -427,6 +427,7 @@
           <option value="markings">Διαγραμμίσεις</option>
           <option value="signs">Πινακίδες</option>
           <option value="vehicles">Οχήματα</option>
+          <option value="texts">Πλαίσια Κειμένου</option>
           <option value="other">Άλλα</option>
         </select>
         <div class="palette-items" id="palette-items">
@@ -1063,10 +1064,50 @@
             class="palette-item"
             draggable="true"
             data-shape="text"
-            data-categories="other"
+            data-categories="other texts"
           >
             <svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14" /></svg>
             Κείμενο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="sketchheader"
+            data-categories="texts"
+            title="Πλαίσιο με τη Διεύθυνση Αστυνομίας και την Υπηρεσία, από τις Ρυθμίσεις"
+          >
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" /><path d="M6 10h12M8 14h8" /></svg>
+            Κεφαλίδα Υπηρεσίας
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="sketchtitle"
+            data-categories="texts"
+            title="«ΠΡΟΧΕΙΡΟ ΣΧΕΔΙΑΓΡΑΜΜΑ» με ημερομηνία, ώρα και τόπο του ατυχήματος"
+          >
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" /><path d="M8 9h8M5 13h14M5 16h10" /></svg>
+            Τίτλος Σχεδιαγράμματος
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="sketchlegend"
+            data-categories="texts"
+            title="Υπόμνημα με οχήματα Α/Β, πιθανές πορείες, σημείο σύγκρουσης και τελικές θέσεις"
+          >
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" /><path d="M5 9h6M5 12h12M5 15h12" /></svg>
+            Υπόμνημα
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="sketchsignature"
+            data-categories="texts"
+            title="Τόπος, ημερομηνία και υπογραφή του επιλεγμένου ανακριτικού υπαλλήλου"
+          >
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" /><path d="M7 9h10M10 12h4M8 16h8" /></svg>
+            Συντάξας
           </div>
           <div class="palette-empty" id="palette-empty">
             Δεν υπάρχουν ακόμα στοιχεία σε αυτή την κατηγορία.
