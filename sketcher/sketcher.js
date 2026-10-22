@@ -912,7 +912,12 @@
       canvas.requestRenderAll();
     });
     stopMeasuring();
-    window.displayNotification("Η κλίμακα του χάρτη φόντου ρυθμίστηκε.");
+    const upscale = mapUpscale();
+    window.displayNotification(
+      upscale > 1.5
+        ? `Η κλίμακα ρυθμίστηκε. Ο χάρτης εμφανίζεται μεγεθυμένος ×${upscale.toFixed(1).replace(".", ",")}, γι' αυτό είναι θολός· πατήστε «1:1» για πιο καθαρή εικόνα.`
+        : "Η κλίμακα του χάρτη φόντου ρυθμίστηκε.",
+    );
   }
   document
     .getElementById("btn-map-calibrate-apply")
@@ -1173,6 +1178,19 @@
     if (mapImage) canvas.sendObjectToBack(mapImage);
   }
 
+  // Bicubic rather than the browser's default bilinear when the map is
+  // drawn enlarged, so it's less blocky. Set on every render because
+  // exports draw to a fresh context.
+  canvas.on("before:render", ({ ctx }) => {
+    ctx.imageSmoothingQuality = "high";
+  });
+
+  // How much the map is enlarged in device pixels; past ~1.5× the
+  // screenshot visibly blurs.
+  function mapUpscale() {
+    return mapImage.scaleX * window.devicePixelRatio;
+  }
+
   // Locked, the map ignores the mouse entirely: drags pan the canvas and
   // rubber-band selection skips it. Unlocked, it moves and rotates with
   // Fabric's own handles; its scale stays whatever calibration set.
@@ -1288,6 +1306,15 @@
     if (mapAdjusting) canvas.setActiveObject(mapImage);
     updateMapControls();
     canvas.requestRenderAll();
+  });
+  // "1:1" sets the sketch zoom so the map shows at the screenshot's own
+  // resolution, the sharpest it can look. Sizes and distances don't change,
+  // since the zoom rescales the whole sketch together.
+  document.getElementById("btn-map-native").addEventListener("click", () => {
+    if (!mapImage) return;
+    const min = parseFloat(scaleInput.min) || 5;
+    scaleInput.value = Math.max(min, Math.round(ppm / mapUpscale()));
+    scaleInput.dispatchEvent(new Event("change"));
   });
   mapOpacityInput.addEventListener("input", () => {
     if (!mapImage) return;
