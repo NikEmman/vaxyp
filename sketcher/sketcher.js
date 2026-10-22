@@ -9,6 +9,8 @@
   let gridVisible = true;
   let measuring = false;
   let measurePoints = [];
+  let calibrating = false; // measuring, but the line sets the map's scale instead of being drawn
+  let calibrationPending = null; // { p1, p2 } once the line is drawn, until its distance is entered
   let erasing = false;
   let mapImage = null; // the background map screenshot, if any — see "Map background"
   const undoStack = [];
@@ -650,6 +652,9 @@
   // into a "|——————|" mark — a line with a perpendicular tick at each end
   // — grouped into one selectable/movable object.
   const measureBtn = document.getElementById("btn-measure");
+  const calibrateBtn = document.getElementById("btn-map-calibrate");
+  const calibratePanel = document.getElementById("map-calibrate-panel");
+  const calibrateInput = document.getElementById("map-calibrate-distance");
   const TICK_HALF = 5; // px on each side of the line, i.e. a 10px tick
 
   // Perpendicular unit vector to the line from p1 to p2 (zero if p1===p2).
@@ -685,22 +690,35 @@
     measurePoints = [];
     clearMeasurePreview();
     measureBtn.classList.remove("active");
+    calibrating = false;
+    calibrationPending = null;
+    calibrateBtn.classList.remove("active");
+    calibratePanel.hidden = true;
+    canvas.skipTargetFind = false;
     canvas.selection = selectMode;
     canvas.defaultCursor = selectMode ? "default" : "grab";
     canvas.requestRenderAll();
   }
 
   measureBtn.addEventListener("click", () => {
-    if (measuring) {
+    if (measuring && !calibrating) {
       stopMeasuring();
       return;
     }
+    stopMeasuring(); // in case it's calibrating
     stopErasing();
     measuring = true;
     measurePoints = [];
     measureBtn.classList.add("active");
     canvas.selection = false;
     canvas.defaultCursor = "crosshair";
+    if (mapImage && !mapImage.calibrated && !mapImage.measureWarned) {
+      mapImage.measureWarned = true;
+      window.displayNotification(
+        "Ο χάρτης φόντου δεν έχει βαθμονομηθεί, οπότε οι αποστάσεις πάνω του δεν είναι ακριβείς.",
+        "warning",
+      );
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -754,9 +772,10 @@
   });
 
   canvas.on("mouse:up", (opt) => {
-    if (!measuring || measurePoints.length === 0) return;
+    if (!measuring || measurePoints.length === 0 || calibrationPending) return;
     const p1 = measurePoints[0];
     const p = canvas.getPointer(opt.e);
+    if (calibrating) return finishCalibrationLine(p1, p);
     const distM = (Math.hypot(p.x - p1.x, p.y - p1.y) / ppm).toFixed(2);
     const { nx, ny } = perpUnit(p1, p);
     clearMeasurePreview();
@@ -797,7 +816,7 @@
   });
 
   canvas.on("mouse:move", (opt) => {
-    if (!measuring || measurePoints.length === 0 || !previewLine) return;
+    if (!measuring || measurePoints.length === 0 || !previewLine || calibrationPending) return;
     const p1 = measurePoints[0];
     const p = canvas.getPointer(opt.e);
     const distM = (Math.hypot(p.x - p1.x, p.y - p1.y) / ppm).toFixed(2);
@@ -814,6 +833,95 @@
       text: `${distM} m`,
     });
     canvas.requestRenderAll();
+  });
+
+  // ── Map calibration ──────────────────────────────────────────────
+  // The measure tool's drag-a-line gesture, over a distance the officer
+  // knows (a lane, a road's width, the map's own scale bar). The map is
+  // then rescaled so that line is exactly that many meters at the current
+  // px/m, so vehicles and roads dropped on it come out the right size.
+  // It scales around the line's midpoint, so that stretch stays in view.
+  function startCalibrating() {
+    stopMeasuring();
+    stopErasing();
+    measuring = true;
+    calibrating = true;
+    calibrateBtn.classList.add("active");
+    canvas.discardActiveObject();
+    canvas.selection = false;
+    canvas.skipTargetFind = true; // a drag over the map (or a piece) draws the line instead of moving it
+    canvas.defaultCursor = "crosshair";
+    canvas.requestRenderAll();
+  }
+  calibrateBtn.addEventListener("click", () => {
+    if (calibrating) stopMeasuring();
+    else startCalibrating();
+  });
+
+  // The line stays drawn while the panel asks for its real length.
+  function finishCalibrationLine(p1, p2) {
+    if (Math.hypot(p2.x - p1.x, p2.y - p1.y) < 10) {
+      clearMeasurePreview();
+      measurePoints = [];
+      canvas.defaultCursor = "crosshair";
+      canvas.requestRenderAll();
+      window.displayNotification(
+        "Σύρετε μια γραμμή πάνω σε απόσταση του χάρτη που γνωρίζετε.",
+        "warning",
+      );
+      return;
+    }
+    calibrationPending = { p1, p2 };
+    canvas.defaultCursor = "crosshair";
+    canvas.setCursor("crosshair");
+    calibrateInput.value = "";
+    calibratePanel.hidden = false;
+    calibrateInput.focus();
+  }
+
+  function applyCalibration() {
+    const realM = parseFloat(calibrateInput.value.replace(",", "."));
+    if (!(realM > 0)) {
+      window.displayNotification("Δώστε την πραγματική απόσταση σε μέτρα.", "warning");
+      calibrateInput.focus();
+      return;
+    }
+    const { p1, p2 } = calibrationPending;
+    const k = (realM * ppm) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const cx = (p1.x + p2.x) / 2;
+    const cy = (p1.y + p2.y) / 2;
+    const map = mapImage;
+    const prev = {
+      left: map.left,
+      top: map.top,
+      scaleX: map.scaleX,
+      scaleY: map.scaleY,
+      calibrated: map.calibrated,
+    };
+    map.set({
+      left: cx + (map.left - cx) * k,
+      top: cy + (map.top - cy) * k,
+      scaleX: map.scaleX * k,
+      scaleY: map.scaleY * k,
+      calibrated: true,
+    });
+    map.setCoords();
+    pushUndo(() => {
+      map.set(prev);
+      map.setCoords();
+      canvas.requestRenderAll();
+    });
+    stopMeasuring();
+    window.displayNotification("Η κλίμακα του χάρτη φόντου ρυθμίστηκε.");
+  }
+  document
+    .getElementById("btn-map-calibrate-apply")
+    .addEventListener("click", applyCalibration);
+  document
+    .getElementById("btn-map-calibrate-cancel")
+    .addEventListener("click", stopMeasuring);
+  calibrateInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyCalibration();
   });
 
   // ── Undo ─────────────────────────────────────────────────────────
@@ -1070,6 +1178,7 @@
   // step, so undo itself can use it. Returns the map it replaced.
   function swapMap(next) {
     const prev = mapImage;
+    if (calibrating) stopMeasuring(); // a calibration line drawn on the old map
     if (prev) {
       if (canvas.getActiveObjects().includes(prev)) canvas.discardActiveObject();
       canvas.remove(prev);
@@ -1112,8 +1221,12 @@
             evented: false,
           });
           img.isMapImage = true;
+          img.calibrated = false;
           replaceMap(img);
-          window.displayNotification("Ο χάρτης φόντου προστέθηκε.");
+          startCalibrating();
+          window.displayNotification(
+            "Ο χάρτης φόντου προστέθηκε. Βαθμονομήστε τον: σύρετε μια γραμμή πάνω σε απόσταση που γνωρίζετε (π.χ. πλάτος δρόμου).",
+          );
         })
         .catch(() =>
           window.displayNotification("Η εικόνα δεν μπόρεσε να φορτωθεί.", "warning"),
