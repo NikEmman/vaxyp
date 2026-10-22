@@ -1161,17 +1161,34 @@
   // An optional screenshot of the scene's map (Google Maps etc.) to draw
   // over. It's an ordinary canvas object kept at the very bottom, so the
   // px/m zoom above rescales it along with everything else, but it's
-  // locked (not selectable) and left out of the export crop, the eraser,
-  // Clear and saved sketches. One map at a time; it's never stored.
+  // locked unless "adjust" is on, and left out of the export crop, the
+  // eraser, Clear and saved sketches. One map at a time; it's never stored.
   const mapFileInput = document.getElementById("map-file-input");
   const mapControls = document.getElementById("map-controls");
+  const mapAdjustBtn = document.getElementById("btn-map-adjust");
+  const mapOpacityInput = document.getElementById("map-opacity");
+  let mapAdjusting = false;
 
   function sendMapToBack() {
     if (mapImage) canvas.sendObjectToBack(mapImage);
   }
 
+  // Locked, the map ignores the mouse entirely: drags pan the canvas and
+  // rubber-band selection skips it. Unlocked, it moves and rotates with
+  // Fabric's own handles; its scale stays whatever calibration set.
+  function applyMapLock() {
+    if (!mapImage) return;
+    mapImage.set({ selectable: mapAdjusting, evented: mapAdjusting });
+    if (!mapAdjusting && canvas.getActiveObjects().includes(mapImage))
+      canvas.discardActiveObject();
+  }
+
   function updateMapControls() {
     mapControls.hidden = !mapImage;
+    if (!mapImage) mapAdjusting = false;
+    mapAdjustBtn.classList.toggle("active", mapAdjusting);
+    mapAdjustBtn.setAttribute("aria-pressed", String(mapAdjusting));
+    if (mapImage) mapOpacityInput.value = Math.round(mapImage.opacity * 100);
   }
 
   // Swaps the current map for `next` (either may be null) without an undo
@@ -1188,6 +1205,7 @@
       canvas.add(next);
       sendMapToBack();
     }
+    applyMapLock();
     updateMapControls();
     canvas.requestRenderAll();
     return prev;
@@ -1217,8 +1235,17 @@
             top: scrollWrap.scrollTop + scrollWrap.clientHeight / 2,
             scaleX: fit,
             scaleY: fit,
-            selectable: false,
-            evented: false,
+            opacity: mapOpacityInput.value / 100,
+            lockScalingX: true,
+            lockScalingY: true,
+            lockSkewingX: true,
+            lockSkewingY: true,
+            hoverCursor: "move",
+          });
+          // Rotation handle only; the corner/side handles would rescale it.
+          img.setControlsVisibility({
+            tl: false, tr: false, bl: false, br: false,
+            ml: false, mr: false, mt: false, mb: false,
           });
           img.isMapImage = true;
           img.calibrated = false;
@@ -1252,6 +1279,20 @@
     if (!item) return;
     e.preventDefault();
     importMapFile(item.getAsFile());
+  });
+  mapAdjustBtn.addEventListener("click", () => {
+    if (measuring) stopMeasuring();
+    if (erasing) stopErasing();
+    mapAdjusting = !mapAdjusting;
+    applyMapLock();
+    if (mapAdjusting) canvas.setActiveObject(mapImage);
+    updateMapControls();
+    canvas.requestRenderAll();
+  });
+  mapOpacityInput.addEventListener("input", () => {
+    if (!mapImage) return;
+    mapImage.set("opacity", mapOpacityInput.value / 100);
+    canvas.requestRenderAll();
   });
   document
     .getElementById("btn-map-remove")
