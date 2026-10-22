@@ -1303,12 +1303,10 @@
   // Shared by both export buttons: bounding box of everything drawn,
   // padded and clamped to the canvas — crops out the mostly-blank working
   // area. Excludes connector markers (transient editing aid, would pad
-  // the crop by a few px) and the map, which still shows inside the crop
-  // but would otherwise stretch it to the whole screenshot.
+  // the crop by a few px). A map counts too, unpadded, so the export is
+  // exactly the screenshot unless something is drawn past its edges.
   function getExportCropBounds(pad) {
-    const objects = canvas
-      .getObjects()
-      .filter((o) => !o.isConnectorIndicator && !o.isMapImage);
+    const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
     if (objects.length === 0) return null;
 
     canvas.discardActiveObject();
@@ -1316,20 +1314,21 @@
     const bounds = objects.reduce(
       (acc, o) => {
         const r = o.getBoundingRect();
+        const p = o.isMapImage ? 0 : pad;
         return {
-          left: Math.min(acc.left, r.left),
-          top: Math.min(acc.top, r.top),
-          right: Math.max(acc.right, r.left + r.width),
-          bottom: Math.max(acc.bottom, r.top + r.height),
+          left: Math.min(acc.left, r.left - p),
+          top: Math.min(acc.top, r.top - p),
+          right: Math.max(acc.right, r.left + r.width + p),
+          bottom: Math.max(acc.bottom, r.top + r.height + p),
         };
       },
       { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
     );
 
-    const left = Math.max(0, bounds.left - pad);
-    const top = Math.max(0, bounds.top - pad);
-    const width = Math.min(CANVAS_W, bounds.right + pad) - left;
-    const height = Math.min(CANVAS_H, bounds.bottom + pad) - top;
+    const left = Math.max(0, bounds.left);
+    const top = Math.max(0, bounds.top);
+    const width = Math.min(CANVAS_W, bounds.right) - left;
+    const height = Math.min(CANVAS_H, bounds.bottom) - top;
     return { left, top, width, height };
   }
 
