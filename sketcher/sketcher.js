@@ -10,6 +10,7 @@
   let measuring = false;
   let measurePoints = [];
   let erasing = false;
+  let mapImage = null; // the background map screenshot, if any — see "Map background"
   const undoStack = [];
   const UNDO_LIMIT = 50;
 
@@ -170,6 +171,7 @@
       canvas.add(obj);
       if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
       else if (obj.roadConnections) canvas.sendObjectToBack(obj);
+      sendMapToBack();
       canvas.setActiveObject(obj);
       pushUndo(() => {
         canvas.remove(obj);
@@ -292,6 +294,8 @@
   scrollWrap.addEventListener("dragover", (e) => e.preventDefault());
   scrollWrap.addEventListener("drop", (e) => {
     e.preventDefault();
+    const imageFile = [...e.dataTransfer.files].find((f) => f.type.startsWith("image/"));
+    if (imageFile) return importMapFile(imageFile);
     const shapeKey = e.dataTransfer.getData("text/plain");
     if (!shapeKey) return;
     const rect = canvas.upperCanvasEl.getBoundingClientRect();
@@ -609,9 +613,14 @@
 
   // ── Delete ───────────────────────────────────────────────────────
   function deleteSelected() {
-    const objs = canvas.getActiveObjects();
-    if (objs.length === 0) return;
+    const selected = canvas.getActiveObjects();
+    if (selected.length === 0) return;
     canvas.discardActiveObject();
+    // The map (selectable only while adjusting it) has its own remove/undo,
+    // which puts it back under the road pieces rather than on top.
+    if (selected.includes(mapImage)) replaceMap(null);
+    const objs = selected.filter((o) => !o.isMapImage);
+    if (objs.length === 0) return;
     objs.forEach((o) => canvas.remove(o));
     refreshConnectorMarkers(); // a neighbor's connector may now be free again
     canvas.requestRenderAll();
@@ -621,6 +630,7 @@
         if (o.isGroundMarking) canvas.bringObjectToFront(o);
         else if (o.roadConnections) canvas.sendObjectToBack(o);
       });
+      sendMapToBack();
       refreshConnectorMarkers();
       canvas.requestRenderAll();
     });
@@ -869,7 +879,7 @@
     const changes = [];
 
     canvas.getObjects().forEach((obj) => {
-      if (obj.isConnectorIndicator) return;
+      if (obj.isConnectorIndicator || obj.isMapImage) return;
       const b = obj.getBoundingRect();
       const overlaps =
         strokeBounds.left < b.left + b.width &&
@@ -1039,13 +1049,112 @@
     }
   });
 
+  // ── Map background ───────────────────────────────────────────────
+  // An optional screenshot of the scene's map (Google Maps etc.) to draw
+  // over. It's an ordinary canvas object kept at the very bottom, so the
+  // px/m zoom above rescales it along with everything else, but it's
+  // locked (not selectable) and left out of the export crop, the eraser,
+  // Clear and saved sketches. One map at a time; it's never stored.
+  const mapFileInput = document.getElementById("map-file-input");
+  const mapControls = document.getElementById("map-controls");
+
+  function sendMapToBack() {
+    if (mapImage) canvas.sendObjectToBack(mapImage);
+  }
+
+  function updateMapControls() {
+    mapControls.hidden = !mapImage;
+  }
+
+  // Swaps the current map for `next` (either may be null) without an undo
+  // step, so undo itself can use it. Returns the map it replaced.
+  function swapMap(next) {
+    const prev = mapImage;
+    if (prev) {
+      if (canvas.getActiveObjects().includes(prev)) canvas.discardActiveObject();
+      canvas.remove(prev);
+    }
+    mapImage = next;
+    if (next) {
+      canvas.add(next);
+      sendMapToBack();
+    }
+    updateMapControls();
+    canvas.requestRenderAll();
+    return prev;
+  }
+  function replaceMap(next) {
+    const prev = swapMap(next);
+    pushUndo(() => swapMap(prev));
+  }
+
+  function importMapFile(file) {
+    if (mapImage && !confirm("Αντικατάσταση του υπάρχοντος χάρτη φόντου;")) return;
+    const reader = new FileReader();
+    reader.onload = () =>
+      fabric.Image.fromURL(reader.result)
+        .then((img) => {
+          // Natural size, shrunk to fit the visible area if bigger;
+          // calibrating sets its real scale afterwards.
+          const fit = Math.min(
+            1,
+            scrollWrap.clientWidth / img.width,
+            scrollWrap.clientHeight / img.height,
+          );
+          img.set({
+            originX: "center",
+            originY: "center",
+            left: scrollWrap.scrollLeft + scrollWrap.clientWidth / 2,
+            top: scrollWrap.scrollTop + scrollWrap.clientHeight / 2,
+            scaleX: fit,
+            scaleY: fit,
+            selectable: false,
+            evented: false,
+          });
+          img.isMapImage = true;
+          replaceMap(img);
+          window.displayNotification("Ο χάρτης φόντου προστέθηκε.");
+        })
+        .catch(() =>
+          window.displayNotification("Η εικόνα δεν μπόρεσε να φορτωθεί.", "warning"),
+        );
+    reader.readAsDataURL(file);
+  }
+
+  document
+    .getElementById("btn-map-import")
+    .addEventListener("click", () => mapFileInput.click());
+  mapFileInput.addEventListener("change", () => {
+    const file = mapFileInput.files[0];
+    mapFileInput.value = ""; // so picking the same file again still fires "change"
+    if (file) importMapFile(file);
+  });
+  // Ctrl+V straight from a screenshot tool. Dropping an image file onto the
+  // canvas is handled by the palette's drop handler above.
+  document.addEventListener("paste", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    const item = [...e.clipboardData.items].find(
+      (i) => i.kind === "file" && i.type.startsWith("image/"),
+    );
+    if (!item) return;
+    e.preventDefault();
+    importMapFile(item.getAsFile());
+  });
+  document
+    .getElementById("btn-map-remove")
+    .addEventListener("click", () => replaceMap(null));
+  updateMapControls();
+
   // ── Export / clear ───────────────────────────────────────────────
   // Shared by both export buttons: bounding box of everything drawn,
   // padded and clamped to the canvas — crops out the mostly-blank working
   // area. Excludes connector markers (transient editing aid, would pad
-  // the crop by a few px).
+  // the crop by a few px) and the map, which still shows inside the crop
+  // but would otherwise stretch it to the whole screenshot.
   function getExportCropBounds(pad) {
-    const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
+    const objects = canvas
+      .getObjects()
+      .filter((o) => !o.isConnectorIndicator && !o.isMapImage);
     if (objects.length === 0) return null;
 
     canvas.discardActiveObject();
@@ -1156,9 +1265,12 @@
 
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
-    const objs = canvas.getObjects().slice();
-    canvas.clear();
-    connectorMarkers = []; // canvas.clear() already removed them from the canvas
+    // Clears the drawing only; the map has its own remove button. Connector
+    // markers are dropped rather than kept for undo, which rebuilds them.
+    canvas.discardActiveObject();
+    clearConnectorMarkers();
+    const objs = canvas.getObjects().filter((o) => !o.isMapImage);
+    canvas.remove(...objs);
     applyGrid();
     pushUndo(() => {
       objs.forEach((o) => {
@@ -1166,6 +1278,7 @@
         if (o.isGroundMarking) canvas.bringObjectToFront(o);
         else if (o.roadConnections) canvas.sendObjectToBack(o);
       });
+      sendMapToBack();
       refreshConnectorMarkers();
       applyGrid();
       canvas.requestRenderAll();
@@ -1191,11 +1304,13 @@
   // refreshConnectorMarkers), are transient UI state, not sketch content —
   // strip both before serializing. Left in, `.marker` points at a fabric
   // object that references the canvas back, and JSON.stringify throws on
-  // the circular structure.
+  // the circular structure. The map is never saved either, only what
+  // was drawn on it.
   function serializeSketch() {
     clearConnectorMarkers();
-    const json = canvas.toObject(["isGroundMarking", "roadConnections"]);
+    const json = canvas.toObject(["isGroundMarking", "roadConnections", "isMapImage"]);
     refreshConnectorMarkers();
+    json.objects = json.objects.filter((o) => !o.isMapImage);
     json.objects.forEach((o) => {
       if (o.roadConnections) {
         o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
@@ -1224,7 +1339,7 @@
       window.displayNotification("Δώστε ένα όνομα στο σκαρίφημα.", "warning");
       return;
     }
-    if (canvas.getObjects().filter((o) => !o.isConnectorIndicator).length === 0) {
+    if (canvas.getObjects().every((o) => o.isConnectorIndicator || o.isMapImage)) {
       window.displayNotification(
         "Δεν υπάρχει σκαρίφημα για αποθήκευση.",
         "warning",
@@ -1316,6 +1431,7 @@
         if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
         else if (obj.roadConnections) canvas.sendObjectToBack(obj);
       });
+      sendMapToBack();
       pushUndo(() => {
         objects.forEach((obj) => canvas.remove(obj));
         refreshConnectorMarkers();

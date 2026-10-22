@@ -249,6 +249,16 @@
         height: 20px;
       }
 
+      /* Map background controls beyond "import", shown once a map is loaded */
+      .map-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+      .map-controls[hidden] {
+        display: none;
+      }
+
       .canvas-scroll {
         flex: 1;
         min-height: 0;
@@ -2112,6 +2122,51 @@
                 <path d="M12 5v14M5 12h14"></path>
               </svg>
             </button>
+          </div>
+          <div class="sep"></div>
+          <div class="toolbar-group" id="toolbar-map-group">
+            <button
+              id="btn-map-import"
+              type="button"
+              title="Χάρτης φόντου: εισαγωγή εικόνας (ή Ctrl+V, ή σύρσιμο αρχείου στον καμβά)"
+              aria-label="Χάρτης φόντου"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                <line x1="8" y1="2" x2="8" y2="18"></line>
+                <line x1="16" y1="6" x2="16" y2="22"></line>
+              </svg>
+            </button>
+            <input type="file" id="map-file-input" accept="image/*" hidden />
+            <div class="map-controls" id="map-controls" hidden>
+              <button
+                id="btn-map-remove"
+                type="button"
+                title="Αφαίρεση χάρτη φόντου"
+                aria-label="Αφαίρεση χάρτη φόντου"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="sep"></div>
           <div
