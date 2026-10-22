@@ -1194,7 +1194,7 @@
   // the circular structure.
   function serializeSketch() {
     clearConnectorMarkers();
-    const json = canvas.toJSON(["isGroundMarking", "roadConnections"]);
+    const json = canvas.toObject(["isGroundMarking", "roadConnections"]);
     refreshConnectorMarkers();
     json.objects.forEach((o) => {
       if (o.roadConnections) {
