@@ -1034,6 +1034,21 @@
     return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') ${c} ${c}, crosshair`;
   })();
 
+  // Rebuilt from raw stroke data every time, never by reusing a prior
+  // clip's actual Path objects: adding an object to a new Group
+  // reparents it, which would silently hollow out that prior group —
+  // corrupting it for anyone (e.g. undo) still holding a reference.
+  function buildEraserClip(strokes) {
+    const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
+    const clip = new fabric.Group(cuts, {
+      inverted: true,
+      absolutePositioned: true,
+    });
+    clip.isEraserClip = true;
+    clip.eraserStrokes = strokes;
+    return clip;
+  }
+
   function applyEraseStroke(erasePath) {
     // The live drag-preview brush is translucent for UX (see the eraseBtn
     // click handler), but the clip mask itself needs a fully opaque stroke
@@ -1053,20 +1068,9 @@
         strokeBounds.top + strokeBounds.height > b.top;
       if (!overlaps) return;
 
-      // Rebuilt from raw stroke data every time, never by reusing a prior
-      // clip's actual Path objects: adding an object to a new Group
-      // reparents it, which would silently hollow out that prior group —
-      // corrupting it for anyone (e.g. undo) still holding a reference.
       const prevClipPath = obj.clipPath;
       const prevStrokes = prevClipPath && prevClipPath.isEraserClip ? prevClipPath.eraserStrokes : [];
-      const strokes = [...prevStrokes, strokeData];
-      const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
-      const newClipPath = new fabric.Group(cuts, {
-        inverted: true,
-        absolutePositioned: true,
-      });
-      newClipPath.isEraserClip = true;
-      newClipPath.eraserStrokes = strokes;
+      const newClipPath = buildEraserClip([...prevStrokes, strokeData]);
 
       changes.push({ obj, prevClipPath });
       obj.clipPath = newClipPath;
@@ -1165,21 +1169,41 @@
   // is on screen stays roughly centered instead of zooming away toward
   // one corner of the much-bigger 6000x4200 canvas.
   const scaleInput = document.getElementById("scale-input");
+  // Scales objects uniformly about (cx, cy), which is how a px/m change
+  // applies to the sketch. An eraser hole is a clipPath in absolute canvas
+  // coordinates, so it has to be scaled along with its piece or it drifts
+  // off it; one that still holds its raw strokes is rebuilt from them, so
+  // a later erase on the piece stacks onto matching coordinates.
+  function scaleAround(objects, cx, cy, ratio) {
+    const scaled = (o) => ({
+      left: cx + (o.left - cx) * ratio,
+      top: cy + (o.top - cy) * ratio,
+      scaleX: (o.scaleX ?? 1) * ratio,
+      scaleY: (o.scaleY ?? 1) * ratio,
+    });
+    objects.forEach((obj) => {
+      obj.set(scaled(obj));
+      obj.setCoords();
+      const clip = obj.clipPath;
+      if (!clip || !clip.absolutePositioned) return;
+      if (clip.isEraserClip) {
+        obj.clipPath = buildEraserClip(
+          clip.eraserStrokes.map((d) => ({ ...d, ...scaled(d) })),
+        );
+      } else {
+        clip.set(scaled(clip));
+        clip.setCoords();
+      }
+      obj.dirty = true;
+    });
+  }
+
   scaleInput.addEventListener("change", (e) => {
     const newPpm = parseFloat(e.target.value) || 40;
     if (newPpm !== ppm) {
-      const ratio = newPpm / ppm;
       const cx = scrollWrap.scrollLeft + scrollWrap.clientWidth / 2;
       const cy = scrollWrap.scrollTop + scrollWrap.clientHeight / 2;
-      canvas.getObjects().forEach((obj) => {
-        obj.set({
-          left: cx + (obj.left - cx) * ratio,
-          top: cy + (obj.top - cy) * ratio,
-          scaleX: obj.scaleX * ratio,
-          scaleY: obj.scaleY * ratio,
-        });
-        obj.setCoords();
-      });
+      scaleAround(canvas.getObjects(), cx, cy, newPpm / ppm);
       ppm = newPpm;
     }
     applyGrid();
@@ -1548,6 +1572,7 @@
     ]);
     refreshConnectorMarkers();
     json.objects = json.objects.filter((o) => !o.isMapImage);
+    json.ppm = ppm; // the zoom its pixel sizes are at, see loadSketch
     json.objects.forEach((o) => {
       if (o.roadConnections) {
         o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
@@ -1624,6 +1649,11 @@
 
     fabric.util.enlivenObjects(data.objects || []).then((objects) => {
       if (objects.length === 0) return;
+
+      // Pixel sizes are at the zoom the sketch was saved at; bring them to
+      // the current one, or a 7 m piece comes back 3.5 m after zooming in.
+      // Sketches saved before the zoom was stored are taken as the default.
+      scaleAround(objects, 0, 0, ppm / (data.ppm || 40));
 
       // Saved coordinates are wherever the piece sat on the (much bigger)
       // canvas when it was stored — recenter the group on the current
