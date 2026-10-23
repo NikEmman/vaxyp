@@ -9,7 +9,10 @@
   let gridVisible = true;
   let measuring = false;
   let measurePoints = [];
+  let calibrating = false; // measuring, but the line sets the map's scale instead of being drawn
+  let calibrationPending = null; // { p1, p2 } once the line is drawn, until its distance is entered
   let erasing = false;
+  let mapImage = null; // the background map screenshot, if any — see "Map background"
   const undoStack = [];
   const UNDO_LIMIT = 50;
 
@@ -170,6 +173,7 @@
       canvas.add(obj);
       if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
       else if (obj.roadConnections) canvas.sendObjectToBack(obj);
+      sendMapToBack();
       canvas.setActiveObject(obj);
       pushUndo(() => {
         canvas.remove(obj);
@@ -292,6 +296,8 @@
   scrollWrap.addEventListener("dragover", (e) => e.preventDefault());
   scrollWrap.addEventListener("drop", (e) => {
     e.preventDefault();
+    const imageFile = [...e.dataTransfer.files].find((f) => f.type.startsWith("image/"));
+    if (imageFile) return importMapFile(imageFile);
     const shapeKey = e.dataTransfer.getData("text/plain");
     if (!shapeKey) return;
     const rect = canvas.upperCanvasEl.getBoundingClientRect();
@@ -609,9 +615,14 @@
 
   // ── Delete ───────────────────────────────────────────────────────
   function deleteSelected() {
-    const objs = canvas.getActiveObjects();
-    if (objs.length === 0) return;
+    const selected = canvas.getActiveObjects();
+    if (selected.length === 0) return;
     canvas.discardActiveObject();
+    // The map (selectable only while adjusting it) has its own remove/undo,
+    // which puts it back under the road pieces rather than on top.
+    if (selected.includes(mapImage)) replaceMap(null);
+    const objs = selected.filter((o) => !o.isMapImage);
+    if (objs.length === 0) return;
     objs.forEach((o) => canvas.remove(o));
     refreshConnectorMarkers(); // a neighbor's connector may now be free again
     canvas.requestRenderAll();
@@ -621,6 +632,7 @@
         if (o.isGroundMarking) canvas.bringObjectToFront(o);
         else if (o.roadConnections) canvas.sendObjectToBack(o);
       });
+      sendMapToBack();
       refreshConnectorMarkers();
       canvas.requestRenderAll();
     });
@@ -640,6 +652,9 @@
   // into a "|——————|" mark — a line with a perpendicular tick at each end
   // — grouped into one selectable/movable object.
   const measureBtn = document.getElementById("btn-measure");
+  const calibrateBtn = document.getElementById("btn-map-calibrate");
+  const calibratePanel = document.getElementById("map-calibrate-panel");
+  const calibrateInput = document.getElementById("map-calibrate-distance");
   const TICK_HALF = 5; // px on each side of the line, i.e. a 10px tick
 
   // Perpendicular unit vector to the line from p1 to p2 (zero if p1===p2).
@@ -675,22 +690,35 @@
     measurePoints = [];
     clearMeasurePreview();
     measureBtn.classList.remove("active");
+    calibrating = false;
+    calibrationPending = null;
+    calibrateBtn.classList.remove("active");
+    calibratePanel.hidden = true;
+    canvas.skipTargetFind = false;
     canvas.selection = selectMode;
     canvas.defaultCursor = selectMode ? "default" : "grab";
     canvas.requestRenderAll();
   }
 
   measureBtn.addEventListener("click", () => {
-    if (measuring) {
+    if (measuring && !calibrating) {
       stopMeasuring();
       return;
     }
+    stopMeasuring(); // in case it's calibrating
     stopErasing();
     measuring = true;
     measurePoints = [];
     measureBtn.classList.add("active");
     canvas.selection = false;
     canvas.defaultCursor = "crosshair";
+    if (mapImage && !mapImage.calibrated && !mapImage.measureWarned) {
+      mapImage.measureWarned = true;
+      window.displayNotification(
+        "Ο χάρτης φόντου δεν έχει βαθμονομηθεί, οπότε οι αποστάσεις πάνω του δεν είναι ακριβείς.",
+        "warning",
+      );
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -731,6 +759,7 @@
       evented: false,
     });
     previewLabel = new fabric.Text("0.00 m", {
+      originX: "center", // centered over the line, so an edited label stays centered too
       left: p.x,
       top: p.y - 16,
       fontSize: 14,
@@ -744,9 +773,10 @@
   });
 
   canvas.on("mouse:up", (opt) => {
-    if (!measuring || measurePoints.length === 0) return;
+    if (!measuring || measurePoints.length === 0 || calibrationPending) return;
     const p1 = measurePoints[0];
     const p = canvas.getPointer(opt.e);
+    if (calibrating) return finishCalibrationLine(p1, p);
     const distM = (Math.hypot(p.x - p1.x, p.y - p1.y) / ppm).toFixed(2);
     const { nx, ny } = perpUnit(p1, p);
     clearMeasurePreview();
@@ -770,6 +800,7 @@
       evented: false,
     });
     const label = new fabric.Text(`${distM} m`, {
+      originX: "center",
       left: (p1.x + p.x) / 2,
       top: (p1.y + p.y) / 2 - 16,
       fontSize: 14,
@@ -777,9 +808,11 @@
       selectable: false,
       evented: false,
     });
-    canvas.add(
-      new fabric.Group([line, tick1, tick2, label], { subTargetCheck: false }),
-    );
+    const measurement = new fabric.Group([line, tick1, tick2, label], {
+      subTargetCheck: false,
+    });
+    measurement.isMeasurement = true; // double-click edits its label, see "Measurement labels"
+    canvas.add(measurement);
 
     // stopMeasuring() resets the cursor straight to default/grab, so it
     // never flashes back to a crosshair before the tool deactivates.
@@ -787,7 +820,7 @@
   });
 
   canvas.on("mouse:move", (opt) => {
-    if (!measuring || measurePoints.length === 0 || !previewLine) return;
+    if (!measuring || measurePoints.length === 0 || !previewLine || calibrationPending) return;
     const p1 = measurePoints[0];
     const p = canvas.getPointer(opt.e);
     const distM = (Math.hypot(p.x - p1.x, p.y - p1.y) / ppm).toFixed(2);
@@ -806,6 +839,148 @@
     canvas.requestRenderAll();
   });
 
+  // ── Measurement labels ───────────────────────────────────────────
+  // Double-clicking a measurement puts a temporary IText over its label,
+  // so the officer can type anything instead of the measured distance
+  // ("≈ 15 μ", "Α–Β", or nothing at all). The label itself stays a plain
+  // Text inside the group; only its text changes.
+  function setMeasurementLabel(group, label, text) {
+    label.set("text", text);
+    group.triggerLayout(); // refit the group's box to the new label width
+    group.setCoords();
+    canvas.requestRenderAll();
+  }
+
+  canvas.on("mouse:dblclick", (opt) => {
+    const group = opt.target;
+    if (!group || !group.isMeasurement || measuring || erasing) return;
+    const label = group.getObjects().find((o) => o instanceof fabric.Text);
+    const { translateX, translateY, angle, scaleX, scaleY } = fabric.util.qrDecompose(
+      label.calcTransformMatrix(),
+    );
+    const editor = new fabric.IText(label.text, {
+      originX: "center",
+      originY: "center",
+      left: translateX,
+      top: translateY,
+      angle,
+      scaleX,
+      scaleY,
+      fontSize: label.fontSize,
+      fontFamily: label.fontFamily,
+      fill: label.fill,
+    });
+    label.set("visible", false);
+    group.dirty = true;
+    canvas.add(editor);
+    canvas.setActiveObject(editor);
+    editor.enterEditing();
+    editor.selectAll();
+
+    editor.on("editing:exited", () => {
+      const prevText = label.text;
+      label.set("visible", true);
+      setMeasurementLabel(group, label, editor.text);
+      canvas.remove(editor);
+      if (editor.text !== prevText)
+        pushUndo(() => setMeasurementLabel(group, label, prevText));
+    });
+  });
+
+  // ── Map calibration ──────────────────────────────────────────────
+  // The measure tool's drag-a-line gesture, over a distance the officer
+  // knows (a lane, a road's width, the map's own scale bar). The map is
+  // then rescaled so that line is exactly that many meters at the current
+  // px/m, so vehicles and roads dropped on it come out the right size.
+  // It scales around the line's midpoint, so that stretch stays in view.
+  function startCalibrating() {
+    stopMeasuring();
+    stopErasing();
+    measuring = true;
+    calibrating = true;
+    calibrateBtn.classList.add("active");
+    canvas.discardActiveObject();
+    canvas.selection = false;
+    canvas.skipTargetFind = true; // a drag over the map (or a piece) draws the line instead of moving it
+    canvas.defaultCursor = "crosshair";
+    canvas.requestRenderAll();
+  }
+  calibrateBtn.addEventListener("click", () => {
+    if (calibrating) stopMeasuring();
+    else startCalibrating();
+  });
+
+  // The line stays drawn while the panel asks for its real length.
+  function finishCalibrationLine(p1, p2) {
+    if (Math.hypot(p2.x - p1.x, p2.y - p1.y) < 10) {
+      clearMeasurePreview();
+      measurePoints = [];
+      canvas.defaultCursor = "crosshair";
+      canvas.requestRenderAll();
+      window.displayNotification(
+        "Σύρετε μια γραμμή πάνω σε απόσταση του χάρτη που γνωρίζετε.",
+        "warning",
+      );
+      return;
+    }
+    calibrationPending = { p1, p2 };
+    canvas.defaultCursor = "crosshair";
+    canvas.setCursor("crosshair");
+    calibrateInput.value = "";
+    calibratePanel.hidden = false;
+    calibrateInput.focus();
+  }
+
+  function applyCalibration() {
+    const realM = parseFloat(calibrateInput.value.replace(",", "."));
+    if (!(realM > 0)) {
+      window.displayNotification("Δώστε την πραγματική απόσταση σε μέτρα.", "warning");
+      calibrateInput.focus();
+      return;
+    }
+    const { p1, p2 } = calibrationPending;
+    const k = (realM * ppm) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const cx = (p1.x + p2.x) / 2;
+    const cy = (p1.y + p2.y) / 2;
+    const map = mapImage;
+    const prev = {
+      left: map.left,
+      top: map.top,
+      scaleX: map.scaleX,
+      scaleY: map.scaleY,
+      calibrated: map.calibrated,
+    };
+    map.set({
+      left: cx + (map.left - cx) * k,
+      top: cy + (map.top - cy) * k,
+      scaleX: map.scaleX * k,
+      scaleY: map.scaleY * k,
+      calibrated: true,
+    });
+    map.setCoords();
+    pushUndo(() => {
+      map.set(prev);
+      map.setCoords();
+      canvas.requestRenderAll();
+    });
+    stopMeasuring();
+    const upscale = mapUpscale();
+    window.displayNotification(
+      upscale > 1.5
+        ? `Η κλίμακα ρυθμίστηκε. Ο χάρτης εμφανίζεται μεγεθυμένος ×${upscale.toFixed(1).replace(".", ",")}, γι' αυτό είναι θολός· πατήστε «1:1» για πιο καθαρή εικόνα.`
+        : "Η κλίμακα του χάρτη φόντου ρυθμίστηκε.",
+    );
+  }
+  document
+    .getElementById("btn-map-calibrate-apply")
+    .addEventListener("click", applyCalibration);
+  document
+    .getElementById("btn-map-calibrate-cancel")
+    .addEventListener("click", stopMeasuring);
+  calibrateInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyCalibration();
+  });
+
   // ── Undo ─────────────────────────────────────────────────────────
   // One flat stack of reverse-actions, pushed by whatever just mutated the
   // canvas (add/delete/rotate/drag/erase) — each entry knows how to put
@@ -815,15 +990,24 @@
   function updateUndoButton() {
     undoBtn.disabled = undoStack.length === 0;
   }
+  // Each step also remembers the zoom it was recorded at: steps restore raw
+  // pixel positions and sizes, or re-add objects that missed every zoom
+  // since. So undo puts the scene back at that zoom, runs the step, then
+  // zooms everything (now including whatever it re-added) back again.
   function pushUndo(fn) {
-    undoStack.push(fn);
+    undoStack.push({ fn, view: { ...view } });
     if (undoStack.length > UNDO_LIMIT) undoStack.shift();
     updateUndoButton();
   }
   undoBtn.addEventListener("click", () => {
-    const fn = undoStack.pop();
-    if (!fn) return;
-    fn();
+    const step = undoStack.pop();
+    if (!step) return;
+    const current = { ...view };
+    setView(step.view);
+    step.fn();
+    setView(current);
+    refreshConnectorMarkers(); // any the step rebuilt were rebuilt at its zoom
+    canvas.requestRenderAll();
     updateUndoButton();
   });
   updateUndoButton();
@@ -836,9 +1020,11 @@
 
   // ── Eraser ───────────────────────────────────────────────────────
   // Reuses Fabric's own free-drawing brush to track the drag into a Path,
-  // then discards that path and reapplies its shape as an inverted,
-  // absolutely-positioned clipPath on every piece it overlaps — punching a
-  // permanent hole rather than deleting the object. Multiple erases on the
+  // then discards that path and reapplies its shape as an inverted
+  // clipPath on every piece it overlaps — punching a permanent hole rather
+  // than deleting the object. The clip lives in the piece's own local
+  // coordinates, so the hole moves, rotates and scales (zoom included)
+  // with the piece without any help. Multiple erases on the
   // same piece accumulate into a new clipPath group each time (rather than
   // mutating the existing one in place), so undo is just restoring
   // whichever clipPath (or none) was there right before this stroke.
@@ -859,17 +1045,51 @@
     return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') ${c} ${c}, crosshair`;
   })();
 
+  // Rebuilt from raw stroke data every time, never by reusing a prior
+  // clip's actual Path objects: adding an object to a new Group
+  // reparents it, which would silently hollow out that prior group —
+  // corrupting it for anyone (e.g. undo) still holding a reference.
+  function buildEraserClip(strokes) {
+    const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
+    const clip = new fabric.Group(cuts, { inverted: true });
+    clip.isEraserClip = true;
+    clip.eraserStrokes = strokes;
+    return clip;
+  }
+
+  // Raw data for a stroke `path` placed by `matrix` instead of its own
+  // transform — how a canvas-space stroke is re-expressed in a piece's
+  // local plane, where its clipPath lives.
+  function strokeDataAt(path, matrix, overrides) {
+    const placed = new fabric.Path(path.path, { ...path.toObject(), ...overrides });
+    fabric.util.applyTransformToObject(placed, matrix);
+    return placed.toObject();
+  }
+  const canvasToLocal = (obj) => fabric.util.invertTransform(obj.calcTransformMatrix());
+
+  // A loaded clip is a plain group, without the raw strokes a later erase
+  // rebuilds from (and, from sketches saved before holes moved with their
+  // pieces, in absolute canvas coordinates): rebuild it from its own
+  // paths, in the piece's local plane.
+  function adoptLoadedClip(obj) {
+    const clip = obj.clipPath;
+    if (!clip) return;
+    const toLocal = clip.absolutePositioned ? canvasToLocal(obj) : [1, 0, 0, 1, 0, 0];
+    obj.clipPath = buildEraserClip(
+      clip
+        .getObjects()
+        .map((p) =>
+          strokeDataAt(p, fabric.util.multiplyTransformMatrices(toLocal, p.calcTransformMatrix())),
+        ),
+    );
+  }
+
   function applyEraseStroke(erasePath) {
-    // The live drag-preview brush is translucent for UX (see the eraseBtn
-    // click handler), but the clip mask itself needs a fully opaque stroke
-    // — a translucent one only partially masks, rendering "erased" areas
-    // faded instead of actually removed.
-    const strokeData = { ...erasePath.toObject(), stroke: "rgba(0,0,0,1)", opacity: 1 };
     const strokeBounds = erasePath.getBoundingRect();
     const changes = [];
 
     canvas.getObjects().forEach((obj) => {
-      if (obj.isConnectorIndicator) return;
+      if (obj.isConnectorIndicator || obj.isMapImage) return;
       const b = obj.getBoundingRect();
       const overlaps =
         strokeBounds.left < b.left + b.width &&
@@ -878,20 +1098,18 @@
         strokeBounds.top + strokeBounds.height > b.top;
       if (!overlaps) return;
 
-      // Rebuilt from raw stroke data every time, never by reusing a prior
-      // clip's actual Path objects: adding an object to a new Group
-      // reparents it, which would silently hollow out that prior group —
-      // corrupting it for anyone (e.g. undo) still holding a reference.
+      // The live drag-preview brush is translucent for UX (see the eraseBtn
+      // click handler), but the clip mask itself needs a fully opaque stroke
+      // — a translucent one only partially masks, rendering "erased" areas
+      // faded instead of actually removed.
+      const strokeData = strokeDataAt(
+        erasePath,
+        fabric.util.multiplyTransformMatrices(canvasToLocal(obj), erasePath.calcTransformMatrix()),
+        { stroke: "rgba(0,0,0,1)", opacity: 1 },
+      );
       const prevClipPath = obj.clipPath;
       const prevStrokes = prevClipPath && prevClipPath.isEraserClip ? prevClipPath.eraserStrokes : [];
-      const strokes = [...prevStrokes, strokeData];
-      const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
-      const newClipPath = new fabric.Group(cuts, {
-        inverted: true,
-        absolutePositioned: true,
-      });
-      newClipPath.isEraserClip = true;
-      newClipPath.eraserStrokes = strokes;
+      const newClipPath = buildEraserClip([...prevStrokes, strokeData]);
 
       changes.push({ obj, prevClipPath });
       obj.clipPath = newClipPath;
@@ -990,21 +1208,35 @@
   // is on screen stays roughly centered instead of zooming away toward
   // one corner of the much-bigger 6000x4200 canvas.
   const scaleInput = document.getElementById("scale-input");
+  // Zooming maps every canvas position p to r·p + t and scales sizes by r.
+  // `view` accumulates that mapping since startup (canvas px = k·world + x/y),
+  // so undo can tell which zoom each of its steps was recorded at.
+  const view = { k: 1, x: 0, y: 0 };
+  function transformObjects(objects, r, tx, ty) {
+    objects.forEach((obj) => {
+      obj.set({
+        left: r * obj.left + tx,
+        top: r * obj.top + ty,
+        scaleX: obj.scaleX * r,
+        scaleY: obj.scaleY * r,
+      });
+      obj.setCoords();
+    });
+  }
+  // Rescales the whole scene to the `next` view (undo uses this as well).
+  function setView(next) {
+    const r = next.k / view.k;
+    transformObjects(canvas.getObjects(), r, next.x - r * view.x, next.y - r * view.y);
+    Object.assign(view, next);
+  }
+
   scaleInput.addEventListener("change", (e) => {
     const newPpm = parseFloat(e.target.value) || 40;
     if (newPpm !== ppm) {
-      const ratio = newPpm / ppm;
+      const r = newPpm / ppm;
       const cx = scrollWrap.scrollLeft + scrollWrap.clientWidth / 2;
       const cy = scrollWrap.scrollTop + scrollWrap.clientHeight / 2;
-      canvas.getObjects().forEach((obj) => {
-        obj.set({
-          left: cx + (obj.left - cx) * ratio,
-          top: cy + (obj.top - cy) * ratio,
-          scaleX: obj.scaleX * ratio,
-          scaleY: obj.scaleY * ratio,
-        });
-        obj.setCoords();
-      });
+      setView({ k: view.k * r, x: cx + (view.x - cx) * r, y: cy + (view.y - cy) * r });
       ppm = newPpm;
     }
     applyGrid();
@@ -1039,11 +1271,176 @@
     }
   });
 
+  // ── Map background ───────────────────────────────────────────────
+  // An optional screenshot of the scene's map (Google Maps etc.) to draw
+  // over. It's an ordinary canvas object kept at the very bottom, so the
+  // px/m zoom above rescales it along with everything else, but it's
+  // locked unless "adjust" is on, and left out of the export crop, the
+  // eraser, Clear and saved sketches. One map at a time; it's never stored.
+  const mapFileInput = document.getElementById("map-file-input");
+  const mapControls = document.getElementById("map-controls");
+  const mapAdjustBtn = document.getElementById("btn-map-adjust");
+  const mapOpacityInput = document.getElementById("map-opacity");
+  let mapAdjusting = false;
+
+  function sendMapToBack() {
+    if (mapImage) canvas.sendObjectToBack(mapImage);
+  }
+
+  // Bicubic rather than the browser's default bilinear when the map is
+  // drawn enlarged, so it's less blocky. Set on every render because
+  // exports draw to a fresh context.
+  canvas.on("before:render", ({ ctx }) => {
+    ctx.imageSmoothingQuality = "high";
+  });
+
+  // How much the map is enlarged in device pixels; past ~1.5× the
+  // screenshot visibly blurs.
+  function mapUpscale() {
+    return mapImage.scaleX * window.devicePixelRatio;
+  }
+
+  // Locked, the map ignores the mouse entirely: drags pan the canvas and
+  // rubber-band selection skips it. Unlocked, it moves and rotates with
+  // Fabric's own handles; its scale stays whatever calibration set.
+  function applyMapLock() {
+    if (!mapImage) return;
+    mapImage.set({ selectable: mapAdjusting, evented: mapAdjusting });
+    if (!mapAdjusting && canvas.getActiveObjects().includes(mapImage))
+      canvas.discardActiveObject();
+  }
+
+  function updateMapControls() {
+    mapControls.hidden = !mapImage;
+    if (!mapImage) mapAdjusting = false;
+    mapAdjustBtn.classList.toggle("active", mapAdjusting);
+    mapAdjustBtn.setAttribute("aria-pressed", String(mapAdjusting));
+    if (mapImage) mapOpacityInput.value = Math.round(mapImage.opacity * 100);
+  }
+
+  // Swaps the current map for `next` (either may be null) without an undo
+  // step, so undo itself can use it. Returns the map it replaced.
+  function swapMap(next) {
+    const prev = mapImage;
+    if (calibrating) stopMeasuring(); // a calibration line drawn on the old map
+    if (prev) {
+      if (canvas.getActiveObjects().includes(prev)) canvas.discardActiveObject();
+      canvas.remove(prev);
+    }
+    mapImage = next;
+    if (next) {
+      canvas.add(next);
+      sendMapToBack();
+    }
+    applyMapLock();
+    updateMapControls();
+    canvas.requestRenderAll();
+    return prev;
+  }
+  function replaceMap(next) {
+    const prev = swapMap(next);
+    pushUndo(() => swapMap(prev));
+  }
+
+  function importMapFile(file) {
+    if (mapImage && !confirm("Αντικατάσταση του υπάρχοντος χάρτη φόντου;")) return;
+    const reader = new FileReader();
+    reader.onload = () =>
+      fabric.Image.fromURL(reader.result)
+        .then((img) => {
+          // Natural size, shrunk to fit the visible area if bigger;
+          // calibrating sets its real scale afterwards.
+          const fit = Math.min(
+            1,
+            scrollWrap.clientWidth / img.width,
+            scrollWrap.clientHeight / img.height,
+          );
+          img.set({
+            originX: "center",
+            originY: "center",
+            left: scrollWrap.scrollLeft + scrollWrap.clientWidth / 2,
+            top: scrollWrap.scrollTop + scrollWrap.clientHeight / 2,
+            scaleX: fit,
+            scaleY: fit,
+            opacity: mapOpacityInput.value / 100,
+            lockScalingX: true,
+            lockScalingY: true,
+            lockSkewingX: true,
+            lockSkewingY: true,
+            hoverCursor: "move",
+          });
+          // Rotation handle only; the corner/side handles would rescale it.
+          img.setControlsVisibility({
+            tl: false, tr: false, bl: false, br: false,
+            ml: false, mr: false, mt: false, mb: false,
+          });
+          img.isMapImage = true;
+          img.calibrated = false;
+          replaceMap(img);
+          startCalibrating();
+          window.displayNotification(
+            "Ο χάρτης φόντου προστέθηκε. Βαθμονομήστε τον: σύρετε μια γραμμή πάνω σε απόσταση που γνωρίζετε (π.χ. πλάτος δρόμου).",
+          );
+        })
+        .catch(() =>
+          window.displayNotification("Η εικόνα δεν μπόρεσε να φορτωθεί.", "warning"),
+        );
+    reader.readAsDataURL(file);
+  }
+
+  document
+    .getElementById("btn-map-import")
+    .addEventListener("click", () => mapFileInput.click());
+  mapFileInput.addEventListener("change", () => {
+    const file = mapFileInput.files[0];
+    mapFileInput.value = ""; // so picking the same file again still fires "change"
+    if (file) importMapFile(file);
+  });
+  // Ctrl+V straight from a screenshot tool. Dropping an image file onto the
+  // canvas is handled by the palette's drop handler above.
+  document.addEventListener("paste", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    const item = [...e.clipboardData.items].find(
+      (i) => i.kind === "file" && i.type.startsWith("image/"),
+    );
+    if (!item) return;
+    e.preventDefault();
+    importMapFile(item.getAsFile());
+  });
+  mapAdjustBtn.addEventListener("click", () => {
+    if (measuring) stopMeasuring();
+    if (erasing) stopErasing();
+    mapAdjusting = !mapAdjusting;
+    applyMapLock();
+    if (mapAdjusting) canvas.setActiveObject(mapImage);
+    updateMapControls();
+    canvas.requestRenderAll();
+  });
+  // "1:1" sets the sketch zoom so the map shows at the screenshot's own
+  // resolution, the sharpest it can look. Sizes and distances don't change,
+  // since the zoom rescales the whole sketch together.
+  document.getElementById("btn-map-native").addEventListener("click", () => {
+    if (!mapImage) return;
+    const min = parseFloat(scaleInput.min) || 5;
+    scaleInput.value = Math.max(min, Math.round(ppm / mapUpscale()));
+    scaleInput.dispatchEvent(new Event("change"));
+  });
+  mapOpacityInput.addEventListener("input", () => {
+    if (!mapImage) return;
+    mapImage.set("opacity", mapOpacityInput.value / 100);
+    canvas.requestRenderAll();
+  });
+  document
+    .getElementById("btn-map-remove")
+    .addEventListener("click", () => replaceMap(null));
+  updateMapControls();
+
   // ── Export / clear ───────────────────────────────────────────────
   // Shared by both export buttons: bounding box of everything drawn,
   // padded and clamped to the canvas — crops out the mostly-blank working
   // area. Excludes connector markers (transient editing aid, would pad
-  // the crop by a few px).
+  // the crop by a few px). A map counts too, unpadded, so the export is
+  // exactly the screenshot unless something is drawn past its edges.
   function getExportCropBounds(pad) {
     const objects = canvas.getObjects().filter((o) => !o.isConnectorIndicator);
     if (objects.length === 0) return null;
@@ -1053,20 +1450,21 @@
     const bounds = objects.reduce(
       (acc, o) => {
         const r = o.getBoundingRect();
+        const p = o.isMapImage ? 0 : pad;
         return {
-          left: Math.min(acc.left, r.left),
-          top: Math.min(acc.top, r.top),
-          right: Math.max(acc.right, r.left + r.width),
-          bottom: Math.max(acc.bottom, r.top + r.height),
+          left: Math.min(acc.left, r.left - p),
+          top: Math.min(acc.top, r.top - p),
+          right: Math.max(acc.right, r.left + r.width + p),
+          bottom: Math.max(acc.bottom, r.top + r.height + p),
         };
       },
       { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
     );
 
-    const left = Math.max(0, bounds.left - pad);
-    const top = Math.max(0, bounds.top - pad);
-    const width = Math.min(CANVAS_W, bounds.right + pad) - left;
-    const height = Math.min(CANVAS_H, bounds.bottom + pad) - top;
+    const left = Math.max(0, bounds.left);
+    const top = Math.max(0, bounds.top);
+    const width = Math.min(CANVAS_W, bounds.right) - left;
+    const height = Math.min(CANVAS_H, bounds.bottom) - top;
     return { left, top, width, height };
   }
 
@@ -1156,9 +1554,12 @@
 
   document.getElementById("btn-clear").addEventListener("click", () => {
     if (!confirm("Καθαρισμός όλου του σκαριφήματος;")) return;
-    const objs = canvas.getObjects().slice();
-    canvas.clear();
-    connectorMarkers = []; // canvas.clear() already removed them from the canvas
+    // Clears the drawing only; the map has its own remove button. Connector
+    // markers are dropped rather than kept for undo, which rebuilds them.
+    canvas.discardActiveObject();
+    clearConnectorMarkers();
+    const objs = canvas.getObjects().filter((o) => !o.isMapImage);
+    canvas.remove(...objs);
     applyGrid();
     pushUndo(() => {
       objs.forEach((o) => {
@@ -1166,6 +1567,7 @@
         if (o.isGroundMarking) canvas.bringObjectToFront(o);
         else if (o.roadConnections) canvas.sendObjectToBack(o);
       });
+      sendMapToBack();
       refreshConnectorMarkers();
       applyGrid();
       canvas.requestRenderAll();
@@ -1191,11 +1593,19 @@
   // refreshConnectorMarkers), are transient UI state, not sketch content —
   // strip both before serializing. Left in, `.marker` points at a fabric
   // object that references the canvas back, and JSON.stringify throws on
-  // the circular structure.
+  // the circular structure. The map is never saved either, only what
+  // was drawn on it.
   function serializeSketch() {
     clearConnectorMarkers();
-    const json = canvas.toJSON(["isGroundMarking", "roadConnections"]);
+    const json = canvas.toObject([
+      "isGroundMarking",
+      "roadConnections",
+      "isMapImage",
+      "isMeasurement",
+    ]);
     refreshConnectorMarkers();
+    json.objects = json.objects.filter((o) => !o.isMapImage);
+    json.ppm = ppm; // the zoom its pixel sizes are at, see loadSketch
     json.objects.forEach((o) => {
       if (o.roadConnections) {
         o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
@@ -1224,7 +1634,7 @@
       window.displayNotification("Δώστε ένα όνομα στο σκαρίφημα.", "warning");
       return;
     }
-    if (canvas.getObjects().filter((o) => !o.isConnectorIndicator).length === 0) {
+    if (canvas.getObjects().every((o) => o.isConnectorIndicator || o.isMapImage)) {
       window.displayNotification(
         "Δεν υπάρχει σκαρίφημα για αποθήκευση.",
         "warning",
@@ -1273,6 +1683,12 @@
     fabric.util.enlivenObjects(data.objects || []).then((objects) => {
       if (objects.length === 0) return;
 
+      objects.forEach(adoptLoadedClip);
+      // Pixel sizes are at the zoom the sketch was saved at; bring them to
+      // the current one, or a 7 m piece comes back 3.5 m after zooming in.
+      // Sketches saved before the zoom was stored are taken as the default.
+      transformObjects(objects, ppm / (data.ppm || 40), 0, 0);
+
       // Saved coordinates are wherever the piece sat on the (much bigger)
       // canvas when it was stored — recenter the group on the current
       // viewport instead, or it usually lands off-screen or on top of
@@ -1301,21 +1717,12 @@
       canvas.discardActiveObject();
       objects.forEach((obj) => {
         obj.set({ left: obj.left + dx, top: obj.top + dy });
-        // An eraser clipPath is absolutePositioned (canvas-space, not
-        // relative to the object), so it has to be shifted right along with
-        // the piece or the hole gets left behind at the old location.
-        if (obj.clipPath) {
-          obj.clipPath.set({
-            left: obj.clipPath.left + dx,
-            top: obj.clipPath.top + dy,
-          });
-          obj.clipPath.setCoords();
-        }
         obj.setCoords();
         canvas.add(obj);
         if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
         else if (obj.roadConnections) canvas.sendObjectToBack(obj);
       });
+      sendMapToBack();
       pushUndo(() => {
         objects.forEach((obj) => canvas.remove(obj));
         refreshConnectorMarkers();
