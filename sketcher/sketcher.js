@@ -759,6 +759,7 @@
       evented: false,
     });
     previewLabel = new fabric.Text("0.00 m", {
+      originX: "center", // centered over the line, so an edited label stays centered too
       left: p.x,
       top: p.y - 16,
       fontSize: 14,
@@ -799,6 +800,7 @@
       evented: false,
     });
     const label = new fabric.Text(`${distM} m`, {
+      originX: "center",
       left: (p1.x + p.x) / 2,
       top: (p1.y + p.y) / 2 - 16,
       fontSize: 14,
@@ -806,9 +808,11 @@
       selectable: false,
       evented: false,
     });
-    canvas.add(
-      new fabric.Group([line, tick1, tick2, label], { subTargetCheck: false }),
-    );
+    const measurement = new fabric.Group([line, tick1, tick2, label], {
+      subTargetCheck: false,
+    });
+    measurement.isMeasurement = true; // double-click edits its label, see "Measurement labels"
+    canvas.add(measurement);
 
     // stopMeasuring() resets the cursor straight to default/grab, so it
     // never flashes back to a crosshair before the tool deactivates.
@@ -833,6 +837,54 @@
       text: `${distM} m`,
     });
     canvas.requestRenderAll();
+  });
+
+  // ── Measurement labels ───────────────────────────────────────────
+  // Double-clicking a measurement puts a temporary IText over its label,
+  // so the officer can type anything instead of the measured distance
+  // ("≈ 15 μ", "Α–Β", or nothing at all). The label itself stays a plain
+  // Text inside the group; only its text changes.
+  function setMeasurementLabel(group, label, text) {
+    label.set("text", text);
+    group.triggerLayout(); // refit the group's box to the new label width
+    group.setCoords();
+    canvas.requestRenderAll();
+  }
+
+  canvas.on("mouse:dblclick", (opt) => {
+    const group = opt.target;
+    if (!group || !group.isMeasurement || measuring || erasing) return;
+    const label = group.getObjects().find((o) => o instanceof fabric.Text);
+    const { translateX, translateY, angle, scaleX, scaleY } = fabric.util.qrDecompose(
+      label.calcTransformMatrix(),
+    );
+    const editor = new fabric.IText(label.text, {
+      originX: "center",
+      originY: "center",
+      left: translateX,
+      top: translateY,
+      angle,
+      scaleX,
+      scaleY,
+      fontSize: label.fontSize,
+      fontFamily: label.fontFamily,
+      fill: label.fill,
+    });
+    label.set("visible", false);
+    group.dirty = true;
+    canvas.add(editor);
+    canvas.setActiveObject(editor);
+    editor.enterEditing();
+    editor.selectAll();
+
+    editor.on("editing:exited", () => {
+      const prevText = label.text;
+      label.set("visible", true);
+      setMeasurementLabel(group, label, editor.text);
+      canvas.remove(editor);
+      if (editor.text !== prevText)
+        pushUndo(() => setMeasurementLabel(group, label, prevText));
+    });
   });
 
   // ── Map calibration ──────────────────────────────────────────────
@@ -1488,7 +1540,12 @@
   // was drawn on it.
   function serializeSketch() {
     clearConnectorMarkers();
-    const json = canvas.toObject(["isGroundMarking", "roadConnections", "isMapImage"]);
+    const json = canvas.toObject([
+      "isGroundMarking",
+      "roadConnections",
+      "isMapImage",
+      "isMeasurement",
+    ]);
     refreshConnectorMarkers();
     json.objects = json.objects.filter((o) => !o.isMapImage);
     json.objects.forEach((o) => {
