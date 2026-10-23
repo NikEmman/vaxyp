@@ -624,6 +624,65 @@ function createDebrisLarge(ppm) {
   ]);
 }
 
+// ── Possible collision point (Πιθανό Σημείο Σύγκρουσης) ──────────
+// A jagged starburst, like a small explosion, labelled "Π.Σ.Σ" as in the
+// ready-made legend. Spikes vary a little in length and spacing (seeded,
+// so it always looks the same). A ground marking, so it stays above roads;
+// the burst and a patch behind the label are filled so lane lines don't
+// run through them.
+function createCollisionPoint(ppm) {
+  const rand = seededRandom(9);
+  const spikes = 11;
+  const r = 0.65 * ppm;
+  const burst = Array.from({ length: spikes * 2 }, (_, i) => {
+    const a = ((i + (rand() - 0.5) * 0.5) / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+    const len = i % 2 === 0 ? r * (0.8 + rand() * 0.2) : r * (0.4 + rand() * 0.12);
+    return { x: Math.cos(a) * len, y: Math.sin(a) * len };
+  });
+  const label = new fabric.Text("Π.Σ.Σ", {
+    left: 0,
+    top: r + 0.15 * ppm,
+    originX: "center",
+    fontSize: 0.5 * ppm,
+    fontWeight: "bold",
+    fontFamily: "Arial, sans-serif",
+    fill: LINE_COLOR,
+    selectable: false,
+    evented: false,
+  });
+  const labelPatch = new fabric.Rect({
+    left: 0,
+    top: label.top,
+    originX: "center",
+    width: label.width + 0.2 * ppm,
+    height: label.height,
+    fill: SHAPE_FILL,
+    selectable: false,
+    evented: false,
+  });
+  return markAsGroundMarking(
+    new fabric.Group(
+      [
+        new fabric.Polygon(burst, {
+          left: 0,
+          top: 0,
+          originX: "center",
+          originY: "center",
+          fill: SHAPE_FILL,
+          stroke: LINE_COLOR,
+          strokeWidth: 2,
+          strokeLineJoin: "miter",
+          selectable: false,
+          evented: false,
+        }),
+        labelPatch,
+        label,
+      ],
+      { originX: "center", originY: "center", subTargetCheck: false }
+    )
+  );
+}
+
 // ── Vehicle path arrows (Πορεία οχημάτων) ────────────────────────
 // Annotation arrows showing which way a vehicle moved, pointing up (-y)
 // like the vehicles so a rotated car and its arrow line up. Thick line
@@ -2372,32 +2431,25 @@ function createTractor(ppm) {
   return vehicleGroup([frontAxle, ...frontTires, ...rearTires, hitch, hood, ...grille, cab, cabRoof, exhaust]);
 }
 
-// Pedestrian (Πεζός), seen from above: shoulders, head, and feet stepping
-// out in front so the walking direction shows.
+// Pedestrian (Πεζός), seen from above mid-stride, in the same capsule
+// style as the fallen people below: an outlined shoulder bar with short
+// arms swinging, a solid head (hair, from above) and solid feet, one
+// stepping ahead and one behind, so the walking direction (up, -y) shows.
+// From straight above the legs are hidden under the body. Uses capsule()
+// and humanPart() from further down, which exist by the time any factory
+// runs.
 function createPedestrian(ppm) {
-  const foot = (x, y) =>
-    new fabric.Ellipse({
-      left: x * ppm,
-      top: y * ppm,
-      rx: 0.05 * ppm,
-      ry: 0.09 * ppm,
-      originX: "center",
-      originY: "center",
-      selectable: false,
-      evented: false,
-      ...vehicleSolid(),
-    });
-  const shoulders = new fabric.Ellipse({
-    left: 0,
-    top: 0,
-    rx: 0.25 * ppm,
-    ry: 0.13 * ppm,
-    originX: "center",
-    originY: "center",
-    selectable: false,
-    evented: false,
-    ...vehicleBody(),
-  });
+  const P = (x, y) => ({ x, y });
+  const solid = (part) => part.set(vehicleSolid());
+  const feet = [
+    [P(0.09, -0.2), P(0.09, -0.31)], // right foot steps ahead
+    [P(-0.09, 0.18), P(-0.09, 0.29)], // left foot trails
+  ].map(([heel, toe]) => solid(capsule(ppm, heel, toe, 0.09)));
+  const arms = [
+    [P(-0.23, -0.02), P(-0.25, -0.17)], // left arm swings forward, opposite the leading foot
+    [P(0.23, 0.02), P(0.25, 0.16)],
+  ].map(([shoulder, hand]) => capsule(ppm, shoulder, hand, 0.08));
+  const shoulders = capsule(ppm, P(-0.17, 0), P(0.17, 0), 0.2);
   const head = new fabric.Circle({
     left: 0,
     top: -0.01 * ppm,
@@ -2406,10 +2458,10 @@ function createPedestrian(ppm) {
     originY: "center",
     selectable: false,
     evented: false,
-    ...vehicleBody(),
+    ...vehicleSolid(),
   });
 
-  return vehicleGroup([foot(-0.08, -0.15), foot(0.08, -0.07), shoulders, head]);
+  return vehicleGroup([...feet, ...arms, shoulders, head]);
 }
 
 // ── Fallen people ────────────────────────────────────────────────
@@ -3051,6 +3103,7 @@ const SHAPE_FACTORIES = {
   liquidlarge: createLiquidLarge,
   debrissmall: createDebrisSmall,
   debrislarge: createDebrisLarge,
+  collisionpoint: createCollisionPoint,
   pathstraight: createPathStraight,
   pathstraightdashed: createPathStraightDashed,
   pathturnleft: (ppm) => turnPathArrow(ppm, -1),
