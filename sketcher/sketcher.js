@@ -990,15 +990,24 @@
   function updateUndoButton() {
     undoBtn.disabled = undoStack.length === 0;
   }
+  // Each step also remembers the zoom it was recorded at: steps restore raw
+  // pixel positions and sizes, or re-add objects that missed every zoom
+  // since. So undo puts the scene back at that zoom, runs the step, then
+  // zooms everything (now including whatever it re-added) back again.
   function pushUndo(fn) {
-    undoStack.push(fn);
+    undoStack.push({ fn, view: { ...view } });
     if (undoStack.length > UNDO_LIMIT) undoStack.shift();
     updateUndoButton();
   }
   undoBtn.addEventListener("click", () => {
-    const fn = undoStack.pop();
-    if (!fn) return;
-    fn();
+    const step = undoStack.pop();
+    if (!step) return;
+    const current = { ...view };
+    setView(step.view);
+    step.fn();
+    setView(current);
+    refreshConnectorMarkers(); // any the step rebuilt were rebuilt at its zoom
+    canvas.requestRenderAll();
     updateUndoButton();
   });
   updateUndoButton();
@@ -1011,9 +1020,11 @@
 
   // ── Eraser ───────────────────────────────────────────────────────
   // Reuses Fabric's own free-drawing brush to track the drag into a Path,
-  // then discards that path and reapplies its shape as an inverted,
-  // absolutely-positioned clipPath on every piece it overlaps — punching a
-  // permanent hole rather than deleting the object. Multiple erases on the
+  // then discards that path and reapplies its shape as an inverted
+  // clipPath on every piece it overlaps — punching a permanent hole rather
+  // than deleting the object. The clip lives in the piece's own local
+  // coordinates, so the hole moves, rotates and scales (zoom included)
+  // with the piece without any help. Multiple erases on the
   // same piece accumulate into a new clipPath group each time (rather than
   // mutating the existing one in place), so undo is just restoring
   // whichever clipPath (or none) was there right before this stroke.
@@ -1040,21 +1051,40 @@
   // corrupting it for anyone (e.g. undo) still holding a reference.
   function buildEraserClip(strokes) {
     const cuts = strokes.map((d) => new fabric.Path(d.path, { ...d, fill: null }));
-    const clip = new fabric.Group(cuts, {
-      inverted: true,
-      absolutePositioned: true,
-    });
+    const clip = new fabric.Group(cuts, { inverted: true });
     clip.isEraserClip = true;
     clip.eraserStrokes = strokes;
     return clip;
   }
 
+  // Raw data for a stroke `path` placed by `matrix` instead of its own
+  // transform — how a canvas-space stroke is re-expressed in a piece's
+  // local plane, where its clipPath lives.
+  function strokeDataAt(path, matrix, overrides) {
+    const placed = new fabric.Path(path.path, { ...path.toObject(), ...overrides });
+    fabric.util.applyTransformToObject(placed, matrix);
+    return placed.toObject();
+  }
+  const canvasToLocal = (obj) => fabric.util.invertTransform(obj.calcTransformMatrix());
+
+  // A loaded clip is a plain group, without the raw strokes a later erase
+  // rebuilds from (and, from sketches saved before holes moved with their
+  // pieces, in absolute canvas coordinates): rebuild it from its own
+  // paths, in the piece's local plane.
+  function adoptLoadedClip(obj) {
+    const clip = obj.clipPath;
+    if (!clip) return;
+    const toLocal = clip.absolutePositioned ? canvasToLocal(obj) : [1, 0, 0, 1, 0, 0];
+    obj.clipPath = buildEraserClip(
+      clip
+        .getObjects()
+        .map((p) =>
+          strokeDataAt(p, fabric.util.multiplyTransformMatrices(toLocal, p.calcTransformMatrix())),
+        ),
+    );
+  }
+
   function applyEraseStroke(erasePath) {
-    // The live drag-preview brush is translucent for UX (see the eraseBtn
-    // click handler), but the clip mask itself needs a fully opaque stroke
-    // — a translucent one only partially masks, rendering "erased" areas
-    // faded instead of actually removed.
-    const strokeData = { ...erasePath.toObject(), stroke: "rgba(0,0,0,1)", opacity: 1 };
     const strokeBounds = erasePath.getBoundingRect();
     const changes = [];
 
@@ -1068,6 +1098,15 @@
         strokeBounds.top + strokeBounds.height > b.top;
       if (!overlaps) return;
 
+      // The live drag-preview brush is translucent for UX (see the eraseBtn
+      // click handler), but the clip mask itself needs a fully opaque stroke
+      // — a translucent one only partially masks, rendering "erased" areas
+      // faded instead of actually removed.
+      const strokeData = strokeDataAt(
+        erasePath,
+        fabric.util.multiplyTransformMatrices(canvasToLocal(obj), erasePath.calcTransformMatrix()),
+        { stroke: "rgba(0,0,0,1)", opacity: 1 },
+      );
       const prevClipPath = obj.clipPath;
       const prevStrokes = prevClipPath && prevClipPath.isEraserClip ? prevClipPath.eraserStrokes : [];
       const newClipPath = buildEraserClip([...prevStrokes, strokeData]);
@@ -1169,41 +1208,35 @@
   // is on screen stays roughly centered instead of zooming away toward
   // one corner of the much-bigger 6000x4200 canvas.
   const scaleInput = document.getElementById("scale-input");
-  // Scales objects uniformly about (cx, cy), which is how a px/m change
-  // applies to the sketch. An eraser hole is a clipPath in absolute canvas
-  // coordinates, so it has to be scaled along with its piece or it drifts
-  // off it; one that still holds its raw strokes is rebuilt from them, so
-  // a later erase on the piece stacks onto matching coordinates.
-  function scaleAround(objects, cx, cy, ratio) {
-    const scaled = (o) => ({
-      left: cx + (o.left - cx) * ratio,
-      top: cy + (o.top - cy) * ratio,
-      scaleX: (o.scaleX ?? 1) * ratio,
-      scaleY: (o.scaleY ?? 1) * ratio,
-    });
+  // Zooming maps every canvas position p to r·p + t and scales sizes by r.
+  // `view` accumulates that mapping since startup (canvas px = k·world + x/y),
+  // so undo can tell which zoom each of its steps was recorded at.
+  const view = { k: 1, x: 0, y: 0 };
+  function transformObjects(objects, r, tx, ty) {
     objects.forEach((obj) => {
-      obj.set(scaled(obj));
+      obj.set({
+        left: r * obj.left + tx,
+        top: r * obj.top + ty,
+        scaleX: obj.scaleX * r,
+        scaleY: obj.scaleY * r,
+      });
       obj.setCoords();
-      const clip = obj.clipPath;
-      if (!clip || !clip.absolutePositioned) return;
-      if (clip.isEraserClip) {
-        obj.clipPath = buildEraserClip(
-          clip.eraserStrokes.map((d) => ({ ...d, ...scaled(d) })),
-        );
-      } else {
-        clip.set(scaled(clip));
-        clip.setCoords();
-      }
-      obj.dirty = true;
     });
+  }
+  // Rescales the whole scene to the `next` view (undo uses this as well).
+  function setView(next) {
+    const r = next.k / view.k;
+    transformObjects(canvas.getObjects(), r, next.x - r * view.x, next.y - r * view.y);
+    Object.assign(view, next);
   }
 
   scaleInput.addEventListener("change", (e) => {
     const newPpm = parseFloat(e.target.value) || 40;
     if (newPpm !== ppm) {
+      const r = newPpm / ppm;
       const cx = scrollWrap.scrollLeft + scrollWrap.clientWidth / 2;
       const cy = scrollWrap.scrollTop + scrollWrap.clientHeight / 2;
-      scaleAround(canvas.getObjects(), cx, cy, newPpm / ppm);
+      setView({ k: view.k * r, x: cx + (view.x - cx) * r, y: cy + (view.y - cy) * r });
       ppm = newPpm;
     }
     applyGrid();
@@ -1650,10 +1683,11 @@
     fabric.util.enlivenObjects(data.objects || []).then((objects) => {
       if (objects.length === 0) return;
 
+      objects.forEach(adoptLoadedClip);
       // Pixel sizes are at the zoom the sketch was saved at; bring them to
       // the current one, or a 7 m piece comes back 3.5 m after zooming in.
       // Sketches saved before the zoom was stored are taken as the default.
-      scaleAround(objects, 0, 0, ppm / (data.ppm || 40));
+      transformObjects(objects, ppm / (data.ppm || 40), 0, 0);
 
       // Saved coordinates are wherever the piece sat on the (much bigger)
       // canvas when it was stored — recenter the group on the current
@@ -1683,16 +1717,6 @@
       canvas.discardActiveObject();
       objects.forEach((obj) => {
         obj.set({ left: obj.left + dx, top: obj.top + dy });
-        // An eraser clipPath is absolutePositioned (canvas-space, not
-        // relative to the object), so it has to be shifted right along with
-        // the piece or the hole gets left behind at the old location.
-        if (obj.clipPath) {
-          obj.clipPath.set({
-            left: obj.clipPath.left + dx,
-            top: obj.clipPath.top + dy,
-          });
-          obj.clipPath.setCoords();
-        }
         obj.setCoords();
         canvas.add(obj);
         if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
