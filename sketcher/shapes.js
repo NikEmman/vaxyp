@@ -2854,8 +2854,8 @@ function capsule(ppm, p1, p2, w) {
 
 // `rider`: a fallen motorcyclist in riding gear, matching the two riders
 // (see createMotorcycleRider): "light" has a solid helmet and an outlined
-// jacket with a zip, "dark" a solid jacket and an outlined helmet with a
-// visor. Both wear gloves. A helmet is larger than a bare head.
+// jacket with a zip, "dark" a solid jacket and an outlined helmet. Both
+// wear gloves and a full-face helmet, larger than a bare head.
 function createHuman(ppm, pose, { rider = null } = {}) {
   const j = humanJoints(pose);
 
@@ -2913,30 +2913,29 @@ function createHuman(ppm, pose, { rider = null } = {}) {
 
   const gloves = arms.filter((part) => part instanceof fabric.Circle);
   gloves.forEach((glove) => glove.set(vehicleSolid()));
-  const helmet = new fabric.Circle({
-    left: 0,
-    top: -0.25 * ppm,
-    radius: 0.17 * ppm,
-    originX: "center",
-    originY: "center",
-    selectable: false,
-    evented: false,
-    ...(rider === "dark" ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()),
-  });
-  // sun shade over the forehead: a broad rounded brim like a jockey cap's,
-  // sticking out past the helmet, shaded the opposite of the helmet so it
-  // shows against it
-  const brim = vehiclePath(
+  // full-face helmet seen from the front: a rounded shell, a wide visor
+  // window across the face and the chin bar below it, shaded opposite the
+  // shell so the visor shows against it
+  const helmet = vehiclePath(
     ppm,
-    [["M", -0.16, -0.307], ["C", -0.22, -0.6, 0.22, -0.6, 0.16, -0.307], ["Q", 0, -0.53, -0.16, -0.307], ["Z"]],
+    [
+      ["M", -0.15, -0.07],
+      ["C", -0.2, -0.18, -0.2, -0.3, -0.17, -0.35],
+      ["C", -0.14, -0.48, 0.14, -0.48, 0.17, -0.35],
+      ["C", 0.2, -0.3, 0.2, -0.18, 0.15, -0.07],
+      ["Q", 0, -0.03, -0.15, -0.07],
+      ["Z"],
+    ],
+    rider === "dark" ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()
+  );
+  const visor = vehiclePath(
+    ppm,
+    [["M", -0.13, -0.32], ["Q", 0, -0.37, 0.13, -0.32], ["L", 0.14, -0.22], ["Q", 0, -0.17, -0.14, -0.22], ["Z"]],
     rider === "dark" ? vehicleSolid() : { ...vehicleBody(), strokeWidth: 1.5 }
   );
-  const gear = [brim];
+  const gear = [visor];
   if (rider === "dark") {
     [torso, ...arms].forEach((part) => part.set(vehicleSolid()));
-    // tinted visor band across the face (a single curve read as a smile)
-    const visor = [["M", -0.155, -0.31], ["L", 0.155, -0.31], ["L", 0.155, -0.19], ["L", -0.155, -0.19], ["Z"]];
-    gear.push(vehiclePath(ppm, visor, { ...vehicleGlass(), opacity: 0.45 }));
   } else {
     gear.push(vehiclePath(ppm, [["M", 0, -0.04], ["L", 0, 0.58]], vehicleLine())); // zip
   }
