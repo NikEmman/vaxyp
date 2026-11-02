@@ -2019,6 +2019,135 @@ function createParkedSmallCar(ppm) {
   return parkedCar(ppm, smallCarParts(ppm, { parked: true }), SMALL_CAR_ROOF.cy);
 }
 
+// Jeep (Τζιπ), ~4.6 x 1.9 m off-roader: boxy body, flat front with round
+// headlights, wheels standing out under fender flares, a long flat roof
+// with rails and the spare wheel on the tailgate. `camo: true` paints
+// camouflage patches on the hood and roof (military vehicle).
+function jeepParts(ppm, { camo = false } = {}) {
+  const hw = 0.95; // half width
+  const hl = 2.3; // half length
+  const c = 0.15; // corner radius
+  const windshieldFront = -0.98;
+  const roofFront = -0.66;
+  const roofBack = 2.05;
+
+  const wheels = [-1.45, 1.4].flatMap((y) => wheelPair(ppm, hw, y, 0.3, 0.76, 0.14));
+  const flares = [-1.45, 1.4].flatMap((y) =>
+    [-1, 1].map((side) => vehicleRect(ppm, side * (hw + 0.03), y, 0.16, 0.96, { ...vehicleBody(), strokeWidth: 1.5 }))
+  );
+  const mirrors = doorMirrors(ppm, hw, windshieldFront + 0.1);
+  const spare = vehicleRect(ppm, 0, hl + 0.12, 0.72, 0.24, vehicleSolid());
+  const bumpers = [-hl - 0.03, hl - 0.01].map((y) =>
+    vehicleRect(ppm, 0, y, 1.84, 0.12, { ...vehicleSolid(), rx: 0.03 * ppm, ry: 0.03 * ppm })
+  );
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -hw + c, -hl],
+      ["L", hw - c, -hl],
+      ["Q", hw, -hl, hw, -hl + c],
+      ["L", hw, hl - c],
+      ["Q", hw, hl, hw - c, hl],
+      ["L", -hw + c, hl],
+      ["Q", -hw, hl, -hw, hl - c],
+      ["L", -hw, -hl + c],
+      ["Q", -hw, -hl, -hw + c, -hl],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+
+  const patches = camo ? camoPatches(ppm) : [];
+
+  // upright windshield: only a thin strip of it shows from above
+  const windshield = vehiclePath(
+    ppm,
+    [["M", -0.82, windshieldFront], ["L", 0.82, windshieldFront], ["L", 0.8, roofFront - 0.02], ["L", -0.8, roofFront - 0.02], ["Z"]],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.84, roofFront + 0.04], ["L", 0.92, roofFront + 0.04], ["L", 0.92, roofBack - 0.1], ["L", 0.84, roofBack - 0.1], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const roof = vehicleRect(ppm, 0, (roofFront + roofBack) / 2, 1.66, roofBack - roofFront, {
+    ...vehicleLine(),
+    rx: 0.06 * ppm,
+    ry: 0.06 * ppm,
+  });
+  const rails = [-0.66, 0.66].map((x) => vehiclePath(ppm, [["M", x, roofFront + 0.2], ["L", x, roofBack - 0.2]], { ...vehicleLine(), strokeWidth: 2 }));
+  const hoodSeams = [-0.55, 0.55].map((x) => vehiclePath(ppm, [["M", x, -hl + 0.32], ["L", x, windshieldFront - 0.06]], vehicleLine()));
+
+  const headlights = [-1, 1].map((side) => objCircle(ppm, side * 0.66, -hl + 0.18, 0.11, { ...vehicleLine(), selectable: false, evented: false }));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.08), hl - 0.3, 0.1, 0.32, vehicleSolid()));
+
+  return [
+    ...wheels,
+    ...flares,
+    ...mirrors,
+    spare,
+    body,
+    ...patches,
+    ...bumpers,
+    windshield,
+    ...sideWindows,
+    roof,
+    ...rails,
+    ...hoodSeams,
+    ...headlights,
+    ...taillights,
+  ];
+}
+
+// Camouflage: large overlapping blotches in two tones (solid and pale),
+// one per cell of a grid over the hood and roof, a few cells left bare.
+// Kept off the glass. Seeded, so every military jeep matches.
+function camoPatches(ppm) {
+  const rand = seededRandom(23);
+  const regions = [
+    { x0: -0.88, x1: 0.88, y0: -2.08, y1: -1.06, cols: 3, rows: 2 }, // hood
+    { x0: -0.8, x1: 0.8, y0: -0.6, y1: 2.0, cols: 3, rows: 5 }, // roof
+  ];
+  const patches = [];
+  regions.forEach(({ x0, x1, y0, y1, cols, rows }) => {
+    const cellW = (x1 - x0) / cols;
+    const cellH = (y1 - y0) / rows;
+    for (let i = 0; i < cols * rows; i++) {
+      const tone = rand();
+      if (tone < 0.2) continue; // bare
+      const cx = x0 + ((i % cols) + 0.2 + rand() * 0.6) * cellW;
+      const cy = y0 + (Math.floor(i / cols) + 0.2 + rand() * 0.6) * cellH;
+      const rx = cellW * (0.75 + rand() * 0.3);
+      const ry = cellH * (0.6 + rand() * 0.25);
+      const tilt = (rand() - 0.5) * 0.8;
+      const corners = 9;
+      const points = Array.from({ length: corners }, (_, k) => {
+        const a = (k / corners) * Math.PI * 2;
+        const wobble = 0.5 + rand() * 0.7;
+        const px = Math.cos(a) * rx * wobble;
+        const py = Math.sin(a) * ry * wobble;
+        return {
+          x: Math.min(x1, Math.max(x0, cx + px * Math.cos(tilt) - py * Math.sin(tilt))),
+          y: Math.min(y1, Math.max(y0, cy + px * Math.sin(tilt) + py * Math.cos(tilt))),
+        };
+      });
+      // smooth closed curve through the midpoints, cornering at each point
+      const mid = (p, q) => [(p.x + q.x) / 2, (p.y + q.y) / 2];
+      const segs = [["M", ...mid(points[corners - 1], points[0])]];
+      points.forEach((p, k) => segs.push(["Q", p.x, p.y, ...mid(p, points[(k + 1) % corners])]));
+      segs.push(["Z"]);
+      patches.push(vehiclePath(ppm, segs, { fill: LINE_COLOR, stroke: "", opacity: tone < 0.6 ? 0.3 : 0.75 }));
+    }
+  });
+  return patches;
+}
+
+function createJeep(ppm) {
+  return vehicleGroup(jeepParts(ppm));
+}
+
+function createMilitaryJeep(ppm) {
+  return vehicleGroup(jeepParts(ppm, { camo: true }));
+}
+
 function createSmallCarStriped(ppm) {
   // no tail section: past the rear window it would be a pair of dots
   const stripes = twinStripes(ppm, [[-1.88, -1.2], [-0.4, 1.4]]);
@@ -3227,6 +3356,8 @@ const SHAPE_FACTORIES = {
   smallcarstriped: createSmallCarStriped,
   parkedcar: createParkedCar,
   parkedsmallcar: createParkedSmallCar,
+  jeep: createJeep,
+  militaryjeep: createMilitaryJeep,
   truck: createTruck,
   van: createVan,
   bus: createBus,
