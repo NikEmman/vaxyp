@@ -1795,7 +1795,8 @@ function lightBar(ppm, y, wM) {
 // Passenger car, ~4.4 x 1.8 m: rounded nose, glass cabin, wheels, mirrors,
 // headlights at the front and taillights at the back so its heading reads
 // at a glance. `hoodCreases: false` leaves the hood clear (police lettering).
-function carParts(ppm, { hoodCreases = true } = {}) {
+// `parked: true` keeps only the body, glass and roof (see createParkedCar).
+function carParts(ppm, { hoodCreases = true, parked = false } = {}) {
   const hw = 0.9; // half width
   const hl = 2.2; // half length
 
@@ -1816,7 +1817,7 @@ function carParts(ppm, { hoodCreases = true } = {}) {
       ["Q", -hw, -hl + 0.08, -0.62, -hl + 0.04],
       ["Z"],
     ],
-    vehicleBody()
+    parked ? { ...vehicleBody(), strokeWidth: 1.2 } : vehicleBody()
   );
 
   const windshield = vehiclePath(
@@ -1852,6 +1853,8 @@ function carParts(ppm, { hoodCreases = true } = {}) {
   const headlightR = [["M", 0.5, -hl + 0.1], ["L", 0.78, -hl + 0.2], ["L", 0.84, -hl + 0.38], ["L", 0.5, -hl + 0.22], ["Z"]];
   const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
   const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * 0.7, hl - 0.12, 0.26, 0.1, vehicleSolid()));
+
+  if (parked) return [body, windshield, rearWindow, roof];
 
   return [
     ...wheels,
@@ -1903,7 +1906,7 @@ function createCarStriped(ppm) {
 // Tall taillights up the rear corners.
 const SMALL_CAR_ROOF = { cy: 0.5, w: 1.18, h: 1.84 };
 
-function smallCarParts(ppm, { hoodCreases = true } = {}) {
+function smallCarParts(ppm, { hoodCreases = true, parked = false } = {}) {
   const hw = 0.87; // half width
   const hl = 1.97; // half length
 
@@ -1924,7 +1927,7 @@ function smallCarParts(ppm, { hoodCreases = true } = {}) {
       ["Q", -hw, -hl + 0.1, -0.55, -hl + 0.04],
       ["Z"],
     ],
-    vehicleBody()
+    parked ? { ...vehicleBody(), strokeWidth: 1.2 } : vehicleBody()
   );
 
   const windshield = vehiclePath(
@@ -1961,6 +1964,8 @@ function smallCarParts(ppm, { hoodCreases = true } = {}) {
   const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
   const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.08), hl - 0.28, 0.1, 0.34, vehicleSolid()));
 
+  if (parked) return [body, windshield, rearWindow, roof];
+
   return [
     ...wheels,
     ...mirrors,
@@ -1982,6 +1987,36 @@ function createSmallCar(ppm) {
 function createSmallCarDarkRoof(ppm) {
   const { cy, w, h } = SMALL_CAR_ROOF;
   return vehicleGroup([...smallCarParts(ppm), solidRoof(ppm, cy, w, h)]);
+}
+
+// Parked cars (Σταθμευμένα): background scenery, not part of the accident.
+// The bare outline of the car, faded, so it stays out of the way of the
+// vehicles involved; the glass still shows which way it faces. Σ.Ο.
+// (Σταθμευμένο Όχημα) on the roof.
+const PARKED_OPACITY = 0.45;
+
+function parkedCar(ppm, parts, roofY) {
+  const lettering = new fabric.Text("Σ.Ο.", {
+    left: 0,
+    top: roofY * ppm,
+    fontSize: 0.42 * ppm,
+    fontWeight: "bold",
+    fontFamily: "Arial, sans-serif",
+    fill: LINE_COLOR,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  return vehicleGroup([...parts, lettering]).set({ opacity: PARKED_OPACITY });
+}
+
+function createParkedCar(ppm) {
+  return parkedCar(ppm, carParts(ppm, { parked: true }), 0.375);
+}
+
+function createParkedSmallCar(ppm) {
+  return parkedCar(ppm, smallCarParts(ppm, { parked: true }), SMALL_CAR_ROOF.cy);
 }
 
 function createSmallCarStriped(ppm) {
@@ -3190,6 +3225,8 @@ const SHAPE_FACTORIES = {
   smallcar: createSmallCar,
   smallcardarkroof: createSmallCarDarkRoof,
   smallcarstriped: createSmallCarStriped,
+  parkedcar: createParkedCar,
+  parkedsmallcar: createParkedSmallCar,
   truck: createTruck,
   van: createVan,
   bus: createBus,
