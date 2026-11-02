@@ -1871,6 +1871,25 @@ function createCar(ppm) {
   return vehicleGroup(carParts(ppm));
 }
 
+// Car variants, so several cars in one sketch (and each one's start and
+// end position) tell apart at a glance, in print too: the same car with a
+// solid roof, or with twin stripes running nose to tail.
+function createCarDarkRoof(ppm) {
+  const roof = vehicleRect(ppm, 0, 0.375, 1.24, 1.35, { ...vehicleSolid(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+  return vehicleGroup([...carParts(ppm), roof]);
+}
+
+function createCarStriped(ppm) {
+  // hood, roof and trunk, broken where they would cross the glass
+  const spans = [[-2.1, -1.1], [-0.28, 1.0], [1.6, 2.12]];
+  const stripes = [-0.17, 0.17].flatMap((x) =>
+    spans.map(([from, to]) =>
+      vehicleRect(ppm, x, (from + to) / 2, 0.16, to - from, { ...vehicleSolid(), rx: 0.02 * ppm, ry: 0.02 * ppm })
+    )
+  );
+  return vehicleGroup([...carParts(ppm, { hoodCreases: false }), ...stripes]);
+}
+
 // Police patrol car (Περιπολικό): the car with a light bar across the roof
 // and ΕΛ.ΑΣ. lettering on the hood.
 function createPoliceCar(ppm) {
@@ -3066,6 +3085,8 @@ const SHAPE_FACTORIES = {
   stopmarking: createStopMarking,
   yieldmarking: createYieldMarking,
   car: createCar,
+  cardarkroof: createCarDarkRoof,
+  carstriped: createCarStriped,
   truck: createTruck,
   van: createVan,
   bus: createBus,
