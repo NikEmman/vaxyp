@@ -2436,6 +2436,37 @@ function createFireTruck(ppm) {
 
 // Motorcycle (Μοτοσικλέτα), ~2.1 x 0.8 m across the handlebars.
 function createMotorcycle(ppm) {
+  return vehicleGroup(motorcycleParts(ppm));
+}
+
+// Motorcycle with its rider (Μοτοσικλετιστής), seen from above in the
+// pedestrian's capsule style: knees either side of the tank, the back
+// leaning forward from the seat, arms out to the grips and a solid helmet
+// ahead of the shoulders. `dark: true` is the variant that tells a second
+// rider apart: a solid jacket and a light, outlined helmet.
+function createMotorcycleRider(ppm, { dark = false } = {}) {
+  const P = (x, y) => ({ x, y });
+  const thighs = [-1, 1].map((side) => capsule(ppm, P(side * 0.15, 0.3), P(side * 0.22, -0.1), 0.15));
+  const back = capsule(ppm, P(0, 0.3), P(0, 0.02), 0.38);
+  const shoulders = capsule(ppm, P(-0.2, 0), P(0.2, 0), 0.22);
+  const arms = [-1, 1].map((side) => capsule(ppm, P(side * 0.24, -0.02), P(side * 0.34, -0.42), 0.1));
+  const hands = [-1, 1].map((side) => capsule(ppm, P(side * 0.34, -0.44), P(side * 0.34, -0.44), 0.09).set(vehicleSolid()));
+  const helmet = new fabric.Circle({
+    left: 0,
+    top: -0.1 * ppm,
+    radius: 0.13 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...(dark ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()),
+  });
+  if (dark) [...thighs, back, shoulders, ...arms].forEach((part) => part.set(vehicleSolid()));
+
+  return vehicleGroup([...motorcycleParts(ppm), ...thighs, back, ...arms, ...hands, shoulders, helmet]);
+}
+
+function motorcycleParts(ppm) {
   const frontTire = vehicleRect(ppm, 0, -0.72, 0.12, 0.62, vehicleSolid());
   const rearTire = vehicleRect(ppm, 0, 0.72, 0.18, 0.64, vehicleSolid());
   // Tank flowing into the seat and tail.
@@ -2473,7 +2504,7 @@ function createMotorcycle(ppm) {
   );
   const headlight = vehiclePath(ppm, [["M", -0.08, -0.58], ["Q", 0, -0.66, 0.08, -0.58]], { ...vehicleLine(), strokeWidth: 2 });
 
-  return vehicleGroup([frontTire, rearTire, body, seatLine, handlebar, ...grips, ...mirrors, headlight]);
+  return [frontTire, rearTire, body, seatLine, handlebar, ...grips, ...mirrors, headlight];
 }
 
 // Bicycle (Ποδήλατο), ~1.75 x 0.6 m across the handlebars.
@@ -2821,7 +2852,11 @@ function capsule(ppm, p1, p2, w) {
   });
 }
 
-function createHuman(ppm, pose) {
+// `rider`: a fallen motorcyclist in riding gear, matching the two riders
+// (see createMotorcycleRider): "light" has a solid helmet and an outlined
+// jacket with a zip, "dark" a solid jacket and an outlined helmet with a
+// visor. Both wear gloves. A helmet is larger than a bare head.
+function createHuman(ppm, pose, { rider = null } = {}) {
   const j = humanJoints(pose);
 
   const legs = [j.lLeg, j.rLeg].flatMap((leg) => [
@@ -2874,7 +2909,39 @@ function createHuman(ppm, pose) {
     ...humanPart(),
   });
 
-  return vehicleGroup([...legs, ...arms, neck, torso, head]);
+  if (!rider) return vehicleGroup([...legs, ...arms, neck, torso, head]);
+
+  const gloves = arms.filter((part) => part instanceof fabric.Circle);
+  gloves.forEach((glove) => glove.set(vehicleSolid()));
+  const helmet = new fabric.Circle({
+    left: 0,
+    top: -0.25 * ppm,
+    radius: 0.17 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...(rider === "dark" ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()),
+  });
+  // sun shade over the forehead: a broad rounded brim like a jockey cap's,
+  // sticking out past the helmet, shaded the opposite of the helmet so it
+  // shows against it
+  const brim = vehiclePath(
+    ppm,
+    [["M", -0.16, -0.307], ["C", -0.22, -0.6, 0.22, -0.6, 0.16, -0.307], ["Q", 0, -0.53, -0.16, -0.307], ["Z"]],
+    rider === "dark" ? vehicleSolid() : { ...vehicleBody(), strokeWidth: 1.5 }
+  );
+  const gear = [brim];
+  if (rider === "dark") {
+    [torso, ...arms].forEach((part) => part.set(vehicleSolid()));
+    // tinted visor band across the face (a single curve read as a smile)
+    const visor = [["M", -0.155, -0.31], ["L", 0.155, -0.31], ["L", 0.155, -0.19], ["L", -0.155, -0.19], ["Z"]];
+    gear.push(vehiclePath(ppm, visor, { ...vehicleGlass(), opacity: 0.45 }));
+  } else {
+    gear.push(vehiclePath(ppm, [["M", 0, -0.04], ["L", 0, 0.58]], vehicleLine())); // zip
+  }
+
+  return vehicleGroup([...legs, ...arms, neck, torso, helmet, ...gear]);
 }
 
 // Traffic signal head (Φωτεινός σηματοδότης), vector-drawn — no catalog
@@ -3363,6 +3430,8 @@ const SHAPE_FACTORIES = {
   bus: createBus,
   semitruck: createSemiTruck,
   motorcycle: createMotorcycle,
+  motorcyclerider: (ppm) => createMotorcycleRider(ppm),
+  motorcycleriderdark: (ppm) => createMotorcycleRider(ppm, { dark: true }),
   bicycle: createBicycle,
   fallenmotorcycle: createFallenMotorcycle,
   fallenbicycle: createFallenBicycle,
@@ -3374,6 +3443,8 @@ const SHAPE_FACTORIES = {
   firetruck: createFireTruck,
   pedestrian: createPedestrian,
   ...Object.fromEntries(Object.entries(HUMAN_POSES).map(([key, pose]) => [key, (ppm) => createHuman(ppm, pose)])),
+  humanrider: (ppm) => createHuman(ppm, HUMAN_POSES.humansprawled, { rider: "light" }),
+  humanriderdark: (ppm) => createHuman(ppm, HUMAN_POSES.humansprawled, { rider: "dark" }),
   trafficlight: createTrafficLight,
   tree: createTree,
   treetrunk: createTreeTrunk,
