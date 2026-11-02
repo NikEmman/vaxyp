@@ -1795,7 +1795,8 @@ function lightBar(ppm, y, wM) {
 // Passenger car, ~4.4 x 1.8 m: rounded nose, glass cabin, wheels, mirrors,
 // headlights at the front and taillights at the back so its heading reads
 // at a glance. `hoodCreases: false` leaves the hood clear (police lettering).
-function carParts(ppm, { hoodCreases = true } = {}) {
+// `parked: true` keeps only the body, glass and roof (see createParkedCar).
+function carParts(ppm, { hoodCreases = true, parked = false } = {}) {
   const hw = 0.9; // half width
   const hl = 2.2; // half length
 
@@ -1816,7 +1817,7 @@ function carParts(ppm, { hoodCreases = true } = {}) {
       ["Q", -hw, -hl + 0.08, -0.62, -hl + 0.04],
       ["Z"],
     ],
-    vehicleBody()
+    parked ? { ...vehicleBody(), strokeWidth: 1.2 } : vehicleBody()
   );
 
   const windshield = vehiclePath(
@@ -1853,6 +1854,8 @@ function carParts(ppm, { hoodCreases = true } = {}) {
   const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
   const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * 0.7, hl - 0.12, 0.26, 0.1, vehicleSolid()));
 
+  if (parked) return [body, windshield, rearWindow, roof];
+
   return [
     ...wheels,
     ...mirrors,
@@ -1869,6 +1872,286 @@ function carParts(ppm, { hoodCreases = true } = {}) {
 
 function createCar(ppm) {
   return vehicleGroup(carParts(ppm));
+}
+
+// Car variants, so several cars in one sketch (and each one's start and
+// end position) tell apart at a glance, in print too: the same car with a
+// solid roof, or with twin stripes running nose to tail.
+function solidRoof(ppm, cy, wM, hM) {
+  return vehicleRect(ppm, 0, cy, wM, hM, { ...vehicleSolid(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+}
+
+// `spans`: [from, to] lengths of body the stripes cover, broken where they
+// would cross the glass.
+function twinStripes(ppm, spans) {
+  return [-0.17, 0.17].flatMap((x) =>
+    spans.map(([from, to]) =>
+      vehicleRect(ppm, x, (from + to) / 2, 0.16, to - from, { ...vehicleSolid(), rx: 0.02 * ppm, ry: 0.02 * ppm })
+    )
+  );
+}
+
+function createCarDarkRoof(ppm) {
+  return vehicleGroup([...carParts(ppm), solidRoof(ppm, 0.375, 1.24, 1.35)]);
+}
+
+function createCarStriped(ppm) {
+  const stripes = twinStripes(ppm, [[-2.1, -1.1], [-0.28, 1.0], [1.6, 2.12]]);
+  return vehicleGroup([...carParts(ppm, { hoodCreases: false }), ...stripes]);
+}
+
+// Small hatchback, ~3.95 x 1.74 m (Yaris/Micra class): shorter than the
+// sedan, with a short hood, a steep windshield and a roof that runs almost
+// to the tail, ending in a short upright rear window instead of a trunk.
+// Tall taillights up the rear corners.
+const SMALL_CAR_ROOF = { cy: 0.5, w: 1.18, h: 1.84 };
+
+function smallCarParts(ppm, { hoodCreases = true, parked = false } = {}) {
+  const hw = 0.87; // half width
+  const hl = 1.97; // half length
+
+  const wheels = [-1.24, 1.24].flatMap((y) => wheelPair(ppm, hw, y, 0.22, 0.6, 0.08));
+  const mirrors = doorMirrors(ppm, hw, -0.62);
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -0.55, -hl + 0.04],
+      ["Q", 0, -hl - 0.05, 0.55, -hl + 0.04],
+      ["Q", hw, -hl + 0.1, hw, -hl + 0.6],
+      ["L", hw, hl - 0.35],
+      ["Q", hw, hl - 0.02, 0.6, hl],
+      ["Q", 0, hl + 0.03, -0.6, hl],
+      ["Q", -hw, hl - 0.02, -hw, hl - 0.35],
+      ["L", -hw, -hl + 0.6],
+      ["Q", -hw, -hl + 0.1, -0.55, -hl + 0.04],
+      ["Z"],
+    ],
+    parked ? { ...vehicleBody(), strokeWidth: 1.2 } : vehicleBody()
+  );
+
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -0.7, -1.12],
+      ["Q", 0, -1.26, 0.7, -1.12],
+      ["L", 0.6, -0.45],
+      ["Q", 0, -0.5, -0.6, -0.45],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const rearWindow = vehiclePath(
+    ppm,
+    [
+      ["M", -0.6, 1.5],
+      ["Q", 0, 1.47, 0.6, 1.5],
+      ["L", 0.64, 1.74],
+      ["Q", 0, 1.78, -0.64, 1.74],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.64, -0.42], ["L", 0.76, -0.48], ["L", 0.76, 1.36], ["L", 0.64, 1.4], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const { cy, w, h } = SMALL_CAR_ROOF;
+  const roof = vehicleRect(ppm, 0, cy, w, h, { ...vehicleLine(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+
+  const hoodR = [["M", 0.4, -1.18], ["Q", 0.45, -1.5, 0.36, -1.84]];
+  const hood = hoodCreases ? [hoodR, mirrorX(hoodR)].map((segs) => vehiclePath(ppm, segs, vehicleLine())) : [];
+
+  const headlightR = [["M", 0.45, -hl + 0.1], ["L", 0.74, -hl + 0.22], ["L", 0.82, -hl + 0.5], ["L", 0.5, -hl + 0.26], ["Z"]];
+  const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.08), hl - 0.28, 0.1, 0.34, vehicleSolid()));
+
+  if (parked) return [body, windshield, rearWindow, roof];
+
+  return [
+    ...wheels,
+    ...mirrors,
+    body,
+    windshield,
+    rearWindow,
+    ...sideWindows,
+    roof,
+    ...hood,
+    ...headlights,
+    ...taillights,
+  ];
+}
+
+function createSmallCar(ppm) {
+  return vehicleGroup(smallCarParts(ppm));
+}
+
+function createSmallCarDarkRoof(ppm) {
+  const { cy, w, h } = SMALL_CAR_ROOF;
+  return vehicleGroup([...smallCarParts(ppm), solidRoof(ppm, cy, w, h)]);
+}
+
+// Parked cars (Σταθμευμένα): background scenery, not part of the accident.
+// The bare outline of the car, faded, so it stays out of the way of the
+// vehicles involved; the glass still shows which way it faces. Σ.Ο.
+// (Σταθμευμένο Όχημα) on the roof.
+const PARKED_OPACITY = 0.45;
+
+function parkedCar(ppm, parts, roofY) {
+  const lettering = new fabric.Text("Σ.Ο.", {
+    left: 0,
+    top: roofY * ppm,
+    fontSize: 0.42 * ppm,
+    fontWeight: "bold",
+    fontFamily: "Arial, sans-serif",
+    fill: LINE_COLOR,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+  });
+  return vehicleGroup([...parts, lettering]).set({ opacity: PARKED_OPACITY });
+}
+
+function createParkedCar(ppm) {
+  return parkedCar(ppm, carParts(ppm, { parked: true }), 0.375);
+}
+
+function createParkedSmallCar(ppm) {
+  return parkedCar(ppm, smallCarParts(ppm, { parked: true }), SMALL_CAR_ROOF.cy);
+}
+
+// Jeep (Τζιπ), ~4.6 x 1.9 m off-roader: boxy body, flat front with round
+// headlights, wheels standing out under fender flares, a long flat roof
+// with rails and the spare wheel on the tailgate. `camo: true` paints
+// camouflage patches on the hood and roof (military vehicle).
+function jeepParts(ppm, { camo = false } = {}) {
+  const hw = 0.95; // half width
+  const hl = 2.3; // half length
+  const c = 0.15; // corner radius
+  const windshieldFront = -0.98;
+  const roofFront = -0.66;
+  const roofBack = 2.05;
+
+  const wheels = [-1.45, 1.4].flatMap((y) => wheelPair(ppm, hw, y, 0.3, 0.76, 0.14));
+  const flares = [-1.45, 1.4].flatMap((y) =>
+    [-1, 1].map((side) => vehicleRect(ppm, side * (hw + 0.03), y, 0.16, 0.96, { ...vehicleBody(), strokeWidth: 1.5 }))
+  );
+  const mirrors = doorMirrors(ppm, hw, windshieldFront + 0.1);
+  const spare = vehicleRect(ppm, 0, hl + 0.12, 0.72, 0.24, vehicleSolid());
+  const bumpers = [-hl - 0.03, hl - 0.01].map((y) =>
+    vehicleRect(ppm, 0, y, 1.84, 0.12, { ...vehicleSolid(), rx: 0.03 * ppm, ry: 0.03 * ppm })
+  );
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -hw + c, -hl],
+      ["L", hw - c, -hl],
+      ["Q", hw, -hl, hw, -hl + c],
+      ["L", hw, hl - c],
+      ["Q", hw, hl, hw - c, hl],
+      ["L", -hw + c, hl],
+      ["Q", -hw, hl, -hw, hl - c],
+      ["L", -hw, -hl + c],
+      ["Q", -hw, -hl, -hw + c, -hl],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+
+  const patches = camo ? camoPatches(ppm) : [];
+
+  // upright windshield: only a thin strip of it shows from above
+  const windshield = vehiclePath(
+    ppm,
+    [["M", -0.82, windshieldFront], ["L", 0.82, windshieldFront], ["L", 0.8, roofFront - 0.02], ["L", -0.8, roofFront - 0.02], ["Z"]],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.84, roofFront + 0.04], ["L", 0.92, roofFront + 0.04], ["L", 0.92, roofBack - 0.1], ["L", 0.84, roofBack - 0.1], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const roof = vehicleRect(ppm, 0, (roofFront + roofBack) / 2, 1.66, roofBack - roofFront, {
+    ...vehicleLine(),
+    rx: 0.06 * ppm,
+    ry: 0.06 * ppm,
+  });
+  const rails = [-0.66, 0.66].map((x) => vehiclePath(ppm, [["M", x, roofFront + 0.2], ["L", x, roofBack - 0.2]], { ...vehicleLine(), strokeWidth: 2 }));
+  const hoodSeams = [-0.55, 0.55].map((x) => vehiclePath(ppm, [["M", x, -hl + 0.32], ["L", x, windshieldFront - 0.06]], vehicleLine()));
+
+  const headlights = [-1, 1].map((side) => objCircle(ppm, side * 0.66, -hl + 0.18, 0.11, { ...vehicleLine(), selectable: false, evented: false }));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.08), hl - 0.3, 0.1, 0.32, vehicleSolid()));
+
+  return [
+    ...wheels,
+    ...flares,
+    ...mirrors,
+    spare,
+    body,
+    ...patches,
+    ...bumpers,
+    windshield,
+    ...sideWindows,
+    roof,
+    ...rails,
+    ...hoodSeams,
+    ...headlights,
+    ...taillights,
+  ];
+}
+
+// Camouflage: large overlapping blotches in two tones (solid and pale),
+// one per cell of a grid over the hood and roof, a few cells left bare.
+// Kept off the glass. Seeded, so every military jeep matches.
+function camoPatches(ppm) {
+  const rand = seededRandom(23);
+  const regions = [
+    { x0: -0.88, x1: 0.88, y0: -2.08, y1: -1.06, cols: 3, rows: 2 }, // hood
+    { x0: -0.8, x1: 0.8, y0: -0.6, y1: 2.0, cols: 3, rows: 5 }, // roof
+  ];
+  const patches = [];
+  regions.forEach(({ x0, x1, y0, y1, cols, rows }) => {
+    const cellW = (x1 - x0) / cols;
+    const cellH = (y1 - y0) / rows;
+    for (let i = 0; i < cols * rows; i++) {
+      const tone = rand();
+      if (tone < 0.2) continue; // bare
+      const cx = x0 + ((i % cols) + 0.2 + rand() * 0.6) * cellW;
+      const cy = y0 + (Math.floor(i / cols) + 0.2 + rand() * 0.6) * cellH;
+      const rx = cellW * (0.75 + rand() * 0.3);
+      const ry = cellH * (0.6 + rand() * 0.25);
+      const tilt = (rand() - 0.5) * 0.8;
+      const corners = 9;
+      const points = Array.from({ length: corners }, (_, k) => {
+        const a = (k / corners) * Math.PI * 2;
+        const wobble = 0.5 + rand() * 0.7;
+        const px = Math.cos(a) * rx * wobble;
+        const py = Math.sin(a) * ry * wobble;
+        return {
+          x: Math.min(x1, Math.max(x0, cx + px * Math.cos(tilt) - py * Math.sin(tilt))),
+          y: Math.min(y1, Math.max(y0, cy + px * Math.sin(tilt) + py * Math.cos(tilt))),
+        };
+      });
+      // smooth closed curve through the midpoints, cornering at each point
+      const mid = (p, q) => [(p.x + q.x) / 2, (p.y + q.y) / 2];
+      const segs = [["M", ...mid(points[corners - 1], points[0])]];
+      points.forEach((p, k) => segs.push(["Q", p.x, p.y, ...mid(p, points[(k + 1) % corners])]));
+      segs.push(["Z"]);
+      patches.push(vehiclePath(ppm, segs, { fill: LINE_COLOR, stroke: "", opacity: tone < 0.6 ? 0.3 : 0.75 }));
+    }
+  });
+  return patches;
+}
+
+function createJeep(ppm) {
+  return vehicleGroup(jeepParts(ppm));
+}
+
+function createMilitaryJeep(ppm) {
+  return vehicleGroup(jeepParts(ppm, { camo: true }));
+}
+
+function createSmallCarStriped(ppm) {
+  // no tail section: past the rear window it would be a pair of dots
+  const stripes = twinStripes(ppm, [[-1.88, -1.2], [-0.4, 1.4]]);
+  return vehicleGroup([...smallCarParts(ppm, { hoodCreases: false }), ...stripes]);
 }
 
 // Police patrol car (Περιπολικό): the car with a light bar across the roof
@@ -2153,6 +2436,37 @@ function createFireTruck(ppm) {
 
 // Motorcycle (Μοτοσικλέτα), ~2.1 x 0.8 m across the handlebars.
 function createMotorcycle(ppm) {
+  return vehicleGroup(motorcycleParts(ppm));
+}
+
+// Motorcycle with its rider (Μοτοσικλετιστής), seen from above in the
+// pedestrian's capsule style: knees either side of the tank, the back
+// leaning forward from the seat, arms out to the grips and a solid helmet
+// ahead of the shoulders. `dark: true` is the variant that tells a second
+// rider apart: a solid jacket and a light, outlined helmet.
+function createMotorcycleRider(ppm, { dark = false } = {}) {
+  const P = (x, y) => ({ x, y });
+  const thighs = [-1, 1].map((side) => capsule(ppm, P(side * 0.15, 0.3), P(side * 0.22, -0.1), 0.15));
+  const back = capsule(ppm, P(0, 0.3), P(0, 0.02), 0.38);
+  const shoulders = capsule(ppm, P(-0.2, 0), P(0.2, 0), 0.22);
+  const arms = [-1, 1].map((side) => capsule(ppm, P(side * 0.24, -0.02), P(side * 0.34, -0.42), 0.1));
+  const hands = [-1, 1].map((side) => capsule(ppm, P(side * 0.34, -0.44), P(side * 0.34, -0.44), 0.09).set(vehicleSolid()));
+  const helmet = new fabric.Circle({
+    left: 0,
+    top: -0.1 * ppm,
+    radius: 0.13 * ppm,
+    originX: "center",
+    originY: "center",
+    selectable: false,
+    evented: false,
+    ...(dark ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()),
+  });
+  if (dark) [...thighs, back, shoulders, ...arms].forEach((part) => part.set(vehicleSolid()));
+
+  return vehicleGroup([...motorcycleParts(ppm), ...thighs, back, ...arms, ...hands, shoulders, helmet]);
+}
+
+function motorcycleParts(ppm) {
   const frontTire = vehicleRect(ppm, 0, -0.72, 0.12, 0.62, vehicleSolid());
   const rearTire = vehicleRect(ppm, 0, 0.72, 0.18, 0.64, vehicleSolid());
   // Tank flowing into the seat and tail.
@@ -2190,7 +2504,7 @@ function createMotorcycle(ppm) {
   );
   const headlight = vehiclePath(ppm, [["M", -0.08, -0.58], ["Q", 0, -0.66, 0.08, -0.58]], { ...vehicleLine(), strokeWidth: 2 });
 
-  return vehicleGroup([frontTire, rearTire, body, seatLine, handlebar, ...grips, ...mirrors, headlight]);
+  return [frontTire, rearTire, body, seatLine, handlebar, ...grips, ...mirrors, headlight];
 }
 
 // Bicycle (Ποδήλατο), ~1.75 x 0.6 m across the handlebars.
@@ -2538,7 +2852,11 @@ function capsule(ppm, p1, p2, w) {
   });
 }
 
-function createHuman(ppm, pose) {
+// `rider`: a fallen motorcyclist in riding gear, matching the two riders
+// (see createMotorcycleRider): "light" has a solid helmet and an outlined
+// jacket with a zip, "dark" a solid jacket and an outlined helmet. Both
+// wear gloves and a full-face helmet, larger than a bare head.
+function createHuman(ppm, pose, { rider = null } = {}) {
   const j = humanJoints(pose);
 
   const legs = [j.lLeg, j.rLeg].flatMap((leg) => [
@@ -2591,7 +2909,38 @@ function createHuman(ppm, pose) {
     ...humanPart(),
   });
 
-  return vehicleGroup([...legs, ...arms, neck, torso, head]);
+  if (!rider) return vehicleGroup([...legs, ...arms, neck, torso, head]);
+
+  const gloves = arms.filter((part) => part instanceof fabric.Circle);
+  gloves.forEach((glove) => glove.set(vehicleSolid()));
+  // full-face helmet seen from the front: a rounded shell, a wide visor
+  // window across the face and the chin bar below it, shaded opposite the
+  // shell so the visor shows against it
+  const helmet = vehiclePath(
+    ppm,
+    [
+      ["M", -0.15, -0.07],
+      ["C", -0.2, -0.18, -0.2, -0.3, -0.17, -0.35],
+      ["C", -0.14, -0.48, 0.14, -0.48, 0.17, -0.35],
+      ["C", 0.2, -0.3, 0.2, -0.18, 0.15, -0.07],
+      ["Q", 0, -0.03, -0.15, -0.07],
+      ["Z"],
+    ],
+    rider === "dark" ? { ...vehicleBody(), strokeWidth: 2 } : vehicleSolid()
+  );
+  const visor = vehiclePath(
+    ppm,
+    [["M", -0.13, -0.32], ["Q", 0, -0.37, 0.13, -0.32], ["L", 0.14, -0.22], ["Q", 0, -0.17, -0.14, -0.22], ["Z"]],
+    rider === "dark" ? vehicleSolid() : { ...vehicleBody(), strokeWidth: 1.5 }
+  );
+  const gear = [visor];
+  if (rider === "dark") {
+    [torso, ...arms].forEach((part) => part.set(vehicleSolid()));
+  } else {
+    gear.push(vehiclePath(ppm, [["M", 0, -0.04], ["L", 0, 0.58]], vehicleLine())); // zip
+  }
+
+  return vehicleGroup([...legs, ...arms, neck, torso, helmet, ...gear]);
 }
 
 // Traffic signal head (Φωτεινός σηματοδότης), vector-drawn — no catalog
@@ -3066,11 +3415,22 @@ const SHAPE_FACTORIES = {
   stopmarking: createStopMarking,
   yieldmarking: createYieldMarking,
   car: createCar,
+  cardarkroof: createCarDarkRoof,
+  carstriped: createCarStriped,
+  smallcar: createSmallCar,
+  smallcardarkroof: createSmallCarDarkRoof,
+  smallcarstriped: createSmallCarStriped,
+  parkedcar: createParkedCar,
+  parkedsmallcar: createParkedSmallCar,
+  jeep: createJeep,
+  militaryjeep: createMilitaryJeep,
   truck: createTruck,
   van: createVan,
   bus: createBus,
   semitruck: createSemiTruck,
   motorcycle: createMotorcycle,
+  motorcyclerider: (ppm) => createMotorcycleRider(ppm),
+  motorcycleriderdark: (ppm) => createMotorcycleRider(ppm, { dark: true }),
   bicycle: createBicycle,
   fallenmotorcycle: createFallenMotorcycle,
   fallenbicycle: createFallenBicycle,
@@ -3082,6 +3442,8 @@ const SHAPE_FACTORIES = {
   firetruck: createFireTruck,
   pedestrian: createPedestrian,
   ...Object.fromEntries(Object.entries(HUMAN_POSES).map(([key, pose]) => [key, (ppm) => createHuman(ppm, pose)])),
+  humanrider: (ppm) => createHuman(ppm, HUMAN_POSES.humansprawled, { rider: "light" }),
+  humanriderdark: (ppm) => createHuman(ppm, HUMAN_POSES.humansprawled, { rider: "dark" }),
   trafficlight: createTrafficLight,
   tree: createTree,
   treetrunk: createTreeTrunk,
