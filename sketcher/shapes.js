@@ -1874,20 +1874,120 @@ function createCar(ppm) {
 // Car variants, so several cars in one sketch (and each one's start and
 // end position) tell apart at a glance, in print too: the same car with a
 // solid roof, or with twin stripes running nose to tail.
-function createCarDarkRoof(ppm) {
-  const roof = vehicleRect(ppm, 0, 0.375, 1.24, 1.35, { ...vehicleSolid(), rx: 0.08 * ppm, ry: 0.08 * ppm });
-  return vehicleGroup([...carParts(ppm), roof]);
+function solidRoof(ppm, cy, wM, hM) {
+  return vehicleRect(ppm, 0, cy, wM, hM, { ...vehicleSolid(), rx: 0.08 * ppm, ry: 0.08 * ppm });
 }
 
-function createCarStriped(ppm) {
-  // hood, roof and trunk, broken where they would cross the glass
-  const spans = [[-2.1, -1.1], [-0.28, 1.0], [1.6, 2.12]];
-  const stripes = [-0.17, 0.17].flatMap((x) =>
+// `spans`: [from, to] lengths of body the stripes cover, broken where they
+// would cross the glass.
+function twinStripes(ppm, spans) {
+  return [-0.17, 0.17].flatMap((x) =>
     spans.map(([from, to]) =>
       vehicleRect(ppm, x, (from + to) / 2, 0.16, to - from, { ...vehicleSolid(), rx: 0.02 * ppm, ry: 0.02 * ppm })
     )
   );
+}
+
+function createCarDarkRoof(ppm) {
+  return vehicleGroup([...carParts(ppm), solidRoof(ppm, 0.375, 1.24, 1.35)]);
+}
+
+function createCarStriped(ppm) {
+  const stripes = twinStripes(ppm, [[-2.1, -1.1], [-0.28, 1.0], [1.6, 2.12]]);
   return vehicleGroup([...carParts(ppm, { hoodCreases: false }), ...stripes]);
+}
+
+// Small hatchback, ~3.95 x 1.74 m (Yaris/Micra class): shorter than the
+// sedan, with a short hood, a steep windshield and a roof that runs almost
+// to the tail, ending in a short upright rear window instead of a trunk.
+// Tall taillights up the rear corners.
+const SMALL_CAR_ROOF = { cy: 0.5, w: 1.18, h: 1.84 };
+
+function smallCarParts(ppm, { hoodCreases = true } = {}) {
+  const hw = 0.87; // half width
+  const hl = 1.97; // half length
+
+  const wheels = [-1.24, 1.24].flatMap((y) => wheelPair(ppm, hw, y, 0.22, 0.6, 0.08));
+  const mirrors = doorMirrors(ppm, hw, -0.62);
+
+  const body = vehiclePath(
+    ppm,
+    [
+      ["M", -0.55, -hl + 0.04],
+      ["Q", 0, -hl - 0.05, 0.55, -hl + 0.04],
+      ["Q", hw, -hl + 0.1, hw, -hl + 0.6],
+      ["L", hw, hl - 0.35],
+      ["Q", hw, hl - 0.02, 0.6, hl],
+      ["Q", 0, hl + 0.03, -0.6, hl],
+      ["Q", -hw, hl - 0.02, -hw, hl - 0.35],
+      ["L", -hw, -hl + 0.6],
+      ["Q", -hw, -hl + 0.1, -0.55, -hl + 0.04],
+      ["Z"],
+    ],
+    vehicleBody()
+  );
+
+  const windshield = vehiclePath(
+    ppm,
+    [
+      ["M", -0.7, -1.12],
+      ["Q", 0, -1.26, 0.7, -1.12],
+      ["L", 0.6, -0.45],
+      ["Q", 0, -0.5, -0.6, -0.45],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const rearWindow = vehiclePath(
+    ppm,
+    [
+      ["M", -0.6, 1.5],
+      ["Q", 0, 1.47, 0.6, 1.5],
+      ["L", 0.64, 1.74],
+      ["Q", 0, 1.78, -0.64, 1.74],
+      ["Z"],
+    ],
+    vehicleGlass()
+  );
+  const sideWindowR = [["M", 0.64, -0.42], ["L", 0.76, -0.48], ["L", 0.76, 1.36], ["L", 0.64, 1.4], ["Z"]];
+  const sideWindows = [sideWindowR, mirrorX(sideWindowR)].map((segs) => vehiclePath(ppm, segs, vehicleGlass()));
+  const { cy, w, h } = SMALL_CAR_ROOF;
+  const roof = vehicleRect(ppm, 0, cy, w, h, { ...vehicleLine(), rx: 0.08 * ppm, ry: 0.08 * ppm });
+
+  const hoodR = [["M", 0.4, -1.18], ["Q", 0.45, -1.5, 0.36, -1.84]];
+  const hood = hoodCreases ? [hoodR, mirrorX(hoodR)].map((segs) => vehiclePath(ppm, segs, vehicleLine())) : [];
+
+  const headlightR = [["M", 0.45, -hl + 0.1], ["L", 0.74, -hl + 0.22], ["L", 0.82, -hl + 0.5], ["L", 0.5, -hl + 0.26], ["Z"]];
+  const headlights = [headlightR, mirrorX(headlightR)].map((segs) => vehiclePath(ppm, segs, vehicleLine()));
+  const taillights = [-1, 1].map((side) => vehicleRect(ppm, side * (hw - 0.08), hl - 0.28, 0.1, 0.34, vehicleSolid()));
+
+  return [
+    ...wheels,
+    ...mirrors,
+    body,
+    windshield,
+    rearWindow,
+    ...sideWindows,
+    roof,
+    ...hood,
+    ...headlights,
+    ...taillights,
+  ];
+}
+
+function createSmallCar(ppm) {
+  return vehicleGroup(smallCarParts(ppm));
+}
+
+function createSmallCarDarkRoof(ppm) {
+  const { cy, w, h } = SMALL_CAR_ROOF;
+  return vehicleGroup([...smallCarParts(ppm), solidRoof(ppm, cy, w, h)]);
+}
+
+function createSmallCarStriped(ppm) {
+  // no tail section: past the rear window it would be a pair of dots
+  const stripes = twinStripes(ppm, [[-1.88, -1.2], [-0.4, 1.4]]);
+  return vehicleGroup([...smallCarParts(ppm, { hoodCreases: false }), ...stripes]);
 }
 
 // Police patrol car (Περιπολικό): the car with a light bar across the roof
@@ -3087,6 +3187,9 @@ const SHAPE_FACTORIES = {
   car: createCar,
   cardarkroof: createCarDarkRoof,
   carstriped: createCarStriped,
+  smallcar: createSmallCar,
+  smallcardarkroof: createSmallCarDarkRoof,
+  smallcarstriped: createSmallCarStriped,
   truck: createTruck,
   van: createVan,
   bus: createBus,
