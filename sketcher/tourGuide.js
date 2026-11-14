@@ -46,9 +46,23 @@ function startSketcherTour() {
         },
       },
       {
+        // The first length badge actually showing (the palette may be
+        // filtered or scrolled); falls back to the whole palette if the
+        // current category has none.
+        element: () =>
+          [...document.querySelectorAll(".length-badge")].find((b) => b.offsetParent !== null) ||
+          document.getElementById("palette"),
+        popover: {
+          title: "5. Ένδειξη μήκους",
+          description:
+            "Τα στοιχεία της παλέτας με αυτή την ένδειξη στα δεξιά τους παίρνουν το μέγεθός τους από το «Μήκος τμήματος». Ο αριθμός δείχνει το μήκος με το οποίο θα προστεθούν (ή την πλευρά, στα τετράγωνα και ορθογώνια) και αλλάζει μαζί με το slider. Τα υπόλοιπα στοιχεία έχουν σταθερό, ρεαλιστικό μέγεθος.",
+          side: "right",
+        },
+      },
+      {
         element: "#toolbar-export-group",
         popover: {
-          title: "5. Εξαγωγή",
+          title: "6. Εξαγωγή",
           description:
             "Όταν ολοκληρώσετε το σκαρίφημά σας, εξάγετέ το σε αρχείο εικόνας (PNG) ή εγγράφου (PDF).",
           side: "bottom",
@@ -57,7 +71,7 @@ function startSketcherTour() {
       {
         element: "#toolbar-sketch-io-group",
         popover: {
-          title: "6. Αποθήκευση & Φόρτωση",
+          title: "7. Αποθήκευση & Φόρτωση",
           description:
             "Αποθηκεύστε το τρέχον σκαρίφημα με ένα όνομα ώστε να συνεχίσετε αργότερα, ή φορτώστε ένα σκαρίφημα που έχετε ήδη αποθηκεύσει. Τα σκαριφήματα αποθηκεύονται τοπικά στον browser σας.",
           side: "bottom",
