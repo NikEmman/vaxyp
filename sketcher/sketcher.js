@@ -162,6 +162,23 @@
   showSegmentLength();
   segmentLengthInput.addEventListener("input", showSegmentLength);
 
+  // Re-adds several objects at once (load, undo of delete/clear), given in
+  // their stacking order. Roads go under everything and markings over
+  // everything, each keeping its relative order: roads are sent back last
+  // to first, since sending them first to last would reverse them (and a
+  // T-junction branch would drop under its through-road's edge line).
+  function addRestacked(objs) {
+    objs.forEach((o) => canvas.add(o));
+    objs
+      .filter((o) => o.roadConnections && !o.isGroundMarking)
+      .reverse()
+      .forEach((o) => canvas.sendObjectToBack(o));
+    objs
+      .filter((o) => o.isGroundMarking)
+      .forEach((o) => canvas.bringObjectToFront(o));
+    sendMapToBack();
+  }
+
   // Traffic-sign factories return a Promise (async image load); others
   // are synchronous. Promise.resolve() handles both uniformly.
   function addShape(key, x, y) {
@@ -426,7 +443,13 @@
     const mineAfterRotation = connectionsWorld(target)[best.mineIndex];
     target.left += destX - mineAfterRotation.x;
     target.top += destY - mineAfterRotation.y;
-    if (isTJunction) canvas.bringObjectToFront(target);
+    // Lift the branch to the top of the road layer only (just above the
+    // highest other road piece), never above vehicles, text or markings.
+    if (isTJunction) {
+      const others = canvas.getObjects().filter((o) => o !== target);
+      const lastRoad = others.findLastIndex((o) => o.roadConnections);
+      canvas.moveObjectTo(target, lastRoad + 1);
+    }
     target.setCoords();
 
     showSnapIndicator(best.theirs);
@@ -621,18 +644,18 @@
     // The map (selectable only while adjusting it) has its own remove/undo,
     // which puts it back under the road pieces rather than on top.
     if (selected.includes(mapImage)) replaceMap(null);
-    const objs = selected.filter((o) => !o.isMapImage);
+    // In stacking order, so undo puts them back the way they were layered
+    // (a shift-click selection lists them in click order).
+    const stack = canvas.getObjects();
+    const objs = selected
+      .filter((o) => !o.isMapImage)
+      .sort((a, b) => stack.indexOf(a) - stack.indexOf(b));
     if (objs.length === 0) return;
     objs.forEach((o) => canvas.remove(o));
     refreshConnectorMarkers(); // a neighbor's connector may now be free again
     canvas.requestRenderAll();
     pushUndo(() => {
-      objs.forEach((o) => {
-        canvas.add(o);
-        if (o.isGroundMarking) canvas.bringObjectToFront(o);
-        else if (o.roadConnections) canvas.sendObjectToBack(o);
-      });
-      sendMapToBack();
+      addRestacked(objs);
       refreshConnectorMarkers();
       canvas.requestRenderAll();
     });
@@ -1560,12 +1583,7 @@
     canvas.remove(...objs);
     applyGrid();
     pushUndo(() => {
-      objs.forEach((o) => {
-        canvas.add(o);
-        if (o.isGroundMarking) canvas.bringObjectToFront(o);
-        else if (o.roadConnections) canvas.sendObjectToBack(o);
-      });
-      sendMapToBack();
+      addRestacked(objs);
       refreshConnectorMarkers();
       applyGrid();
       canvas.requestRenderAll();
@@ -1716,11 +1734,8 @@
       objects.forEach((obj) => {
         obj.set({ left: obj.left + dx, top: obj.top + dy });
         obj.setCoords();
-        canvas.add(obj);
-        if (obj.isGroundMarking) canvas.bringObjectToFront(obj);
-        else if (obj.roadConnections) canvas.sendObjectToBack(obj);
       });
-      sendMapToBack();
+      addRestacked(objects);
       pushUndo(() => {
         objects.forEach((obj) => canvas.remove(obj));
         refreshConnectorMarkers();
