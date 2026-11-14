@@ -3386,6 +3386,97 @@ function createShapeRect(ppm, lengthM = ROAD_LENGTH_M) {
   return plainRect(ppm, lengthM, lengthM / 2);
 }
 
+// Curve (Καμπύλη): a circular arc whose chord runs along y, length = slider.
+// `curveSag` is how far (px, signed) the arc's middle sits off the chord:
+// 0 is straight, ±curveLen/2 a half circle. The bend handle (see
+// attachCurveControl) changes it; the ends stay put. Both are saved with the
+// sketch so a loaded curve can be bent again. `padding` widens the click
+// area, since a nearly straight 2px path is otherwise hard to hit.
+const CURVE_START_BEND = 0.15; // sag as a fraction of the chord
+const CURVE_HANDLE_COLOR = "#e05a00"; // matches the selection handles
+
+function curvePathData(lenPx, sag) {
+  const h = lenPx / 2;
+  if (Math.abs(sag) < 0.5) return `M 0 ${-h} L 0 ${h}`;
+  const r = (h * h + sag * sag) / (2 * Math.abs(sag));
+  return `M 0 ${-h} A ${r} ${r} 0 0 ${sag > 0 ? 1 : 0} 0 ${h}`;
+}
+
+// Where the path point (x, y) is on the canvas, before any viewport zoom.
+function curvePointWorld(obj, x, y) {
+  return new fabric.Point(x - obj.pathOffset.x, y - obj.pathOffset.y).transform(obj.calcOwnMatrix());
+}
+
+function setCurveBend(obj, sag) {
+  const h = obj.curveLen / 2;
+  sag = Math.max(-h, Math.min(h, sag));
+  const before = curvePointWorld(obj, 0, -h);
+  obj._setPath(curvePathData(obj.curveLen, sag), false);
+  obj.curveSag = sag;
+  const after = curvePointWorld(obj, 0, -h);
+  obj.set({ left: obj.left - (after.x - before.x), top: obj.top - (after.y - before.y), dirty: true });
+  obj.setCoords();
+}
+
+// Adds the bend handle, at the middle of the arc. Called for new curves and
+// again for loaded ones (controls aren't saved); safe to call twice.
+function attachCurveControl(obj) {
+  if (obj.curveLen == null || obj.controls.bend) return;
+  obj.controls = {
+    ...obj.controls,
+    bend: new fabric.Control({
+      actionName: "bend",
+      cursorStyle: "pointer",
+      sizeX: 14,
+      sizeY: 14,
+      positionHandler: (dim, finalMatrix, o) =>
+        new fabric.Point(o.curveSag - o.pathOffset.x, -o.pathOffset.y).transform(
+          fabric.util.multiplyTransformMatrices(o.getViewportTransform(), o.calcTransformMatrix()),
+        ),
+      actionHandler: (eventData, transform, x, y) => {
+        const o = transform.target;
+        const local = fabric.util.sendPointToPlane(new fabric.Point(x, y), undefined, o.calcOwnMatrix());
+        setCurveBend(o, local.x + o.pathOffset.x);
+        return true;
+      },
+      render: (ctx, left, top) => {
+        ctx.save();
+        ctx.fillStyle = CURVE_HANDLE_COLOR;
+        ctx.strokeStyle = "#1b1f24";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(left, top, 7, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      },
+    }),
+  };
+}
+
+function plainCurve(ppm, lengthM, dashed) {
+  const len = lengthM * ppm;
+  const sag = len * CURVE_START_BEND;
+  const obj = new fabric.Path(curvePathData(len, sag), {
+    ...plainStroke(dashed, ppm),
+    selectable: true,
+    evented: true,
+    originX: "center",
+    originY: "center",
+    padding: 8,
+  });
+  obj.curveLen = len;
+  obj.curveSag = sag;
+  attachCurveControl(obj);
+  return obj;
+}
+function createCurve(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainCurve(ppm, lengthM, false);
+}
+function createCurveDashed(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainCurve(ppm, lengthM, true);
+}
+
 // Guardrail (Μπαριέρα / στηθαίο): W-beam rail with posts behind it every
 // 2 m (on the +x side, away from traffic) and flared ends.
 function createGuardrail(ppm, lengthM = 12) {
@@ -3502,6 +3593,8 @@ const SHAPE_FACTORIES = {
   linedashed: createLineDashed,
   shapesquare: createShapeSquare,
   shaperect: createShapeRect,
+  curve: createCurve,
+  curvedashed: createCurveDashed,
   fence: createFence,
   guardrail: createGuardrail,
   skidmarks: createSkidMarks,

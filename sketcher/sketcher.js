@@ -33,7 +33,10 @@
     borderScaleFactor: 2,
     cornerSize: 10,
   };
-  canvas.on("object:added", (e) => e.target.set(SELECTION_STYLE));
+  canvas.on("object:added", (e) => {
+    e.target.set(SELECTION_STYLE);
+    attachCurveControl(e.target); // loaded curves get their bend handle back
+  });
   canvas.selectionColor = "rgba(224,90,0,0.12)";
   canvas.selectionBorderColor = "#e05a00";
   canvas.selectionLineWidth = 2;
@@ -465,7 +468,7 @@
     const t = opt.target;
     transformStart =
       t && t.type !== "activeSelection"
-        ? { obj: t, left: t.left, top: t.top, angle: t.angle, scaleX: t.scaleX, scaleY: t.scaleY }
+        ? { obj: t, left: t.left, top: t.top, angle: t.angle, scaleX: t.scaleX, scaleY: t.scaleY, curveSag: t.curveSag }
         : null;
   });
 
@@ -477,6 +480,9 @@
     if (transformStart && transformStart.obj === opt.target) {
       const prev = transformStart;
       pushUndo(() => {
+        // Bend first: it shifts left/top to keep the ends put, which the
+        // snapshot's left/top then override exactly.
+        if (prev.curveSag != null) setCurveBend(prev.obj, prev.curveSag);
         prev.obj.set({
           left: prev.left,
           top: prev.top,
@@ -1618,6 +1624,9 @@
       "roadConnections",
       "isMapImage",
       "isMeasurement",
+      "curveLen",
+      "curveSag",
+      "padding",
     ]);
     refreshConnectorMarkers();
     json.objects = json.objects.filter((o) => !o.isMapImage);
