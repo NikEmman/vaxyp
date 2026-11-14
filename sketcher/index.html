@@ -382,8 +382,8 @@
         right: 0;
         margin-top: 6px;
         display: flex;
-        align-items: center;
-        gap: 0.4em;
+        flex-direction: column;
+        gap: 0.5em;
         background-color: var(--background-white);
         border: 1px solid var(--border-color);
         border-radius: 8px;
@@ -393,6 +393,47 @@
       }
       .sketch-save-panel[hidden] {
         display: none;
+      }
+      .sketch-save-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+      }
+      /* Existing saves under the name field, each overwritable in one click. */
+      .sketch-save-existing {
+        border-top: 1px solid var(--border-color);
+        padding-top: 0.4em;
+      }
+      .sketch-save-existing[hidden] {
+        display: none;
+      }
+      .sketch-save-existing-title {
+        padding: 0 0.5em 0.2em;
+        font-size: 0.75em;
+        color: var(--text-dark);
+        opacity: 0.7;
+      }
+      #save-sketch-list {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .sketch-list-name.is-current {
+        font-weight: 700;
+      }
+      .sketch-list-overwrite {
+        flex-shrink: 0;
+        padding: 0.25em 0.5em;
+        border: 1px solid var(--secondary-blue);
+        border-radius: 4px;
+        background-color: transparent;
+        color: var(--primary-blue);
+        cursor: pointer;
+        font-size: 0.75em;
+        white-space: nowrap;
+      }
+      .sketch-list-overwrite:hover {
+        background-color: var(--secondary-blue);
+        color: #ffffff;
       }
       #save-sketch-name {
         width: 10em;
@@ -460,7 +501,8 @@
          icon buttons) — which outranks the single-class rule above and both
          centers the name and silently breaks the ellipsis (it needs a block
          box, not a flex one). Scoped selector to win on specificity. */
-      .sketch-list-panel .sketch-list-name {
+      .sketch-list-panel .sketch-list-name,
+      #save-sketch-list .sketch-list-name {
         display: block;
       }
       .sketch-list-name:hover {
@@ -2746,13 +2788,19 @@
               </svg>
             </button>
             <div class="sketch-save-panel" id="save-sketch-panel" hidden>
-              <input
-                type="text"
-                id="save-sketch-name"
-                placeholder="Όνομα σκαριφήματος"
-                autocomplete="off"
-              />
-              <button id="btn-store-sketch" type="button">Αποθήκευση</button>
+              <div class="sketch-save-row">
+                <input
+                  type="text"
+                  id="save-sketch-name"
+                  placeholder="Όνομα σκαριφήματος"
+                  autocomplete="off"
+                />
+                <button id="btn-store-sketch" type="button">Αποθήκευση</button>
+              </div>
+              <div class="sketch-save-existing" id="save-sketch-existing" hidden>
+                <div class="sketch-save-existing-title">Ή αντικαταστήστε ένα υπάρχον:</div>
+                <div id="save-sketch-list"></div>
+              </div>
             </div>
           </div>
           <div class="sketch-io-dropdown">

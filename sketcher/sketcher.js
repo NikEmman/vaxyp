@@ -1628,7 +1628,11 @@
     const objs = canvas.getObjects().filter((o) => !o.isMapImage);
     canvas.remove(...objs);
     applyGrid();
+    // A cleared canvas is no longer the working sketch; undo brings it back.
+    const prevSketchName = currentSketchName;
+    currentSketchName = null;
     pushUndo(() => {
+      currentSketchName = prevSketchName;
       addRestacked(objs);
       refreshConnectorMarkers();
       applyGrid();
@@ -1684,22 +1688,42 @@
   const loadSketchPanel = document.getElementById("load-sketch-panel");
   const sketchListEl = document.getElementById("sketch-list");
 
-  document.getElementById("btn-save-sketch").addEventListener("click", () => {
+  // The "working sketch": the save the canvas currently is. Set by saving
+  // under a name, or by loading a save onto an empty canvas (loading onto
+  // a non-empty one mixes sketches, so it's left alone). Clear and deleting
+  // that save forget it. It prefills the save panel and lets Ctrl+S save
+  // straight back to it, so work in progress doesn't pile up new saves.
+  let currentSketchName = null;
+  const saveSketchExisting = document.getElementById("save-sketch-existing");
+  const saveSketchListEl = document.getElementById("save-sketch-list");
+
+  function isCanvasEmpty() {
+    return canvas.getObjects().every((o) => o.isConnectorIndicator || o.isMapImage);
+  }
+
+  function openSavePanel() {
     loadSketchPanel.hidden = true;
-    saveSketchPanel.hidden = !saveSketchPanel.hidden;
-    if (!saveSketchPanel.hidden) {
-      saveSketchNameInput.value = "";
-      saveSketchNameInput.focus();
-    }
+    saveSketchPanel.hidden = false;
+    renderSaveList();
+    saveSketchNameInput.value = currentSketchName || "";
+    saveSketchNameInput.focus();
+    saveSketchNameInput.select();
+  }
+
+  document.getElementById("btn-save-sketch").addEventListener("click", () => {
+    if (saveSketchPanel.hidden) openSavePanel();
+    else saveSketchPanel.hidden = true;
   });
 
-  function storeSketch() {
-    const name = saveSketchNameInput.value.trim();
+  // Saves the canvas as `name`. Overwriting the working sketch needs no
+  // confirm (that's the point of it); overwriting any other save does,
+  // unless the caller already asked.
+  function saveSketchAs(name, { confirmed = false } = {}) {
     if (!name) {
       window.displayNotification("Δώστε ένα όνομα στο σκαρίφημα.", "warning");
       return;
     }
-    if (canvas.getObjects().every((o) => o.isConnectorIndicator || o.isMapImage)) {
+    if (isCanvasEmpty()) {
       window.displayNotification(
         "Δεν υπάρχει σκαρίφημα για αποθήκευση.",
         "warning",
@@ -1709,14 +1733,18 @@
     const sketches = loadSavedSketches();
     if (
       sketches[name] &&
+      name !== currentSketchName &&
+      !confirmed &&
       !confirm(`Υπάρχει ήδη σκαρίφημα με το όνομα "${name}". Αντικατάσταση;`)
     )
       return;
     sketches[name] = serializeSketch();
     persistSavedSketches(sketches);
+    currentSketchName = name;
     saveSketchPanel.hidden = true;
-    window.displayNotification("Το σκαρίφημα αποθηκεύτηκε.");
+    window.displayNotification(`Το σκαρίφημα αποθηκεύτηκε: «${name}».`);
   }
+  const storeSketch = () => saveSketchAs(saveSketchNameInput.value.trim());
   document
     .getElementById("btn-store-sketch")
     .addEventListener("click", storeSketch);
@@ -1724,17 +1752,57 @@
     if (e.key === "Enter") storeSketch();
   });
 
-  // Ctrl+S opens the save panel exactly like clicking "save sketch" does —
-  // reset to a blank name and focused, ready for Enter — rather than
-  // reusing whatever name is still sitting in the field from the last
-  // save, which would silently overwrite it with no chance to reconsider.
+  // Existing saves under the name field: clicking a name puts it in the
+  // field, "Αντικατάσταση" overwrites that save with the canvas right away.
+  function renderSaveList() {
+    const names = Object.keys(loadSavedSketches()).sort((a, b) => a.localeCompare(b, "el"));
+    saveSketchExisting.hidden = names.length === 0;
+    saveSketchListEl.innerHTML = "";
+    names.forEach((name) => {
+      const item = document.createElement("div");
+      item.className = "sketch-list-item";
+
+      const nameBtn = document.createElement("button");
+      nameBtn.type = "button";
+      nameBtn.className = "sketch-list-name";
+      if (name === currentSketchName) nameBtn.classList.add("is-current");
+      nameBtn.textContent = name;
+      nameBtn.title = name === currentSketchName ? `${name} (τρέχον σκαρίφημα)` : name;
+      nameBtn.addEventListener("click", () => {
+        saveSketchNameInput.value = name;
+        saveSketchNameInput.focus();
+      });
+      item.appendChild(nameBtn);
+
+      const overwriteBtn = document.createElement("button");
+      overwriteBtn.type = "button";
+      overwriteBtn.className = "sketch-list-overwrite";
+      overwriteBtn.textContent = "Αντικατάσταση";
+      overwriteBtn.title = `Αντικατάσταση του "${name}" με το τρέχον σκαρίφημα`;
+      overwriteBtn.addEventListener("click", () => {
+        if (
+          name !== currentSketchName &&
+          !confirm(`Αντικατάσταση του "${name}" με το τρέχον σκαρίφημα;`)
+        )
+          return;
+        saveSketchAs(name, { confirmed: true });
+      });
+      item.appendChild(overwriteBtn);
+
+      saveSketchListEl.appendChild(item);
+    });
+  }
+
+  // Ctrl+S saves straight back to the working sketch, like any editor. With
+  // none (or if that save was removed meanwhile) it opens the save panel.
   document.addEventListener("keydown", (e) => {
     if (e.code !== "KeyS" || (!e.ctrlKey && !e.metaKey)) return;
     e.preventDefault(); // stop the browser's own save-page dialog
-    loadSketchPanel.hidden = true;
-    saveSketchPanel.hidden = false;
-    saveSketchNameInput.value = "";
-    saveSketchNameInput.focus();
+    if (currentSketchName && loadSavedSketches()[currentSketchName]) {
+      saveSketchAs(currentSketchName);
+    } else {
+      openSavePanel();
+    }
   });
 
   // Adds the saved sketch's pieces alongside whatever's already on the
@@ -1744,6 +1812,7 @@
     const sketches = loadSavedSketches();
     const data = sketches[name];
     if (!data) return;
+    const wasEmpty = isCanvasEmpty();
 
     fabric.util.enlivenObjects(data.objects || []).then((objects) => {
       if (objects.length === 0) return;
@@ -1802,6 +1871,7 @@
       refreshConnectorMarkers();
       canvas.requestRenderAll();
       loadSketchPanel.hidden = true;
+      if (wasEmpty) currentSketchName = name;
       window.displayNotification("Το σκαρίφημα προστέθηκε στον καμβά.");
     });
   }
@@ -1811,6 +1881,7 @@
     const sketches = loadSavedSketches();
     delete sketches[name];
     persistSavedSketches(sketches);
+    if (name === currentSketchName) currentSketchName = null;
     renderSketchList();
     window.displayNotification("Το σκαρίφημα διαγράφηκε.");
   }
