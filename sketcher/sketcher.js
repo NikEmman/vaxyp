@@ -159,7 +159,9 @@
   // Steps by 0.1 m; the readout always shows one decimal with a Greek
   // decimal comma ("6,1").
   const showSegmentLength = () => {
-    segmentLengthValue.value = parseFloat(segmentLengthInput.value).toFixed(1).replace(".", ",");
+    const text = parseFloat(segmentLengthInput.value).toFixed(1).replace(".", ",");
+    segmentLengthValue.value = text;
+    document.querySelectorAll(".length-badge-value").forEach((el) => (el.textContent = `${text} μ`));
   };
   segmentLengthInput.value = segmentLengthInput.defaultValue;
   showSegmentLength();
@@ -293,6 +295,21 @@
     paletteSearchText.set(item, text);
     paletteSearchWords.set(item, text.split(/\s+/));
   });
+
+  // Items sized by the segment-length slider (data-sized) get a pill on
+  // their right showing the length they'll be added at. Added after the
+  // search text is built, so "20,0 μ" isn't searchable.
+  paletteItems.forEach((item) => {
+    if (!("sized" in item.dataset)) return;
+    const badge = document.createElement("span");
+    badge.className = "length-badge";
+    badge.title = "Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»";
+    badge.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18" /><circle cx="14" cy="12" r="3.5" /></svg>' +
+      '<span class="length-badge-value"></span>';
+    item.appendChild(badge);
+  });
+  showSegmentLength();
 
   function applyPaletteFilters() {
     const query = normalizeGreek(searchInput.value.trim());

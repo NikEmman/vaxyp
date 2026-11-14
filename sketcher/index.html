@@ -27,7 +27,7 @@
 
       /* ── Palette (left sidebar) ─────────────────────────────── */
       .palette {
-        width: 220px;
+        width: 240px;
         flex-shrink: 0;
         background-color: var(--background-white);
         border-right: 1px solid var(--border-color);
@@ -92,6 +92,40 @@
         stroke-width: 1.6;
         stroke-linecap: round;
         stroke-linejoin: round;
+      }
+      /* Pill on items sized by the «Μήκος τμήματος» slider, showing the
+         length they'll be added at (kept in sync by sketcher.js). */
+      .palette-item .length-badge {
+        margin-left: auto;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.1em;
+        flex-shrink: 0;
+        padding: 0.2em 0.35em;
+        border: 1.5px solid var(--secondary-blue);
+        border-radius: 6px;
+        background-color: color-mix(in srgb, var(--secondary-blue) 12%, transparent);
+        color: var(--primary-blue);
+        font-size: 0.72em;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+      /* A little tighter, so long one-word labels ("Σιδηροδρομικές")
+         still leave room for the pill. */
+      .palette-item[data-sized] {
+        gap: 0.45em;
+        padding-right: 0.45em;
+      }
+      .palette-item .length-badge svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        stroke-width: 2;
+      }
+      .palette-item .length-badge svg circle {
+        fill: currentColor;
       }
       .palette-item img {
         width: 22px;
@@ -510,6 +544,7 @@
             class="palette-item"
             draggable="true"
             data-shape="road2"
+            data-sized
             data-categories="roads"
           >
             <svg viewBox="0 0 24 24">
@@ -521,6 +556,7 @@
             class="palette-item"
             draggable="true"
             data-shape="road2doubleline"
+            data-sized
             data-categories="roads"
             title="Διπλή συνεχής γραμμή: απαγορευμένο το προσπέρασμα και από τις δύο λωρίδες"
           >
@@ -534,6 +570,7 @@
             class="palette-item"
             draggable="true"
             data-shape="road2passingzone"
+            data-sized
             data-categories="roads"
             title="Ζώνη προσπέρασης: η λωρίδα δίπλα στη διακεκομμένη γραμμή επιτρέπεται να προσπεράσει, η άλλη όχι"
           >
@@ -548,6 +585,7 @@
             class="palette-item"
             draggable="true"
             data-shape="road3"
+            data-sized
             data-categories="roads"
           >
             <svg viewBox="0 0 24 24">
@@ -559,6 +597,7 @@
             class="palette-item"
             draggable="true"
             data-shape="traintracks"
+            data-sized
             data-categories="roads"
           >
             <svg viewBox="0 0 24 24">
@@ -571,6 +610,7 @@
             class="palette-item"
             draggable="true"
             data-shape="oneway"
+            data-sized
             data-categories="roads"
           >
             <svg viewBox="0 0 24 24">
@@ -667,6 +707,7 @@
             class="palette-item"
             draggable="true"
             data-shape="medianstrip"
+            data-sized
             data-categories="medians"
             title="Μη διαβατή νησίδα διαχωρισμού — τοποθετείται ανάμεσα σε ευθεία τμήματα δρόμου"
           >
@@ -1680,6 +1721,7 @@
             class="palette-item"
             draggable="true"
             data-shape="pathstraight"
+            data-sized
             data-categories="paths"
             data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
             title="Το μήκος του βέλους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1693,6 +1735,7 @@
             class="palette-item"
             draggable="true"
             data-shape="pathstraightdashed"
+            data-sized
             data-categories="paths"
             data-keywords="βέλος κατεύθυνση πορεία κίνηση τροχιά όχημα"
             title="Π.χ. η πορεία που θα ακολουθούσε το όχημα. Το μήκος του βέλους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1781,6 +1824,7 @@
             class="palette-item"
             draggable="true"
             data-shape="line"
+            data-sized
             data-categories="shapes"
             data-keywords="γραμμή ευθεία όριο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1794,6 +1838,7 @@
             class="palette-item"
             draggable="true"
             data-shape="linedashed"
+            data-sized
             data-categories="shapes"
             data-keywords="γραμμή διακεκομμένη όριο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1807,6 +1852,7 @@
             class="palette-item"
             draggable="true"
             data-shape="shapesquare"
+            data-sized
             data-categories="shapes"
             data-keywords="τετράγωνο κτίριο κτήριο οικοδομή σπίτι"
             title="Η πλευρά ρυθμίζεται από το πεδίο «Μήκος τμήματος»· τεντώστε το από τις γωνίες για άλλες αναλογίες. Π.χ. για κτίρια"
@@ -1820,6 +1866,7 @@
             class="palette-item"
             draggable="true"
             data-shape="shaperect"
+            data-sized
             data-categories="shapes"
             data-keywords="ορθογώνιο παραλληλόγραμμο κτίριο κτήριο οικοδομή σπίτι"
             title="Η μεγάλη πλευρά ρυθμίζεται από το πεδίο «Μήκος τμήματος» (η μικρή είναι η μισή)· τεντώστε το από τις γωνίες για άλλες αναλογίες. Π.χ. για κτίρια"
@@ -1833,6 +1880,7 @@
             class="palette-item"
             draggable="true"
             data-shape="curve"
+            data-sized
             data-categories="shapes"
             data-keywords="καμπύλη γραμμή τόξο κράσπεδο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος». Σύρετε την πορτοκαλί λαβή στη μέση της για να αλλάξετε πόσο καμπυλώνει"
@@ -1846,6 +1894,7 @@
             class="palette-item"
             draggable="true"
             data-shape="curvedashed"
+            data-sized
             data-categories="shapes"
             data-keywords="καμπύλη διακεκομμένη γραμμή τόξο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος». Σύρετε την πορτοκαλί λαβή στη μέση της για να αλλάξετε πόσο καμπυλώνει"
@@ -1873,6 +1922,7 @@
             class="palette-item"
             draggable="true"
             data-shape="skidmarks"
+            data-sized
             data-categories="other"
             data-keywords="ίχνη ελαστικών λάστιχα φρενάρισμα ολίσθηση"
             title="Ίχνη φρεναρίσματος ελαστικών· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1887,6 +1937,7 @@
             class="palette-item"
             draggable="true"
             data-shape="skidmarkssideways"
+            data-sized
             data-categories="other"
             data-keywords="ίχνη ελαστικών λάστιχα ολίσθηση πλαγιολίσθηση ντεραπάρισμα πλάγια"
             title="Ίχνη ελαστικών οχήματος που γλιστράει πλάγια (τα ίχνη μπροστινών και πίσω τροχών)· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -1901,6 +1952,7 @@
             class="palette-item"
             draggable="true"
             data-shape="scrapemarks"
+            data-sized
             data-categories="other"
             data-keywords="χαραγές χαράγματα γρατζουνιές απόξεση τριβή εκδορά μέταλλο οδόστρωμα ίχνη"
             title="Χαραγές στο οδόστρωμα από μέταλλο που σύρθηκε πάνω του (αμάξωμα, ζάντα, μοτοσικλέτα)· το μήκος τους ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -2182,6 +2234,7 @@
             class="palette-item"
             draggable="true"
             data-shape="wall"
+            data-sized
             data-categories="obstacles"
             data-keywords="τοίχος μαντρότοιχος τοιχίο εμπόδιο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -2196,6 +2249,7 @@
             class="palette-item"
             draggable="true"
             data-shape="fence"
+            data-sized
             data-categories="obstacles"
             data-keywords="φράχτης περίφραξη συρματόπλεγμα εμπόδιο"
             title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
@@ -2212,6 +2266,7 @@
             class="palette-item"
             draggable="true"
             data-shape="guardrail"
+            data-sized
             data-categories="obstacles"
             data-keywords="μπαριέρα στηθαίο προστατευτικό κιγκλίδωμα εμπόδιο"
             title="Προστατευτικό στηθαίο ασφαλείας· οι ορθοστάτες είναι στην πλευρά μακριά από την κυκλοφορία. Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
