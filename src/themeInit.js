@@ -77,6 +77,10 @@
         Math.max(y, innerHeight - y)
       );
 
+      // The new snapshot starts clipped to nothing in CSS, so it can't show
+      // in full for a frame before the reveal animation picks it up.
+      root.style.setProperty("--reveal-x", `${x}px`);
+      root.style.setProperty("--reveal-y", `${y}px`);
       root.classList.add("theme-switching");
       const transition = document.startViewTransition(swap);
 
@@ -92,6 +96,7 @@
             {
               duration: 550,
               easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+              fill: "forwards",
               pseudoElement: "::view-transition-new(root)",
             }
           );

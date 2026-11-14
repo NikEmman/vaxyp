@@ -33,7 +33,8 @@
   --btn-hover-text: #ffffff;
   --header-bg: var(--primary-blue);
 }
-.dark {
+.dark,
+:root:has(> body.dark) {
   color-scheme: dark;
 }
 .dark {
@@ -1757,6 +1758,10 @@ hr {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+.theme-switching::view-transition-new(root) {
+  clip-path: circle(0px at var(--reveal-x, 50%) var(--reveal-y, 50%));
 }
 
 .theme-switching *,
