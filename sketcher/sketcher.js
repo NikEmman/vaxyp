@@ -1468,53 +1468,67 @@
     return { left, top, width, height };
   }
 
-  document.getElementById("btn-export").addEventListener("click", () => {
+  // Both exports produce the same landscape A4 page at 300 DPI: the crop is
+  // re-rendered (vectors stay sharp) at whatever multiplier makes it fill the
+  // page inside the margins, then centred on white. Shrinking is unlimited;
+  // enlarging stops at 3× natural size (1 canvas unit = 1pt), so a lone car
+  // doesn't balloon to fill the sheet.
+  const A4_DPI = 300;
+  const A4_PX = { w: 3508, h: 2480 }; // landscape A4 at 300 DPI
+  const A4_PT = { w: 841.89, h: 595.28 }; // landscape A4 in PDF points
+  const A4_MARGIN_PX = 125; // ≈ 1 cm
+  const MAX_ENLARGE = 3;
+
+  function renderA4Page(crop) {
+    const fit = Math.min(
+      (A4_PX.w - 2 * A4_MARGIN_PX) / crop.width,
+      (A4_PX.h - 2 * A4_MARGIN_PX) / crop.height,
+    );
+    const multiplier = Math.min(fit, (MAX_ENLARGE * A4_DPI) / 72);
+    const sketch = captureInLightPalette(() =>
+      canvas.toCanvasElement(multiplier, crop),
+    );
+
+    const page = document.createElement("canvas");
+    page.width = A4_PX.w;
+    page.height = A4_PX.h;
+    const ctx = page.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, page.width, page.height);
+    ctx.drawImage(
+      sketch,
+      Math.round((page.width - sketch.width) / 2),
+      Math.round((page.height - sketch.height) / 2),
+    );
+    return page;
+  }
+
+  function getExportCropOrWarn() {
     const crop = getExportCropBounds(30);
-    if (!crop) {
+    if (!crop)
       window.displayNotification(
         "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
         "warning",
       );
-      return;
-    }
-    const dataUrl = captureInLightPalette(() =>
-      canvas.toDataURL({ format: "png", multiplier: 2, ...crop }),
-    );
+    return crop;
+  }
+
+  document.getElementById("btn-export").addEventListener("click", () => {
+    const crop = getExportCropOrWarn();
+    if (!crop) return;
     const a = document.createElement("a");
-    a.href = dataUrl;
+    a.href = renderA4Page(crop).toDataURL("image/png");
     a.download = "skarifima.png";
     a.click();
   });
 
-  // PDF export fits the same content-cropped PNG onto a landscape page —
-  // closer to something you'd actually staple into a report. Since the PNG
-  // is captured at multiplier:2, a fit-scale of 0.5 is the content's native
-  // resolution (1 canvas unit = 1 PDF point); below that, A4 would shrink
-  // it past its natural crispness, so we promote to A3 instead.
-  const PAGE_A4 = { w: 841.89, h: 595.28 }; // landscape, in points
-  const PAGE_A3 = { w: 1190.55, h: 841.89 }; // landscape, in points
-  const NATIVE_SCALE = 0.5;
-
-  function fitScale(page, margin, width, height) {
-    const avail = { w: page.w - 2 * margin, h: page.h - 2 * margin };
-    return Math.min(avail.w / width, avail.h / height);
-  }
-
   document
     .getElementById("btn-export-pdf")
     .addEventListener("click", async () => {
-      const crop = getExportCropBounds(30);
-      if (!crop) {
-        window.displayNotification(
-          "Δεν υπάρχει σκαρίφημα για εξαγωγή.",
-          "warning",
-        );
-        return;
-      }
+      const crop = getExportCropOrWarn();
+      if (!crop) return;
 
-      const pngDataUrl = captureInLightPalette(() =>
-        canvas.toDataURL({ format: "png", multiplier: 2, ...crop }),
-      );
+      const pngDataUrl = renderA4Page(crop).toDataURL("image/png");
       const pngBytes = Uint8Array.from(atob(pngDataUrl.split(",")[1]), (c) =>
         c.charCodeAt(0),
       );
@@ -1522,24 +1536,8 @@
       const { PDFDocument } = PDFLib;
       const doc = await PDFDocument.create();
       const embedded = await doc.embedPng(pngBytes);
-
-      const margin = 30;
-      let PAGE = PAGE_A4;
-      let scale = fitScale(PAGE, margin, embedded.width, embedded.height);
-      if (scale < NATIVE_SCALE) {
-        PAGE = PAGE_A3;
-        scale = fitScale(PAGE, margin, embedded.width, embedded.height);
-      }
-      const dw = embedded.width * scale;
-      const dh = embedded.height * scale;
-
-      const page = doc.addPage([PAGE.w, PAGE.h]);
-      page.drawImage(embedded, {
-        x: (PAGE.w - dw) / 2,
-        y: (PAGE.h - dh) / 2,
-        width: dw,
-        height: dh,
-      });
+      const page = doc.addPage([A4_PT.w, A4_PT.h]);
+      page.drawImage(embedded, { x: 0, y: 0, width: A4_PT.w, height: A4_PT.h });
 
       const bytes = await doc.save();
       const url = URL.createObjectURL(
