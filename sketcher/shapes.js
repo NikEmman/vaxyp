@@ -3343,6 +3343,49 @@ function createFence(ppm, lengthM = 10) {
   return objGroup(parts);
 }
 
+// ── Plain shapes (Σχήματα), sized by the segment-length slider ──
+// Outline only, so a map underneath stays visible (e.g. tracing buildings).
+// strokeUniform keeps the border thin when the shape is stretched with its
+// corner handles into other proportions or past the slider's 20 m.
+const plainStroke = (dashed, ppm) =>
+  objPart({
+    fill: "",
+    stroke: LINE_COLOR,
+    strokeWidth: 2,
+    strokeUniform: true,
+    strokeDashArray: dashed ? [0.4 * ppm, 0.25 * ppm] : null,
+  });
+
+// Straight line (Ευθεία γραμμή) along y, like road pieces. A 2px line alone
+// is nearly impossible to click, so an invisible 0.6 m strip gives it a grab
+// area (and a visible selection box).
+function plainLine(ppm, lengthM, dashed) {
+  const h = lengthM * ppm;
+  return objGroup([
+    new fabric.Rect({ width: 0.6 * ppm, height: h, originX: "center", originY: "center", ...objPart({ fill: "rgba(0,0,0,0)" }) }),
+    new fabric.Path(`M 0 ${h / 2} L 0 ${-h / 2}`, plainStroke(dashed, ppm)),
+  ]);
+}
+function createLine(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainLine(ppm, lengthM, false);
+}
+function createLineDashed(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainLine(ppm, lengthM, true);
+}
+
+function plainRect(ppm, wM, hM) {
+  return objGroup([
+    new fabric.Rect({ width: wM * ppm, height: hM * ppm, originX: "center", originY: "center", ...plainStroke(false, ppm) }),
+  ]);
+}
+// Square: side = slider length. Rectangle: slider length × half of it.
+function createShapeSquare(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainRect(ppm, lengthM, lengthM);
+}
+function createShapeRect(ppm, lengthM = ROAD_LENGTH_M) {
+  return plainRect(ppm, lengthM, lengthM / 2);
+}
+
 // Guardrail (Μπαριέρα / στηθαίο): W-beam rail with posts behind it every
 // 2 m (on the +x side, away from traffic) and flared ends.
 function createGuardrail(ppm, lengthM = 12) {
@@ -3455,6 +3498,10 @@ const SHAPE_FACTORIES = {
   cone: createCone,
   bin: createBin,
   wall: createWall,
+  line: createLine,
+  linedashed: createLineDashed,
+  shapesquare: createShapeSquare,
+  shaperect: createShapeRect,
   fence: createFence,
   guardrail: createGuardrail,
   skidmarks: createSkidMarks,

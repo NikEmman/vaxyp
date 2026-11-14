@@ -497,6 +497,7 @@
           <option value="obstacles">Εμπόδια</option>
           <option value="paths">Πορεία Οχημάτων</option>
           <option value="texts">Πλαίσια Κειμένου</option>
+          <option value="shapes">Σχήματα</option>
           <option value="other">Άλλα</option>
         </select>
         <div class="palette-items" id="palette-items">
@@ -1774,6 +1775,58 @@
           <div
             class="palette-item"
             draggable="true"
+            data-shape="line"
+            data-categories="shapes"
+            data-keywords="γραμμή ευθεία όριο"
+            title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2v20" />
+            </svg>
+            Ευθεία Γραμμή
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="linedashed"
+            data-categories="shapes"
+            data-keywords="γραμμή διακεκομμένη όριο"
+            title="Το μήκος ρυθμίζεται από το πεδίο «Μήκος τμήματος»"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2v20" stroke-dasharray="3 2" />
+            </svg>
+            Διακεκομμένη Γραμμή
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="shapesquare"
+            data-categories="shapes"
+            data-keywords="τετράγωνο κτίριο κτήριο οικοδομή σπίτι"
+            title="Η πλευρά ρυθμίζεται από το πεδίο «Μήκος τμήματος»· τεντώστε το από τις γωνίες για άλλες αναλογίες. Π.χ. για κτίρια"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="4" y="4" width="16" height="16" />
+            </svg>
+            Τετράγωνο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
+            data-shape="shaperect"
+            data-categories="shapes"
+            data-keywords="ορθογώνιο παραλληλόγραμμο κτίριο κτήριο οικοδομή σπίτι"
+            title="Η μεγάλη πλευρά ρυθμίζεται από το πεδίο «Μήκος τμήματος» (η μικρή είναι η μισή)· τεντώστε το από τις γωνίες για άλλες αναλογίες. Π.χ. για κτίρια"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="7" width="20" height="10" />
+            </svg>
+            Ορθογώνιο
+          </div>
+          <div
+            class="palette-item"
+            draggable="true"
             data-shape="trafficlight"
             data-categories="other"
           >
@@ -2536,7 +2589,7 @@
           <div class="sep"></div>
           <div
             class="segment-length-control"
-            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας, ιχνών ελαστικών, χαραγών, ευθέων βελών πορείας, τοίχων, φραχτών ή μπαριέρων που θα προστεθούν στο σκαρίφημα"
+            title="Μήκος των νέων ευθειών τμημάτων δρόμου, σιδηροδρομικών γραμμών, νησίδας, ιχνών ελαστικών, χαραγών, ευθέων βελών πορείας, τοίχων, φραχτών, μπαριέρων ή γραμμών που θα προστεθούν στο σκαρίφημα, καθώς και πλευρά των νέων τετραγώνων και ορθογωνίων"
           >
             <label for="segment-length-input">Μήκος τμήματος: </label>
             <input
