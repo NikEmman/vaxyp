@@ -652,8 +652,11 @@
   const rotateLeftBtn = document.getElementById("btn-rotate-left");
   const rotateRightBtn = document.getElementById("btn-rotate-right");
   const deleteBtn = document.getElementById("btn-delete");
+  const copyBtn = document.getElementById("btn-copy");
+  const pasteBtn = document.getElementById("btn-paste"); // enabled by the first copy
   function updateSelectionButtons() {
     const hasSelection = !!canvas.getActiveObject();
+    copyBtn.disabled = !hasSelection;
     rotateLeftBtn.disabled = !hasSelection;
     rotateRightBtn.disabled = !hasSelection;
     deleteBtn.disabled = !hasSelection;
@@ -1472,9 +1475,25 @@
     const item = [...e.clipboardData.items].find(
       (i) => i.kind === "file" && i.type.startsWith("image/"),
     );
-    if (!item) return;
+    if (item) {
+      e.preventDefault();
+      importMapFile(item.getAsFile());
+      return;
+    }
+    // Otherwise it's copied sketch objects: from this window (the internal
+    // clipboard) or, tagged on the system clipboard, from another one.
+    const text = e.clipboardData.getData("text/plain");
+    if (text.startsWith(CLIPBOARD_TAG)) {
+      try {
+        sketchClipboard = JSON.parse(text.slice(CLIPBOARD_TAG.length));
+        pasteBtn.disabled = false;
+      } catch {
+        /* malformed — fall back to the internal clipboard */
+      }
+    }
+    if (!sketchClipboard) return;
     e.preventDefault();
-    importMapFile(item.getAsFile());
+    pasteClipboard();
   });
   mapAdjustBtn.addEventListener("click", () => {
     if (measuring) stopMeasuring();
@@ -1661,26 +1680,37 @@
   // object that references the canvas back, and JSON.stringify throws on
   // the circular structure. The map is never saved either, only what
   // was drawn on it.
+  const SAVED_PROPS = [
+    "isGroundMarking",
+    "roadConnections",
+    "isMapImage",
+    "isMeasurement",
+    "curveLen",
+    "curveSag",
+    "padding",
+  ];
+  const stripMarkers = (o) => {
+    if (o.roadConnections) {
+      o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
+    }
+    return o;
+  };
   function serializeSketch() {
     clearConnectorMarkers();
-    const json = canvas.toObject([
-      "isGroundMarking",
-      "roadConnections",
-      "isMapImage",
-      "isMeasurement",
-      "curveLen",
-      "curveSag",
-      "padding",
-    ]);
+    const json = canvas.toObject(SAVED_PROPS);
     refreshConnectorMarkers();
     json.objects = json.objects.filter((o) => !o.isMapImage);
-    json.ppm = ppm; // the zoom its pixel sizes are at, see loadSketch
-    json.objects.forEach((o) => {
-      if (o.roadConnections) {
-        o.roadConnections = o.roadConnections.map(({ marker, ...rest }) => rest);
-      }
-    });
+    json.ppm = ppm; // the zoom its pixel sizes are at, see placeSerialized
+    json.objects.forEach(stripMarkers);
     return json;
+  }
+  // Same, for just some objects (copy/paste). They must not be inside an
+  // ActiveSelection, whose members' coordinates are relative to it.
+  function serializeObjects(objs) {
+    clearConnectorMarkers();
+    const out = objs.map((o) => stripMarkers(o.toObject(SAVED_PROPS)));
+    refreshConnectorMarkers();
+    return out;
   }
 
   const saveSketchPanel = document.getElementById("save-sketch-panel");
@@ -1805,6 +1835,60 @@
     }
   });
 
+  const viewportCenter = () => ({
+    x: scrollWrap.scrollLeft + scrollWrap.clientWidth / 2,
+    y: scrollWrap.scrollTop + scrollWrap.clientHeight / 2,
+  });
+
+  // Turns serialized objects (a saved sketch, or the copy/paste clipboard)
+  // back into canvas objects centered on `at`, as one undo step, and
+  // selects them so they can be dragged into place as one piece right away.
+  async function placeSerialized(objectsJson, fromPpm, at) {
+    const objects = await fabric.util.enlivenObjects(objectsJson || []);
+    if (objects.length === 0) return objects;
+
+    objects.forEach(adoptLoadedClip);
+    // Pixel sizes are at the zoom they were stored at; bring them to the
+    // current one, or a 7 m piece comes back 3.5 m after zooming in.
+    // Sketches saved before the zoom was stored are taken as the default.
+    transformObjects(objects, ppm / (fromPpm || 40), 0, 0);
+
+    // Stored coordinates are wherever the pieces sat on the (much bigger)
+    // canvas back then — recenter the group on `at` instead.
+    const bounds = objects.reduce(
+      (acc, o) => {
+        const r = o.getBoundingRect();
+        return {
+          left: Math.min(acc.left, r.left),
+          top: Math.min(acc.top, r.top),
+          right: Math.max(acc.right, r.left + r.width),
+          bottom: Math.max(acc.bottom, r.top + r.height),
+        };
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+    );
+    const dx = at.x - (bounds.left + bounds.right) / 2;
+    const dy = at.y - (bounds.top + bounds.bottom) / 2;
+
+    canvas.discardActiveObject();
+    objects.forEach((obj) => {
+      obj.set({ left: obj.left + dx, top: obj.top + dy });
+      obj.setCoords();
+    });
+    addRestacked(objects);
+    pushUndo(() => {
+      objects.forEach((obj) => canvas.remove(obj));
+      refreshConnectorMarkers();
+      canvas.requestRenderAll();
+    });
+
+    if (objects.length === 1) canvas.setActiveObject(objects[0]);
+    else canvas.setActiveObject(new fabric.ActiveSelection(objects, { canvas }));
+    refreshConnectorMarkers();
+    canvas.requestRenderAll();
+    return objects;
+  }
+
   // Adds the saved sketch's pieces alongside whatever's already on the
   // canvas (nothing is cleared) — this is how a recurring local layout
   // (a known junction, a common set-up) gets reused across sketches.
@@ -1814,67 +1898,123 @@
     if (!data) return;
     const wasEmpty = isCanvasEmpty();
 
-    fabric.util.enlivenObjects(data.objects || []).then((objects) => {
+    placeSerialized(data.objects, data.ppm, viewportCenter()).then((objects) => {
       if (objects.length === 0) return;
-
-      objects.forEach(adoptLoadedClip);
-      // Pixel sizes are at the zoom the sketch was saved at; bring them to
-      // the current one, or a 7 m piece comes back 3.5 m after zooming in.
-      // Sketches saved before the zoom was stored are taken as the default.
-      transformObjects(objects, ppm / (data.ppm || 40), 0, 0);
-
-      // Saved coordinates are wherever the piece sat on the (much bigger)
-      // canvas when it was stored — recenter the group on the current
-      // viewport instead, or it usually lands off-screen or on top of
-      // whatever's already there.
-      const bounds = objects.reduce(
-        (acc, o) => {
-          const r = o.getBoundingRect();
-          return {
-            left: Math.min(acc.left, r.left),
-            top: Math.min(acc.top, r.top),
-            right: Math.max(acc.right, r.left + r.width),
-            bottom: Math.max(acc.bottom, r.top + r.height),
-          };
-        },
-        { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
-      );
-      const dx =
-        scrollWrap.scrollLeft +
-        scrollWrap.clientWidth / 2 -
-        (bounds.left + bounds.right) / 2;
-      const dy =
-        scrollWrap.scrollTop +
-        scrollWrap.clientHeight / 2 -
-        (bounds.top + bounds.bottom) / 2;
-
-      canvas.discardActiveObject();
-      objects.forEach((obj) => {
-        obj.set({ left: obj.left + dx, top: obj.top + dy });
-        obj.setCoords();
-      });
-      addRestacked(objects);
-      pushUndo(() => {
-        objects.forEach((obj) => canvas.remove(obj));
-        refreshConnectorMarkers();
-        canvas.requestRenderAll();
-      });
-
-      // Select the whole loaded group so it can be dragged into place as
-      // one piece right away, same as a single freshly-added shape.
-      if (objects.length === 1) canvas.setActiveObject(objects[0]);
-      else
-        canvas.setActiveObject(
-          new fabric.ActiveSelection(objects, { canvas }),
-        );
-
-      refreshConnectorMarkers();
-      canvas.requestRenderAll();
       loadSketchPanel.hidden = true;
       if (wasEmpty) currentSketchName = name;
       window.displayNotification("Το σκαρίφημα προστέθηκε στον καμβά.");
     });
   }
+
+  // ── Copy / paste / duplicate ─────────────────────────────────────
+  // Ctrl+C (or the toolbar button) copies the selection; Ctrl+V pastes it
+  // centered on the mouse pointer if it's over the canvas, else on the
+  // middle of the view, like palette items. Ctrl+D duplicates in place,
+  // offset a little. The copy also goes onto the system clipboard as tagged
+  // text: that replaces any screenshot there, so Ctrl+V pastes whichever was
+  // copied last (a screenshot still becomes the background map), and lets a
+  // copy be pasted into another sketcher window.
+  const CLIPBOARD_TAG = "vaxyp-sketcher-objects:";
+  const DUPLICATE_OFFSET_M = 1.5;
+  const PASTE_CASCADE_M = 1; // repeat pastes at one spot step apart, not stack
+  let sketchClipboard = null; // { objects, ppm }
+  let pointer = null; // last mouse position on the canvas, in canvas px
+  let pointerOnCanvas = false;
+  let lastPaste = null; // { x, y, n }: where the last paste was aimed
+
+  canvas.on("mouse:move", (opt) => {
+    pointer = canvas.getScenePoint(opt.e);
+  });
+  canvas.upperCanvasEl.addEventListener("pointerenter", () => (pointerOnCanvas = true));
+  canvas.upperCanvasEl.addEventListener("pointerleave", () => (pointerOnCanvas = false));
+
+  // Serializes the selection (in stacking order, never the map), keeping it
+  // selected. Returns null when there's nothing to copy, or while a text box
+  // is being typed in (its own copy/paste must keep working).
+  function copySelection() {
+    const active = canvas.getActiveObject();
+    if (!active || active.isEditing) return null;
+    const stack = canvas.getObjects();
+    const objs = canvas
+      .getActiveObjects()
+      .filter((o) => !o.isMapImage && !o.isConnectorIndicator)
+      .sort((a, b) => stack.indexOf(a) - stack.indexOf(b));
+    if (objs.length === 0) return null;
+    canvas.discardActiveObject();
+    const box = objs.reduce(
+      (acc, o) => {
+        const r = o.getBoundingRect();
+        return {
+          left: Math.min(acc.left, r.left),
+          top: Math.min(acc.top, r.top),
+          right: Math.max(acc.right, r.left + r.width),
+          bottom: Math.max(acc.bottom, r.top + r.height),
+        };
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+    );
+    const clip = {
+      objects: serializeObjects(objs),
+      ppm,
+      center: { x: (box.left + box.right) / 2, y: (box.top + box.bottom) / 2 },
+    };
+    if (objs.length === 1) canvas.setActiveObject(objs[0]);
+    else canvas.setActiveObject(new fabric.ActiveSelection(objs, { canvas }));
+    canvas.requestRenderAll();
+    return clip;
+  }
+
+  function storeClipboard(clip) {
+    sketchClipboard = { objects: clip.objects, ppm: clip.ppm };
+    lastPaste = null;
+    pasteBtn.disabled = false;
+    const n = clip.objects.length;
+    window.displayNotification(n === 1 ? "Αντιγράφηκε 1 στοιχείο." : `Αντιγράφηκαν ${n} στοιχεία.`);
+    return `${CLIPBOARD_TAG}${JSON.stringify(sketchClipboard)}`;
+  }
+
+  function pasteClipboard() {
+    if (!sketchClipboard) return;
+    let at = pointerOnCanvas && pointer ? { x: pointer.x, y: pointer.y } : viewportCenter();
+    if (lastPaste && Math.hypot(at.x - lastPaste.x, at.y - lastPaste.y) < 1) {
+      lastPaste.n++;
+    } else {
+      lastPaste = { x: at.x, y: at.y, n: 0 };
+    }
+    const step = lastPaste.n * PASTE_CASCADE_M * ppm;
+    at = { x: at.x + step, y: at.y + step };
+    placeSerialized(sketchClipboard.objects, sketchClipboard.ppm, at);
+  }
+
+  function duplicateSelection() {
+    const clip = copySelection();
+    if (!clip) return;
+    const off = DUPLICATE_OFFSET_M * ppm;
+    placeSerialized(clip.objects, clip.ppm, { x: clip.center.x + off, y: clip.center.y + off });
+  }
+
+  const isTypingTarget = (t) => t.tagName === "INPUT" || t.tagName === "TEXTAREA";
+
+  document.addEventListener("copy", (e) => {
+    if (isTypingTarget(e.target)) return;
+    const clip = copySelection();
+    if (!clip) return;
+    e.preventDefault();
+    e.clipboardData.setData("text/plain", storeClipboard(clip));
+  });
+  document.getElementById("btn-copy").addEventListener("click", () => {
+    const clip = copySelection();
+    if (!clip) return;
+    const text = storeClipboard(clip);
+    navigator.clipboard?.writeText(text).catch(() => {}); // best effort
+  });
+  pasteBtn.addEventListener("click", pasteClipboard);
+  document.addEventListener("keydown", (e) => {
+    if (e.code !== "KeyD" || (!e.ctrlKey && !e.metaKey) || e.shiftKey) return;
+    if (isTypingTarget(e.target)) return;
+    e.preventDefault(); // stop the browser's own bookmark shortcut
+    duplicateSelection();
+  });
 
   function deleteSketch(name) {
     if (!confirm(`Διαγραφή του σκαριφήματος "${name}";`)) return;
