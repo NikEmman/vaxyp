@@ -159,11 +159,34 @@
   // Steps by 0.1 m; the readout always shows one decimal with a Greek
   // decimal comma ("6,1").
   const showSegmentLength = () => {
-    segmentLengthValue.textContent = parseFloat(segmentLengthInput.value).toFixed(1).replace(".", ",");
+    segmentLengthValue.value = parseFloat(segmentLengthInput.value).toFixed(1).replace(".", ",");
   };
   segmentLengthInput.value = segmentLengthInput.defaultValue;
   showSegmentLength();
   segmentLengthInput.addEventListener("input", showSegmentLength);
+  // The readout is also a text box: typing a length ("6,5" or "6.5") and
+  // pressing Enter or leaving the box moves the slider there, clamped to the
+  // slider's range and step. Anything unreadable just restores the value.
+  function applyTypedSegmentLength() {
+    const typed = parseFloat(segmentLengthValue.value.replace(",", "."));
+    if (Number.isFinite(typed)) {
+      const min = parseFloat(segmentLengthInput.min);
+      const max = parseFloat(segmentLengthInput.max);
+      segmentLengthInput.value = Math.min(max, Math.max(min, Math.round(typed * 10) / 10));
+    }
+    showSegmentLength();
+  }
+  segmentLengthValue.addEventListener("change", applyTypedSegmentLength);
+  segmentLengthValue.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      applyTypedSegmentLength();
+      segmentLengthValue.blur();
+    } else if (e.key === "Escape") {
+      showSegmentLength();
+      segmentLengthValue.blur();
+    }
+  });
+  segmentLengthValue.addEventListener("focus", () => segmentLengthValue.select());
 
   // Re-adds several objects at once (load, undo of delete/clear), given in
   // their stacking order. Roads go under everything and markings over

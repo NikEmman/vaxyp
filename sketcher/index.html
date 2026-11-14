@@ -215,13 +215,18 @@
         width: 100%;
         accent-color: var(--secondary-blue);
       }
+      #segment-length-value {
+        width: 3.5em;
+        text-align: center;
+      }
       .segment-length-control label {
         display: block;
         font-size: 0.85em;
         color: var(--text-dark);
         white-space: nowrap;
       }
-      .toolbar input[type="number"] {
+      .toolbar input[type="number"],
+      #segment-length-value {
         width: 4.5em;
         padding: 0.3em 0.4em;
         border: 1px solid var(--border-color);
@@ -2626,7 +2631,17 @@
               max="20"
               step="0.1"
             />
-            <div><span id="segment-length-value">20,0</span> μ</div>
+            <div>
+              <input
+                type="text"
+                inputmode="decimal"
+                id="segment-length-value"
+                value="20,0"
+                aria-label="Μήκος τμήματος σε μέτρα"
+                title="Πληκτρολογήστε μήκος από 0,5 έως 20 μ και πατήστε Enter"
+              />
+              μ
+            </div>
           </div>
           <div class="sep"></div>
           <div class="toolbar-group" id="toolbar-export-group">
